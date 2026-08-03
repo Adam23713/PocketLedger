@@ -1,0 +1,76 @@
+@model PocketLedger.Models.ViewModels.Categories.CategoryFormViewModel
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+<div class="mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.CategoryType>()" class="form-select" id="category-type"></select></div>
+<div class="mb-3">
+    <label asp-for="ParentCategoryId" class="form-label">Parent category</label>
+    <select asp-for="ParentCategoryId" class="form-select" id="parent-category">
+        <option value="">None (main category)</option>
+        @foreach (var parent in Model.ParentCategories)
+        {
+            <option value="@parent.Id" data-category-type="@parent.Type" selected="@(parent.Id == Model.ParentCategoryId)">@parent.Name</option>
+        }
+    </select>
+    <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
+</div>
+<fieldset class="mb-3" id="category-icon-picker" hidden="@(Model.ParentCategoryId is not null)">
+    <legend class="form-label">Icon</legend>
+    <div class="category-icon-groups">
+        @foreach (var group in Model.AvailableIcons.GroupBy(icon => new { icon.Group, icon.GroupDisplayName, icon.CategoryType }))
+        {
+            <section class="category-icon-group" data-category-type="@((int)group.Key.CategoryType)" hidden="@(group.Key.CategoryType != Model.Type)">
+                <h2 class="h6">@group.Key.GroupDisplayName</h2>
+                <div class="account-icon-grid">
+                    @foreach (var icon in group)
+                    {
+                        <label class="account-icon-option">
+                            <input asp-for="Icon" type="radio" value="@icon.Id" />
+                            <span class="account-icon-selection">
+                                <img src="@icon.WebPath" alt="@icon.DisplayName" />
+                                <span class="visually-hidden">@icon.DisplayName</span>
+                            </span>
+                        </label>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+    <div class="form-text">Only main categories can use icons.</div>
+    <span asp-validation-for="Icon" class="text-danger"></span>
+</fieldset>
+<div class="mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
+<script>
+    (() => {
+        const type = document.getElementById("category-type");
+        const parent = document.getElementById("parent-category");
+        const iconPicker = document.getElementById("category-icon-picker");
+        const iconGroups = Array.from(iconPicker.querySelectorAll(".category-icon-group"));
+        function filterParents() {
+            for (const option of parent.options) {
+                if (!option.dataset.categoryType) continue;
+                option.hidden = option.dataset.categoryType !== type.options[type.selectedIndex].text;
+                option.disabled = option.hidden;
+            }
+            if (parent.selectedOptions[0]?.disabled) parent.value = "";
+        }
+        function updateIconPicker() {
+            const isSubcategory = Boolean(parent.value);
+            iconPicker.hidden = isSubcategory;
+            for (const group of iconGroups) {
+                const visible = !isSubcategory && group.dataset.categoryType === type.value;
+                group.hidden = !visible;
+                for (const input of group.querySelectorAll('input[name="Icon"]')) input.disabled = !visible;
+            }
+
+            const selected = iconPicker.querySelector('input[name="Icon"]:checked');
+            if (selected?.disabled) selected.checked = false;
+            if (!isSubcategory && !iconPicker.querySelector('input[name="Icon"]:checked')) {
+                iconPicker.querySelector('.category-icon-group:not([hidden]) input[name="Icon"]')?.click();
+            }
+        }
+        type.addEventListener("change", () => { filterParents(); updateIconPicker(); });
+        parent.addEventListener("change", updateIconPicker);
+        filterParents();
+        updateIconPicker();
+    })();
+</script>

@@ -1,0 +1,38 @@
+@model PocketLedger.Models.ViewModels.Calendar.CalendarViewModel
+@{
+    ViewData["Title"] = "Calendar";
+    var selected = new DateOnly(Model.Year, Model.Month, 1);
+    var previous = selected.AddMonths(-1);
+    var next = selected.AddMonths(1);
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Calendar</h1>
+    <div class="btn-group">
+        <a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month">←</a>
+        <span class="btn btn-outline-secondary disabled">@selected.ToString("MMMM yyyy")</span>
+        <a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a>
+    </div>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Incoming</div><div class="h4 mb-0 text-success">@MoneyFormatter.Format(Model.MonthlyIncome, "HUF") HUF</div></div></div></div>
+    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Outgoing</div><div class="h4 mb-0 text-danger">−@MoneyFormatter.Format(Model.MonthlyExpenses, "HUF") HUF</div></div></div></div>
+    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Total</div><div class="h4 mb-0">@MoneyFormatter.Format(Model.MonthlyTotal, "HUF") HUF</div></div></div></div>
+</div>
+<div class="calendar-grid calendar-header text-center fw-semibold">
+    @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }) { <div>@day</div> }
+</div>
+<div class="calendar-grid">
+@foreach (var day in Model.Days)
+{
+    <a class="calendar-day text-decoration-none text-body @(!day.IsCurrentMonth ? "outside-month" : "") @(day.IsToday ? "today" : "") @(day.TransactionCount > 0 ? "has-transactions" : "")"
+       asp-controller="Transactions" asp-action="Index" asp-route-dateFrom="@day.Date.ToString("yyyy-MM-dd")" asp-route-dateTo="@day.Date.ToString("yyyy-MM-dd")" asp-route-year="" asp-route-month="">
+        <strong>@day.Date.Day</strong>
+        @if (day.TransactionCount > 0)
+        {
+            <small class="d-block text-success">+@MoneyFormatter.Format(day.Income, "HUF")</small>
+            <small class="d-block text-danger">−@MoneyFormatter.Format(day.Expenses, "HUF")</small>
+            <small class="d-block">=@MoneyFormatter.Format(day.Balance, "HUF")</small>
+        }
+    </a>
+}
+</div>

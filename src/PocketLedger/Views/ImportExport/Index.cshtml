@@ -1,0 +1,6 @@
+@{ ViewData["Title"] = "Import / Export"; }
+<h1>Import / Export</h1>
+<div class="row g-3">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h4">CSV</h2><p>Export transactions or preview and import a CSV file.</p><a class="btn btn-outline-primary" asp-action="ExportCsv">Export all</a> <a class="btn btn-primary" asp-action="Import">Import</a></div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h4">JSON backup</h2><p>Download or restore the complete PocketLedger database.</p><a class="btn btn-outline-primary" asp-action="Backup">Download backup</a> <a class="btn btn-danger" asp-action="Restore">Restore</a></div></div></div>
+</div>

@@ -1,0 +1,11 @@
+@model PocketLedger.Models.ViewModels.ImportExport.RestoreViewModel
+@{ ViewData["Title"] = "Restore backup"; }
+<h1>Restore backup</h1>
+<div class="alert alert-danger"><strong>Warning:</strong> a confirmed restore replaces all current PocketLedger data. It runs in a database transaction and rolls back on failure.</div>
+<form asp-action="PreviewRestore" method="post" enctype="multipart/form-data"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="mb-3"><input class="form-control" type="file" name="file" accept=".json,application/json" /></div><button class="btn btn-primary">Preview</button></form>
+@if (Model.Preview is not null)
+{
+    <hr /><h2 class="h4">Preview</h2><ul><li>Accounts: @Model.Preview.AccountCount</li><li>Categories: @Model.Preview.CategoryCount</li><li>Transactions: @Model.Preview.TransactionCount</li><li>Recurring: @Model.Preview.RecurringTransactionCount</li></ul>
+    @if (!Model.Preview.IsValid) { <div class="alert alert-danger">@string.Join(" ", Model.Preview.Errors)</div> }
+    else { <form asp-action="ConfirmRestore" method="post"><textarea asp-for="Json" hidden></textarea><div class="form-check mb-3"><input asp-for="Confirm" class="form-check-input" /><label asp-for="Confirm" class="form-check-label">I understand that current data will be replaced.</label><span asp-validation-for="Confirm" class="text-danger"></span></div><button class="btn btn-danger">Restore backup</button></form> }
+}

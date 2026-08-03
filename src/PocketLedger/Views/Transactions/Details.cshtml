@@ -1,0 +1,24 @@
+@model PocketLedger.Models.ViewModels.Transactions.TransactionDetailsViewModel
+@using PocketLedger.Models.Enums
+@{
+    ViewData["Title"] = "Transaction details";
+    var negative = Model.Type == TransactionType.Expense || Model.Type == TransactionType.Adjustment && Model.AdjustmentDirection == AdjustmentDirection.Decrease;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Transaction details</h1>
+    <div><a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a></div>
+</div>
+<dl class="row">
+    <dt class="col-sm-3">Type</dt><dd class="col-sm-9">@Model.Type @Model.AdjustmentDirection</dd>
+    <dt class="col-sm-3">Account</dt><dd class="col-sm-9">@Model.AccountName</dd>
+    @if (Model.Type == TransactionType.Transfer)
+    {
+        <dt class="col-sm-3">Target account</dt><dd class="col-sm-9">@Model.TargetAccountName</dd>
+        <dt class="col-sm-3">Target amount</dt><dd class="col-sm-9">@MoneyFormatter.Format(Model.TargetAmount ?? Model.Amount, Model.TargetCurrency) @Model.TargetCurrency</dd>
+    }
+    <dt class="col-sm-3">Amount</dt><dd class="col-sm-9 @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(Model.Amount, Model.Currency) @Model.Currency</dd>
+    <dt class="col-sm-3">Date</dt><dd class="col-sm-9">@Model.TransactionDate.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-3">Category</dt><dd class="col-sm-9">@if (!string.IsNullOrWhiteSpace(Model.CategoryIconPath)) { <img class="category-icon me-2" src="@Model.CategoryIconPath" alt="@Model.CategoryIconAlt" /> }@(Model.CategoryName ?? "—")</dd>
+    <dt class="col-sm-3">Note</dt><dd class="col-sm-9">@(Model.Note ?? "—")</dd>
+</dl>
+<a asp-action="Index">Back to transactions</a>

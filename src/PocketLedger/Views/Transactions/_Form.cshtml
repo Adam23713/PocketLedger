@@ -1,0 +1,53 @@
+@model PocketLedger.Models.ViewModels.Transactions.TransactionFormViewModel
+@using PocketLedger.Models.Enums
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="mb-3">
+    <label asp-for="Type" class="form-label"></label>
+    <select asp-for="Type" class="form-select" id="transaction-type">
+        <option value="@TransactionType.Income">Income</option>
+        <option value="@TransactionType.Expense">Expense</option>
+        <option value="@TransactionType.Adjustment">Adjustment</option>
+        <option value="@TransactionType.Transfer">Transfer</option>
+    </select>
+</div>
+<div class="mb-3">
+    <label asp-for="AccountId" class="form-label">Source account</label>
+    <select asp-for="AccountId" class="form-select" id="source-account">
+        <option value="">Select an account</option>
+        @foreach (var account in Model.Accounts) { <option value="@account.Id" data-currency="@account.Currency">@account.Name (@account.Currency)</option> }
+    </select>
+    <span asp-validation-for="AccountId" class="text-danger"></span>
+</div>
+<div class="mb-3" id="target-account-field">
+    <label asp-for="TargetAccountId" class="form-label">Target account</label>
+    <select asp-for="TargetAccountId" class="form-select" id="target-account">
+        <option value="">Select a target account</option>
+        @foreach (var account in Model.Accounts) { <option value="@account.Id" data-currency="@account.Currency">@account.Name (@account.Currency)</option> }
+    </select>
+    <span asp-validation-for="TargetAccountId" class="text-danger"></span>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">Source amount</label><input asp-for="Amount" class="form-control" id="source-amount" /><span asp-validation-for="Amount" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3" id="target-amount-field"><label asp-for="TargetAmount" class="form-label">Target amount</label><input asp-for="TargetAmount" class="form-control" id="target-amount" /><div class="form-text">Automatically matched when currencies are equal.</div><span asp-validation-for="TargetAmount" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="TransactionDate" class="form-label">Date</label><input asp-for="TransactionDate" class="form-control" type="date" /><span asp-validation-for="TransactionDate" class="text-danger"></span></div>
+</div>
+<div class="mb-3" id="category-field">
+    <label asp-for="CategoryId" class="form-label">Category</label>
+    <div class="d-flex align-items-center gap-2">
+        <img class="category-icon" id="category-selected-icon" alt="" hidden />
+        <select asp-for="CategoryId" class="form-select" id="category-select">
+            <option value="">Select a category</option>
+            @foreach (var category in Model.Categories)
+            {
+                <option value="@category.Id" data-category-type="@category.Type" data-icon-path="@category.IconPath" data-icon-alt="@category.IconAlt" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+            }
+        </select>
+    </div>
+    <span asp-validation-for="CategoryId" class="text-danger"></span>
+</div>
+<div class="mb-3" id="adjustment-field">
+    <label asp-for="AdjustmentDirection" class="form-label">Adjustment direction</label>
+    <select asp-for="AdjustmentDirection" asp-items="Html.GetEnumSelectList<AdjustmentDirection>()" class="form-select"><option value="">Select a direction</option></select>
+    <span asp-validation-for="AdjustmentDirection" class="text-danger"></span>
+</div>
+<div class="mb-3"><label asp-for="Note" class="form-label"></label><textarea asp-for="Note" class="form-control" rows="3"></textarea><span asp-validation-for="Note" class="text-danger"></span></div>

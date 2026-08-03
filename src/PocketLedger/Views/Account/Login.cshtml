@@ -1,0 +1,5 @@
+@model PocketLedger.Models.ViewModels.Account.LoginViewModel
+@{ ViewData["Title"] = "Login"; }
+<h1>Login</h1>
+<form method="post"><div asp-validation-summary="All" class="text-danger"></div><div class="mb-3"><label asp-for="Username"></label><input asp-for="Username" class="form-control" autocomplete="username" /></div><div class="mb-3"><label asp-for="Password"></label><input asp-for="Password" class="form-control" autocomplete="current-password" /></div><button class="btn btn-primary">Login</button></form>
+<a asp-action="Register">Register</a>

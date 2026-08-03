@@ -1,0 +1,30 @@
+@model IReadOnlyList<PocketLedger.Models.ViewModels.Categories.CategoryListItemViewModel>
+@if (Model.Count == 0)
+{
+    <p class="text-muted">No categories.</p>
+}
+else
+{
+    <div class="list-group">
+    @foreach (var category in Model)
+    {
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="d-inline-flex align-items-center gap-2">
+                    @if (!string.IsNullOrWhiteSpace(category.IconPath)) { <img class="account-icon account-icon-sm" src="@category.IconPath" alt="@category.IconAlt" /> }
+                    else if (!string.IsNullOrWhiteSpace(category.Icon)) { <span>@category.Icon</span> }
+                    <strong>@category.Name</strong> <small class="text-muted">#@category.DisplayOrder</small>
+                </span>
+                <span><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@category.Id">Edit</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@category.Id">Delete</a></span>
+            </div>
+            @foreach (var child in category.Subcategories)
+            {
+                <div class="d-flex justify-content-between align-items-center border-top mt-2 pt-2 ps-3">
+                    <span>↳ @child.Name <small class="text-muted">#@child.DisplayOrder</small></span>
+                    <span><a class="btn btn-sm btn-link" asp-action="Edit" asp-route-id="@child.Id">Edit</a><a class="btn btn-sm btn-link text-danger" asp-action="Delete" asp-route-id="@child.Id">Delete</a></span>
+                </div>
+            }
+        </div>
+    }
+    </div>
+}

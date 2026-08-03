@@ -1,0 +1,80 @@
+@model PocketLedger.Models.ViewModels.Home.HomeViewModel
+@using PocketLedger.Models.Enums
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Total main balance: <strong>@MoneyFormatter.Format(Model.TotalMainBalance, "HUF")</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" asp-controller="Accounts" asp-action="Create">New account</a>
+        <a class="btn btn-primary" asp-controller="Transactions" asp-action="Create">New transaction</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.TotalMainBalance, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.NetWorth, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Accounts</small><div class="h4 mb-0">@Model.AccountCount</div></div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Income this month</small><div class="h4 mb-0 text-success">@MoneyFormatter.Format(Model.IncomeThisMonth, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Expenses this month</small><div class="h4 mb-0 text-danger">@MoneyFormatter.Format(Model.ExpensesThisMonth, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Monthly change</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.BalanceChangeThisMonth, "HUF")</div></div></div></div>
+</div>
+
+<h2 class="h4">Account balances</h2>
+<div class="row g-3 mb-5">
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="col"><div class="alert alert-info">No accounts yet. Create your first account to get started.</div></div>
+    }
+    @foreach (var account in Model.Accounts)
+    {
+        <div class="col-12 col-md-6 col-xl-4">
+            <a class="card account-card h-100 text-decoration-none text-body" style="background-color: @account.Color" asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <img class="account-icon" src="@account.IconPath" alt="@account.IconAlt" />
+                            <h2 class="h5 mb-0">@account.Name</h2>
+                        </div>
+                        <span class="badge text-bg-light">@account.Type</span>
+                    </div>
+                    <div class="display-6 fs-3">@MoneyFormatter.Format(account.CurrentBalance, account.Currency) <small class="fs-6 text-muted">@account.Currency</small></div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h4 mb-0">Latest transactions</h2>
+    <a asp-controller="Transactions" asp-action="Index">View all</a>
+</div>
+@if (Model.RecentTransactions.Count == 0)
+{
+    <p class="text-muted">No transactions yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Category</th><th class="text-end">Amount</th></tr></thead>
+            <tbody>
+            @foreach (var transaction in Model.RecentTransactions)
+            {
+                var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer;
+                <tr>
+                    <td><a asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">@transaction.TransactionDate.ToString("yyyy-MM-dd")</a></td>
+                    <td>@transaction.Type</td>
+                    <td>@transaction.AccountName</td>
+                    <td>@if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.CategoryName ?? "—")</td>
+                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

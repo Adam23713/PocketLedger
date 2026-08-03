@@ -1,0 +1,58 @@
+<script>
+    (() => {
+        const type = document.getElementById("transaction-type");
+        const categoryField = document.getElementById("category-field");
+        const category = document.getElementById("category-select");
+        const categoryIcon = document.getElementById("category-selected-icon");
+        const adjustmentField = document.getElementById("adjustment-field");
+        const sourceAccount = document.getElementById("source-account");
+        const targetAccount = document.getElementById("target-account");
+        const targetAccountField = document.getElementById("target-account-field");
+        const sourceAmount = document.getElementById("source-amount");
+        const targetAmount = document.getElementById("target-amount");
+        const targetAmountField = document.getElementById("target-amount-field");
+
+        function synchronizeTransferAmount() {
+            const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency;
+            const targetCurrency = targetAccount.selectedOptions[0]?.dataset.currency;
+            const sameCurrency = sourceCurrency && sourceCurrency === targetCurrency;
+            targetAmount.readOnly = Boolean(sameCurrency);
+            if (sameCurrency) targetAmount.value = sourceAmount.value;
+        }
+
+        function updateFields() {
+            const isAdjustment = type.value === "Adjustment";
+            const isTransfer = type.value === "Transfer";
+            categoryField.hidden = isAdjustment || isTransfer;
+            adjustmentField.hidden = !isAdjustment;
+            targetAccountField.hidden = !isTransfer;
+            targetAmountField.hidden = !isTransfer;
+            if (isAdjustment || isTransfer) {
+                category.value = "";
+            }
+            if (!isTransfer) {
+                targetAccount.value = "";
+                targetAmount.value = "";
+            }
+
+            for (const option of category.options) {
+                if (!option.dataset.categoryType) continue;
+                option.hidden = option.dataset.categoryType !== type.value;
+                option.disabled = option.hidden;
+            }
+            if (category.selectedOptions[0]?.disabled) category.value = "";
+            const selectedCategory = category.selectedOptions[0];
+            categoryIcon.src = selectedCategory?.dataset.iconPath ?? "";
+            categoryIcon.alt = selectedCategory?.dataset.iconAlt ?? "";
+            categoryIcon.hidden = !selectedCategory?.dataset.iconPath;
+            synchronizeTransferAmount();
+        }
+
+        type.addEventListener("change", updateFields);
+        sourceAccount.addEventListener("change", synchronizeTransferAmount);
+        targetAccount.addEventListener("change", synchronizeTransferAmount);
+        category.addEventListener("change", updateFields);
+        sourceAmount.addEventListener("input", synchronizeTransferAmount);
+        updateFields();
+    })();
+</script>

@@ -1,0 +1,9 @@
+@model PocketLedger.Models.ViewModels.Accounts.AccountDeleteViewModel
+@{ ViewData["Title"] = "Delete account"; }
+<h1>Delete account</h1>
+<div class="alert alert-warning">Delete <strong>@Model.Name</strong>? This is only allowed when no transactions reference it.</div>
+<p>Current balance: @MoneyFormatter.Format(Model.CurrentBalance, Model.Currency) @Model.Currency</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+</form>

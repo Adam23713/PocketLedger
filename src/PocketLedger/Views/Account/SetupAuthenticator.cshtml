@@ -1,0 +1,3 @@
+@model PocketLedger.Models.ViewModels.Account.AuthenticatorSetupViewModel
+@{ ViewData["Title"] = "Configure Microsoft Authenticator"; }
+<h1>Configure Microsoft Authenticator</h1><p>Scan this QR code, or enter the shared key manually.</p><img src="@Model.QrCodeDataUri" alt="Authenticator QR code" /><p><code>@Model.SharedKey</code></p><form method="post"><div asp-validation-summary="All" class="text-danger"></div><label asp-for="Code">Verification code</label><input asp-for="Code" class="form-control" autocomplete="one-time-code" /><button class="btn btn-primary mt-3">Verify</button></form>

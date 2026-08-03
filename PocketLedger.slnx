@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PocketLedger/PocketLedger.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PocketLedger.Tests/PocketLedger.Tests.csproj" />
+  </Folder>
+</Solution>

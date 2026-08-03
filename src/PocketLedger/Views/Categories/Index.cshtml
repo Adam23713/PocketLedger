@@ -1,0 +1,18 @@
+@model PocketLedger.Models.ViewModels.Categories.CategoryListViewModel
+@{
+    ViewData["Title"] = "Categories";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Categories</h1>
+    <a class="btn btn-primary" asp-action="Create">New category</a>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <h2 class="h4 text-success">Income</h2>
+        <partial name="_CategoryList" model="Model.IncomeCategories" />
+    </div>
+    <div class="col-lg-6">
+        <h2 class="h4 text-danger">Expense</h2>
+        <partial name="_CategoryList" model="Model.ExpenseCategories" />
+    </div>
+</div>

@@ -1,0 +1,25 @@
+@model PocketLedger.Models.ViewModels.Statistics.StatisticsViewModel
+@{
+    ViewData["Title"] = "Statistics";
+    var selected = new DateOnly(Model.Year, Model.Month, 1);
+    var previous = selected.AddMonths(-1);
+    var next = selected.AddMonths(1);
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Statistics</h1>
+    <div class="btn-group"><a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month">←</a><span class="btn btn-outline-secondary disabled">@selected.ToString("MMMM yyyy")</span><a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a></div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Income</small><div class="h4 text-success">@MoneyFormatter.Format(Model.Income, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Expenses</small><div class="h4 text-danger">@MoneyFormatter.Format(Model.Expenses, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Savings</small><div class="h4">@MoneyFormatter.Format(Model.Savings, "HUF")</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Balance</small><div class="h4">@MoneyFormatter.Format(Model.Balance, "HUF")</div></div></div></div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6"><h2 class="h4">Income by category</h2><partial name="_CategoryBreakdown" model="Model.IncomeByCategory" /></div>
+    <div class="col-lg-6"><h2 class="h4">Expenses by category</h2><partial name="_CategoryBreakdown" model="Model.ExpenseByCategory" /></div>
+</div>
+<h2 class="h4 mt-4">Account balances</h2>
+<div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var account in Model.AccountBalances) { <tr><td><a asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">@account.Name</a></td><td class="text-end">@MoneyFormatter.Format(account.Balance, account.Currency) @account.Currency</td></tr> }</tbody></table></div>
+<h2 class="h4 mt-4">Last 12 months</h2>
+<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Month</th><th class="text-end">Income</th><th class="text-end">Expenses</th><th class="text-end">Savings</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var item in Model.MonthlyTrend) { <tr><td>@(new DateOnly(item.Year, item.Month, 1).ToString("yyyy MMM"))</td><td class="text-end">@MoneyFormatter.Format(item.Income, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Expenses, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Savings, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Balance, "HUF")</td></tr> }</tbody></table></div>

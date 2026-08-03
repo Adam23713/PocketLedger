@@ -1,0 +1,9 @@
+@model PocketLedger.Models.ViewModels.Categories.CategoryDeleteViewModel
+@{ ViewData["Title"] = "Delete category"; }
+<h1>Delete category</h1>
+<div class="alert alert-warning">Delete <strong>@Model.Name</strong>? Categories referenced by transactions or containing subcategories cannot be deleted.</div>
+<dl class="row"><dt class="col-sm-3">Type</dt><dd class="col-sm-9">@Model.Type</dd><dt class="col-sm-3">Parent</dt><dd class="col-sm-9">@(Model.ParentName ?? "None")</dd></dl>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>
