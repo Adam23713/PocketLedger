@@ -1,0 +1,10 @@
+@model PocketLedger.Models.ViewModels.ImportExport.CsvImportViewModel
+@{ ViewData["Title"] = "Import CSV"; }
+<h1>Import CSV</h1>
+<form asp-action="PreviewImport" method="post" enctype="multipart/form-data" class="mb-4"><div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="mb-3"><input class="form-control" type="file" name="file" accept=".csv,text/csv" /></div><button class="btn btn-primary">Preview</button></form>
+@if (Model.Preview is not null)
+{
+    <div class="alert alert-info">Ready: @Model.Preview.ValidCount · Duplicates: @Model.Preview.DuplicateCount · Invalid: @Model.Preview.InvalidCount</div>
+    <div class="table-responsive"><table class="table table-sm"><thead><tr><th>Row</th><th>Status</th><th>Date</th><th>Account</th><th>Type</th><th>Category</th><th>Amount</th><th>Message</th></tr></thead><tbody>@foreach (var row in Model.Preview.Rows) { <tr class="@(!row.IsValid ? "table-danger" : row.IsDuplicate ? "table-warning" : "")"><td>@row.RowNumber</td><td>@(!row.IsValid ? "Invalid" : row.IsDuplicate ? "Duplicate" : "Ready")</td><td>@row.Date</td><td>@row.Account</td><td>@row.Type</td><td>@row.Category</td><td>@row.Amount</td><td>@row.Error</td></tr> }</tbody></table></div>
+    @if (Model.Preview.ValidCount > 0) { <form asp-action="ConfirmImport" method="post"><textarea asp-for="Csv" hidden></textarea><button class="btn btn-success">Import valid rows</button></form> }
+}

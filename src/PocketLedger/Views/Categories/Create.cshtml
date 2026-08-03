@@ -1,0 +1,9 @@
+@model PocketLedger.Models.ViewModels.Categories.CategoryFormViewModel
+@{ ViewData["Title"] = "New category"; }
+<h1>New category</h1>
+<form asp-action="Create" method="post" class="form-narrow">
+    <partial name="_Form" model="Model" />
+    <button class="btn btn-primary" type="submit">Create</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

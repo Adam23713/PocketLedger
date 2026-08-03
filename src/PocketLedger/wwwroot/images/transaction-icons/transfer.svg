@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Transfer</title>
+  <rect width="256" height="256" rx="56" fill="#0d6efd"/>
+  <path d="M56 91h121l-25-25 17-17 54 54-54 54-17-17 25-25H56V91Z" fill="#fff"/>
+  <path d="M200 165H79l25 25-17 17-54-54 54-54 17 17-25 25h121v24Z" fill="#b9d5ff"/>
+</svg>

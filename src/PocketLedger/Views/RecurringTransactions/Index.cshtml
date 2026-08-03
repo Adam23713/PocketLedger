@@ -1,0 +1,8 @@
+@model IReadOnlyList<PocketLedger.Models.ViewModels.RecurringTransactions.RecurringTransactionListItemViewModel>
+@{ ViewData["Title"] = "Recurring transactions"; }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1>Recurring transactions</h1><a class="btn btn-primary" asp-action="Create">New template</a></div>
+<p class="text-muted">Templates are not executed automatically.</p>
+@if (Model.Count == 0) { <div class="alert alert-info">No recurring templates.</div> }
+else { <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Type</th><th>Account</th><th>Category</th><th>Schedule</th><th class="text-end">Amount</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach (var item in Model) { <tr><td>@item.Type</td><td>@item.AccountName</td><td>@if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon me-2" src="@item.CategoryIconPath" alt="@item.CategoryIconAlt" /> }@(item.CategoryName ?? "—")</td><td>@item.Frequency from @item.FirstOccurrence.ToString("yyyy-MM-dd")</td><td class="text-end">@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</td><td>@(item.Enabled ? "Enabled" : "Disabled")</td><td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a></td></tr> }
+</tbody></table></div> }

@@ -1,0 +1,41 @@
+using PocketLedger.Models.Enums;
+
+namespace PocketLedger.Models.ViewModels.Home;
+
+public class HomeViewModel
+{
+    public decimal TotalMainBalance { get; init; }
+    public decimal NetWorth { get; init; }
+    public int AccountCount { get; init; }
+    public decimal IncomeThisMonth { get; init; }
+    public decimal ExpensesThisMonth { get; init; }
+    public decimal BalanceChangeThisMonth { get; init; }
+    public IReadOnlyList<AccountCardViewModel> Accounts { get; init; } = [];
+    public IReadOnlyList<RecentTransactionViewModel> RecentTransactions { get; init; } = [];
+}
+
+public class AccountCardViewModel
+{
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public AccountType Type { get; init; }
+    public decimal CurrentBalance { get; init; }
+    public string Currency { get; init; } = string.Empty;
+    public string IconPath { get; init; } = string.Empty;
+    public string IconAlt { get; init; } = string.Empty;
+    public string Color { get; init; } = "#ffffff";
+}
+
+public class RecentTransactionViewModel
+{
+    public Guid Id { get; init; }
+    public TransactionType Type { get; init; }
+    public AdjustmentDirection? AdjustmentDirection { get; init; }
+    public string AccountName { get; init; } = string.Empty;
+    public string Currency { get; init; } = string.Empty;
+    public string? CategoryName { get; init; }
+    public string? CategoryIconPath { get; init; }
+    public string? CategoryIconAlt { get; init; }
+    public decimal Amount { get; init; }
+    public DateOnly TransactionDate { get; init; }
+}

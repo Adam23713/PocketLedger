@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PocketLedger</title>
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem("pocketledger-theme") ?? "system";
+            const theme = savedTheme === "system"
+                ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                : savedTheme;
+            document.documentElement.setAttribute("data-bs-theme", theme);
+        })();
+    </script>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PocketLedger.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-body border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PocketLedger</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Accounts" asp-action="Index">Accounts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Categories" asp-action="Index">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Transactions" asp-action="Index">Transactions</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Calendar" asp-action="Index">Calendar</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Statistics" asp-action="Index">Statistics</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="RecurringTransactions" asp-action="Index">Recurring</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="ImportExport" asp-action="Index">Import / Export</a></li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Security">Security</a></li>
+                            <li class="nav-item"><form asp-controller="Account" asp-action="Logout" method="post"><button class="btn btn-link nav-link" type="submit">Logout</button></form></li>
+                        }
+                    </ul>
+                    <div class="theme-selector d-flex align-items-center ms-sm-3">
+                        <label class="visually-hidden" for="theme-selector">Theme</label>
+                        <select class="form-select form-select-sm" id="theme-selector" aria-label="Theme">
+                            <option value="system">System theme</option>
+                            <option value="light">Light theme</option>
+                            <option value="dark">Dark theme</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @if (TempData["SuccessMessage"] is string successMessage)
+            {
+                <div class="alert alert-success" role="alert">@successMessage</div>
+            }
+            @if (TempData["ErrorMessage"] is string errorMessage)
+            {
+                <div class="alert alert-danger" role="alert">@errorMessage</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - PocketLedger
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

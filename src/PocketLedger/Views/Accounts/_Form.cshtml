@@ -1,0 +1,31 @@
+@model PocketLedger.Models.ViewModels.Accounts.AccountFormViewModel
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+<div class="row">
+    <div class="col-md-6 mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.AccountType>()" class="form-select"></select></div>
+    <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label"></label><input asp-for="Currency" class="form-control text-uppercase" maxlength="3" /><span asp-validation-for="Currency" class="text-danger"></span></div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3"><label asp-for="InitialBalance" class="form-label"></label><input asp-for="InitialBalance" class="form-control" /><span asp-validation-for="InitialBalance" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
+</div>
+<fieldset class="mb-3" id="account-icon-picker">
+    <legend class="form-label">Icon</legend>
+    <div class="account-icon-grid">
+        @foreach (var icon in Model.AvailableIcons)
+        {
+            <label class="account-icon-option">
+                <input asp-for="Icon" type="radio" value="@icon.Id" />
+                <span class="account-icon-selection">
+                    <img src="@icon.WebPath" alt="@icon.DisplayName" />
+                    <span class="visually-hidden">@icon.DisplayName</span>
+                </span>
+            </label>
+        }
+    </div>
+    <span asp-validation-for="Icon" class="text-danger"></span>
+</fieldset>
+<div class="mb-3"><label asp-for="Color" class="form-label"></label><input asp-for="Color" type="color" class="form-control form-control-color w-100" /><span asp-validation-for="Color" class="text-danger"></span></div>
+<div class="form-check mb-2"><input asp-for="IncludeInMainBalance" class="form-check-input" /><label asp-for="IncludeInMainBalance" class="form-check-label"></label></div>
+<div class="form-check mb-2"><input asp-for="IncludeInNetWorth" class="form-check-input" /><label asp-for="IncludeInNetWorth" class="form-check-label"></label></div>
+<div class="form-check mb-3"><input asp-for="IncludeInStatistics" class="form-check-input" /><label asp-for="IncludeInStatistics" class="form-check-label"></label></div>

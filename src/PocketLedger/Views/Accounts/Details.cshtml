@@ -1,0 +1,36 @@
+@model PocketLedger.Models.ViewModels.Accounts.AccountDetailsViewModel
+@using PocketLedger.Models.Enums
+@{
+    ViewData["Title"] = Model.Account.Name;
+}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <img class="account-icon account-icon-lg" src="@Model.Account.IconPath" alt="@Model.Account.IconAlt" />
+        <div>
+            <h1 class="mb-1">@Model.Account.Name</h1>
+            <div class="text-muted">@Model.Account.Type · @Model.Account.Currency</div>
+        </div>
+    </div>
+    <div><a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Account.Id">Edit</a></div>
+</div>
+<dl class="row">
+    <dt class="col-sm-3">Current balance</dt><dd class="col-sm-9">@MoneyFormatter.Format(Model.Account.CurrentBalance, Model.Account.Currency) @Model.Account.Currency</dd>
+    <dt class="col-sm-3">Initial balance</dt><dd class="col-sm-9">@MoneyFormatter.Format(Model.InitialBalance, Model.Account.Currency) @Model.Account.Currency</dd>
+    <dt class="col-sm-3">Display order</dt><dd class="col-sm-9">@Model.Account.DisplayOrder</dd>
+</dl>
+<h2 class="h4 mt-4">Recent transactions</h2>
+@if (Model.RecentTransactions.Count == 0) { <p class="text-muted">No transactions for this account.</p> }
+else
+{
+    <div class="list-group">
+    @foreach (var transaction in Model.RecentTransactions)
+    {
+        var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease;
+        <a class="list-group-item list-group-item-action d-flex justify-content-between" asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">
+            <span>@if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@transaction.Date.ToString("yyyy-MM-dd") · @(transaction.CategoryName ?? transaction.Type.ToString())</span>
+            <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, Model.Account.Currency) @Model.Account.Currency</span>
+        </a>
+    }
+    </div>
+}
+<div class="mt-4"><a asp-action="Index">Back to accounts</a></div>

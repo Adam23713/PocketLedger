@@ -1,0 +1,15 @@
+@model PocketLedger.Models.ViewModels.Transactions.TransactionDeleteViewModel
+@{ ViewData["Title"] = "Delete transaction"; }
+<h1>Delete transaction</h1>
+<div class="alert alert-warning">Delete this @Model.Type transaction?</div>
+<p class="d-flex align-items-center gap-2">
+    @if (!string.IsNullOrWhiteSpace(Model.CategoryIconPath))
+    {
+        <img class="category-icon" src="@Model.CategoryIconPath" alt="@Model.CategoryIconAlt" />
+    }
+    <span>@Model.TransactionDate.ToString("yyyy-MM-dd") · @MoneyFormatter.Format(Model.Amount, Model.Currency) @Model.Currency · @Model.AccountName</span>
+</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button class="btn btn-danger" type="submit">Delete</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+</form>

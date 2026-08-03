@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "exportedAt": "2026-08-01T12:00:00+00:00",
+  "accounts": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "name": "Everyday Account",
+      "type": "BankAccount",
+      "currency": "EUR",
+      "initialBalance": 1250.00,
+      "icon": "bank-account-1",
+      "displayOrder": 1,
+      "includeInMainBalance": true,
+      "includeInNetWorth": true,
+      "includeInStatistics": true,
+      "color": "#2563eb"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "name": "Rainy Day Fund",
+      "type": "Savings",
+      "currency": "EUR",
+      "initialBalance": 4000.00,
+      "icon": "savings-1",
+      "displayOrder": 2,
+      "includeInMainBalance": true,
+      "includeInNetWorth": true,
+      "includeInStatistics": true,
+      "color": "#059669"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000003",
+      "name": "Wallet",
+      "type": "Cash",
+      "currency": "EUR",
+      "initialBalance": 80.00,
+      "icon": "cash-1",
+      "displayOrder": 3,
+      "includeInMainBalance": true,
+      "includeInNetWorth": true,
+      "includeInStatistics": true,
+      "color": "#d97706"
+    }
+  ],
+  "categories": [
+    {
+      "id": "20000000-0000-0000-0000-000000000001",
+      "name": "Salary",
+      "type": "Income",
+      "icon": "salary-1",
+      "parentCategoryId": null,
+      "displayOrder": 1
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000002",
+      "name": "Housing",
+      "type": "Expense",
+      "icon": "accommodation-1",
+      "parentCategoryId": null,
+      "displayOrder": 1
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000003",
+      "name": "Food",
+      "type": "Expense",
+      "icon": "food-1",
+      "parentCategoryId": null,
+      "displayOrder": 2
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000004",
+      "name": "Groceries",
+      "type": "Expense",
+      "icon": null,
+      "parentCategoryId": "20000000-0000-0000-0000-000000000003",
+      "displayOrder": 1
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000005",
+      "name": "Dining Out",
+      "type": "Expense",
+      "icon": null,
+      "parentCategoryId": "20000000-0000-0000-0000-000000000003",
+      "displayOrder": 2
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000006",
+      "name": "Transport",
+      "type": "Expense",
+      "icon": "transportation-1",
+      "parentCategoryId": null,
+      "displayOrder": 3
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000007",
+      "name": "Entertainment",
+      "type": "Expense",
+      "icon": "entertainment-1",
+      "parentCategoryId": null,
+      "displayOrder": 4
+    }
+  ],
+  "transactions": [
+    {
+      "id": "30000000-0000-0000-0000-000000000001",
+      "type": "Income",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": null,
+      "amount": 2850.00,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-01",
+      "categoryId": "20000000-0000-0000-0000-000000000001",
+      "note": "Monthly salary — fictional demo data"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000002",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": null,
+      "amount": 850.00,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-03",
+      "categoryId": "20000000-0000-0000-0000-000000000002",
+      "note": "Monthly rent"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000003",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": null,
+      "amount": 72.40,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-06",
+      "categoryId": "20000000-0000-0000-0000-000000000004",
+      "note": "Weekly groceries"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000004",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000003",
+      "targetAccountId": null,
+      "amount": 18.50,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-10",
+      "categoryId": "20000000-0000-0000-0000-000000000005",
+      "note": "Lunch with friends"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000005",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": null,
+      "amount": 42.00,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-12",
+      "categoryId": "20000000-0000-0000-0000-000000000006",
+      "note": "Monthly transit pass"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000006",
+      "type": "Transfer",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": "10000000-0000-0000-0000-000000000002",
+      "amount": 400.00,
+      "targetAmount": 400.00,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-15",
+      "categoryId": null,
+      "note": "Monthly savings transfer"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000007",
+      "type": "Adjustment",
+      "accountId": "10000000-0000-0000-0000-000000000003",
+      "targetAccountId": null,
+      "amount": 5.00,
+      "targetAmount": null,
+      "adjustmentDirection": "Decrease",
+      "transactionDate": "2026-07-20",
+      "categoryId": null,
+      "note": "Cash reconciliation"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000008",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "targetAccountId": null,
+      "amount": 24.00,
+      "targetAmount": null,
+      "adjustmentDirection": null,
+      "transactionDate": "2026-07-25",
+      "categoryId": "20000000-0000-0000-0000-000000000007",
+      "note": "Cinema tickets"
+    }
+  ],
+  "recurringTransactions": [
+    {
+      "id": "40000000-0000-0000-0000-000000000001",
+      "type": "Income",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "categoryId": "20000000-0000-0000-0000-000000000001",
+      "amount": 2850.00,
+      "adjustmentDirection": null,
+      "note": "Monthly salary",
+      "firstOccurrence": "2026-08-01",
+      "lastOccurrence": null,
+      "frequency": "Monthly",
+      "enabled": true
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000002",
+      "type": "Expense",
+      "accountId": "10000000-0000-0000-0000-000000000001",
+      "categoryId": "20000000-0000-0000-0000-000000000002",
+      "amount": 850.00,
+      "adjustmentDirection": null,
+      "note": "Monthly rent",
+      "firstOccurrence": "2026-08-03",
+      "lastOccurrence": null,
+      "frequency": "Monthly",
+      "enabled": true
+    }
+  ]
+}

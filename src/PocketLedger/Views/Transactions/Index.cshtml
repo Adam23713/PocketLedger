@@ -1,0 +1,71 @@
+@model PocketLedger.Models.ViewModels.Transactions.TransactionIndexViewModel
+@using PocketLedger.Models.Enums
+@{
+    ViewData["Title"] = "Transactions";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Transactions <small class="text-muted fs-6">(@Model.TotalCount)</small></h1>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-controller="ImportExport" asp-action="ExportCsv"
+           asp-route-dateFrom="@Model.DateFrom" asp-route-dateTo="@Model.DateTo" asp-route-year="@(Model.Year == 0 ? null : Model.Year)" asp-route-month="@(Model.Month == 0 ? null : Model.Month)"
+           asp-route-accountId="@Model.AccountId" asp-route-categoryId="@Model.CategoryId" asp-route-type="@Model.Type" asp-route-amountFrom="@Model.AmountFrom" asp-route-amountTo="@Model.AmountTo" asp-route-search="@Model.Search">Export CSV</a>
+        <a class="btn btn-primary" asp-action="Create">New transaction</a>
+    </div>
+</div>
+<form method="get" class="card card-body mb-4">
+    <div class="row g-3">
+        <div class="col-md-2"><label class="form-label">From</label><input class="form-control" type="date" name="dateFrom" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-md-2"><label class="form-label">To</label><input class="form-control" type="date" name="dateTo" value="@Model.DateTo?.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-md-1"><label class="form-label">Year</label><input class="form-control" type="number" name="year" value="@(Model.Year == 0 ? null : Model.Year)" /></div>
+        <div class="col-md-1"><label class="form-label">Month</label><input class="form-control" type="number" min="1" max="12" name="month" value="@(Model.Month == 0 ? null : Model.Month)" /></div>
+        <div class="col-md-3"><label class="form-label">Account</label><select class="form-select" name="accountId" asp-items="Model.Accounts"><option value="">All</option></select></div>
+        <div class="col-md-3"><label class="form-label">Category</label><select class="form-select" name="categoryId" asp-items="Model.Categories"><option value="">All</option></select></div>
+        <div class="col-md-2"><label class="form-label">Type</label><select class="form-select" name="type" asp-items="Html.GetEnumSelectList<TransactionType>()"><option value="">All</option></select></div>
+        <div class="col-md-2"><label class="form-label">Min amount</label><input class="form-control" type="number" step="0.0001" name="amountFrom" value="@Model.AmountFrom" /></div>
+        <div class="col-md-2"><label class="form-label">Max amount</label><input class="form-control" type="number" step="0.0001" name="amountTo" value="@Model.AmountTo" /></div>
+        <div class="col-md-4"><label class="form-label">Note contains</label><input class="form-control" name="search" value="@Model.Search" /></div>
+        <div class="col-md-2 d-flex align-items-end gap-2"><button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-link" asp-action="Index">Reset</a></div>
+    </div>
+</form>
+@if (Model.DayGroups.Count == 0)
+{
+    <div class="alert alert-info">No matching transactions.</div>
+}
+@foreach (var day in Model.DayGroups)
+{
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-2">
+        <h2 class="h6 text-muted mb-0">@day.Date.ToString("dddd, yyyy-MM-dd")</h2>
+        @if (day.Totals.Count > 0)
+        {
+            <div class="d-flex flex-wrap gap-3 small">
+                @foreach (var total in day.Totals)
+                {
+                    <span class="text-success">Incoming: +@MoneyFormatter.Format(total.Income, total.Currency) @total.Currency</span>
+                    <span class="text-danger">Outgoing: −@MoneyFormatter.Format(total.Expenses, total.Currency) @total.Currency</span>
+                }
+            </div>
+        }
+    </div>
+    <div class="list-group">
+    @foreach (var transaction in day.Transactions)
+    {
+        var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer;
+        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" asp-action="Details" asp-route-id="@transaction.Id">
+            <span class="d-flex align-items-center gap-2">
+                @if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }
+                <span><strong>@transaction.Type</strong> · @(transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")<br /><small class="text-muted">@transaction.AccountName@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note)</small></span>
+            </span>
+            <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</span>
+        </a>
+    }
+    </div>
+}
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4"><ul class="pagination">
+    @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+    {
+        <li class="page-item @(pageNumber == Model.Page ? "active" : "")"><a class="page-link" asp-route-page="@pageNumber" asp-route-dateFrom="@Model.DateFrom" asp-route-dateTo="@Model.DateTo" asp-route-year="@(Model.Year == 0 ? null : Model.Year)" asp-route-month="@(Model.Month == 0 ? null : Model.Month)" asp-route-accountId="@Model.AccountId" asp-route-categoryId="@Model.CategoryId" asp-route-type="@Model.Type" asp-route-amountFrom="@Model.AmountFrom" asp-route-amountTo="@Model.AmountTo" asp-route-search="@Model.Search">@pageNumber</a></li>
+    }
+    </ul></nav>
+}

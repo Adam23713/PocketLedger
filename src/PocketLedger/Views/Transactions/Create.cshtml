@@ -1,0 +1,9 @@
+@model PocketLedger.Models.ViewModels.Transactions.TransactionFormViewModel
+@{ ViewData["Title"] = "New transaction"; }
+<h1>New transaction</h1>
+<form asp-action="Create" method="post" class="form-narrow">
+    <partial name="_Form" model="Model" />
+    <button class="btn btn-primary" type="submit">Create</button>
+    <a class="btn btn-link" asp-action="Index">Cancel</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /><partial name="_FormScripts" /> }

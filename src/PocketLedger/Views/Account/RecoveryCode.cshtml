@@ -1,0 +1,3 @@
+@model PocketLedger.Models.ViewModels.Account.TwoFactorViewModel
+@{ ViewData["Title"] = "Recovery code"; }
+<h1>Recovery code</h1><p>A successful recovery requires configuring a new authenticator.</p><form method="post"><div asp-validation-summary="All" class="text-danger"></div><label asp-for="Code">Recovery code</label><input asp-for="Code" class="form-control" autocomplete="off" /><button class="btn btn-primary mt-3">Recover account</button></form>

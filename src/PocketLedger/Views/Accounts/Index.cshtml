@@ -1,0 +1,37 @@
+@model IReadOnlyList<PocketLedger.Models.ViewModels.Accounts.AccountListItemViewModel>
+@{
+    ViewData["Title"] = "Accounts";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Accounts</h1>
+    <a class="btn btn-primary" asp-action="Create">New account</a>
+</div>
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">No accounts have been created.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Name</th><th>Type</th><th class="text-end">Balance</th><th>Order</th><th>Included in</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var account in Model)
+            {
+                <tr>
+                    <td><a class="d-inline-flex align-items-center gap-2" asp-action="Details" asp-route-id="@account.Id"><img class="account-icon account-icon-sm" src="@account.IconPath" alt="@account.IconAlt" />@account.Name</a></td>
+                    <td>@account.Type</td>
+                    <td class="text-end">@MoneyFormatter.Format(account.CurrentBalance, account.Currency) @account.Currency</td>
+                    <td>@account.DisplayOrder</td>
+                    <td>
+                        @if (account.IncludeInMainBalance) { <span class="badge text-bg-primary">Main balance</span> }
+                        @if (account.IncludeInNetWorth) { <span class="badge text-bg-secondary">Net worth</span> }
+                        @if (account.IncludeInStatistics) { <span class="badge text-bg-light">Statistics</span> }
+                    </td>
+                    <td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@account.Id">Edit</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@account.Id">Delete</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
