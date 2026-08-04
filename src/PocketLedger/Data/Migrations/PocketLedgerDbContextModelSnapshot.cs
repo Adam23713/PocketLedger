@@ -3,8 +3,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PocketLedger.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using PocketLedger.Data;
 
 #nullable disable
 
@@ -450,6 +450,12 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("numeric(19,4)")
                         .HasColumnName("amount");
 
+                    b.Property<DateOnly>("AutomationStartsOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasColumnName("automation_starts_on")
+                        .HasDefaultValueSql("(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Budapest')::date");
+
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
@@ -512,6 +518,38 @@ namespace PocketLedger.Data.Migrations
 
                             t.HasCheckConstraint("ck_recurring_transactions_date_range", "last_occurrence IS NULL OR last_occurrence >= first_occurrence");
                         });
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransactionOccurrence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("OccurrenceDate")
+                        .HasColumnType("date")
+                        .HasColumnName("occurrence_date");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<Guid>("RecurringTransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recurring_transaction_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_recurring_transaction_occurrences");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_recurring_transaction_occurrences_owner_id");
+
+                    b.HasIndex("RecurringTransactionId", "OccurrenceDate")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recurring_transaction_occurrences_template_date");
+
+                    b.ToTable("recurring_transaction_occurrences", (string)null);
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.Transaction", b =>
@@ -723,6 +761,27 @@ namespace PocketLedger.Data.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransactionOccurrence", b =>
+                {
+                    b.HasOne("PocketLedger.Models.Entities.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recurring_transaction_occurrences_users_owner_id");
+
+                    b.HasOne("PocketLedger.Models.Entities.RecurringTransaction", "RecurringTransaction")
+                        .WithMany("Occurrences")
+                        .HasForeignKey("RecurringTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_recurring_transaction_occurrences_recurring_transaction_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("RecurringTransaction");
+                });
+
             modelBuilder.Entity("PocketLedger.Models.Entities.Transaction", b =>
                 {
                     b.HasOne("PocketLedger.Models.Entities.Account", "Account")
@@ -763,6 +822,11 @@ namespace PocketLedger.Data.Migrations
             modelBuilder.Entity("PocketLedger.Models.Entities.Category", b =>
                 {
                     b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>
+                {
+                    b.Navigation("Occurrences");
                 });
 #pragma warning restore 612, 618
         }

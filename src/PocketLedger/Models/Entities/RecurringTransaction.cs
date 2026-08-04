@@ -17,6 +17,8 @@ public class RecurringTransaction
     public string? Note { get; set; }
     public DateOnly FirstOccurrence { get; set; }
     public DateOnly? LastOccurrence { get; set; }
+    public DateOnly AutomationStartsOn { get; set; }
     public RecurringFrequency Frequency { get; set; }
     public bool Enabled { get; set; }
+    public ICollection<RecurringTransactionOccurrence> Occurrences { get; set; } = [];
 }

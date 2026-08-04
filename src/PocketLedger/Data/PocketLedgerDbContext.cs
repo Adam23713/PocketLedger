@@ -11,6 +11,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
+    public DbSet<RecurringTransactionOccurrence> RecurringTransactionOccurrences => Set<RecurringTransactionOccurrence>();
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,6 +23,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
         modelBuilder.Entity<Category>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
         modelBuilder.Entity<Transaction>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
         modelBuilder.Entity<RecurringTransaction>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
+        modelBuilder.Entity<RecurringTransactionOccurrence>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -36,6 +38,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
                     case Category category: category.OwnerId = currentUser.UserId; break;
                     case Transaction transaction: transaction.OwnerId = currentUser.UserId; break;
                     case RecurringTransaction recurring: recurring.OwnerId = currentUser.UserId; break;
+                    case RecurringTransactionOccurrence occurrence: occurrence.OwnerId = currentUser.UserId; break;
                 }
             }
         }

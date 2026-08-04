@@ -19,6 +19,9 @@
     <div class="col-lg-6"><h2 class="h4">Income by category</h2><partial name="_CategoryBreakdown" model="Model.IncomeByCategory" /></div>
     <div class="col-lg-6"><h2 class="h4">Expenses by category</h2><partial name="_CategoryBreakdown" model="Model.ExpenseByCategory" /></div>
 </div>
+<h2 class="h4 mt-4">Recurring expenses by main category</h2>
+@if (Model.RecurringExpenses.Count == 0) { <p class="text-muted">No recurring expenses are scheduled for this month.</p> }
+else { <div class="table-responsive"><table class="table"><thead><tr><th>Main category</th><th class="text-end">Occurrences</th><th class="text-end">Monthly expense</th></tr></thead><tbody>@foreach (var item in Model.RecurringExpenses) { <tr><td><img class="category-icon me-2" src="@item.IconPath" alt="@item.IconAlt" />@item.MainCategoryName</td><td class="text-end">@item.OccurrenceCount</td><td class="text-end">@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</td></tr> }</tbody></table></div> }
 <h2 class="h4 mt-4">Account balances</h2>
 <div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var account in Model.AccountBalances) { <tr><td><a asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">@account.Name</a></td><td class="text-end">@MoneyFormatter.Format(account.Balance, account.Currency) @account.Currency</td></tr> }</tbody></table></div>
 <h2 class="h4 mt-4">Last 12 months</h2>
