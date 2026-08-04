@@ -15,5 +15,7 @@ EXPOSE 5050
 
 COPY --from=build /app/publish .
 
+RUN mkdir -p /home/app/.aspnet/DataProtection-Keys && chown -R $APP_UID:$APP_UID /home/app/.aspnet
+
 USER $APP_UID
 ENTRYPOINT ["dotnet", "PocketLedger.dll"]
