@@ -1,3 +1,0 @@
-pocketledger-adam.dynv6.net {
-	reverse_proxy app:5050
-}
