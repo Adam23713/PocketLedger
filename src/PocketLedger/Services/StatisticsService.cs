@@ -29,6 +29,33 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
         var selectedTotals = PeriodCalculator.Calculate(selected.Select(ToTransaction));
         var accounts = await accountService.GetAllAsync(cancellationToken);
         var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
+        var recurringTemplates = await dbContext.RecurringTransactions.AsNoTracking()
+            .Where(template => template.Enabled && template.Type == TransactionType.Expense && template.FirstOccurrence < end && (template.LastOccurrence == null || template.LastOccurrence >= selectedStart))
+            .Select(template => new
+            {
+                Template = template,
+                template.Account.Currency,
+                MainCategoryId = template.Category!.ParentCategoryId ?? template.CategoryId!.Value,
+                MainCategoryName = template.Category!.ParentCategory != null ? template.Category.ParentCategory.Name : template.Category.Name,
+                MainCategoryIcon = template.Category.ParentCategory != null ? template.Category.ParentCategory.Icon : template.Category.Icon
+            })
+            .ToListAsync(cancellationToken);
+
+        var recurringExpenses = recurringTemplates.Select(item => new
+            {
+                item.MainCategoryName,
+                item.MainCategoryIcon,
+                item.MainCategoryId,
+                item.Currency,
+                OccurrenceCount = RecurringSchedule.GetOccurrences(item.Template, selectedStart, end.AddDays(-1)).Count,
+                item.Template.Amount
+            })
+            .Where(item => item.OccurrenceCount > 0)
+            .GroupBy(item => new { item.MainCategoryId, item.MainCategoryName, item.MainCategoryIcon, item.Currency })
+            .Select(group => new StatisticsRecurringExpense(group.Key.MainCategoryName, group.Key.MainCategoryIcon, group.Key.Currency, group.Sum(item => item.OccurrenceCount), group.Sum(item => item.Amount * item.OccurrenceCount)))
+            .OrderByDescending(item => item.Amount)
+            .ThenBy(item => item.MainCategoryName)
+            .ToList();
 
         var trend = Enumerable.Range(0, 12).Select(offset =>
         {
@@ -47,7 +74,8 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             CategoryTotals(selected, TransactionType.Income),
             CategoryTotals(selected, TransactionType.Expense),
             accounts.Select(account => new StatisticsAccountBalance(account.Id, account.Name, account.Currency, balances[account.Id])).ToList(),
-            trend);
+            trend,
+            recurringExpenses);
     }
 
     private static IReadOnlyList<StatisticsCategoryTotal> CategoryTotals(IEnumerable<StatisticsTransactionRow> transactions, TransactionType type)

@@ -9,30 +9,40 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class RecurringTransactionsController(IRecurringTransactionService recurringService, IAccountService accountService, ICategoryService categoryService) : Controller
+public class RecurringTransactionsController(IRecurringTransactionService recurringService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var templates = await recurringService.GetAllAsync(cancellationToken);
-        return View(templates.Select(template =>
+        var today = BudapestDate.Today(timeProvider);
+        var items = templates.Select(template =>
         {
             var categoryIcon = template.Category is null ? null : CategoryIcons.Resolve(template.Category);
             return new RecurringTransactionListItemViewModel
             {
                 Id = template.Id,
                 Type = template.Type,
+                AdjustmentDirection = template.AdjustmentDirection,
                 AccountName = template.Account.Name,
                 CategoryName = template.Category?.Name,
                 CategoryIconPath = categoryIcon?.WebPath,
                 CategoryIconAlt = categoryIcon?.DisplayName,
+                Note = template.Note,
                 Amount = template.Amount,
                 Currency = template.Account.Currency,
                 FirstOccurrence = template.FirstOccurrence,
                 LastOccurrence = template.LastOccurrence,
+                NextOccurrence = template.Enabled ? RecurringSchedule.GetNextOccurrence(template, today) : null,
                 Frequency = template.Frequency,
                 Enabled = template.Enabled
             };
-        }).ToList());
+        }).OrderBy(item => !item.Enabled).ThenBy(item => item.NextOccurrence is null).ThenBy(item => item.NextOccurrence).ThenBy(item => item.FirstOccurrence).ToList();
+        var expenseTotals = items.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
+            .GroupBy(item => item.Currency)
+            .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => item.Amount)))
+            .OrderBy(total => total.Currency)
+            .ToList();
+        return View(new RecurringTransactionIndexViewModel { Items = items, ExpenseTotals = expenseTotals });
     }
 
     [HttpGet]
@@ -69,7 +79,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         {
             Id = template.Id, Type = template.Type, AccountId = template.AccountId, CategoryId = template.CategoryId, Amount = template.Amount,
             AdjustmentDirection = template.AdjustmentDirection, Note = template.Note, FirstOccurrence = template.FirstOccurrence,
-            LastOccurrence = template.LastOccurrence, Frequency = template.Frequency, Enabled = template.Enabled
+            LastOccurrence = template.LastOccurrence, NoEndDate = template.LastOccurrence is null, Frequency = template.Frequency, Enabled = template.Enabled
         };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
@@ -133,6 +143,6 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     {
         Id = model.Id, Type = model.Type, AccountId = model.AccountId ?? Guid.Empty, CategoryId = model.CategoryId, Amount = model.Amount,
         AdjustmentDirection = model.AdjustmentDirection, Note = model.Note, FirstOccurrence = model.FirstOccurrence,
-        LastOccurrence = model.LastOccurrence, Frequency = model.Frequency, Enabled = model.Enabled
+        LastOccurrence = model.NoEndDate ? null : model.LastOccurrence, Frequency = model.Frequency, Enabled = model.Enabled
     };
 }

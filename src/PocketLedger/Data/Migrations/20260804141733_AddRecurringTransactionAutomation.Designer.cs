@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PocketLedger.Data;
@@ -11,9 +12,11 @@ using PocketLedger.Data;
 namespace PocketLedger.Data.Migrations
 {
     [DbContext(typeof(PocketLedgerDbContext))]
-    partial class PocketLedgerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260804141733_AddRecurringTransactionAutomation")]
+    partial class AddRecurringTransactionAutomation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

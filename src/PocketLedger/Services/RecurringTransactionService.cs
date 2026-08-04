@@ -5,7 +5,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class RecurringTransactionService(PocketLedgerDbContext dbContext) : IRecurringTransactionService
+public class RecurringTransactionService(PocketLedgerDbContext dbContext, TimeProvider timeProvider) : IRecurringTransactionService
 {
     public async Task<IReadOnlyList<RecurringTransaction>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -21,6 +21,7 @@ public class RecurringTransactionService(PocketLedgerDbContext dbContext) : IRec
     {
         await ValidateAsync(template, cancellationToken);
         template.Id = template.Id == Guid.Empty ? Guid.NewGuid() : template.Id;
+        template.AutomationStartsOn = BudapestDate.Today(timeProvider);
         dbContext.RecurringTransactions.Add(template);
         await dbContext.SaveChangesAsync(cancellationToken);
         return template;
@@ -31,6 +32,8 @@ public class RecurringTransactionService(PocketLedgerDbContext dbContext) : IRec
         await ValidateAsync(template, cancellationToken);
         var existing = await dbContext.RecurringTransactions.SingleOrDefaultAsync(item => item.Id == template.Id, cancellationToken)
             ?? throw new EntityNotFoundException("Recurring transaction not found.");
+        var scheduleChanged = existing.FirstOccurrence != template.FirstOccurrence || existing.LastOccurrence != template.LastOccurrence || existing.Frequency != template.Frequency;
+        if (scheduleChanged || !existing.Enabled && template.Enabled) existing.AutomationStartsOn = BudapestDate.Today(timeProvider);
         existing.Type = template.Type;
         existing.AccountId = template.AccountId;
         existing.CategoryId = template.CategoryId;

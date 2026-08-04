@@ -27,7 +27,12 @@ public class StatisticsController(IStatisticsService statisticsService) : Contro
                 IncomeByCategory = summary.IncomeByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
                 ExpenseByCategory = summary.ExpenseByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
                 AccountBalances = summary.AccountBalances.Select(item => new StatisticsAccountViewModel(item.AccountId, item.Name, item.Currency, item.Balance)).ToList(),
-                MonthlyTrend = summary.MonthlyTrend.Select(item => new StatisticsTrendViewModel(item.Year, item.Month, item.Income, item.Expenses, item.Savings, item.Balance)).ToList()
+                MonthlyTrend = summary.MonthlyTrend.Select(item => new StatisticsTrendViewModel(item.Year, item.Month, item.Income, item.Expenses, item.Savings, item.Balance)).ToList(),
+                RecurringExpenses = summary.RecurringExpenses.Select(item =>
+                {
+                    var icon = CategoryIcons.Resolve(item.MainCategoryIcon, Models.Enums.CategoryType.Expense);
+                    return new StatisticsRecurringExpenseViewModel(item.MainCategoryName, icon.WebPath, icon.DisplayName, item.Currency, item.OccurrenceCount, item.Amount);
+                }).ToList()
             });
         }
         catch (BusinessRuleException)

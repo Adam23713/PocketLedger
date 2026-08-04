@@ -60,6 +60,8 @@ builder.Services.AddScoped<IRecurringTransactionService, RecurringTransactionSer
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IImportExportService, ImportExportService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddHostedService<RecurringTransactionWorker>();
 
 var app = builder.Build();
 
