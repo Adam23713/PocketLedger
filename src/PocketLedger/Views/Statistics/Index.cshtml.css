@@ -1,0 +1,13 @@
+.statistics-category-layout { align-items: start; display: grid; gap: 2rem; grid-template-columns: minmax(0, 1fr) minmax(20rem, .9fr); }
+.statistics-doughnut-container { height: 22rem; margin-inline: auto; max-width: 32rem; position: relative; width: 100%; }
+.statistics-trend-container { height: 22rem; position: relative; width: 100%; }
+.statistics-category-selector { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1rem; }
+.statistics-category-selector ::deep button { align-items: center; background: transparent; border: 1px solid var(--surface-border); color: var(--text-primary); display: inline-flex; gap: .4rem; padding: .4rem .65rem; }
+.statistics-category-selector ::deep button:hover, .statistics-category-selector ::deep button[aria-pressed="true"] { background: var(--surface-background-hover); border-color: var(--accent-color); }
+.statistics-category-selector ::deep .statistics-category-swatch { border-radius: 50%; height: .75rem; width: .75rem; }
+.statistics-breakdown { min-width: 0; }
+
+@media (max-width: 767.98px) {
+  .statistics-category-layout { grid-template-columns: minmax(0, 1fr); }
+  .statistics-doughnut-container, .statistics-trend-container { height: 18rem; }
+}

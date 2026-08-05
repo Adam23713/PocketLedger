@@ -26,6 +26,11 @@ public class StatisticsController(IStatisticsService statisticsService) : Contro
                 Balance = summary.Balance,
                 IncomeByCategory = summary.IncomeByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
                 ExpenseByCategory = summary.ExpenseByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
+                ExpenseMainCategories = summary.ExpenseMainCategories.Select(item =>
+                {
+                    var icon = CategoryIcons.Resolve(item.Icon, Models.Enums.CategoryType.Expense);
+                    return new StatisticsMainCategoryViewModel(item.CategoryId, item.Name, item.Amount, icon.WebPath, icon.DisplayName, item.Subcategories.Select(subcategory => new StatisticsSubcategoryViewModel(subcategory.CategoryId, subcategory.Name, subcategory.Amount)).ToList());
+                }).ToList(),
                 AccountBalances = summary.AccountBalances.Select(item => new StatisticsAccountViewModel(item.AccountId, item.Name, item.Currency, item.Balance)).ToList(),
                 MonthlyTrend = summary.MonthlyTrend.Select(item => new StatisticsTrendViewModel(item.Year, item.Month, item.Income, item.Expenses, item.Savings, item.Balance)).ToList(),
                 RecurringExpenses = summary.RecurringExpenses.Select(item =>
