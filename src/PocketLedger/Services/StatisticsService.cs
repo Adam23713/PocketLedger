@@ -23,6 +23,8 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
                 transaction.CategoryId,
                 transaction.Category != null ? transaction.Category.Name : null,
                 transaction.Category != null ? transaction.Category.Icon : null,
+                transaction.Category != null ? transaction.Category.ParentCategoryId : null,
+                transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.Name : null,
                 transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.Icon : null))
             .ToListAsync(cancellationToken);
         var selected = transactions.Where(transaction => transaction.TransactionDate >= selectedStart).ToList();
@@ -73,6 +75,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             selectedTotals.Balance,
             CategoryTotals(selected, TransactionType.Income),
             CategoryTotals(selected, TransactionType.Expense),
+            ExpenseMainCategoryTotals(selected),
             accounts.Select(account => new StatisticsAccountBalance(account.Id, account.Name, account.Currency, balances[account.Id])).ToList(),
             trend,
             recurringExpenses);
@@ -87,7 +90,35 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             .ToList();
     }
 
-    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, Guid? CategoryId, string? CategoryName, string? CategoryIcon, string? ParentCategoryIcon);
+    private static IReadOnlyList<StatisticsMainCategoryTotal> ExpenseMainCategoryTotals(IEnumerable<StatisticsTransactionRow> transactions)
+    {
+        return transactions.Where(item => item.Type == TransactionType.Expense)
+            .GroupBy(item => new
+            {
+                CategoryId = item.ParentCategoryId ?? item.CategoryId,
+                Name = item.ParentCategoryName ?? item.CategoryName ?? "Uncategorized",
+                Icon = item.ParentCategoryIcon ?? item.CategoryIcon
+            })
+            .Select(group => new StatisticsMainCategoryTotal(
+                group.Key.CategoryId,
+                group.Key.Name,
+                group.Sum(item => item.Amount),
+                group.Key.Icon,
+                group.GroupBy(item => new
+                    {
+                        CategoryId = item.ParentCategoryId is not null ? item.CategoryId : null,
+                        Name = item.ParentCategoryId is not null ? item.CategoryName! : item.CategoryId is null ? "Uncategorized" : "Direct"
+                    })
+                    .Select(subcategory => new StatisticsSubcategoryTotal(subcategory.Key.CategoryId, subcategory.Key.Name, subcategory.Sum(item => item.Amount)))
+                    .OrderByDescending(item => item.Amount)
+                    .ThenBy(item => item.Name)
+                    .ToList()))
+            .OrderByDescending(item => item.Amount)
+            .ThenBy(item => item.Name)
+            .ToList();
+    }
+
+    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
 
     private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection };
 }
