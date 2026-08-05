@@ -125,7 +125,7 @@ body {
 .navbar-brand:hover, .navbar-brand:focus { color: var(--accent-color); }
 .navbar-brand img { border-radius: .45rem; }
 .navbar-nav { gap: .08rem; }
-.navbar .nav-link { border-radius: var(--control-radius); color: var(--text-secondary); font-size: .875rem; font-weight: 520; padding: .55rem .65rem; position: relative; }
+.navbar .nav-link { border-radius: var(--control-radius); color: var(--text-secondary); font-size: 1rem; font-weight: 520; padding: .65rem .8rem; position: relative; }
 .navbar .nav-link:hover, .navbar .nav-link:focus-visible { background: var(--surface-background-hover); color: var(--text-primary); }
 .navbar .nav-link.active { color: var(--accent-color); font-weight: 650; }
 .navbar .nav-link.active::after { background: var(--accent-color); border-radius: 1rem; bottom: -.62rem; content: ""; height: 2px; left: .65rem; position: absolute; right: .65rem; }
