@@ -9,7 +9,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService) : Controller
+public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider) : Controller
 {
     public async Task<IActionResult> Index(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search, int page = 1, CancellationToken cancellationToken = default)
     {
@@ -121,6 +121,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             return NotFound();
         }
 
+        var now = timeProvider.GetLocalNow();
         var model = new TransactionFormViewModel
         {
             Id = transaction.Id,
@@ -130,6 +131,8 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
             TransactionDate = transaction.TransactionDate,
+            TransactionHour = now.Hour,
+            TransactionMinute = now.Minute,
             CategoryId = transaction.CategoryId,
             AdjustmentDirection = transaction.AdjustmentDirection,
             Note = transaction.Note
@@ -189,6 +192,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
             Amount = transaction.Amount,
             TransactionDate = transaction.TransactionDate,
+            TransactionTime = transaction.TransactionTime,
             Note = transaction.Note
         });
     }
@@ -242,6 +246,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         Amount = model.Amount,
         TargetAmount = model.TargetAmount,
         TransactionDate = model.TransactionDate,
+        TransactionTime = new TimeOnly(model.TransactionHour, model.TransactionMinute),
         CategoryId = model.CategoryId,
         AdjustmentDirection = model.AdjustmentDirection,
         Note = model.Note
@@ -265,6 +270,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : icon?.DisplayName,
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
+            TransactionTime = transaction.TransactionTime,
             Note = transaction.Note
         };
     }
@@ -288,6 +294,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
             TransactionDate = transaction.TransactionDate,
+            TransactionTime = transaction.TransactionTime,
             Note = transaction.Note
         };
     }

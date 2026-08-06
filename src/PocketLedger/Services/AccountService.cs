@@ -87,6 +87,7 @@ public class AccountService(PocketLedgerDbContext dbContext) : IAccountService
             .ThenInclude(category => category!.ParentCategory)
             .Where(transaction => transaction.AccountId == accountId || transaction.TargetAccountId == accountId)
             .OrderByDescending(transaction => transaction.TransactionDate)
+            .ThenByDescending(transaction => transaction.TransactionTime)
             .ThenByDescending(transaction => transaction.Id)
             .Take(count)
             .ToListAsync(cancellationToken);

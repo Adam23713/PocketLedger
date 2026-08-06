@@ -28,6 +28,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(transaction => transaction.TargetAmount).HasColumnName("target_amount").HasPrecision(19, 4);
         builder.Property(transaction => transaction.AdjustmentDirection).HasColumnName("adjustment_direction").HasConversion<string>().HasMaxLength(10);
         builder.Property(transaction => transaction.TransactionDate).HasColumnName("transaction_date").HasColumnType("date");
+        builder.Property(transaction => transaction.TransactionTime).HasColumnName("transaction_time").HasColumnType("time without time zone");
         builder.Property(transaction => transaction.CategoryId).HasColumnName("category_id");
         builder.Property(transaction => transaction.Note).HasColumnName("note").HasMaxLength(500);
 

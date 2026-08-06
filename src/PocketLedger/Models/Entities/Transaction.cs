@@ -16,6 +16,7 @@ public class Transaction
     public decimal? TargetAmount { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }
     public DateOnly TransactionDate { get; set; }
+    public TimeOnly TransactionTime { get; set; }
     public Guid? CategoryId { get; set; }
     public Category? Category { get; set; }
     public string? Note { get; set; }

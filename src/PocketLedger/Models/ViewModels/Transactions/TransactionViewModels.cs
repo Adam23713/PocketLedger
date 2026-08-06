@@ -52,6 +52,7 @@ public class TransactionListItemViewModel
     public string? CategoryIconAlt { get; init; }
     public decimal Amount { get; init; }
     public decimal? TargetAmount { get; init; }
+    public TimeOnly TransactionTime { get; init; }
     public string? Note { get; init; }
 }
 
@@ -70,11 +71,19 @@ public class TransactionDetailsViewModel
     public decimal Amount { get; init; }
     public decimal? TargetAmount { get; init; }
     public DateOnly TransactionDate { get; init; }
+    public TimeOnly TransactionTime { get; init; }
     public string? Note { get; init; }
 }
 
 public class TransactionFormViewModel
 {
+    public TransactionFormViewModel()
+    {
+        var now = DateTime.Now;
+        TransactionHour = now.Hour;
+        TransactionMinute = now.Minute;
+    }
+
     public Guid Id { get; set; }
 
     [Required]
@@ -92,6 +101,12 @@ public class TransactionFormViewModel
 
     [Required]
     public DateOnly TransactionDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+    [Range(0, 23)]
+    public int TransactionHour { get; set; }
+
+    [Range(0, 59)]
+    public int TransactionMinute { get; set; }
 
     public Guid? CategoryId { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }

@@ -46,7 +46,7 @@
         <h2 class="h6 text-muted mb-0">@day.Date.ToString("dddd, yyyy-MM-dd")</h2>
         @if (day.Totals.Count > 0)
         {
-            <div class="d-flex flex-wrap gap-3 small">
+            <div class="d-flex flex-wrap gap-3 fs-6">
                 @foreach (var total in day.Totals)
                 {
                     <span class="text-success">Incoming: +@MoneyFormatter.Format(total.Income, total.Currency) @total.Currency</span>
@@ -62,7 +62,7 @@
         <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" asp-action="Details" asp-route-id="@transaction.Id">
             <span class="d-flex align-items-center gap-2">
                 @if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }
-                <span><strong>@transaction.Type</strong> · @(transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")<br /><small class="text-muted">@transaction.AccountName@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note)</small></span>
+                <span><strong>@transaction.Type</strong> · @(transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")<br /><small class="text-muted">@transaction.TransactionTime.ToString("HH:mm") · @transaction.AccountName@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note)</small></span>
             </span>
             <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</span>
         </a>

@@ -4,7 +4,7 @@ namespace PocketLedger.Services;
 
 public record AccountBackup(Guid Id, string Name, AccountType Type, string Currency, decimal InitialBalance, string? Icon, int DisplayOrder, bool IncludeInMainBalance, bool IncludeInNetWorth, bool IncludeInStatistics, string? Color = null);
 public record CategoryBackup(Guid Id, string Name, CategoryType Type, string? Icon, Guid? ParentCategoryId, int DisplayOrder);
-public record TransactionBackup(Guid Id, TransactionType Type, Guid AccountId, Guid? TargetAccountId, decimal Amount, decimal? TargetAmount, AdjustmentDirection? AdjustmentDirection, DateOnly TransactionDate, Guid? CategoryId, string? Note);
+public record TransactionBackup(Guid Id, TransactionType Type, Guid AccountId, Guid? TargetAccountId, decimal Amount, decimal? TargetAmount, AdjustmentDirection? AdjustmentDirection, DateOnly TransactionDate, Guid? CategoryId, string? Note, TimeOnly TransactionTime = default);
 public record RecurringTransactionBackup(Guid Id, TransactionType Type, Guid AccountId, Guid? CategoryId, decimal Amount, AdjustmentDirection? AdjustmentDirection, string? Note, DateOnly FirstOccurrence, DateOnly? LastOccurrence, RecurringFrequency Frequency, bool Enabled);
 public record PocketLedgerBackup(int Version, DateTimeOffset ExportedAt, IReadOnlyList<AccountBackup> Accounts, IReadOnlyList<CategoryBackup> Categories, IReadOnlyList<TransactionBackup> Transactions, IReadOnlyList<RecurringTransactionBackup> RecurringTransactions);
 public record RestorePreview(bool IsValid, int AccountCount, int CategoryCount, int TransactionCount, int RecurringTransactionCount, IReadOnlyList<string> Errors);
