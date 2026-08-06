@@ -20,5 +20,8 @@ public class RecurringTransaction
     public DateOnly AutomationStartsOn { get; set; }
     public RecurringFrequency Frequency { get; set; }
     public bool Enabled { get; set; }
+    public Guid? DebtId { get; set; }
+    public Debt? Debt { get; set; }
+    public DebtOperationType? DebtOperationType { get; set; }
     public ICollection<RecurringTransactionOccurrence> Occurrences { get; set; } = [];
 }

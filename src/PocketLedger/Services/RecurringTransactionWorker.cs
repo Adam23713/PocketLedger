@@ -57,26 +57,39 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
 
     private async Task CreateOccurrenceAsync(PocketLedgerDbContext dbContext, RecurringTransaction template, DateOnly occurrenceDate, CancellationToken cancellationToken)
     {
-        var transaction = new Transaction
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        if (template.DebtId is not null) await dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({template.DebtId.Value.ToString()}, 0))", cancellationToken);
+        Transaction transaction;
+        if (template.DebtId is not null)
         {
-            Id = Guid.NewGuid(), OwnerId = template.OwnerId, Type = template.Type, AccountId = template.AccountId, Amount = template.Amount,
-            AdjustmentDirection = template.AdjustmentDirection, TransactionDate = occurrenceDate, CategoryId = template.CategoryId, Note = template.Note
-        };
+            transaction = await new DebtService(dbContext, timeProvider).AddAutomaticOperationAsync(template, occurrenceDate, cancellationToken);
+            transaction.OwnerId = template.OwnerId;
+        }
+        else
+        {
+            transaction = new Transaction
+            {
+                Id = Guid.NewGuid(), OwnerId = template.OwnerId, Type = template.Type, AccountId = template.AccountId, Amount = template.Amount,
+                AdjustmentDirection = template.AdjustmentDirection, TransactionDate = occurrenceDate, CategoryId = template.CategoryId, Note = template.Note
+            };
+            dbContext.Transactions.Add(transaction);
+        }
         var occurrence = new RecurringTransactionOccurrence
         {
-            Id = Guid.NewGuid(), OwnerId = template.OwnerId, RecurringTransactionId = template.Id, OccurrenceDate = occurrenceDate
+            Id = Guid.NewGuid(), OwnerId = template.OwnerId, RecurringTransactionId = template.Id, OccurrenceDate = occurrenceDate, TransactionId = transaction.Id
         };
-        dbContext.Transactions.Add(transaction);
         dbContext.RecurringTransactionOccurrences.Add(occurrence);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
+            await dbTransaction.CommitAsync(cancellationToken);
             logger.LogInformation("Created recurring transaction {RecurringTransactionId} for {OccurrenceDate}.", template.Id, occurrenceDate);
         }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
             dbContext.Entry(transaction).State = EntityState.Detached;
             dbContext.Entry(occurrence).State = EntityState.Detached;
+            dbContext.ChangeTracker.Clear();
             logger.LogWarning(exception, "Recurring occurrence {RecurringTransactionId} for {OccurrenceDate} was not created, most likely because another instance processed it.", template.Id, occurrenceDate);
         }
     }

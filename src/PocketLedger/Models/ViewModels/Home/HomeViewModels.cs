@@ -12,6 +12,7 @@ public class HomeViewModel
     public decimal BalanceChangeThisMonth { get; init; }
     public IReadOnlyList<AccountCardViewModel> Accounts { get; init; } = [];
     public IReadOnlyList<RecentTransactionViewModel> RecentTransactions { get; init; } = [];
+    public IReadOnlyList<DebtFundingWarningViewModel> DebtFundingWarnings { get; init; } = [];
 }
 
 public class AccountCardViewModel
@@ -31,11 +32,28 @@ public class RecentTransactionViewModel
     public Guid Id { get; init; }
     public TransactionType Type { get; init; }
     public AdjustmentDirection? AdjustmentDirection { get; init; }
-    public string AccountName { get; init; } = string.Empty;
+    public string? AccountName { get; init; }
     public string Currency { get; init; } = string.Empty;
     public string? CategoryName { get; init; }
     public string? CategoryIconPath { get; init; }
     public string? CategoryIconAlt { get; init; }
     public decimal Amount { get; init; }
     public DateOnly TransactionDate { get; init; }
+    public DebtOperationType? DebtOperationType { get; init; }
+    public string? DebtIconPath { get; init; }
+    public string? DebtIconAlt { get; init; }
+}
+
+public class DebtFundingWarningViewModel
+{
+    public Guid DebtId { get; init; }
+    public string DebtName { get; init; } = string.Empty;
+    public DateOnly Date { get; init; }
+    public decimal Amount { get; init; }
+    public string Currency { get; init; } = string.Empty;
+    public string AccountName { get; init; } = string.Empty;
+    public decimal AccountBalance { get; init; }
+    public decimal Shortfall { get; init; }
+    public string IconPath { get; init; } = string.Empty;
+    public string IconAlt { get; init; } = string.Empty;
 }

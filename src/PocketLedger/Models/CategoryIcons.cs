@@ -60,6 +60,13 @@ public static class CategoryIcons
             ?? DefaultFor(categoryType);
     }
 
+    public static CategoryIconDefinition Resolve(string? id)
+    {
+        return All.FirstOrDefault(icon => string.Equals(icon.Id, id, StringComparison.Ordinal)) ?? DefaultFor(CategoryType.Expense);
+    }
+
+    public static bool Exists(string? id) => All.Any(icon => string.Equals(icon.Id, id, StringComparison.Ordinal));
+
     public static bool IsCompatible(string? id, CategoryType categoryType)
     {
         return All.Any(icon => icon.CategoryType == categoryType && string.Equals(icon.Id, id, StringComparison.Ordinal));

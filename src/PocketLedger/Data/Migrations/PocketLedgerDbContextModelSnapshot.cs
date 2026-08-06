@@ -429,6 +429,104 @@ namespace PocketLedger.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.Debt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset?>("ClosedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_at");
+
+                    b.Property<string>("CounterpartyName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("counterparty_name");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("direction");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("icon");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("original_amount");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_debts");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_debts_account_id");
+
+                    b.HasIndex("OwnerId", "Status")
+                        .HasDatabaseName("ix_debts_owner_id_status");
+
+                    b.ToTable("debts", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_debts_date_range", "due_date IS NULL OR due_date >= start_date");
+
+                            t.HasCheckConstraint("ck_debts_original_amount_positive", "original_amount > 0");
+
+                            t.HasCheckConstraint("ck_debts_receivable_type", "direction <> 'Receivable' OR type = 'PrivatePerson'");
+                        });
+                });
+
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -459,6 +557,15 @@ namespace PocketLedger.Data.Migrations
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
+
+                    b.Property<Guid?>("DebtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("debt_id");
+
+                    b.Property<string>("DebtOperationType")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("debt_operation_type");
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean")
@@ -502,6 +609,9 @@ namespace PocketLedger.Data.Migrations
                     b.HasIndex("CategoryId")
                         .HasDatabaseName("ix_recurring_transactions_category_id");
 
+                    b.HasIndex("DebtId")
+                        .HasDatabaseName("ix_recurring_transactions_debt_id");
+
                     b.HasIndex("Enabled", "FirstOccurrence")
                         .HasDatabaseName("ix_recurring_transactions_enabled_first_occurrence");
 
@@ -514,7 +624,7 @@ namespace PocketLedger.Data.Migrations
 
                             t.HasCheckConstraint("ck_recurring_transactions_amount_positive", "amount > 0");
 
-                            t.HasCheckConstraint("ck_recurring_transactions_category", "(type IN ('Income', 'Expense') AND category_id IS NOT NULL) OR (type = 'Adjustment' AND category_id IS NULL)");
+                            t.HasCheckConstraint("ck_recurring_transactions_category", "(debt_id IS NOT NULL AND category_id IS NULL) OR (debt_id IS NULL AND type IN ('Income', 'Expense') AND category_id IS NOT NULL) OR (debt_id IS NULL AND type = 'Adjustment' AND category_id IS NULL)");
 
                             t.HasCheckConstraint("ck_recurring_transactions_date_range", "last_occurrence IS NULL OR last_occurrence >= first_occurrence");
                         });
@@ -539,11 +649,19 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("recurring_transaction_id");
 
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
                     b.HasKey("Id")
                         .HasName("pk_recurring_transaction_occurrences");
 
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("ix_recurring_transaction_occurrences_owner_id");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recurring_transaction_occurrences_transaction_id");
 
                     b.HasIndex("RecurringTransactionId", "OccurrenceDate")
                         .IsUnique()
@@ -559,7 +677,7 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<Guid>("AccountId")
+                    b.Property<Guid?>("AccountId")
                         .HasColumnType("uuid")
                         .HasColumnName("account_id");
 
@@ -576,6 +694,15 @@ namespace PocketLedger.Data.Migrations
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
+
+                    b.Property<Guid?>("DebtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("debt_id");
+
+                    b.Property<string>("DebtOperationType")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("debt_operation_type");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
@@ -624,14 +751,21 @@ namespace PocketLedger.Data.Migrations
                     b.HasIndex("CategoryId", "TransactionDate")
                         .HasDatabaseName("ix_transactions_category_id_transaction_date");
 
+                    b.HasIndex("DebtId", "TransactionDate")
+                        .HasDatabaseName("ix_transactions_debt_id_transaction_date");
+
                     b.HasIndex("OwnerId", "TransactionDate")
                         .HasDatabaseName("ix_transactions_owner_id_transaction_date");
 
                     b.ToTable("transactions", null, t =>
                         {
+                            t.HasCheckConstraint("ck_transactions_account", "(type = 'DebtEntry' AND account_id IS NULL) OR (type <> 'DebtEntry' AND account_id IS NOT NULL)");
+
                             t.HasCheckConstraint("ck_transactions_adjustment_direction", "(type = 'Adjustment' AND adjustment_direction IS NOT NULL) OR (type <> 'Adjustment' AND adjustment_direction IS NULL)");
 
                             t.HasCheckConstraint("ck_transactions_amount_positive", "amount > 0");
+
+                            t.HasCheckConstraint("ck_transactions_debt_operation", "(debt_id IS NULL AND debt_operation_type IS NULL) OR (debt_id IS NOT NULL AND debt_operation_type IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_transactions_different_accounts", "target_account_id IS NULL OR target_account_id <> account_id");
 
@@ -639,7 +773,7 @@ namespace PocketLedger.Data.Migrations
 
                             t.HasCheckConstraint("ck_transactions_target_amount_transfer", "target_amount IS NULL OR type = 'Transfer'");
 
-                            t.HasCheckConstraint("ck_transactions_transfer_target", "(type = 'Transfer' AND target_account_id IS NOT NULL) OR (type <> 'Transfer' AND target_account_id IS NULL)");
+                            t.HasCheckConstraint("ck_transactions_transfer_target", "(type = 'Transfer' AND account_id IS NOT NULL AND target_account_id IS NOT NULL) OR (type <> 'Transfer' AND target_account_id IS NULL)");
                         });
                 });
 
@@ -736,6 +870,26 @@ namespace PocketLedger.Data.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.Debt", b =>
+                {
+                    b.HasOne("PocketLedger.Models.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_debts_accounts_account_id");
+
+                    b.HasOne("PocketLedger.Models.Entities.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_debts_users_owner_id");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>
                 {
                     b.HasOne("PocketLedger.Models.Entities.Account", "Account")
@@ -751,6 +905,12 @@ namespace PocketLedger.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_recurring_transactions_categories_category_id");
 
+                    b.HasOne("PocketLedger.Models.Entities.Debt", "Debt")
+                        .WithMany("RecurringTransactions")
+                        .HasForeignKey("DebtId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_recurring_transactions_debts_debt_id");
+
                     b.HasOne("PocketLedger.Models.Entities.ApplicationUser", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
@@ -761,6 +921,8 @@ namespace PocketLedger.Data.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Category");
+
+                    b.Navigation("Debt");
 
                     b.Navigation("Owner");
                 });
@@ -781,9 +943,17 @@ namespace PocketLedger.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_recurring_transaction_occurrences_recurring_transaction_id");
 
+                    b.HasOne("PocketLedger.Models.Entities.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_recurring_transaction_occurrences_transactions_transaction_id");
+
                     b.Navigation("Owner");
 
                     b.Navigation("RecurringTransaction");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.Transaction", b =>
@@ -792,7 +962,6 @@ namespace PocketLedger.Data.Migrations
                         .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_transactions_accounts_account_id");
 
                     b.HasOne("PocketLedger.Models.Entities.Category", "Category")
@@ -800,6 +969,12 @@ namespace PocketLedger.Data.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_transactions_categories_category_id");
+
+                    b.HasOne("PocketLedger.Models.Entities.Debt", "Debt")
+                        .WithMany("Transactions")
+                        .HasForeignKey("DebtId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_transactions_debts_debt_id");
 
                     b.HasOne("PocketLedger.Models.Entities.ApplicationUser", "Owner")
                         .WithMany()
@@ -818,6 +993,8 @@ namespace PocketLedger.Data.Migrations
 
                     b.Navigation("Category");
 
+                    b.Navigation("Debt");
+
                     b.Navigation("Owner");
 
                     b.Navigation("TargetAccount");
@@ -826,6 +1003,13 @@ namespace PocketLedger.Data.Migrations
             modelBuilder.Entity("PocketLedger.Models.Entities.Category", b =>
                 {
                     b.Navigation("Subcategories");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.Debt", b =>
+                {
+                    b.Navigation("RecurringTransactions");
+
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>

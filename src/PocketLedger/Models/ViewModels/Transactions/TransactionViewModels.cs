@@ -43,7 +43,7 @@ public class TransactionListItemViewModel
     public Guid Id { get; init; }
     public TransactionType Type { get; init; }
     public AdjustmentDirection? AdjustmentDirection { get; init; }
-    public string AccountName { get; init; } = string.Empty;
+    public string? AccountName { get; init; }
     public string? TargetAccountName { get; init; }
     public string Currency { get; init; } = string.Empty;
     public string? TargetCurrency { get; init; }
@@ -54,6 +54,10 @@ public class TransactionListItemViewModel
     public decimal? TargetAmount { get; init; }
     public TimeOnly TransactionTime { get; init; }
     public string? Note { get; init; }
+    public string? DebtName { get; init; }
+    public DebtOperationType? DebtOperationType { get; init; }
+    public string? DebtIconPath { get; init; }
+    public string? DebtIconAlt { get; init; }
 }
 
 public class TransactionDetailsViewModel
@@ -61,7 +65,7 @@ public class TransactionDetailsViewModel
     public Guid Id { get; init; }
     public TransactionType Type { get; init; }
     public AdjustmentDirection? AdjustmentDirection { get; init; }
-    public string AccountName { get; init; } = string.Empty;
+    public string? AccountName { get; init; }
     public string? TargetAccountName { get; init; }
     public string Currency { get; init; } = string.Empty;
     public string? TargetCurrency { get; init; }
@@ -73,6 +77,11 @@ public class TransactionDetailsViewModel
     public DateOnly TransactionDate { get; init; }
     public TimeOnly TransactionTime { get; init; }
     public string? Note { get; init; }
+    public Guid? DebtId { get; init; }
+    public string? DebtName { get; init; }
+    public DebtOperationType? DebtOperationType { get; init; }
+    public string? DebtIconPath { get; init; }
+    public string? DebtIconAlt { get; init; }
 }
 
 public class TransactionFormViewModel

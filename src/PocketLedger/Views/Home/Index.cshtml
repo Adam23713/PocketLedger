@@ -14,6 +14,10 @@
         <a class="btn btn-primary" asp-controller="Transactions" asp-action="Create">New transaction</a>
     </div>
 </div>
+@foreach (var warning in Model.DebtFundingWarnings)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): @MoneyFormatter.Format(warning.Amount, warning.Currency) @warning.Currency from @warning.AccountName; current balance @MoneyFormatter.Format(warning.AccountBalance, warning.Currency) @warning.Currency, shortfall @MoneyFormatter.Format(warning.Shortfall, warning.Currency) @warning.Currency.</span></div>
+}
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.TotalMainBalance, "HUF") HUF</div></div></div></div>
@@ -65,12 +69,12 @@ else
             <tbody>
             @foreach (var transaction in Model.RecentTransactions)
             {
-                var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer;
+                var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer || transaction.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
                 <tr>
                     <td><a asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">@transaction.TransactionDate.ToString("yyyy-MM-dd")</a></td>
                     <td>@transaction.Type</td>
-                    <td>@transaction.AccountName</td>
-                    <td>@if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.CategoryName ?? "—")</td>
+                    <td>@(transaction.AccountName ?? "No account movement")</td>
+                    <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
                     <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</td>
                 </tr>
             }

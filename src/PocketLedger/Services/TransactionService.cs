@@ -54,7 +54,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
             .Select(transaction => new
             {
                 Date = transaction.TransactionDate,
-                transaction.Account.Currency,
+                transaction.Account!.Currency,
                 Income = transaction.Type == TransactionType.Income ? transaction.Amount : 0m,
                 Expenses = transaction.Type == TransactionType.Expense ? transaction.Amount : 0m
             })
@@ -84,6 +84,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
 
     public async Task<Transaction> CreateAsync(Transaction transaction, CancellationToken cancellationToken)
     {
+        if (transaction.DebtId is not null || transaction.Type == TransactionType.DebtEntry) throw new BusinessRuleException("Debt transactions must be created from the debt page.");
         await PrepareAndValidateAsync(transaction, cancellationToken);
         transaction.Id = transaction.Id == Guid.Empty ? Guid.NewGuid() : transaction.Id;
         dbContext.Transactions.Add(transaction);
@@ -96,6 +97,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         await PrepareAndValidateAsync(transaction, cancellationToken);
         var existing = await dbContext.Transactions.SingleOrDefaultAsync(item => item.Id == transaction.Id, cancellationToken)
             ?? throw new EntityNotFoundException("Transaction not found.");
+        if (existing.DebtId is not null) throw new BusinessRuleException("Debt transactions must be edited from the debt page.");
 
         existing.Type = transaction.Type;
         existing.AccountId = transaction.AccountId;
@@ -114,6 +116,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
     {
         var transaction = await dbContext.Transactions.SingleOrDefaultAsync(item => item.Id == id, cancellationToken)
             ?? throw new EntityNotFoundException("Transaction not found.");
+        if (transaction.DebtId is not null) throw new BusinessRuleException("Debt transactions must be deleted from the debt page.");
         dbContext.Transactions.Remove(transaction);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -134,7 +137,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
 
     private IQueryable<Transaction> BaseReadQuery()
     {
-        return dbContext.Transactions.AsNoTracking().Include(transaction => transaction.Account).Include(transaction => transaction.TargetAccount).Include(transaction => transaction.Category).ThenInclude(category => category!.ParentCategory);
+        return dbContext.Transactions.AsNoTracking().Include(transaction => transaction.Account).Include(transaction => transaction.TargetAccount).Include(transaction => transaction.Category).ThenInclude(category => category!.ParentCategory).Include(transaction => transaction.Debt);
     }
 
     private async Task PrepareAndValidateAsync(Transaction transaction, CancellationToken cancellationToken)
@@ -144,7 +147,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
             throw new BusinessRuleException("Transaction date is required.");
         }
 
-        var account = await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == transaction.AccountId, cancellationToken);
+        var account = transaction.AccountId is null ? null : await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == transaction.AccountId, cancellationToken);
         Category? category = null;
         if (transaction.CategoryId is not null)
         {

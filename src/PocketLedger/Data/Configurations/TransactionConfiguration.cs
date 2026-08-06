@@ -13,9 +13,11 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             tableBuilder.HasCheckConstraint("ck_transactions_amount_positive", "amount > 0");
             tableBuilder.HasCheckConstraint("ck_transactions_target_amount_positive", "target_amount IS NULL OR target_amount > 0");
             tableBuilder.HasCheckConstraint("ck_transactions_different_accounts", "target_account_id IS NULL OR target_account_id <> account_id");
-            tableBuilder.HasCheckConstraint("ck_transactions_transfer_target", "(type = 'Transfer' AND target_account_id IS NOT NULL) OR (type <> 'Transfer' AND target_account_id IS NULL)");
+            tableBuilder.HasCheckConstraint("ck_transactions_transfer_target", "(type = 'Transfer' AND account_id IS NOT NULL AND target_account_id IS NOT NULL) OR (type <> 'Transfer' AND target_account_id IS NULL)");
             tableBuilder.HasCheckConstraint("ck_transactions_target_amount_transfer", "target_amount IS NULL OR type = 'Transfer'");
             tableBuilder.HasCheckConstraint("ck_transactions_adjustment_direction", "(type = 'Adjustment' AND adjustment_direction IS NOT NULL) OR (type <> 'Adjustment' AND adjustment_direction IS NULL)");
+            tableBuilder.HasCheckConstraint("ck_transactions_account", "(type = 'DebtEntry' AND account_id IS NULL) OR (type <> 'DebtEntry' AND account_id IS NOT NULL)");
+            tableBuilder.HasCheckConstraint("ck_transactions_debt_operation", "(debt_id IS NULL AND debt_operation_type IS NULL) OR (debt_id IS NOT NULL AND debt_operation_type IS NOT NULL)");
         });
 
         builder.HasKey(transaction => transaction.Id).HasName("pk_transactions");
@@ -31,6 +33,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(transaction => transaction.TransactionTime).HasColumnName("transaction_time").HasColumnType("time without time zone");
         builder.Property(transaction => transaction.CategoryId).HasColumnName("category_id");
         builder.Property(transaction => transaction.Note).HasColumnName("note").HasMaxLength(500);
+        builder.Property(transaction => transaction.DebtId).HasColumnName("debt_id");
+        builder.Property(transaction => transaction.DebtOperationType).HasColumnName("debt_operation_type").HasConversion<string>().HasMaxLength(40);
 
         builder.HasOne(transaction => transaction.Account)
             .WithMany()
@@ -50,6 +54,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("fk_transactions_categories_category_id");
 
+        builder.HasOne(transaction => transaction.Debt).WithMany(debt => debt.Transactions).HasForeignKey(transaction => transaction.DebtId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_transactions_debts_debt_id");
+
         builder.HasOne(transaction => transaction.Owner).WithMany().HasForeignKey(transaction => transaction.OwnerId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_transactions_users_owner_id");
 
         builder.HasIndex(transaction => transaction.TransactionDate).HasDatabaseName("ix_transactions_transaction_date");
@@ -57,5 +63,6 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.HasIndex(transaction => new { transaction.CategoryId, transaction.TransactionDate }).HasDatabaseName("ix_transactions_category_id_transaction_date");
         builder.HasIndex(transaction => transaction.TargetAccountId).HasDatabaseName("ix_transactions_target_account_id");
         builder.HasIndex(transaction => new { transaction.OwnerId, transaction.TransactionDate }).HasDatabaseName("ix_transactions_owner_id_transaction_date");
+        builder.HasIndex(transaction => new { transaction.DebtId, transaction.TransactionDate }).HasDatabaseName("ix_transactions_debt_id_transaction_date");
     }
 }

@@ -51,7 +51,8 @@ public class AccountService(PocketLedgerDbContext dbContext) : IAccountService
             ?? throw new EntityNotFoundException("Account not found.");
         var hasTransactions = await dbContext.Transactions.AnyAsync(transaction => transaction.AccountId == id || transaction.TargetAccountId == id, cancellationToken);
         var hasRecurringTransactions = await dbContext.RecurringTransactions.AnyAsync(template => template.AccountId == id, cancellationToken);
-        AccountRules.EnsureCanDelete(hasTransactions || hasRecurringTransactions);
+        var hasDebts = await dbContext.Debts.AnyAsync(debt => debt.AccountId == id, cancellationToken);
+        AccountRules.EnsureCanDelete(hasTransactions || hasRecurringTransactions || hasDebts);
         dbContext.Accounts.Remove(account);
         await dbContext.SaveChangesAsync(cancellationToken);
     }

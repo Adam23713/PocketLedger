@@ -2,18 +2,19 @@
 @using PocketLedger.Models.Enums
 @{
     ViewData["Title"] = "Transaction details";
-    var negative = Model.Type == TransactionType.Expense || Model.Type == TransactionType.Adjustment && Model.AdjustmentDirection == AdjustmentDirection.Decrease;
+    var negative = Model.Type == TransactionType.Expense || Model.Type == TransactionType.Adjustment && Model.AdjustmentDirection == AdjustmentDirection.Decrease || Model.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Transaction details</h1>
-    <div><a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a></div>
+    <div>@if (Model.DebtId is null) { <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a> } else { <a class="btn btn-outline-primary" asp-controller="Debts" asp-action="Details" asp-route-id="@Model.DebtId">View debt</a> }</div>
 </div>
 <div class="card mb-3">
     <div class="table-responsive">
         <table class="table table-striped align-middle mb-0">
             <tbody>
                 <tr><th class="w-25" scope="row">Type</th><td>@Model.Type @Model.AdjustmentDirection</td></tr>
-                <tr><th scope="row">Account</th><td>@Model.AccountName</td></tr>
+                <tr><th scope="row">Account</th><td>@(Model.AccountName ?? "No account movement")</td></tr>
+                @if (Model.DebtId is not null) { <tr><th scope="row">Debt operation</th><td>@if (!string.IsNullOrWhiteSpace(Model.DebtIconPath)) { <img class="category-icon me-2" src="@Model.DebtIconPath" alt="@Model.DebtIconAlt" /> }@Model.DebtOperationType · @Model.DebtName</td></tr> }
                 @if (Model.Type == TransactionType.Transfer)
                 {
                     <tr><th scope="row">Target account</th><td>@Model.TargetAccountName</td></tr>

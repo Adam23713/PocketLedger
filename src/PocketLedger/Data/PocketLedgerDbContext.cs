@@ -13,6 +13,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
     public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
     public DbSet<RecurringTransactionOccurrence> RecurringTransactionOccurrences => Set<RecurringTransactionOccurrence>();
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
+    public DbSet<Debt> Debts => Set<Debt>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +25,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
         modelBuilder.Entity<Transaction>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
         modelBuilder.Entity<RecurringTransaction>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
         modelBuilder.Entity<RecurringTransactionOccurrence>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
+        modelBuilder.Entity<Debt>().HasQueryFilter(entity => currentUser == null || !currentUser.IsAuthenticated || entity.OwnerId == currentUser.UserId);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -39,6 +41,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
                     case Transaction transaction: transaction.OwnerId = currentUser.UserId; break;
                     case RecurringTransaction recurring: recurring.OwnerId = currentUser.UserId; break;
                     case RecurringTransactionOccurrence occurrence: occurrence.OwnerId = currentUser.UserId; break;
+                    case Debt debt: debt.OwnerId = currentUser.UserId; break;
                 }
             }
         }
