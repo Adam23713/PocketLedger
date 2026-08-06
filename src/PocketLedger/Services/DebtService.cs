@@ -1,0 +1,199 @@
+using Microsoft.EntityFrameworkCore;
+using PocketLedger.Data;
+using PocketLedger.Models.Entities;
+using PocketLedger.Models.Enums;
+using PocketLedger.Services.Interfaces;
+
+namespace PocketLedger.Services;
+
+public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvider) : IDebtService
+{
+    public async Task<IReadOnlyList<DebtSummary>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var debts = await BaseQuery().ToListAsync(cancellationToken);
+        return debts.Select(ToSummary).OrderBy(item => item.Debt.Status).ThenBy(item => item.NextPayment is null).ThenBy(item => item.NextPayment).ThenBy(item => item.Debt.Name).ToList();
+    }
+
+    public async Task<DebtDetails?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var debt = await BaseQuery().SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+        if (debt is null) return null;
+        var summary = ToSummary(debt);
+        return new DebtDetails(debt, summary.RemainingAmount, debt.Transactions.OrderByDescending(item => item.TransactionDate).ThenByDescending(item => item.TransactionTime).ToList(), summary.AutomaticPayment, summary.NextPayment);
+    }
+
+    public Task<Transaction?> GetOperationAsync(Guid transactionId, CancellationToken cancellationToken) => dbContext.Transactions.AsNoTracking().Include(item => item.Debt).Include(item => item.Account).SingleOrDefaultAsync(item => item.Id == transactionId && item.DebtId != null, cancellationToken);
+
+    public async Task<Debt> CreateAsync(Debt debt, RecurringPaymentInput? recurringPayment, CancellationToken cancellationToken)
+    {
+        debt.Id = debt.Id == Guid.Empty ? Guid.NewGuid() : debt.Id;
+        debt.Status = DebtStatus.Active;
+        await PrepareAndValidateAsync(debt, cancellationToken);
+        dbContext.Debts.Add(debt);
+        if (recurringPayment is not null) dbContext.RecurringTransactions.Add(await CreateTemplateAsync(debt, recurringPayment, cancellationToken));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return debt;
+    }
+
+    public async Task UpdateAsync(Debt debt, RecurringPaymentInput? recurringPayment, CancellationToken cancellationToken)
+    {
+        await PrepareAndValidateAsync(debt, cancellationToken);
+        var existing = await dbContext.Debts.Include(item => item.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == debt.Id, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
+        if (existing.Direction != debt.Direction && await dbContext.Transactions.AnyAsync(item => item.DebtId == debt.Id, cancellationToken)) throw new BusinessRuleException("Debt direction cannot be changed after operations have been recorded.");
+        var operationDelta = await dbContext.Transactions.Where(item => item.DebtId == debt.Id && item.DebtOperationType != null).SumAsync(item => item.DebtOperationType == DebtOperationType.Increase || item.DebtOperationType == DebtOperationType.ManualCorrectionIncrease || item.DebtOperationType == DebtOperationType.LoanDisbursement ? item.Amount : -item.Amount, cancellationToken);
+        if (debt.OriginalAmount + operationDelta < 0) throw new BusinessRuleException("Original amount cannot be lower than the already repaid amount.");
+        existing.Name = debt.Name; existing.Icon = debt.Icon; existing.Direction = debt.Direction; existing.Type = debt.Type; existing.CounterpartyName = debt.CounterpartyName;
+        existing.OriginalAmount = debt.OriginalAmount; existing.Currency = debt.Currency; existing.StartDate = debt.StartDate; existing.DueDate = debt.DueDate; existing.Note = debt.Note; existing.AccountId = debt.AccountId;
+        var template = existing.RecurringTransactions.SingleOrDefault();
+        if (recurringPayment is null)
+        {
+            if (template is not null) template.Enabled = false;
+        }
+        else if (template is null)
+        {
+            dbContext.RecurringTransactions.Add(await CreateTemplateAsync(existing, recurringPayment, cancellationToken));
+        }
+        else
+        {
+            await ValidateRecurringAsync(existing, recurringPayment, cancellationToken);
+            var scheduleChanged = template.FirstOccurrence != recurringPayment.NextOccurrence || template.LastOccurrence != recurringPayment.LastOccurrence || template.Frequency != recurringPayment.Frequency;
+            template.AccountId = recurringPayment.AccountId; template.Amount = recurringPayment.Amount; template.FirstOccurrence = recurringPayment.NextOccurrence;
+            template.LastOccurrence = recurringPayment.LastOccurrence; template.Frequency = recurringPayment.Frequency; template.Enabled = recurringPayment.Enabled && existing.Status == DebtStatus.Active;
+            if (scheduleChanged || template.Enabled) template.AutomationStartsOn = BudapestDate.Today(timeProvider);
+        }
+        ApplyAutomaticStatus(existing, debt.OriginalAmount + operationDelta);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Transaction> AddOperationAsync(Guid debtId, DebtOperationInput input, CancellationToken cancellationToken)
+    {
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        await LockDebtAsync(debtId, cancellationToken);
+        var debt = await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == debtId, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
+        var transaction = await AddOperationCoreAsync(debt, input, cancellationToken);
+        await dbTransaction.CommitAsync(cancellationToken);
+        return transaction;
+    }
+
+    public async Task DeleteOperationAsync(Guid transactionId, CancellationToken cancellationToken)
+    {
+        var transaction = await dbContext.Transactions.Include(item => item.Debt).ThenInclude(debt => debt!.Transactions).Include(item => item.Debt).ThenInclude(debt => debt!.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == transactionId, cancellationToken) ?? throw new EntityNotFoundException("Transaction not found.");
+        if (transaction.Debt is null) throw new BusinessRuleException("This is not a debt transaction.");
+        var debt = transaction.Debt;
+        dbContext.Transactions.Remove(transaction);
+        var remaining = CalculateRemaining(debt, transaction.Id);
+        ApplyAutomaticStatus(debt, remaining);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Transaction> UpdateOperationAsync(Guid transactionId, DebtOperationInput input, CancellationToken cancellationToken)
+    {
+        var debtId = await dbContext.Transactions.AsNoTracking().Where(item => item.Id == transactionId).Select(item => item.DebtId).SingleOrDefaultAsync(cancellationToken) ?? throw new EntityNotFoundException("Debt transaction not found.");
+        if (await dbContext.RecurringTransactionOccurrences.AnyAsync(item => item.TransactionId == transactionId, cancellationToken)) throw new BusinessRuleException("Automatically generated operations cannot be edited. Delete the operation or edit its recurring payment instead.");
+        await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        await LockDebtAsync(debtId, cancellationToken);
+        var debt = await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleAsync(item => item.Id == debtId, cancellationToken);
+        var existing = debt.Transactions.Single(item => item.Id == transactionId);
+        debt.Transactions.Remove(existing);
+        dbContext.Transactions.Remove(existing);
+        if (debt.Status == DebtStatus.Closed) { debt.Status = DebtStatus.Active; debt.ClosedAt = null; }
+        var replacement = await AddOperationCoreAsync(debt, input, cancellationToken, false);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await dbTransaction.CommitAsync(cancellationToken);
+        return replacement;
+    }
+
+    public async Task CloseAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var details = await GetTrackedAsync(id, cancellationToken);
+        if (CalculateRemaining(details) != 0) throw new BusinessRuleException("Only a fully repaid debt can be closed.");
+        ApplyAutomaticStatus(details, 0);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task ReopenAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var debt = await GetTrackedAsync(id, cancellationToken);
+        debt.Status = DebtStatus.Active; debt.ClosedAt = null;
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DebtFundingWarning>> GetFundingWarningsAsync(DateOnly today, CancellationToken cancellationToken)
+    {
+        var end = today.AddDays(3);
+        var templates = await dbContext.RecurringTransactions.AsNoTracking().Include(item => item.Debt).Include(item => item.Account)
+            .Where(item => item.Enabled && item.DebtId != null && item.Debt!.Status == DebtStatus.Active).ToListAsync(cancellationToken);
+        var balances = await CalculateBalancesAsync(cancellationToken);
+        return templates.Select(template => (Template: template, Date: RecurringSchedule.GetNextOccurrence(template, today)))
+            .Where(item => item.Date is not null && item.Date <= end && balances[item.Template.AccountId] < item.Template.Amount)
+            .Select(item => new DebtFundingWarning(item.Template.DebtId!.Value, item.Template.Debt!.Name, item.Template.Debt.Icon, item.Date!.Value, item.Template.Amount, item.Template.Account.Currency, item.Template.Account.Name, balances[item.Template.AccountId], item.Template.Amount - balances[item.Template.AccountId])).ToList();
+    }
+
+    internal async Task<Transaction> AddAutomaticOperationAsync(RecurringTransaction template, DateOnly date, CancellationToken cancellationToken)
+    {
+        var debt = await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleAsync(item => item.Id == template.DebtId, cancellationToken);
+        return await AddOperationCoreAsync(debt, new DebtOperationInput(template.DebtOperationType!.Value, template.Amount, template.AccountId, date, TimeOnly.MinValue, template.Note), cancellationToken, false);
+    }
+
+    private async Task<Transaction> AddOperationCoreAsync(Debt debt, DebtOperationInput input, CancellationToken cancellationToken, bool save = true)
+    {
+        if (debt.Status != DebtStatus.Active) throw new BusinessRuleException("The debt is closed.");
+        if (input.Amount <= 0 || input.Date == default) throw new BusinessRuleException("A positive amount and date are required.");
+        if (DebtRules.RequiresAccount(input.Type) && input.AccountId is null) throw new BusinessRuleException("An account is required for this operation.");
+        if (!DebtRules.AllowsAccount(input.Type) && input.AccountId is not null) throw new BusinessRuleException("This operation cannot use an account.");
+        if (input.Type is DebtOperationType.ManualCorrectionIncrease or DebtOperationType.ManualCorrectionDecrease && string.IsNullOrWhiteSpace(input.Note)) throw new BusinessRuleException("A note is required for a manual correction.");
+        if (debt.Direction == DebtDirection.Payable && input.Type is DebtOperationType.LoanDisbursement or DebtOperationType.ReceivedRepayment || debt.Direction == DebtDirection.Receivable && input.Type is DebtOperationType.Payment or DebtOperationType.EarlyRepayment) throw new BusinessRuleException("The operation does not match the debt direction.");
+        Account? account = null;
+        if (input.AccountId is not null) account = await dbContext.Accounts.SingleOrDefaultAsync(item => item.Id == input.AccountId, cancellationToken) ?? throw new BusinessRuleException("The selected account does not exist.");
+        if (account is not null && account.Currency != debt.Currency) throw new BusinessRuleException("Debt and account currencies must match.");
+        var remaining = CalculateRemaining(debt);
+        var delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
+        if (remaining + delta < 0) throw new BusinessRuleException("The operation amount cannot exceed the remaining debt.");
+        var transaction = new Transaction { Id = Guid.NewGuid(), Type = GetTransactionType(input.Type, account), AccountId = account?.Id, Amount = input.Amount, TransactionDate = input.Date, TransactionTime = input.Time, Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
+        dbContext.Transactions.Add(transaction);
+        ApplyAutomaticStatus(debt, remaining + delta);
+        if (save) await dbContext.SaveChangesAsync(cancellationToken);
+        return transaction;
+    }
+
+    private IQueryable<Debt> BaseQuery() => dbContext.Debts.AsNoTracking().Include(item => item.Account).Include(item => item.Transactions).ThenInclude(item => item.Account).Include(item => item.RecurringTransactions).ThenInclude(item => item.Account);
+    private DebtSummary ToSummary(Debt debt)
+    {
+        var template = debt.RecurringTransactions.SingleOrDefault();
+        var next = template?.Enabled == true ? RecurringSchedule.GetNextOccurrence(template, BudapestDate.Today(timeProvider)) : null;
+        return new DebtSummary(debt, CalculateRemaining(debt), template, next);
+    }
+    private async Task PrepareAndValidateAsync(Debt debt, CancellationToken cancellationToken)
+    {
+        debt.Name = debt.Name.Trim(); debt.CounterpartyName = debt.CounterpartyName.Trim(); debt.Currency = AccountRules.NormalizeAndValidateCurrency(debt.Currency); debt.Note = string.IsNullOrWhiteSpace(debt.Note) ? null : debt.Note.Trim();
+        var account = debt.AccountId is null ? null : await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == debt.AccountId, cancellationToken) ?? throw new BusinessRuleException("The selected account does not exist.");
+        DebtRules.Validate(debt, account);
+    }
+    private async Task<RecurringTransaction> CreateTemplateAsync(Debt debt, RecurringPaymentInput input, CancellationToken cancellationToken)
+    {
+        await ValidateRecurringAsync(debt, input, cancellationToken);
+        return new RecurringTransaction { Id = Guid.NewGuid(), Type = debt.Direction == DebtDirection.Payable ? TransactionType.Expense : TransactionType.Income, AccountId = input.AccountId, Amount = input.Amount, Note = debt.Name, FirstOccurrence = input.NextOccurrence, LastOccurrence = input.LastOccurrence, AutomationStartsOn = BudapestDate.Today(timeProvider), Frequency = input.Frequency, Enabled = input.Enabled, DebtId = debt.Id, DebtOperationType = debt.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment };
+    }
+    private async Task ValidateRecurringAsync(Debt debt, RecurringPaymentInput input, CancellationToken cancellationToken)
+    {
+        var account = await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == input.AccountId, cancellationToken) ?? throw new BusinessRuleException("The selected account does not exist.");
+        if (account.Currency != debt.Currency) throw new BusinessRuleException("Debt and account currencies must match.");
+        if (input.Amount <= 0 || input.NextOccurrence == default || !Enum.IsDefined(input.Frequency)) throw new BusinessRuleException("Automatic payment settings are invalid.");
+        if (input.LastOccurrence < input.NextOccurrence) throw new BusinessRuleException("Last occurrence cannot be before the next occurrence.");
+    }
+    private async Task<Debt> GetTrackedAsync(Guid id, CancellationToken cancellationToken) => await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
+    private static decimal CalculateRemaining(Debt debt, Guid? excludingTransactionId = null) => debt.OriginalAmount + debt.Transactions.Where(item => item.Id != excludingTransactionId && item.DebtOperationType is not null).Sum(item => DebtRules.GetDebtDelta(item.DebtOperationType!.Value, item.Amount));
+    private static void ApplyAutomaticStatus(Debt debt, decimal remaining)
+    {
+        if (remaining != 0) { if (debt.Status == DebtStatus.Closed) { debt.Status = DebtStatus.Active; debt.ClosedAt = null; } return; }
+        debt.Status = DebtStatus.Closed; debt.ClosedAt = DateTimeOffset.UtcNow;
+        foreach (var template in debt.RecurringTransactions) template.Enabled = false;
+    }
+    private static TransactionType GetTransactionType(DebtOperationType type, Account? account) => account is null ? TransactionType.DebtEntry : type is DebtOperationType.ReceivedRepayment ? TransactionType.Income : TransactionType.Expense;
+    private async Task<IReadOnlyDictionary<Guid, decimal>> CalculateBalancesAsync(CancellationToken cancellationToken)
+    {
+        var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken); var transactions = await dbContext.Transactions.AsNoTracking().ToListAsync(cancellationToken);
+        return accounts.ToDictionary(account => account.Id, account => BalanceCalculator.Calculate(account.Id, account.InitialBalance, transactions));
+    }
+    private Task LockDebtAsync(Guid debtId, CancellationToken cancellationToken) => dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({debtId.ToString()}, 0))", cancellationToken);
+}

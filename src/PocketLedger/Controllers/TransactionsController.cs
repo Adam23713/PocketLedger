@@ -120,6 +120,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         {
             return NotFound();
         }
+        if (transaction.DebtId is not null) return RedirectToAction("Details", "Debts", new { id = transaction.DebtId });
 
         var now = timeProvider.GetLocalNow();
         var model = new TransactionFormViewModel
@@ -178,6 +179,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     {
         var transaction = await transactionService.GetByIdAsync(id, cancellationToken);
         if (transaction is null) return NotFound();
+        if (transaction.DebtId is not null) return RedirectToAction("Details", "Debts", new { id = transaction.DebtId });
         var categoryIcon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
         var isTransfer = transaction.Type == TransactionType.Transfer;
         return View(new TransactionDeleteViewModel
@@ -185,15 +187,17 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Id = transaction.Id,
             Type = transaction.Type,
             AdjustmentDirection = transaction.AdjustmentDirection,
-            AccountName = transaction.Account.Name,
-            Currency = transaction.Account.Currency,
+            AccountName = transaction.Account?.Name,
+            Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
             CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
             CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : categoryIcon?.WebPath,
             CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
             Amount = transaction.Amount,
             TransactionDate = transaction.TransactionDate,
             TransactionTime = transaction.TransactionTime,
-            Note = transaction.Note
+            Note = transaction.Note,
+            DebtName = transaction.Debt?.Name,
+            DebtOperationType = transaction.DebtOperationType
         });
     }
 
@@ -255,15 +259,16 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     private static TransactionListItemViewModel ToListItem(Transaction transaction)
     {
         var icon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+        var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
         var isTransfer = transaction.Type == TransactionType.Transfer;
         return new TransactionListItemViewModel
         {
             Id = transaction.Id,
             Type = transaction.Type,
             AdjustmentDirection = transaction.AdjustmentDirection,
-            AccountName = transaction.Account.Name,
+            AccountName = transaction.Account?.Name,
             TargetAccountName = transaction.TargetAccount?.Name,
-            Currency = transaction.Account.Currency,
+            Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
             TargetCurrency = transaction.TargetAccount?.Currency,
             CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
             CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
@@ -271,22 +276,27 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
             TransactionTime = transaction.TransactionTime,
-            Note = transaction.Note
+            Note = transaction.Note,
+            DebtName = transaction.Debt?.Name,
+            DebtOperationType = transaction.DebtOperationType,
+            DebtIconPath = debtIcon?.WebPath,
+            DebtIconAlt = debtIcon?.DisplayName
         };
     }
 
     private static TransactionDetailsViewModel ToDetails(Transaction transaction)
     {
         var icon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+        var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
         var isTransfer = transaction.Type == TransactionType.Transfer;
         return new TransactionDetailsViewModel
         {
             Id = transaction.Id,
             Type = transaction.Type,
             AdjustmentDirection = transaction.AdjustmentDirection,
-            AccountName = transaction.Account.Name,
+            AccountName = transaction.Account?.Name,
             TargetAccountName = transaction.TargetAccount?.Name,
-            Currency = transaction.Account.Currency,
+            Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
             TargetCurrency = transaction.TargetAccount?.Currency,
             CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
             CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
@@ -295,7 +305,12 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             TargetAmount = transaction.TargetAmount,
             TransactionDate = transaction.TransactionDate,
             TransactionTime = transaction.TransactionTime,
-            Note = transaction.Note
+            Note = transaction.Note,
+            DebtId = transaction.DebtId,
+            DebtName = transaction.Debt?.Name,
+            DebtOperationType = transaction.DebtOperationType,
+            DebtIconPath = debtIcon?.WebPath,
+            DebtIconAlt = debtIcon?.DisplayName
         };
     }
 }

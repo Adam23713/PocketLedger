@@ -5,10 +5,11 @@ using PocketLedger.Models;
 using PocketLedger.Models.ViewModels.Home;
 using PocketLedger.Models.ViewModels;
 using PocketLedger.Services.Interfaces;
+using PocketLedger.Services;
 
 namespace PocketLedger.Controllers;
 
-public class HomeController(IAccountService accountService, ITransactionService transactionService) : Controller
+public class HomeController(IAccountService accountService, ITransactionService transactionService, IDebtService debtService, TimeProvider timeProvider) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -20,6 +21,7 @@ public class HomeController(IAccountService accountService, ITransactionService 
         var incomeThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Income).Sum(transaction => transaction.Amount);
         var expensesThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Expense).Sum(transaction => transaction.Amount);
         var adjustmentsThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Adjustment).Sum(transaction => transaction.AdjustmentDirection == AdjustmentDirection.Increase ? transaction.Amount : -transaction.Amount);
+        var warnings = await debtService.GetFundingWarningsAsync(BudapestDate.Today(timeProvider), cancellationToken);
         var model = new HomeViewModel
         {
             TotalMainBalance = await transactionService.CalculateMainBalanceAsync(cancellationToken),
@@ -46,21 +48,26 @@ public class HomeController(IAccountService accountService, ITransactionService 
             RecentTransactions = recentTransactions.Select(transaction =>
             {
                 var categoryIcon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+                var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
                 var isTransfer = transaction.Type == TransactionType.Transfer;
                 return new RecentTransactionViewModel
                 {
                     Id = transaction.Id,
                     Type = transaction.Type,
                     AdjustmentDirection = transaction.AdjustmentDirection,
-                    AccountName = transaction.Account.Name,
-                    Currency = transaction.Account.Currency,
+                    AccountName = transaction.Account?.Name,
+                    Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
                     CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
                     CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : categoryIcon?.WebPath,
                     CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
                     Amount = transaction.Amount,
-                    TransactionDate = transaction.TransactionDate
+                    TransactionDate = transaction.TransactionDate,
+                    DebtOperationType = transaction.DebtOperationType,
+                    DebtIconPath = debtIcon?.WebPath,
+                    DebtIconAlt = debtIcon?.DisplayName
                 };
-            }).ToList()
+            }).ToList(),
+            DebtFundingWarnings = warnings.Select(item => { var icon = CategoryIcons.Resolve(item.DebtIcon); return new DebtFundingWarningViewModel { DebtId = item.DebtId, DebtName = item.DebtName, IconPath = icon.WebPath, IconAlt = icon.DisplayName, Date = item.Date, Amount = item.Amount, Currency = item.Currency, AccountName = item.AccountName, AccountBalance = item.AccountBalance, Shortfall = item.Shortfall }; }).ToList()
         };
         return View(model);
     }

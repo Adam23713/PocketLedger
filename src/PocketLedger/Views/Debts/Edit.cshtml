@@ -1,0 +1,4 @@
+@model PocketLedger.Models.ViewModels.Debts.DebtFormViewModel
+@{ ViewData["Title"] = "Edit debt"; }
+<h1>Edit debt</h1><form method="post"><input asp-for="Id" type="hidden" />@await Html.PartialAsync("_Form", Model)<button class="btn btn-primary mt-4" type="submit">Save</button> <a class="btn btn-link mt-4" asp-action="Details" asp-route-id="@Model.Id">Cancel</a></form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

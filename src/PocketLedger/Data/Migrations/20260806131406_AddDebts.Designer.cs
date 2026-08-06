@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PocketLedger.Data;
@@ -11,9 +12,11 @@ using PocketLedger.Data;
 namespace PocketLedger.Data.Migrations
 {
     [DbContext(typeof(PocketLedgerDbContext))]
-    partial class PocketLedgerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806131406_AddDebts")]
+    partial class AddDebts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -465,12 +468,6 @@ namespace PocketLedger.Data.Migrations
                     b.Property<DateOnly?>("DueDate")
                         .HasColumnType("date")
                         .HasColumnName("due_date");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("icon");
 
                     b.Property<string>("Name")
                         .IsRequired()

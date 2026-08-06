@@ -8,4 +8,6 @@ public class RecurringTransactionOccurrence
     public Guid RecurringTransactionId { get; set; }
     public RecurringTransaction RecurringTransaction { get; set; } = null!;
     public DateOnly OccurrenceDate { get; set; }
+    public Guid? TransactionId { get; set; }
+    public Transaction? Transaction { get; set; }
 }

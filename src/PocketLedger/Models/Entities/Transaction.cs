@@ -8,8 +8,8 @@ public class Transaction
     public ApplicationUser Owner { get; set; } = null!;
     public Guid Id { get; set; }
     public TransactionType Type { get; set; }
-    public Guid AccountId { get; set; }
-    public Account Account { get; set; } = null!;
+    public Guid? AccountId { get; set; }
+    public Account? Account { get; set; }
     public Guid? TargetAccountId { get; set; }
     public Account? TargetAccount { get; set; }
     public decimal Amount { get; set; }
@@ -20,4 +20,7 @@ public class Transaction
     public Guid? CategoryId { get; set; }
     public Category? Category { get; set; }
     public string? Note { get; set; }
+    public Guid? DebtId { get; set; }
+    public Debt? Debt { get; set; }
+    public DebtOperationType? DebtOperationType { get; set; }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
+using PocketLedger.Models;
 using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
@@ -17,11 +18,11 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         foreach (var transaction in transactions)
         {
             builder.Append(transaction.TransactionDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)).Append(',')
-                .Append(CsvParser.Escape(transaction.Account.Name)).Append(',')
+                .Append(CsvParser.Escape(transaction.Account?.Name)).Append(',')
                 .Append(transaction.Type).Append(',')
                 .Append(CsvParser.Escape(transaction.Category?.Name)).Append(',')
                 .Append(transaction.Amount.ToString(CultureInfo.InvariantCulture)).Append(',')
-                .Append(CsvParser.Escape(transaction.Account.Currency)).Append(',')
+                .Append(CsvParser.Escape(transaction.Account?.Currency ?? transaction.Debt?.Currency)).Append(',')
                 .Append(CsvParser.Escape(transaction.Note)).Append('\n');
         }
 
@@ -32,7 +33,7 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var categories = await dbContext.Categories.AsNoTracking().ToListAsync(cancellationToken);
-        var existing = await dbContext.Transactions.AsNoTracking().Select(transaction => new { transaction.TransactionDate, transaction.AccountId, transaction.Type, transaction.CategoryId, transaction.Amount, transaction.Note }).ToListAsync(cancellationToken);
+        var existing = await dbContext.Transactions.AsNoTracking().Where(transaction => transaction.AccountId != null).Select(transaction => new { transaction.TransactionDate, AccountId = transaction.AccountId!.Value, transaction.Type, transaction.CategoryId, transaction.Amount, transaction.Note }).ToListAsync(cancellationToken);
         return ParseImport(csv, accounts, categories, existing.Select(item => ImportKey(item.TransactionDate, item.AccountId, item.Type, item.CategoryId, item.Amount, item.Note)).ToHashSet());
     }
 
@@ -40,7 +41,7 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var categories = await dbContext.Categories.AsNoTracking().ToListAsync(cancellationToken);
-        var existing = await dbContext.Transactions.AsNoTracking().Select(transaction => new { transaction.TransactionDate, transaction.AccountId, transaction.Type, transaction.CategoryId, transaction.Amount, transaction.Note }).ToListAsync(cancellationToken);
+        var existing = await dbContext.Transactions.AsNoTracking().Where(transaction => transaction.AccountId != null).Select(transaction => new { transaction.TransactionDate, AccountId = transaction.AccountId!.Value, transaction.Type, transaction.CategoryId, transaction.Amount, transaction.Note }).ToListAsync(cancellationToken);
         var keys = existing.Select(item => ImportKey(item.TransactionDate, item.AccountId, item.Type, item.CategoryId, item.Amount, item.Note)).ToHashSet();
         var preview = ParseImport(csv, accounts, categories, keys);
         var accountLookup = accounts.GroupBy(account => account.Name, StringComparer.OrdinalIgnoreCase).ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
@@ -69,9 +70,10 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
     {
         var accounts = await dbContext.Accounts.AsNoTracking().Select(account => new AccountBackup(account.Id, account.Name, account.Type, account.Currency, account.InitialBalance, account.Icon, account.DisplayOrder, account.IncludeInMainBalance, account.IncludeInNetWorth, account.IncludeInStatistics, account.Color)).ToListAsync(cancellationToken);
         var categories = await dbContext.Categories.AsNoTracking().Select(category => new CategoryBackup(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.DisplayOrder)).ToListAsync(cancellationToken);
-        var transactions = await dbContext.Transactions.AsNoTracking().Select(transaction => new TransactionBackup(transaction.Id, transaction.Type, transaction.AccountId, transaction.TargetAccountId, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.TransactionDate, transaction.CategoryId, transaction.Note, transaction.TransactionTime)).ToListAsync(cancellationToken);
-        var recurring = await dbContext.RecurringTransactions.AsNoTracking().Select(template => new RecurringTransactionBackup(template.Id, template.Type, template.AccountId, template.CategoryId, template.Amount, template.AdjustmentDirection, template.Note, template.FirstOccurrence, template.LastOccurrence, template.Frequency, template.Enabled)).ToListAsync(cancellationToken);
-        return BackupJson.Serialize(new PocketLedgerBackup(1, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring));
+        var debts = await dbContext.Debts.AsNoTracking().Select(debt => new DebtBackup(debt.Id, debt.Name, debt.Direction, debt.Type, debt.CounterpartyName, debt.OriginalAmount, debt.Currency, debt.StartDate, debt.DueDate, debt.Note, debt.Status, debt.ClosedAt, debt.AccountId, debt.Icon)).ToListAsync(cancellationToken);
+        var transactions = await dbContext.Transactions.AsNoTracking().Select(transaction => new TransactionBackup(transaction.Id, transaction.Type, transaction.AccountId, transaction.TargetAccountId, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.TransactionDate, transaction.CategoryId, transaction.Note, transaction.TransactionTime, transaction.DebtId, transaction.DebtOperationType)).ToListAsync(cancellationToken);
+        var recurring = await dbContext.RecurringTransactions.AsNoTracking().Select(template => new RecurringTransactionBackup(template.Id, template.Type, template.AccountId, template.CategoryId, template.Amount, template.AdjustmentDirection, template.Note, template.FirstOccurrence, template.LastOccurrence, template.Frequency, template.Enabled, template.DebtId, template.DebtOperationType)).ToListAsync(cancellationToken);
+        return BackupJson.Serialize(new PocketLedgerBackup(2, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring, debts));
     }
 
     public RestorePreview PreviewRestore(string json)
@@ -99,6 +101,7 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         {
             dbContext.Transactions.RemoveRange(dbContext.Transactions);
             dbContext.RecurringTransactions.RemoveRange(dbContext.RecurringTransactions);
+            dbContext.Debts.RemoveRange(dbContext.Debts);
             dbContext.Categories.RemoveRange(dbContext.Categories);
             dbContext.Accounts.RemoveRange(dbContext.Accounts);
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -106,8 +109,9 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
 
             dbContext.Accounts.AddRange(backup.Accounts.Select(item => new Account { Id = item.Id, Name = item.Name, Type = item.Type, Currency = item.Currency, InitialBalance = item.InitialBalance, Icon = item.Icon, Color = item.Color ?? "#ffffff", DisplayOrder = item.DisplayOrder, IncludeInMainBalance = item.IncludeInMainBalance, IncludeInNetWorth = item.IncludeInNetWorth, IncludeInStatistics = item.IncludeInStatistics }));
             dbContext.Categories.AddRange(backup.Categories.Select(item => new Category { Id = item.Id, Name = item.Name, Type = item.Type, Icon = item.Icon, ParentCategoryId = item.ParentCategoryId, DisplayOrder = item.DisplayOrder }));
-            dbContext.Transactions.AddRange(backup.Transactions.Select(item => new Transaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, Amount = item.Amount, TargetAmount = item.TargetAmount, AdjustmentDirection = item.AdjustmentDirection, TransactionDate = item.TransactionDate, TransactionTime = item.TransactionTime, CategoryId = item.CategoryId, Note = item.Note }));
-            dbContext.RecurringTransactions.AddRange(backup.RecurringTransactions.Select(item => new RecurringTransaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, CategoryId = item.CategoryId, Amount = item.Amount, AdjustmentDirection = item.AdjustmentDirection, Note = item.Note, FirstOccurrence = item.FirstOccurrence, LastOccurrence = item.LastOccurrence, Frequency = item.Frequency, Enabled = item.Enabled }));
+            dbContext.Debts.AddRange((backup.Debts ?? []).Select(item => new Debt { Id = item.Id, Name = item.Name, Icon = item.Icon is not null && CategoryIcons.Exists(item.Icon) ? item.Icon : CategoryIcons.DefaultFor(item.Direction == DebtDirection.Receivable ? CategoryType.Income : CategoryType.Expense).Id, Direction = item.Direction, Type = item.Type, CounterpartyName = item.CounterpartyName, OriginalAmount = item.OriginalAmount, Currency = item.Currency, StartDate = item.StartDate, DueDate = item.DueDate, Note = item.Note, Status = item.Status, ClosedAt = item.ClosedAt, AccountId = item.AccountId }));
+            dbContext.Transactions.AddRange(backup.Transactions.Select(item => new Transaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, Amount = item.Amount, TargetAmount = item.TargetAmount, AdjustmentDirection = item.AdjustmentDirection, TransactionDate = item.TransactionDate, TransactionTime = item.TransactionTime, CategoryId = item.CategoryId, Note = item.Note, DebtId = item.DebtId, DebtOperationType = item.DebtOperationType }));
+            dbContext.RecurringTransactions.AddRange(backup.RecurringTransactions.Select(item => new RecurringTransaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, CategoryId = item.CategoryId, Amount = item.Amount, AdjustmentDirection = item.AdjustmentDirection, Note = item.Note, FirstOccurrence = item.FirstOccurrence, LastOccurrence = item.LastOccurrence, Frequency = item.Frequency, Enabled = item.Enabled, DebtId = item.DebtId, DebtOperationType = item.DebtOperationType }));
             await dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
