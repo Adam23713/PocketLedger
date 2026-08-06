@@ -599,6 +599,10 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("date")
                         .HasColumnName("transaction_date");
 
+                    b.Property<TimeOnly>("TransactionTime")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("transaction_time");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(10)

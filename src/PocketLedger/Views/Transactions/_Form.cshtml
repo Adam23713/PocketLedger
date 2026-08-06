@@ -30,6 +30,26 @@
     <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">Source amount</label><input asp-for="Amount" class="form-control" id="source-amount" /><span asp-validation-for="Amount" class="text-danger"></span></div>
     <div class="col-md-6 mb-3" id="target-amount-field"><label asp-for="TargetAmount" class="form-label">Target amount</label><input asp-for="TargetAmount" class="form-control" id="target-amount" /><div class="form-text">Automatically matched when currencies are equal.</div><span asp-validation-for="TargetAmount" class="text-danger"></span></div>
     <div class="col-md-6 mb-3"><label asp-for="TransactionDate" class="form-label">Date</label><input asp-for="TransactionDate" class="form-control" type="date" /><span asp-validation-for="TransactionDate" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Time</label>
+        <div class="d-flex align-items-center gap-2">
+            <select asp-for="TransactionHour" class="form-select" aria-label="Hour">
+                @for (var hour = 0; hour < 24; hour++)
+                {
+                    <option value="@hour">@hour.ToString("00")</option>
+                }
+            </select>
+            <span>:</span>
+            <select asp-for="TransactionMinute" class="form-select" aria-label="Minute">
+                @for (var minute = 0; minute < 60; minute++)
+                {
+                    <option value="@minute">@minute.ToString("00")</option>
+                }
+            </select>
+        </div>
+        <span asp-validation-for="TransactionHour" class="text-danger"></span>
+        <span asp-validation-for="TransactionMinute" class="text-danger"></span>
+    </div>
 </div>
 <div class="mb-3" id="category-field">
     <label asp-for="CategoryId" class="form-label">Category</label>

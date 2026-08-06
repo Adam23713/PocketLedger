@@ -20,7 +20,7 @@
                     <tr><th scope="row">Target amount</th><td>@MoneyFormatter.Format(Model.TargetAmount ?? Model.Amount, Model.TargetCurrency) @Model.TargetCurrency</td></tr>
                 }
                 <tr><th scope="row">Amount</th><td class="fw-semibold @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(Model.Amount, Model.Currency) @Model.Currency</td></tr>
-                <tr><th scope="row">Date</th><td>@Model.TransactionDate.ToString("yyyy-MM-dd")</td></tr>
+                <tr><th scope="row">Date and time</th><td>@Model.TransactionDate.ToString("yyyy-MM-dd") @Model.TransactionTime.ToString("HH:mm")</td></tr>
                 <tr><th scope="row">Category</th><td>@if (!string.IsNullOrWhiteSpace(Model.CategoryIconPath)) { <img class="category-icon me-2" src="@Model.CategoryIconPath" alt="@Model.CategoryIconAlt" /> }@(Model.CategoryName ?? "—")</td></tr>
                 <tr><th scope="row">Note</th><td class="text-break">@(Model.Note ?? "—")</td></tr>
             </tbody>

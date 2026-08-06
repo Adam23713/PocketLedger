@@ -20,13 +20,14 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         return await BaseReadQuery()
             .Where(transaction => transaction.TransactionDate >= start && transaction.TransactionDate < end)
             .OrderByDescending(transaction => transaction.TransactionDate)
+            .ThenByDescending(transaction => transaction.TransactionTime)
             .ThenByDescending(transaction => transaction.Id)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<Transaction>> GetRecentAsync(int count, CancellationToken cancellationToken)
     {
-        return await BaseReadQuery().OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.Id).Take(count).ToListAsync(cancellationToken);
+        return await BaseReadQuery().OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.TransactionTime).ThenByDescending(transaction => transaction.Id).Take(count).ToListAsync(cancellationToken);
     }
 
     public async Task<PagedResult<Transaction>> GetFilteredAsync(TransactionFilter filter, CancellationToken cancellationToken)
@@ -37,6 +38,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         var pageSize = Math.Clamp(filter.PageSize, 1, 100);
         var page = Math.Max(filter.Page, 1);
         var items = await query.OrderByDescending(transaction => transaction.TransactionDate)
+            .ThenByDescending(transaction => transaction.TransactionTime)
             .ThenByDescending(transaction => transaction.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -72,7 +74,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
     public async Task<IReadOnlyList<Transaction>> GetForExportAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
-        return await ApplyFilter(BaseReadQuery(), filter).OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.Id).ToListAsync(cancellationToken);
+        return await ApplyFilter(BaseReadQuery(), filter).OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.TransactionTime).ThenByDescending(transaction => transaction.Id).ToListAsync(cancellationToken);
     }
 
     public Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -102,6 +104,7 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         existing.TargetAmount = transaction.TargetAmount;
         existing.AdjustmentDirection = transaction.AdjustmentDirection;
         existing.TransactionDate = transaction.TransactionDate;
+        existing.TransactionTime = transaction.TransactionTime;
         existing.CategoryId = transaction.CategoryId;
         existing.Note = transaction.Note;
         await dbContext.SaveChangesAsync(cancellationToken);
