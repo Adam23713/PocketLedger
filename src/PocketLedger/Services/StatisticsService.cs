@@ -32,7 +32,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
         var accounts = await accountService.GetAllAsync(cancellationToken);
         var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
         var recurringTemplates = await dbContext.RecurringTransactions.AsNoTracking()
-            .Where(template => template.Enabled && template.Type == TransactionType.Expense && template.FirstOccurrence < end && (template.LastOccurrence == null || template.LastOccurrence >= selectedStart))
+            .Where(template => template.Enabled && template.Type == TransactionType.Expense && template.CategoryId != null && template.FirstOccurrence < end && (template.LastOccurrence == null || template.LastOccurrence >= selectedStart))
             .Select(template => new
             {
                 Template = template,
