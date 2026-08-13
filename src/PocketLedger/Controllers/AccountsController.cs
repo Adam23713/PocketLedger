@@ -96,7 +96,7 @@ public class AccountsController(IAccountService accountService) : Controller
 
         try
         {
-            await accountService.UpdateAsync(ToEntity(model), cancellationToken);
+            await accountService.UpdateAsync(ToEntity(model), model.CreateInitialBalanceAdjustment, cancellationToken);
             TempData["SuccessMessage"] = "Account updated successfully.";
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -185,6 +185,7 @@ public class AccountsController(IAccountService accountService) : Controller
         Type = account.Type,
         Currency = account.Currency,
         InitialBalance = account.InitialBalance,
+        OriginalInitialBalance = account.InitialBalance,
         Icon = AccountIcons.Resolve(account.Icon, account.Type).Id,
         Color = account.Color,
         DisplayOrder = account.DisplayOrder,

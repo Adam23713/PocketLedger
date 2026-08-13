@@ -2,8 +2,8 @@
 @using PocketLedger.Models.Enums
 @{ ViewData["Title"] = "Recurring transactions"; }
 <div class="d-flex justify-content-between align-items-center mb-3"><h1>Recurring transactions</h1><a class="btn btn-primary" asp-action="Create">New template</a></div>
-<p class="text-muted">Enabled templates are executed automatically at midnight (Europe/Budapest).</p>
-@if (Model.Items.Count == 0) { <div class="alert alert-info">No recurring templates.</div> }
+<p class="text-muted">Enabled templates are processed automatically (Europe/Budapest).</p>
+@if (Model.Items.Count == 0) { <div class="alert alert-info">No regular recurring templates.</div> }
 else
 {
     <div class="list-group">
@@ -32,6 +32,27 @@ else
             <span>Total recurring expenses</span>
             <span class="d-flex flex-wrap gap-3">@foreach (var total in Model.ExpenseTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency) @total.Currency</span> }</span>
         </div>
+    }
+    </div>
+}
+<h2 class="h4 mt-5">Loan Recurring Transactions</h2>
+@if (Model.LoanItems.Count == 0) { <p class="text-muted">No loan recurring transactions.</p> }
+else
+{
+    <div class="list-group">
+    @foreach (var item in Model.LoanItems)
+    {
+        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@item.CategoryIconAlt" /> }
+                <span><strong><a asp-controller="Debts" asp-action="Details" asp-route-id="@item.DebtId">@item.DebtName</a></strong><br /><small class="text-muted">@(item.NextOccurrence is null ? "No upcoming occurrence" : $"Next: {item.NextOccurrence:yyyy-MM-dd}") · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")</small></span>
+            </div>
+            <div class="d-flex align-items-center gap-3 ms-auto"><span class="text-danger">−@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</span><span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span></div>
+        </div>
+    }
+    @if (Model.MonthlyLoanPaymentTotals.Count > 0)
+    {
+        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold"><span>Total monthly loan payments</span><span class="d-flex flex-wrap gap-3">@foreach (var total in Model.MonthlyLoanPaymentTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency) @total.Currency</span> }</span></div>
     }
     </div>
 }

@@ -52,6 +52,8 @@ public class AccountFormViewModel
     public string Currency { get; set; } = "HUF";
 
     public decimal InitialBalance { get; set; }
+    public decimal OriginalInitialBalance { get; set; }
+    public bool CreateInitialBalanceAdjustment { get; set; }
 
     [Required]
     public string Icon { get; set; } = AccountIcons.DefaultFor(AccountType.Cash).Id;

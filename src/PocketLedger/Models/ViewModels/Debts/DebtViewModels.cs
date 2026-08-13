@@ -25,6 +25,8 @@ public class DebtListItemViewModel
     public DateOnly? NextPayment { get; init; }
     public string? AccountName { get; init; }
     public DebtStatus Status { get; init; }
+    public decimal PaidAmount { get; init; }
+    public decimal ProgressPercentage { get; init; }
 }
 
 public class DebtFormViewModel : IValidatableObject
@@ -47,6 +49,8 @@ public class DebtFormViewModel : IValidatableObject
     public DateOnly? NextPaymentDate { get; set; }
     public DateOnly? LastPaymentDate { get; set; }
     public RecurringFrequency Frequency { get; set; } = RecurringFrequency.Monthly;
+    public decimal ExistingOriginalAmount { get; set; }
+    public decimal RemainingAmountForSchedule { get; set; }
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

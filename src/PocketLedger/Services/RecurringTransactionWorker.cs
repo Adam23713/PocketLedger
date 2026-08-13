@@ -24,7 +24,7 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
                 logger.LogError(exception, "Recurring transaction processing failed.");
             }
 
-            await Task.Delay(GetDelayUntilNextMidnight(), timeProvider, stoppingToken);
+            await Task.Delay(GetDelayUntilNextCheck(), timeProvider, stoppingToken);
         }
     }
 
@@ -94,13 +94,13 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         }
     }
 
-    private TimeSpan GetDelayUntilNextMidnight()
+    private TimeSpan GetDelayUntilNextCheck()
     {
         var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), BudapestDate.TimeZone);
         var nextDate = DateOnly.FromDateTime(now.DateTime).AddDays(1);
         var nextLocal = nextDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
         var nextUtc = TimeZoneInfo.ConvertTimeToUtc(nextLocal, BudapestDate.TimeZone);
         var delay = nextUtc - timeProvider.GetUtcNow().UtcDateTime;
-        return delay > TimeSpan.Zero ? delay : TimeSpan.FromMinutes(1);
+        return delay > TimeSpan.Zero && delay < TimeSpan.FromMinutes(1) ? delay : TimeSpan.FromMinutes(1);
     }
 }

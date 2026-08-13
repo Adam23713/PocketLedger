@@ -82,9 +82,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(Guid? accountId, CancellationToken cancellationToken)
     {
-        var model = new TransactionFormViewModel();
+        var model = new TransactionFormViewModel { AccountId = accountId };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }

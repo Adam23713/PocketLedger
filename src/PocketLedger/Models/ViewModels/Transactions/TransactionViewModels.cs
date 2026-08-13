@@ -84,7 +84,7 @@ public class TransactionDetailsViewModel
     public string? DebtIconAlt { get; init; }
 }
 
-public class TransactionFormViewModel
+public class TransactionFormViewModel : IValidatableObject
 {
     public TransactionFormViewModel()
     {
@@ -125,6 +125,12 @@ public class TransactionFormViewModel
 
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
     public IReadOnlyList<CategoryOptionViewModel> Categories { get; set; } = [];
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Amount != decimal.Truncate(Amount)) yield return new ValidationResult("Amount must be a whole number.", [nameof(Amount)]);
+        if (TargetAmount is not null && TargetAmount != decimal.Truncate(TargetAmount.Value)) yield return new ValidationResult("Target amount must be a whole number.", [nameof(TargetAmount)]);
+    }
 }
 
 public class CategoryOptionViewModel

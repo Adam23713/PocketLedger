@@ -5,6 +5,28 @@ namespace PocketLedger.Services;
 
 public static class RecurringSchedule
 {
+    public static DateOnly AddOccurrences(DateOnly firstOccurrence, RecurringFrequency frequency, int occurrenceOffset)
+    {
+        if (occurrenceOffset < 0) throw new ArgumentOutOfRangeException(nameof(occurrenceOffset));
+        return frequency switch
+        {
+            RecurringFrequency.Daily => firstOccurrence.AddDays(occurrenceOffset),
+            RecurringFrequency.Weekly => firstOccurrence.AddDays(occurrenceOffset * 7),
+            RecurringFrequency.Monthly => AddMonthsKeepingScheduleDay(firstOccurrence, occurrenceOffset),
+            RecurringFrequency.Yearly => AddYearsKeepingScheduleDay(firstOccurrence, occurrenceOffset),
+            _ => throw new ArgumentOutOfRangeException(nameof(frequency))
+        };
+    }
+
+    public static decimal ToMonthlyAmount(decimal amount, RecurringFrequency frequency) => frequency switch
+    {
+        RecurringFrequency.Daily => amount * 365m / 12m,
+        RecurringFrequency.Weekly => amount * 52m / 12m,
+        RecurringFrequency.Monthly => amount,
+        RecurringFrequency.Yearly => amount / 12m,
+        _ => throw new ArgumentOutOfRangeException(nameof(frequency))
+    };
+
     public static DateOnly? GetNextOccurrence(RecurringTransaction template, DateOnly from)
     {
         var candidate = from > template.FirstOccurrence ? from : template.FirstOccurrence;
@@ -43,5 +65,17 @@ public static class RecurringSchedule
             RecurringFrequency.Yearly => date.Month == first.Month && date.Day == Math.Min(first.Day, DateTime.DaysInMonth(date.Year, first.Month)),
             _ => false
         };
+    }
+
+    private static DateOnly AddMonthsKeepingScheduleDay(DateOnly first, int months)
+    {
+        var month = new DateOnly(first.Year, first.Month, 1).AddMonths(months);
+        return new DateOnly(month.Year, month.Month, Math.Min(first.Day, DateTime.DaysInMonth(month.Year, month.Month)));
+    }
+
+    private static DateOnly AddYearsKeepingScheduleDay(DateOnly first, int years)
+    {
+        var year = first.Year + years;
+        return new DateOnly(year, first.Month, Math.Min(first.Day, DateTime.DaysInMonth(year, first.Month)));
     }
 }
