@@ -1,5 +1,6 @@
 @model PocketLedger.Models.ViewModels.Debts.DebtFormViewModel
 @using PocketLedger.Models.Enums
+<input asp-for="ExistingOriginalAmount" type="hidden" /><input asp-for="RemainingAmountForSchedule" type="hidden" />
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 <div class="row g-3">
 <div class="col-md-6"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
@@ -33,3 +34,15 @@
 </fieldset>
 <div class="form-check mt-4"><input asp-for="AutomaticPaymentEnabled" class="form-check-input" /><label asp-for="AutomaticPaymentEnabled" class="form-check-label">Enable automatic payment</label></div>
 <div class="row g-3 mt-0"><div class="col-md-3"><label asp-for="AutomaticPaymentAmount" class="form-label"></label><input asp-for="AutomaticPaymentAmount" class="form-control" type="number" step="0.0001" /></div><div class="col-md-3"><label asp-for="NextPaymentDate" class="form-label"></label><input asp-for="NextPaymentDate" class="form-control" type="date" /></div><div class="col-md-3"><label asp-for="LastPaymentDate" class="form-label"></label><input asp-for="LastPaymentDate" class="form-control" type="date" /></div><div class="col-md-3"><label asp-for="Frequency" class="form-label"></label><select asp-for="Frequency" asp-items="Html.GetEnumSelectList<RecurringFrequency>()" class="form-select"></select></div></div>
+<script>
+(() => {
+    const original = document.getElementById("OriginalAmount"), existing = Number(document.getElementById("ExistingOriginalAmount").value || 0), remaining = Number(document.getElementById("RemainingAmountForSchedule").value || 0);
+    const amount = document.getElementById("AutomaticPaymentAmount"), first = document.getElementById("NextPaymentDate"), last = document.getElementById("LastPaymentDate"), frequency = document.getElementById("Frequency");
+    let generated = !last.value;
+    function add(date, count) { const result = new Date(date + "T12:00:00"), day = result.getDate(); if (frequency.value === "0") result.setDate(day + count); else if (frequency.value === "1") result.setDate(day + count * 7); else if (frequency.value === "2") { result.setDate(1); result.setMonth(result.getMonth() + count); result.setDate(Math.min(day, new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate())); } else { result.setDate(1); result.setFullYear(result.getFullYear() + count); result.setDate(Math.min(day, new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate())); } return result.toISOString().slice(0, 10); }
+    function update() { if (!generated || !first.value || Number(amount.value) <= 0) return; const base = existing ? remaining + Number(original.value) - existing : Number(original.value); if (base > 0) last.value = add(first.value, Math.ceil(base / Number(amount.value)) - 1); }
+    last.addEventListener("input", () => generated = !last.value);
+    for (const input of [original, amount, first, frequency]) input.addEventListener("change", update);
+    update();
+})();
+</script>

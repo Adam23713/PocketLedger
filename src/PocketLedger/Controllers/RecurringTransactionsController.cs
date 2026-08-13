@@ -18,6 +18,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         var items = templates.Select(template =>
         {
             var categoryIcon = template.Category is null ? null : CategoryIcons.Resolve(template.Category);
+            var debtIcon = template.Debt is null ? null : CategoryIcons.Resolve(template.Debt.Icon);
             return new RecurringTransactionListItemViewModel
             {
                 Id = template.Id,
@@ -25,8 +26,8 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
                 AdjustmentDirection = template.AdjustmentDirection,
                 AccountName = template.Account.Name,
                 CategoryName = template.Category?.Name,
-                CategoryIconPath = categoryIcon?.WebPath,
-                CategoryIconAlt = categoryIcon?.DisplayName,
+                CategoryIconPath = debtIcon?.WebPath ?? categoryIcon?.WebPath,
+                CategoryIconAlt = debtIcon?.DisplayName ?? categoryIcon?.DisplayName,
                 Note = template.Note,
                 Amount = template.Amount,
                 Currency = template.Account.Currency,
@@ -34,15 +35,22 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
                 LastOccurrence = template.LastOccurrence,
                 NextOccurrence = template.Enabled ? RecurringSchedule.GetNextOccurrence(template, today) : null,
                 Frequency = template.Frequency,
-                Enabled = template.Enabled
+                Enabled = template.Enabled,
+                DebtId = template.DebtId,
+                DebtName = template.Debt?.Name
             };
         }).OrderBy(item => !item.Enabled).ThenBy(item => item.NextOccurrence is null).ThenBy(item => item.NextOccurrence).ThenBy(item => item.FirstOccurrence).ToList();
-        var expenseTotals = items.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
+        var normalItems = items.Where(item => item.DebtId is null).ToList();
+        var loanItems = items.Where(item => item.DebtId is not null).ToList();
+        var expenseTotals = normalItems.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
             .GroupBy(item => item.Currency)
             .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => item.Amount)))
             .OrderBy(total => total.Currency)
             .ToList();
-        return View(new RecurringTransactionIndexViewModel { Items = items, ExpenseTotals = expenseTotals });
+        var loanTotals = loanItems.Where(item => item.Enabled).GroupBy(item => item.Currency)
+            .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => RecurringSchedule.ToMonthlyAmount(item.Amount, item.Frequency))))
+            .OrderBy(total => total.Currency).ToList();
+        return View(new RecurringTransactionIndexViewModel { Items = normalItems, LoanItems = loanItems, ExpenseTotals = expenseTotals, MonthlyLoanPaymentTotals = loanTotals });
     }
 
     [HttpGet]
@@ -75,6 +83,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     {
         var template = await recurringService.GetByIdAsync(id, cancellationToken);
         if (template is null) return NotFound();
+        if (template.DebtId is not null) return RedirectToAction("Edit", "Debts", new { id = template.DebtId });
         var model = new RecurringTransactionFormViewModel
         {
             Id = template.Id, Type = template.Type, AccountId = template.AccountId, CategoryId = template.CategoryId, Amount = template.Amount,
@@ -89,6 +98,9 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     public async Task<IActionResult> Edit(Guid id, RecurringTransactionFormViewModel model, CancellationToken cancellationToken)
     {
         if (id != model.Id) return BadRequest();
+        var existing = await recurringService.GetByIdAsync(id, cancellationToken);
+        if (existing is null) return NotFound();
+        if (existing.DebtId is not null) return RedirectToAction("Edit", "Debts", new { id = existing.DebtId });
         if (!ModelState.IsValid) return await InvalidFormAsync("Edit", model, cancellationToken);
         try
         {
@@ -108,7 +120,8 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var template = await recurringService.GetByIdAsync(id, cancellationToken);
-        return template is null ? NotFound() : View(template);
+        if (template is null) return NotFound();
+        return template.DebtId is not null ? RedirectToAction("Edit", "Debts", new { id = template.DebtId }) : View(template);
     }
 
     [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]
@@ -116,6 +129,9 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     {
         try
         {
+            var existing = await recurringService.GetByIdAsync(id, cancellationToken);
+            if (existing is null) return NotFound();
+            if (existing.DebtId is not null) return RedirectToAction("Edit", "Debts", new { id = existing.DebtId });
             await recurringService.DeleteAsync(id, cancellationToken);
             TempData["SuccessMessage"] = "Recurring transaction deleted.";
             return RedirectToAction(nameof(Index));
@@ -145,4 +161,5 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         AdjustmentDirection = model.AdjustmentDirection, Note = model.Note, FirstOccurrence = model.FirstOccurrence,
         LastOccurrence = model.NoEndDate ? null : model.LastOccurrence, Frequency = model.Frequency, Enabled = model.Enabled
     };
+
 }

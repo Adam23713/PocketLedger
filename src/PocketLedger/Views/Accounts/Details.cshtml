@@ -11,7 +11,7 @@
             <div class="text-muted">@Model.Account.Type · @Model.Account.Currency</div>
         </div>
     </div>
-    <div><a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Account.Id">Edit</a></div>
+    <div><a class="btn btn-primary" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@Model.Account.Id">Add Transaction</a> <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Account.Id">Edit</a></div>
 </div>
 <dl class="row">
     <dt class="col-sm-3">Current balance</dt><dd class="col-sm-9">@MoneyFormatter.Format(Model.Account.CurrentBalance, Model.Account.Currency) @Model.Account.Currency</dd>

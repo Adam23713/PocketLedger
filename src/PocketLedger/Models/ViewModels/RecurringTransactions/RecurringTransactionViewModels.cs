@@ -7,7 +7,9 @@ namespace PocketLedger.Models.ViewModels.RecurringTransactions;
 public class RecurringTransactionIndexViewModel
 {
     public IReadOnlyList<RecurringTransactionListItemViewModel> Items { get; init; } = [];
+    public IReadOnlyList<RecurringTransactionListItemViewModel> LoanItems { get; init; } = [];
     public IReadOnlyList<RecurringTransactionExpenseTotalViewModel> ExpenseTotals { get; init; } = [];
+    public IReadOnlyList<RecurringTransactionExpenseTotalViewModel> MonthlyLoanPaymentTotals { get; init; } = [];
 }
 
 public record RecurringTransactionExpenseTotalViewModel(string Currency, decimal Amount);
@@ -29,6 +31,8 @@ public class RecurringTransactionListItemViewModel
     public DateOnly? NextOccurrence { get; init; }
     public RecurringFrequency Frequency { get; init; }
     public bool Enabled { get; init; }
+    public Guid? DebtId { get; init; }
+    public string? DebtName { get; init; }
 }
 
 public class RecurringTransactionFormViewModel : IValidatableObject

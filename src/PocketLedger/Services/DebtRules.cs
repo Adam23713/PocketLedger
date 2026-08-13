@@ -28,4 +28,23 @@ public static class DebtRules
 
     public static bool RequiresAccount(DebtOperationType type) => type is DebtOperationType.Payment or DebtOperationType.EarlyRepayment;
     public static bool AllowsAccount(DebtOperationType type) => RequiresAccount(type) || type is DebtOperationType.LoanDisbursement or DebtOperationType.ReceivedRepayment;
+
+    public static decimal GetAutomaticPaymentAmount(decimal scheduledAmount, decimal remainingAmount)
+    {
+        if (scheduledAmount <= 0 || remainingAmount <= 0) throw new BusinessRuleException("Automatic payment requires a positive scheduled and remaining amount.");
+        return Math.Min(scheduledAmount, remainingAmount);
+    }
+
+    public static DateOnly CalculateLastPaymentDate(decimal remainingAmount, decimal paymentAmount, DateOnly firstPaymentDate, RecurringFrequency frequency)
+    {
+        if (remainingAmount <= 0 || paymentAmount <= 0 || firstPaymentDate == default) throw new BusinessRuleException("Automatic payment settings are invalid.");
+        var occurrenceCount = (int)Math.Ceiling(remainingAmount / paymentAmount);
+        return RecurringSchedule.AddOccurrences(firstPaymentDate, frequency, occurrenceCount - 1);
+    }
+
+    public static decimal CalculateProgressPercentage(decimal originalAmount, decimal remainingAmount)
+    {
+        if (originalAmount <= 0) return 0;
+        return Math.Clamp((originalAmount - remainingAmount) / originalAmount * 100, 0, 100);
+    }
 }

@@ -3,10 +3,26 @@
 <h1>Edit account</h1>
 <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="form-narrow">
     <input asp-for="Id" type="hidden" />
+    <input asp-for="OriginalInitialBalance" type="hidden" />
     <partial name="_Form" model="Model" />
     <button class="btn btn-primary" type="submit">Save</button>
     <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const amount = document.getElementById("InitialBalance");
+            const original = Number(document.getElementById("OriginalInitialBalance").value);
+            const option = document.getElementById("initial-balance-adjustment-option");
+            const difference = document.getElementById("initial-balance-difference");
+            function update() {
+                const delta = Number(amount.value) - original;
+                option.hidden = !Number.isFinite(delta) || delta === 0;
+                difference.textContent = Number.isFinite(delta) ? new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 }).format(delta) + " Ft" : "";
+            }
+            amount.addEventListener("input", update);
+            update();
+        })();
+    </script>
 }

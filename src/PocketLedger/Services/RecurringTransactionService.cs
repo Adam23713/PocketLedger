@@ -57,7 +57,7 @@ public class RecurringTransactionService(PocketLedgerDbContext dbContext, TimePr
 
     private IQueryable<RecurringTransaction> BaseQuery()
     {
-        return dbContext.RecurringTransactions.AsNoTracking().Include(template => template.Account).Include(template => template.Category).ThenInclude(category => category!.ParentCategory);
+        return dbContext.RecurringTransactions.AsNoTracking().Include(template => template.Account).Include(template => template.Category).ThenInclude(category => category!.ParentCategory).Include(template => template.Debt);
     }
 
     private async Task ValidateAsync(RecurringTransaction template, CancellationToken cancellationToken)

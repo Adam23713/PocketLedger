@@ -5,7 +5,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class AccountService(PocketLedgerDbContext dbContext) : IAccountService
+public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider) : IAccountService
 {
     public async Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ public class AccountService(PocketLedgerDbContext dbContext) : IAccountService
         return account;
     }
 
-    public async Task UpdateAsync(Account account, CancellationToken cancellationToken)
+    public async Task UpdateAsync(Account account, bool createInitialBalanceAdjustment, CancellationToken cancellationToken)
     {
         PrepareAndValidate(account);
         var existing = await dbContext.Accounts.SingleOrDefaultAsync(item => item.Id == account.Id, cancellationToken)
@@ -35,7 +35,20 @@ public class AccountService(PocketLedgerDbContext dbContext) : IAccountService
         existing.Name = account.Name;
         existing.Type = account.Type;
         existing.Currency = account.Currency;
-        existing.InitialBalance = account.InitialBalance;
+        var balanceDifference = account.InitialBalance - existing.InitialBalance;
+        if (createInitialBalanceAdjustment && balanceDifference != 0)
+        {
+            dbContext.Transactions.Add(new Transaction
+            {
+                Id = Guid.NewGuid(), Type = Models.Enums.TransactionType.Adjustment, AccountId = existing.Id, Amount = Math.Abs(balanceDifference),
+                AdjustmentDirection = balanceDifference > 0 ? Models.Enums.AdjustmentDirection.Increase : Models.Enums.AdjustmentDirection.Decrease,
+                TransactionDate = BudapestDate.Today(timeProvider), TransactionTime = TimeOnly.FromDateTime(timeProvider.GetLocalNow().DateTime), Note = "Initial balance adjustment"
+            });
+        }
+        else
+        {
+            existing.InitialBalance = account.InitialBalance;
+        }
         existing.Icon = account.Icon;
         existing.Color = account.Color;
         existing.DisplayOrder = account.DisplayOrder;

@@ -27,8 +27,8 @@
     <span asp-validation-for="TargetAccountId" class="text-danger"></span>
 </div>
 <div class="row">
-    <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">Source amount</label><input asp-for="Amount" class="form-control" id="source-amount" /><span asp-validation-for="Amount" class="text-danger"></span></div>
-    <div class="col-md-6 mb-3" id="target-amount-field"><label asp-for="TargetAmount" class="form-label">Target amount</label><input asp-for="TargetAmount" class="form-control" id="target-amount" /><div class="form-text">Automatically matched when currencies are equal.</div><span asp-validation-for="TargetAmount" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">Source amount</label><div class="input-group"><input asp-for="Amount" class="form-control money-input" id="source-amount" type="text" inputmode="numeric" autocomplete="off" /><span class="input-group-text currency-suffix" id="source-currency-suffix" hidden></span></div><span asp-validation-for="Amount" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3" id="target-amount-field"><label asp-for="TargetAmount" class="form-label">Target amount</label><div class="input-group"><input asp-for="TargetAmount" class="form-control money-input" id="target-amount" type="text" inputmode="numeric" autocomplete="off" /><span class="input-group-text currency-suffix" id="target-currency-suffix" hidden></span></div><div class="form-text">Automatically matched when currencies are equal.</div><span asp-validation-for="TargetAmount" class="text-danger"></span></div>
     <div class="col-md-6 mb-3"><label asp-for="TransactionDate" class="form-label">Date</label><input asp-for="TransactionDate" class="form-control" type="date" /><span asp-validation-for="TransactionDate" class="text-danger"></span></div>
     <div class="col-md-6 mb-3">
         <label class="form-label">Time</label>

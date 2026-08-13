@@ -5,6 +5,13 @@
     <div class="col-md-6 mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.AccountType>()" class="form-select"></select></div>
     <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label"></label><input asp-for="Currency" class="form-control text-uppercase" maxlength="3" /><span asp-validation-for="Currency" class="text-danger"></span></div>
 </div>
+@if (Model.Id != Guid.Empty)
+{
+    <div class="form-check mb-3" id="initial-balance-adjustment-option" hidden>
+        <input asp-for="CreateInitialBalanceAdjustment" class="form-check-input" />
+        <label asp-for="CreateInitialBalanceAdjustment" class="form-check-label">Create an Adjustment transaction (<span id="initial-balance-difference"></span>) instead of changing the initial balance</label>
+    </div>
+}
 <div class="row">
     <div class="col-md-6 mb-3"><label asp-for="InitialBalance" class="form-label"></label><input asp-for="InitialBalance" class="form-control" /><span asp-validation-for="InitialBalance" class="text-danger"></span></div>
     <div class="col-md-6 mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>

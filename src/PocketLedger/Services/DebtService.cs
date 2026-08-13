@@ -56,10 +56,11 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         else
         {
             await ValidateRecurringAsync(existing, recurringPayment, cancellationToken);
+            var wasEnabled = template.Enabled;
             var scheduleChanged = template.FirstOccurrence != recurringPayment.NextOccurrence || template.LastOccurrence != recurringPayment.LastOccurrence || template.Frequency != recurringPayment.Frequency;
             template.AccountId = recurringPayment.AccountId; template.Amount = recurringPayment.Amount; template.FirstOccurrence = recurringPayment.NextOccurrence;
             template.LastOccurrence = recurringPayment.LastOccurrence; template.Frequency = recurringPayment.Frequency; template.Enabled = recurringPayment.Enabled && existing.Status == DebtStatus.Active;
-            if (scheduleChanged || template.Enabled) template.AutomationStartsOn = BudapestDate.Today(timeProvider);
+            if (scheduleChanged || !wasEnabled && template.Enabled) template.AutomationStartsOn = BudapestDate.Today(timeProvider);
         }
         ApplyAutomaticStatus(existing, debt.OriginalAmount + operationDelta);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -132,7 +133,8 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
     internal async Task<Transaction> AddAutomaticOperationAsync(RecurringTransaction template, DateOnly date, CancellationToken cancellationToken)
     {
         var debt = await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleAsync(item => item.Id == template.DebtId, cancellationToken);
-        return await AddOperationCoreAsync(debt, new DebtOperationInput(template.DebtOperationType!.Value, template.Amount, template.AccountId, date, TimeOnly.MinValue, template.Note), cancellationToken, false);
+        var remaining = CalculateRemaining(debt);
+        return await AddOperationCoreAsync(debt, new DebtOperationInput(template.DebtOperationType!.Value, DebtRules.GetAutomaticPaymentAmount(template.Amount, remaining), template.AccountId, date, TimeOnly.MinValue, template.Note), cancellationToken, false);
     }
 
     private async Task<Transaction> AddOperationCoreAsync(Debt debt, DebtOperationInput input, CancellationToken cancellationToken, bool save = true)

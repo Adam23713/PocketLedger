@@ -9,7 +9,7 @@ public interface IAccountService
     Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken);
     Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<Account> CreateAsync(Account account, CancellationToken cancellationToken);
-    Task UpdateAsync(Account account, CancellationToken cancellationToken);
+    Task UpdateAsync(Account account, bool createInitialBalanceAdjustment, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     Task<decimal> GetCurrentBalanceAsync(Guid accountId, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<Guid, decimal>> GetCurrentBalancesAsync(CancellationToken cancellationToken);

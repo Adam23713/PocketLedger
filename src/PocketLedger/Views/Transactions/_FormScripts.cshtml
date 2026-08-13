@@ -56,3 +56,38 @@
         updateFields();
     })();
 </script>
+<script>
+    (() => {
+        const form = document.getElementById("source-amount")?.closest("form");
+        const source = document.getElementById("source-amount"), target = document.getElementById("target-amount");
+        const sourceAccount = document.getElementById("source-account"), targetAccount = document.getElementById("target-account");
+        if (!form || !source || !target) return;
+
+        function digits(value) { return value.replace(/[^0-9]/g, "").replace(/^0+(?=\d)/, ""); }
+        function format(input) {
+            const before = input.selectionStart ?? input.value.length;
+            const digitPosition = digits(input.value.slice(0, before)).length;
+            const raw = digits(input.value);
+            input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            let caret = 0, seen = 0;
+            while (caret < input.value.length && seen < digitPosition) { if (/\d/.test(input.value[caret])) seen++; caret++; }
+            input.setSelectionRange(caret, caret);
+        }
+        function updateSuffix() {
+            for (const [account, suffix] of [[sourceAccount, document.getElementById("source-currency-suffix")], [targetAccount, document.getElementById("target-currency-suffix")]]) {
+                const currency = account.selectedOptions[0]?.dataset.currency;
+                suffix.textContent = currency ?? "";
+                suffix.hidden = !currency;
+            }
+        }
+        for (const input of [source, target]) {
+            input.addEventListener("input", () => format(input));
+            input.addEventListener("focus", () => input.select());
+            format(input);
+        }
+        sourceAccount.addEventListener("change", updateSuffix);
+        targetAccount.addEventListener("change", updateSuffix);
+        form.addEventListener("submit", () => { source.value = digits(source.value); target.value = digits(target.value); });
+        updateSuffix();
+    })();
+</script>
