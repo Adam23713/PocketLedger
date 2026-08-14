@@ -10,7 +10,7 @@ public interface IAuthenticationAuditService
     Task WriteAsync(string eventType, string outcome, Guid? userId = null, string? normalizedUsername = null, string? failureReason = null, string? metadata = null, CancellationToken cancellationToken = default);
 }
 
-public sealed class AuthenticationAuditService(PocketLedgerDbContext dbContext, IHttpContextAccessor contextAccessor, ILogger<AuthenticationAuditService> logger) : IAuthenticationAuditService
+public sealed class AuthenticationAuditService(PocketLedgerDbContext dbContext, IHttpContextAccessor contextAccessor, IClientIpAddressResolver clientIpAddressResolver, ILogger<AuthenticationAuditService> logger) : IAuthenticationAuditService
 {
     public async Task WriteAsync(string eventType, string outcome, Guid? userId = null, string? normalizedUsername = null, string? failureReason = null, string? metadata = null, CancellationToken cancellationToken = default)
     {
@@ -21,7 +21,7 @@ public sealed class AuthenticationAuditService(PocketLedgerDbContext dbContext, 
             Id = Guid.NewGuid(), TimestampUtc = DateTimeOffset.UtcNow, UserId = userId, NormalizedUsername = normalizedUsername,
             EventType = eventType, Outcome = outcome, FailureReason = failureReason,
             RemoteIpAddress = context?.Connection.RemoteIpAddress?.ToString(),
-            ForwardedClientIpAddress = null,
+            ForwardedClientIpAddress = context is null ? null : clientIpAddressResolver.GetForwardedClientIpAddress(context),
             UserAgent = context?.Request.Headers.UserAgent.ToString(), RequestPath = context?.Request.Path.Value ?? string.Empty,
             HttpMethod = context?.Request.Method ?? string.Empty, CorrelationId = context?.TraceIdentifier,
             SessionFingerprint = string.IsNullOrEmpty(sessionSource) ? null : Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(sessionSource))), Metadata = metadata

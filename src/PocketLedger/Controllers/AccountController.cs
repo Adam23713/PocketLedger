@@ -15,7 +15,7 @@ using QRCoder;
 namespace PocketLedger.Controllers;
 
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, PocketLedgerDbContext dbContext,
-    IOptions<AccountManagementOptions> accountOptions, IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit) : Controller
+    IOptions<AccountManagementOptions> accountOptions, IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver) : Controller
 {
     [AllowAnonymous, HttpGet]
     public IActionResult Login() => User.Identity?.IsAuthenticated == true ? RedirectToAction("Index", "Home") : View(new LoginViewModel());
@@ -35,7 +35,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             if (user.AuthenticatorSetupComplete)
             {
                 user.LastSuccessfulLoginAtUtc = DateTimeOffset.UtcNow;
-                user.LastSuccessfulLoginIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                user.LastSuccessfulLoginIpAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext);
                 await userManager.UpdateAsync(user);
             }
             await audit.WriteAsync(user.AuthenticatorSetupComplete ? "LoginSucceeded" : "PasswordAcceptedSetupRequired", "Success", user.Id, normalized, cancellationToken: cancellationToken);
@@ -104,7 +104,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             if (pending is not null)
             {
                 pending.LastSuccessfulLoginAtUtc = DateTimeOffset.UtcNow;
-                pending.LastSuccessfulLoginIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                pending.LastSuccessfulLoginIpAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext);
                 await userManager.UpdateAsync(pending);
                 await audit.WriteAsync("LoginSucceeded", "Success", pending.Id, pending.NormalizedUserName, cancellationToken: cancellationToken);
             }
