@@ -3,11 +3,20 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
+<script>
+    if (localStorage.getItem("pocketledger-dashboard-amounts-hidden") === "true") document.documentElement.dataset.dashboardAmountsHidden = "true";
+</script>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <div>
-        <h1 class="mb-1">Dashboard</h1>
-        <p class="text-muted mb-0">Total main balance: @foreach (var total in Model.MainBalances) { <strong class="me-2">@MoneyFormatter.Format(total.Amount, total.Currency)</strong> }</p>
+        <div class="d-flex align-items-center gap-2">
+            <h1 class="mb-1">Dashboard</h1>
+            <button class="dashboard-privacy-button" id="dashboard-privacy-button" type="button" aria-label="Hide dashboard amounts" aria-pressed="false" title="Hide dashboard amounts">
+                <svg class="privacy-visible-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.75" /></svg>
+                <svg class="privacy-hidden-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+            </button>
+        </div>
+        <p class="text-muted mb-0">Total main balance: @foreach (var total in Model.MainBalances) { <strong class="me-2"><span data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</span></strong> }</p>
     </div>
     <div class="d-flex gap-2">
         <a class="btn btn-outline-primary" asp-controller="Accounts" asp-action="Create">New account</a>
@@ -16,14 +25,14 @@
 </div>
 @foreach (var warning in Model.DebtFundingWarnings)
 {
-    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): @MoneyFormatter.Format(warning.Amount, warning.Currency) @warning.Currency from @warning.AccountName; current balance @MoneyFormatter.Format(warning.AccountBalance, warning.Currency) @warning.Currency, shortfall @MoneyFormatter.Format(warning.Shortfall, warning.Currency) @warning.Currency.</span></div>
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> @warning.Currency from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span> @warning.Currency, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span> @warning.Currency.</span></div>
 }
 
 <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small>@foreach (var total in Model.MainBalances) { <div class="h5 mb-0">@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small>@foreach (var total in Model.NetWorthBalances) { <div class="h5 mb-0">@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small>@foreach (var total in Model.MainBalances) { <div class="h5 mb-0"><span data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</span></div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small>@foreach (var total in Model.NetWorthBalances) { <div class="h5 mb-0"><span data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</span></div> }</div></div></div>
     <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Accounts</small><div class="h4 mb-0">@Model.AccountCount</div></div></div></div>
-    <div class="col-12 col-lg-4"><div class="card h-100"><div class="card-body"><small class="text-muted">This month</small>@foreach (var total in Model.MonthlyTotals) { <div><span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span> · <span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span> · @MoneyFormatter.Format(total.Change, total.Currency)</div> }</div></div></div>
+    <div class="col-12 col-lg-4"><div class="card h-100"><div class="card-body"><small class="text-muted">This month</small>@foreach (var total in Model.MonthlyTotals) { <div><span class="text-success">+<span data-private-amount>@MoneyFormatter.Format(total.Income, total.Currency)</span></span> · <span class="text-danger">−<span data-private-amount>@MoneyFormatter.Format(total.Expenses, total.Currency)</span></span> · <span data-private-amount>@MoneyFormatter.Format(total.Change, total.Currency)</span></div> }</div></div></div>
 </div>
 
 <h2 class="h4">Account balances</h2>
@@ -44,7 +53,7 @@
                         </div>
                         <span class="badge text-bg-light">@account.Type</span>
                     </div>
-                    <div class="display-6 fs-3">@MoneyFormatter.Format(account.CurrentBalance, account.Currency) <small class="fs-6 text-muted">@account.Currency</small></div>
+                    <div class="display-6 fs-3"><span data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</span> <small class="fs-6 text-muted">@account.Currency</small></div>
                 </div>
             </a>
         </div>
@@ -73,7 +82,7 @@ else
                     <td>@transaction.Type</td>
                     <td>@(transaction.AccountName ?? "No account movement")</td>
                     <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
-                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</td>
+                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")<span data-private-amount>@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span> @transaction.Currency</td>
                 </tr>
             }
             </tbody>

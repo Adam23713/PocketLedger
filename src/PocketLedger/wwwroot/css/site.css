@@ -135,6 +135,14 @@ body {
 .header-icon-button { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 50%; color: var(--text-secondary); display: inline-flex; height: 2.5rem; justify-content: center; padding: 0; width: 2.5rem; }
 .header-icon-button:hover, .header-icon-button[aria-expanded="true"] { background: var(--surface-background-hover); color: var(--accent-color); }
 .header-icon-button svg { fill: none; height: 1.25rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.25rem; }
+.dashboard-privacy-button { align-items: center; background: transparent; border: 0; border-radius: 50%; color: var(--text-secondary); display: inline-flex; flex: 0 0 auto; height: 2.25rem; justify-content: center; padding: 0; width: 2.25rem; }
+.dashboard-privacy-button:hover { background: var(--surface-background-hover); color: var(--accent-color); }
+.dashboard-privacy-button svg { fill: none; height: 1.3rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.3rem; }
+.privacy-hidden-icon { display: none; }
+[data-dashboard-amounts-hidden="true"] .privacy-visible-icon { display: none; }
+[data-dashboard-amounts-hidden="true"] .privacy-hidden-icon { display: block; }
+[data-dashboard-amounts-hidden="true"] [data-private-amount] { font-size: 0; }
+[data-dashboard-amounts-hidden="true"] [data-private-amount]::after { content: "••••"; font-size: 1rem; letter-spacing: .08em; }
 .profile-button { background: color-mix(in srgb, var(--accent-color) 13%, transparent); border-color: color-mix(in srgb, var(--accent-color) 22%, transparent); color: var(--accent-color); overflow: hidden; }
 .app-dropdown { background: var(--surface-raised); border: 1px solid var(--border-color); border-radius: var(--card-radius); box-shadow: 0 14px 35px rgba(0, 0, 0, .18); min-width: 14.5rem; padding: .45rem; position: absolute; right: 0; top: calc(100% + .55rem); z-index: 1050; }
 .app-dropdown[hidden] { display: none; }
