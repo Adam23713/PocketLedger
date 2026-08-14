@@ -1,93 +1,29 @@
+<script src="~/js/money-input.js" asp-append-version="true"></script>
 <script>
-    (() => {
-        const type = document.getElementById("transaction-type");
-        const categoryField = document.getElementById("category-field");
-        const category = document.getElementById("category-select");
-        const categoryIcon = document.getElementById("category-selected-icon");
-        const adjustmentField = document.getElementById("adjustment-field");
-        const sourceAccount = document.getElementById("source-account");
-        const targetAccount = document.getElementById("target-account");
-        const targetAccountField = document.getElementById("target-account-field");
-        const sourceAmount = document.getElementById("source-amount");
-        const targetAmount = document.getElementById("target-amount");
-        const targetAmountField = document.getElementById("target-amount-field");
-
-        function synchronizeTransferAmount() {
-            const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency;
-            const targetCurrency = targetAccount.selectedOptions[0]?.dataset.currency;
-            const sameCurrency = sourceCurrency && sourceCurrency === targetCurrency;
-            targetAmount.readOnly = Boolean(sameCurrency);
-            if (sameCurrency) targetAmount.value = sourceAmount.value;
-        }
-
-        function updateFields() {
-            const isAdjustment = type.value === "Adjustment";
-            const isTransfer = type.value === "Transfer";
-            categoryField.hidden = isAdjustment || isTransfer;
-            adjustmentField.hidden = !isAdjustment;
-            targetAccountField.hidden = !isTransfer;
-            targetAmountField.hidden = !isTransfer;
-            if (isAdjustment || isTransfer) {
-                category.value = "";
-            }
-            if (!isTransfer) {
-                targetAccount.value = "";
-                targetAmount.value = "";
-            }
-
-            for (const option of category.options) {
-                if (!option.dataset.categoryType) continue;
-                option.hidden = option.dataset.categoryType !== type.value;
-                option.disabled = option.hidden;
-            }
-            if (category.selectedOptions[0]?.disabled) category.value = "";
-            const selectedCategory = category.selectedOptions[0];
-            categoryIcon.src = selectedCategory?.dataset.iconPath ?? "";
-            categoryIcon.alt = selectedCategory?.dataset.iconAlt ?? "";
-            categoryIcon.hidden = !selectedCategory?.dataset.iconPath;
-            synchronizeTransferAmount();
-        }
-
-        type.addEventListener("change", updateFields);
-        sourceAccount.addEventListener("change", synchronizeTransferAmount);
-        targetAccount.addEventListener("change", synchronizeTransferAmount);
-        category.addEventListener("change", updateFields);
-        sourceAmount.addEventListener("input", synchronizeTransferAmount);
-        updateFields();
-    })();
-</script>
-<script>
-    (() => {
-        const form = document.getElementById("source-amount")?.closest("form");
-        const source = document.getElementById("source-amount"), target = document.getElementById("target-amount");
-        const sourceAccount = document.getElementById("source-account"), targetAccount = document.getElementById("target-account");
-        if (!form || !source || !target) return;
-
-        function digits(value) { return value.replace(/[^0-9]/g, "").replace(/^0+(?=\d)/, ""); }
-        function format(input) {
-            const before = input.selectionStart ?? input.value.length;
-            const digitPosition = digits(input.value.slice(0, before)).length;
-            const raw = digits(input.value);
-            input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-            let caret = 0, seen = 0;
-            while (caret < input.value.length && seen < digitPosition) { if (/\d/.test(input.value[caret])) seen++; caret++; }
-            input.setSelectionRange(caret, caret);
-        }
-        function updateSuffix() {
-            for (const [account, suffix] of [[sourceAccount, document.getElementById("source-currency-suffix")], [targetAccount, document.getElementById("target-currency-suffix")]]) {
-                const currency = account.selectedOptions[0]?.dataset.currency;
-                suffix.textContent = currency ?? "";
-                suffix.hidden = !currency;
-            }
-        }
-        for (const input of [source, target]) {
-            input.addEventListener("input", () => format(input));
-            input.addEventListener("focus", () => input.select());
-            format(input);
-        }
-        sourceAccount.addEventListener("change", updateSuffix);
-        targetAccount.addEventListener("change", updateSuffix);
-        form.addEventListener("submit", () => { source.value = digits(source.value); target.value = digits(target.value); });
-        updateSuffix();
-    })();
+(() => {
+    const type = document.getElementById("transaction-type"), sourceAccount = document.getElementById("source-account"), targetAccount = document.getElementById("target-account");
+    const targetAccountField = document.getElementById("target-account-field"), categoryField = document.getElementById("category-field"), category = document.getElementById("category-select"), categoryIcon = document.getElementById("category-selected-icon"), adjustmentField = document.getElementById("adjustment-field");
+    const amount = document.getElementById("source-amount"), rate = document.getElementById("exchange-rate"), rateField = document.getElementById("exchange-rate-field"), target = document.getElementById("target-amount"), targetDisplay = document.getElementById("target-amount-display"), targetField = document.getElementById("target-amount-field");
+    function updateTransfer() {
+        const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency, targetCurrency = targetAccount.selectedOptions[0]?.dataset.currency;
+        const transfer = type.value === "Transfer", same = sourceCurrency && sourceCurrency === targetCurrency;
+        targetAccountField.hidden = !transfer; targetField.hidden = !transfer; rateField.hidden = !transfer || same;
+        if (transfer && same) rate.value = "1";
+        const result = transfer ? Number(amount.value) * Number(rate.value) : NaN;
+        target.value = Number.isFinite(result) ? result.toFixed(4).replace(/\.?0+$/, "") : ""; targetDisplay.value = target.value;
+        for (const [id, value] of [["source-currency-suffix", sourceCurrency], ["target-currency-suffix", targetCurrency]]) { const suffix = document.getElementById(id); suffix.textContent = value || ""; suffix.hidden = !value; }
+        document.getElementById("exchange-rate-help").textContent = sourceCurrency && targetCurrency ? `1 ${sourceCurrency} = X ${targetCurrency}` : "";
+    }
+    function updateFields() {
+        const adjustment = type.value === "Adjustment", transfer = type.value === "Transfer";
+        categoryField.hidden = adjustment || transfer; adjustmentField.hidden = !adjustment;
+        if (adjustment || transfer) category.value = "";
+        if (!transfer) { targetAccount.value = ""; target.value = ""; rate.value = ""; }
+        for (const option of category.options) { if (option.dataset.categoryType) { option.hidden = option.dataset.categoryType !== type.value; option.disabled = option.hidden; } }
+        if (category.selectedOptions[0]?.disabled) category.value = "";
+        const selected = category.selectedOptions[0]; categoryIcon.src = selected?.dataset.iconPath || ""; categoryIcon.alt = selected?.dataset.iconAlt || ""; categoryIcon.hidden = !selected?.dataset.iconPath;
+        updateTransfer();
+    }
+    [type, sourceAccount, targetAccount, rate].forEach(element => element.addEventListener("change", updateFields)); amount.addEventListener("change", updateTransfer); category.addEventListener("change", updateFields); updateFields();
+})();
 </script>

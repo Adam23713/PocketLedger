@@ -6,20 +6,22 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class StatisticsController(IStatisticsService statisticsService) : Controller
+public class StatisticsController(IStatisticsService statisticsService, IUserContextService userContext) : Controller
 {
-    public async Task<IActionResult> Index(int? year, int? month, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(int? year, int? month, string? currency, CancellationToken cancellationToken)
     {
-        var today = DateTime.Today;
+        var today = await userContext.TodayAsync(cancellationToken);
         var selectedYear = year ?? today.Year;
         var selectedMonth = month ?? today.Month;
+        currency = Currencies.Exists(currency) ? currency!.ToUpperInvariant() : (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency;
         try
         {
-            var summary = await statisticsService.GetSummaryAsync(selectedYear, selectedMonth, cancellationToken);
+            var summary = await statisticsService.GetSummaryAsync(selectedYear, selectedMonth, currency, cancellationToken);
             return View(new StatisticsViewModel
             {
                 Year = selectedYear,
                 Month = selectedMonth,
+                Currency = currency,
                 Income = summary.Income,
                 Expenses = summary.Expenses,
                 Savings = summary.Savings,

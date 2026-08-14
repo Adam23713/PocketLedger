@@ -23,6 +23,7 @@ builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddDbContext<PocketLedgerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>

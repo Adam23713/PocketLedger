@@ -220,7 +220,7 @@ namespace PocketLedger.Data.Migrations
                     b.HasIndex("OwnerId", "DisplayOrder")
                         .HasDatabaseName("ix_accounts_owner_id_display_order");
 
-                    b.ToTable("accounts", (string)null);
+                    b.ToTable("accounts");
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.ApplicationUser", b =>
@@ -235,12 +235,22 @@ namespace PocketLedger.Data.Migrations
                     b.Property<bool>("AuthenticatorSetupComplete")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("AvatarId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DefaultCurrency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -279,6 +289,10 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -704,14 +718,30 @@ namespace PocketLedger.Data.Migrations
                         .HasColumnType("character varying(40)")
                         .HasColumnName("debt_operation_type");
 
+                    b.Property<decimal?>("ExchangeRate")
+                        .HasPrecision(19, 8)
+                        .HasColumnType("numeric(19,8)")
+                        .HasColumnName("exchange_rate");
+
                     b.Property<string>("Note")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("note");
 
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
+
+                    b.Property<string>("SourceCurrency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("source_currency")
+                        .IsFixedLength();
 
                     b.Property<Guid?>("TargetAccountId")
                         .HasColumnType("uuid")
@@ -721,6 +751,12 @@ namespace PocketLedger.Data.Migrations
                         .HasPrecision(19, 4)
                         .HasColumnType("numeric(19,4)")
                         .HasColumnName("target_amount");
+
+                    b.Property<string>("TargetCurrency")
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("target_currency")
+                        .IsFixedLength();
 
                     b.Property<DateOnly>("TransactionDate")
                         .HasColumnType("date")
@@ -769,11 +805,67 @@ namespace PocketLedger.Data.Migrations
 
                             t.HasCheckConstraint("ck_transactions_different_accounts", "target_account_id IS NULL OR target_account_id <> account_id");
 
+                            t.HasCheckConstraint("ck_transactions_exchange_rate", "(type = 'Transfer' AND exchange_rate > 0 AND target_amount > 0 AND target_currency IS NOT NULL) OR (type <> 'Transfer' AND exchange_rate IS NULL AND target_amount IS NULL AND target_currency IS NULL)");
+
                             t.HasCheckConstraint("ck_transactions_target_amount_positive", "target_amount IS NULL OR target_amount > 0");
 
                             t.HasCheckConstraint("ck_transactions_target_amount_transfer", "target_amount IS NULL OR type = 'Transfer'");
 
                             t.HasCheckConstraint("ck_transactions_transfer_target", "(type = 'Transfer' AND account_id IS NOT NULL AND target_account_id IS NOT NULL) OR (type <> 'Transfer' AND target_account_id IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.UserCurrencyFormat", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("CurrencyCode")
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("currency_code")
+                        .IsFixedLength();
+
+                    b.Property<string>("CurrencyDisplay")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency_display");
+
+                    b.Property<string>("CurrencyPosition")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency_position");
+
+                    b.Property<int>("DecimalPlaces")
+                        .HasColumnType("integer")
+                        .HasColumnName("decimal_places");
+
+                    b.Property<string>("DecimalSeparator")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .HasColumnName("decimal_separator");
+
+                    b.Property<string>("ThousandsSeparator")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .HasColumnName("thousands_separator");
+
+                    b.Property<bool>("UseSpace")
+                        .HasColumnType("boolean")
+                        .HasColumnName("use_space");
+
+                    b.HasKey("UserId", "CurrencyCode");
+
+                    b.ToTable("user_currency_formats", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_user_currency_formats_decimal_places", "decimal_places BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_user_currency_formats_separators", "decimal_separator <> thousands_separator");
                         });
                 });
 
@@ -998,6 +1090,22 @@ namespace PocketLedger.Data.Migrations
                     b.Navigation("Owner");
 
                     b.Navigation("TargetAccount");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.UserCurrencyFormat", b =>
+                {
+                    b.HasOne("PocketLedger.Models.Entities.ApplicationUser", "User")
+                        .WithMany("CurrencyFormats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("CurrencyFormats");
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.Category", b =>

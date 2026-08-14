@@ -14,9 +14,13 @@ public class Transaction
     public Account? TargetAccount { get; set; }
     public decimal Amount { get; set; }
     public decimal? TargetAmount { get; set; }
+    public decimal? ExchangeRate { get; set; }
+    public string SourceCurrency { get; set; } = string.Empty;
+    public string? TargetCurrency { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }
     public DateOnly TransactionDate { get; set; }
     public TimeOnly TransactionTime { get; set; }
+    public DateTimeOffset OccurredAtUtc { get; set; }
     public Guid? CategoryId { get; set; }
     public Category? Category { get; set; }
     public string? Note { get; set; }

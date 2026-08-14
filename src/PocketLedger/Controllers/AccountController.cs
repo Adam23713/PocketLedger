@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Models;
 using PocketLedger.Models.ViewModels.Account;
 using PocketLedger.Services;
 using QRCoder;
@@ -204,6 +205,37 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         return View(new AuditLogViewModel(events, page, Math.Max(1, (int)Math.Ceiling(count / (double)pageSize))));
     }
 
+    [Authorize, HttpGet]
+    public async Task<IActionResult> Settings(CancellationToken cancellationToken)
+    {
+        var user = await dbContext.Users.Include(item => item.CurrencyFormats).SingleOrDefaultAsync(item => item.Id == Guid.Parse(userManager.GetUserId(User)!), cancellationToken);
+        if (user is null) return Challenge();
+        return View(ToSettings(user));
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Settings(SettingsViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return View(model);
+        var user = await dbContext.Users.Include(item => item.CurrencyFormats).SingleOrDefaultAsync(item => item.Id == Guid.Parse(userManager.GetUserId(User)!), cancellationToken);
+        if (user is null) return Challenge();
+        user.DisplayName = string.IsNullOrWhiteSpace(model.DisplayName) ? null : model.DisplayName.Trim();
+        user.AvatarId = model.AvatarId;
+        user.DefaultCurrency = Currencies.Get(model.DefaultCurrency).Code;
+        user.TimeZoneId = UserContextService.GetTimeZone(model.TimeZoneId).Id;
+        dbContext.UserCurrencyFormats.RemoveRange(user.CurrencyFormats);
+        user.CurrencyFormats = model.CurrencyFormats.Select(item => new UserCurrencyFormat
+        {
+            UserId = user.Id, CurrencyCode = Currencies.Get(item.CurrencyCode).Code, DecimalPlaces = item.DecimalPlaces,
+            DecimalSeparator = item.DecimalSeparator, ThousandsSeparator = item.ThousandsSeparator,
+            CurrencyDisplay = item.CurrencyDisplay, CurrencyPosition = item.CurrencyPosition, UseSpace = item.UseSpace
+        }).ToList();
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await signInManager.RefreshSignInAsync(user);
+        TempData["SuccessMessage"] = "Settings saved.";
+        return RedirectToAction(nameof(Settings));
+    }
+
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
@@ -234,4 +266,14 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var png = new PngByteQRCode(data).GetGraphic(8);
         return new AuthenticatorSetupViewModel { SharedKey = key, QrCodeDataUri = "data:image/png;base64," + Convert.ToBase64String(png), Code = code };
     }
+
+    private static SettingsViewModel ToSettings(ApplicationUser user) => new()
+    {
+        DisplayName = user.DisplayName, AvatarId = user.AvatarId, DefaultCurrency = user.DefaultCurrency, TimeZoneId = user.TimeZoneId,
+        CurrencyFormats = Currencies.All.Select(definition =>
+        {
+            var item = user.CurrencyFormats.SingleOrDefault(format => format.CurrencyCode == definition.Code) ?? UserContextService.DefaultFormat(definition);
+            return new CurrencyFormatViewModel { CurrencyCode = definition.Code, DecimalPlaces = item.DecimalPlaces, DecimalSeparator = item.DecimalSeparator, ThousandsSeparator = item.ThousandsSeparator, CurrencyDisplay = item.CurrencyDisplay, CurrencyPosition = item.CurrencyPosition, UseSpace = item.UseSpace };
+        }).ToList()
+    };
 }

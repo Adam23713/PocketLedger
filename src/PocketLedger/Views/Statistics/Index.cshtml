@@ -11,11 +11,12 @@
     <h1>Statistics</h1>
     <div class="btn-group"><a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month">←</a><span class="btn btn-outline-secondary disabled">@selected.ToString("MMMM yyyy")</span><a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a></div>
 </div>
+<form method="get" class="mb-3"><input type="hidden" name="year" value="@Model.Year" /><input type="hidden" name="month" value="@Model.Month" /><label class="form-label">Currency</label><select name="currency" class="form-select w-auto" onchange="this.form.submit()">@foreach (var currency in Currencies.All) { <option value="@currency.Code" selected="@(currency.Code == Model.Currency)">@currency.Code — @currency.DisplayName</option> }</select></form>
 <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Income</small><div class="h4 text-success">@MoneyFormatter.Format(Model.Income, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Expenses</small><div class="h4 text-danger">@MoneyFormatter.Format(Model.Expenses, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Savings</small><div class="h4">@MoneyFormatter.Format(Model.Savings, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Balance</small><div class="h4">@MoneyFormatter.Format(Model.Balance, "HUF") HUF</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Income</small><div class="h4 text-success">@MoneyFormatter.Format(Model.Income, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Expenses</small><div class="h4 text-danger">@MoneyFormatter.Format(Model.Expenses, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Savings</small><div class="h4">@MoneyFormatter.Format(Model.Savings, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Balance</small><div class="h4">@MoneyFormatter.Format(Model.Balance, Model.Currency)</div></div></div></div>
 </div>
 <section class="mb-5" aria-labelledby="expense-distribution-heading">
     <h2 class="h4" id="expense-distribution-heading">Expenses by main category</h2>
@@ -59,14 +60,14 @@ else
         <table class="table">
             <thead><tr><th>Main category</th><th class="text-end">Occurrences</th><th class="text-end">Monthly expense</th></tr></thead>
             <tbody>@foreach (var item in Model.RecurringExpenses) { <tr><td><img class="category-icon me-2" src="@item.IconPath" alt="@item.IconAlt" />@item.MainCategoryName</td><td class="text-end">@item.OccurrenceCount</td><td class="text-end">@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</td></tr> }</tbody>
-            <tfoot><tr class="fw-semibold"><th>Total</th><td class="text-end">@Model.RecurringExpenses.Sum(item => item.OccurrenceCount)</td><td class="text-end">@MoneyFormatter.Format(Model.RecurringExpenses.Sum(item => item.Amount), "HUF") HUF</td></tr></tfoot>
+            <tfoot><tr class="fw-semibold"><th>Total</th><td class="text-end">@Model.RecurringExpenses.Sum(item => item.OccurrenceCount)</td><td class="text-end">@MoneyFormatter.Format(Model.RecurringExpenses.Sum(item => item.Amount), Model.Currency)</td></tr></tfoot>
         </table>
     </div>
 }
 <h2 class="h4 mt-4">Account balances</h2>
 <div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var account in Model.AccountBalances) { <tr><td><a asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">@account.Name</a></td><td class="text-end">@MoneyFormatter.Format(account.Balance, account.Currency) @account.Currency</td></tr> }</tbody></table></div>
 <h2 class="h4 mt-4">Last 12 months</h2>
-<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Month</th><th class="text-end">Income</th><th class="text-end">Expenses</th><th class="text-end">Savings</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var item in Model.MonthlyTrend) { <tr><td>@(new DateOnly(item.Year, item.Month, 1).ToString("yyyy MMM"))</td><td class="text-end">@MoneyFormatter.Format(item.Income, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Expenses, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Savings, "HUF")</td><td class="text-end">@MoneyFormatter.Format(item.Balance, "HUF")</td></tr> }</tbody></table></div>
+<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Month</th><th class="text-end">Income</th><th class="text-end">Expenses</th><th class="text-end">Savings</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var item in Model.MonthlyTrend) { <tr><td>@(new DateOnly(item.Year, item.Month, 1).ToString("yyyy MMM"))</td><td class="text-end">@MoneyFormatter.Format(item.Income, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Expenses, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Savings, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Balance, Model.Currency)</td></tr> }</tbody></table></div>
 
 @section Scripts {
     <script id="expense-main-category-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.ExpenseMainCategories, jsonOptions))</script>

@@ -95,5 +95,7 @@ public static class TransactionRules
         {
             throw new BusinessRuleException("Target amount must be greater than zero.");
         }
+
+        if (transaction.ExchangeRate is <= 0) throw new BusinessRuleException("Exchange rate must be greater than zero.");
     }
 }

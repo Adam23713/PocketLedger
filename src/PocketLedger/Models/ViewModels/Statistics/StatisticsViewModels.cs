@@ -2,6 +2,7 @@ namespace PocketLedger.Models.ViewModels.Statistics;
 
 public class StatisticsViewModel
 {
+    public string Currency { get; init; } = "HUF";
     public int Year { get; init; }
     public int Month { get; init; }
     public decimal Income { get; init; }

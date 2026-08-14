@@ -1,6 +1,7 @@
 namespace PocketLedger.Services.Interfaces;
 
-public record CalendarDaySummary(DateOnly Date, decimal Income, decimal Expenses, decimal Balance, int TransactionCount);
+public record CurrencyPeriodTotal(string Currency, decimal Income, decimal Expenses, decimal Balance);
+public record CalendarDaySummary(DateOnly Date, IReadOnlyList<CurrencyPeriodTotal> Totals, int TransactionCount);
 
 public interface ICalendarService
 {

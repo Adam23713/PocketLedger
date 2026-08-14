@@ -19,7 +19,7 @@
             function update() {
                 const delta = Number(amount.value) - original;
                 option.hidden = !Number.isFinite(delta) || delta === 0;
-                difference.textContent = Number.isFinite(delta) ? new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 }).format(delta) + " Ft" : "";
+                difference.textContent = Number.isFinite(delta) ? delta.toString() : "";
             }
             amount.addEventListener("input", update);
             update();

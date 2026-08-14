@@ -9,12 +9,12 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class RecurringTransactionsController(IRecurringTransactionService recurringService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider) : Controller
+public class RecurringTransactionsController(IRecurringTransactionService recurringService, IAccountService accountService, ICategoryService categoryService, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var templates = await recurringService.GetAllAsync(cancellationToken);
-        var today = BudapestDate.Today(timeProvider);
+        var today = await userContext.TodayAsync(cancellationToken);
         var items = templates.Select(template =>
         {
             var categoryIcon = template.Category is null ? null : CategoryIcons.Resolve(template.Category);
@@ -56,7 +56,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
     [HttpGet]
     public async Task<IActionResult> Create(CancellationToken cancellationToken)
     {
-        var model = new RecurringTransactionFormViewModel();
+        var model = new RecurringTransactionFormViewModel { FirstOccurrence = await userContext.TodayAsync(cancellationToken) };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }

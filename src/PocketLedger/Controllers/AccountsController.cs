@@ -8,7 +8,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class AccountsController(IAccountService accountService) : Controller
+public class AccountsController(IAccountService accountService, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -51,7 +51,7 @@ public class AccountsController(IAccountService accountService) : Controller
     }
 
     [HttpGet]
-    public IActionResult Create() => View(new AccountFormViewModel());
+    public async Task<IActionResult> Create(CancellationToken cancellationToken) => View(new AccountFormViewModel { Currency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency });
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AccountFormViewModel model, CancellationToken cancellationToken)

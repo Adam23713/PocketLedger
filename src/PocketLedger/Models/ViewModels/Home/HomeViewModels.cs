@@ -4,6 +4,9 @@ namespace PocketLedger.Models.ViewModels.Home;
 
 public class HomeViewModel
 {
+    public IReadOnlyList<CurrencyBalanceViewModel> MainBalances { get; init; } = [];
+    public IReadOnlyList<CurrencyBalanceViewModel> NetWorthBalances { get; init; } = [];
+    public IReadOnlyList<CurrencyPeriodViewModel> MonthlyTotals { get; init; } = [];
     public decimal TotalMainBalance { get; init; }
     public decimal NetWorth { get; init; }
     public int AccountCount { get; init; }
@@ -14,6 +17,9 @@ public class HomeViewModel
     public IReadOnlyList<RecentTransactionViewModel> RecentTransactions { get; init; } = [];
     public IReadOnlyList<DebtFundingWarningViewModel> DebtFundingWarnings { get; init; } = [];
 }
+
+public record CurrencyBalanceViewModel(string Currency, decimal Amount);
+public record CurrencyPeriodViewModel(string Currency, decimal Income, decimal Expenses, decimal Change);
 
 public class AccountCardViewModel
 {

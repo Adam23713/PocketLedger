@@ -32,13 +32,16 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
-        var today = BudapestDate.Today(timeProvider);
         var templates = await dbContext.RecurringTransactions.IgnoreQueryFilters().AsNoTracking()
-            .Where(template => template.Enabled && template.FirstOccurrence <= today && (template.LastOccurrence == null || template.LastOccurrence >= template.AutomationStartsOn))
+            .Include(template => template.Owner).Include(template => template.Account)
+            .Where(template => template.Enabled && (template.LastOccurrence == null || template.LastOccurrence >= template.AutomationStartsOn))
             .ToListAsync(cancellationToken);
 
         foreach (var template in templates)
         {
+            var zone = UserContextService.GetTimeZone(template.Owner.TimeZoneId);
+            var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), zone).DateTime);
+            if (template.FirstOccurrence > today) continue;
             var start = template.AutomationStartsOn > template.FirstOccurrence ? template.AutomationStartsOn : template.FirstOccurrence;
             var occurrenceDates = RecurringSchedule.GetOccurrences(template, start, today);
             if (occurrenceDates.Count == 0) continue;
@@ -50,12 +53,12 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
 
             foreach (var occurrenceDate in occurrenceDates.Where(date => !processedDates.Contains(date)))
             {
-                await CreateOccurrenceAsync(dbContext, template, occurrenceDate, cancellationToken);
+                await CreateOccurrenceAsync(dbContext, template, occurrenceDate, zone, cancellationToken);
             }
         }
     }
 
-    private async Task CreateOccurrenceAsync(PocketLedgerDbContext dbContext, RecurringTransaction template, DateOnly occurrenceDate, CancellationToken cancellationToken)
+    private async Task CreateOccurrenceAsync(PocketLedgerDbContext dbContext, RecurringTransaction template, DateOnly occurrenceDate, TimeZoneInfo zone, CancellationToken cancellationToken)
     {
         await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         if (template.DebtId is not null) await dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({template.DebtId.Value.ToString()}, 0))", cancellationToken);
@@ -64,13 +67,17 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         {
             transaction = await new DebtService(dbContext, timeProvider).AddAutomaticOperationAsync(template, occurrenceDate, cancellationToken);
             transaction.OwnerId = template.OwnerId;
+            transaction.SourceCurrency = template.Account.Currency;
+            transaction.OccurredAtUtc = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(occurrenceDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone), TimeSpan.Zero);
         }
         else
         {
             transaction = new Transaction
             {
                 Id = Guid.NewGuid(), OwnerId = template.OwnerId, Type = template.Type, AccountId = template.AccountId, Amount = template.Amount,
-                AdjustmentDirection = template.AdjustmentDirection, TransactionDate = occurrenceDate, CategoryId = template.CategoryId, Note = template.Note
+                AdjustmentDirection = template.AdjustmentDirection, TransactionDate = occurrenceDate, TransactionTime = TimeOnly.MinValue,
+                OccurredAtUtc = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(occurrenceDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone), TimeSpan.Zero),
+                SourceCurrency = template.Account.Currency, CategoryId = template.CategoryId, Note = template.Note
             };
             dbContext.Transactions.Add(transaction);
         }
@@ -96,11 +103,6 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
 
     private TimeSpan GetDelayUntilNextCheck()
     {
-        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), BudapestDate.TimeZone);
-        var nextDate = DateOnly.FromDateTime(now.DateTime).AddDays(1);
-        var nextLocal = nextDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
-        var nextUtc = TimeZoneInfo.ConvertTimeToUtc(nextLocal, BudapestDate.TimeZone);
-        var delay = nextUtc - timeProvider.GetUtcNow().UtcDateTime;
-        return delay > TimeSpan.Zero && delay < TimeSpan.FromMinutes(1) ? delay : TimeSpan.FromMinutes(1);
+        return TimeSpan.FromMinutes(1);
     }
 }

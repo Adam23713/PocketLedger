@@ -9,7 +9,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class DebtsController(IDebtService debtService, IAccountService accountService, TimeProvider timeProvider) : Controller
+public class DebtsController(IDebtService debtService, IAccountService accountService, TimeProvider timeProvider, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         return View(new DebtDetailsViewModel { Summary = ToListItem(item.Debt, item.RemainingAmount, item.NextPayment, item.AutomaticPayment?.Account.Name ?? item.Debt.Account?.Name), CounterpartyName = item.Debt.CounterpartyName, StartDate = item.Debt.StartDate, DueDate = item.Debt.DueDate, Note = item.Debt.Note, AutomaticPaymentAmount = item.AutomaticPayment?.Amount, Frequency = item.AutomaticPayment?.Frequency, Operations = item.Transactions.Select(transaction => new DebtOperationListItemViewModel { Id = transaction.Id, Type = transaction.DebtOperationType!.Value, Amount = transaction.Amount, Date = transaction.TransactionDate, Time = transaction.TransactionTime, AccountName = transaction.Account?.Name, Note = transaction.Note }).ToList() });
     }
 
-    [HttpGet] public async Task<IActionResult> Create(CancellationToken cancellationToken) { var model = new DebtFormViewModel { Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id }; await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+    [HttpGet] public async Task<IActionResult> Create(CancellationToken cancellationToken) { var user = await userContext.GetUserAsync(cancellationToken); var model = new DebtFormViewModel { Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, StartDate = await userContext.TodayAsync(cancellationToken), Currency = user.DefaultCurrency }; await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> Create(DebtFormViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
@@ -48,12 +48,12 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     [HttpGet] public async Task<IActionResult> AddOperation(Guid id, CancellationToken cancellationToken)
     {
         var debt = await debtService.GetByIdAsync(id, cancellationToken); if (debt is null) return NotFound();
-        var model = new DebtOperationFormViewModel { DebtId = id, Direction = debt.Debt.Direction, Type = debt.Debt.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment, Date = BudapestDate.Today(timeProvider) }; await PopulateAccountsAsync(model, cancellationToken); return View(model);
+        var model = new DebtOperationFormViewModel { DebtId = id, Direction = debt.Debt.Direction, Type = debt.Debt.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment, Date = await userContext.TodayAsync(cancellationToken) }; await PopulateAccountsAsync(model, cancellationToken); return View(model);
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> AddOperation(DebtOperationFormViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
-        try { await debtService.AddOperationAsync(model.DebtId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, TimeOnly.FromDateTime(timeProvider.GetLocalNow().DateTime), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation recorded."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
+        try { await debtService.AddOperationAsync(model.DebtId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation recorded."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpGet] public async Task<IActionResult> EditOperation(Guid id, CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> EditOperation(DebtOperationFormViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
-        try { await debtService.UpdateOperationAsync(model.TransactionId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, TimeOnly.FromDateTime(timeProvider.GetLocalNow().DateTime), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation updated."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
+        try { await debtService.UpdateOperationAsync(model.TransactionId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation updated."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> DeleteOperation(Guid id, Guid debtId, CancellationToken cancellationToken) { try { await debtService.DeleteOperationAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt operation deleted."; return RedirectToAction(nameof(Details), new { id = debtId }); } catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; return RedirectToAction(nameof(Details), new { id = debtId }); } }
@@ -88,4 +88,5 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         if (!model.AutomaticPaymentEnabled || model.LastPaymentDate is not null || model.NextPaymentDate is null || model.AutomaticPaymentAmount is not > 0 || remainingAmount <= 0) return;
         model.LastPaymentDate = DebtRules.CalculateLastPaymentDate(remainingAmount, model.AutomaticPaymentAmount.Value, model.NextPaymentDate.Value, model.Frequency);
     }
+    private TimeOnly UserLocalTime(ApplicationUser user) => TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserContextService.GetTimeZone(user.TimeZoneId)).DateTime);
 }

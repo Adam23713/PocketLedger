@@ -1,6 +1,7 @@
 @{
     var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentProfile = User.Identity?.IsAuthenticated == true ? await MoneyFormatter.GetUserAsync() : null;
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
@@ -64,13 +65,19 @@
                     </div>
                     <div class="app-menu">
                         <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
-                            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg>
+                            @if (currentProfile is not null) { <img class="header-avatar" src="~/images/avatars/@($"avatar-{currentProfile.AvatarId}.png")" alt="" /> }
                         </button>
                         <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
-                            <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
-                            @if (User.Identity?.IsAuthenticated == true)
+                            @if (currentProfile is not null)
                             {
+                                <div class="profile-menu-header">
+                                    <img src="~/images/avatars/@($"avatar-{currentProfile.AvatarId}.png")" alt="" />
+                                    <div><strong>@(currentProfile.DisplayName ?? currentProfile.UserName)</strong>@if (!string.IsNullOrWhiteSpace(currentProfile.DisplayName)) { <small>@@@currentProfile.UserName</small> }</div>
+                                </div>
+                                <div class="dropdown-divider" role="separator"></div>
+                                <a role="menuitem" asp-controller="Account" asp-action="Settings">Settings</a>
                                 <a role="menuitem" asp-controller="Account" asp-action="Security">Security</a>
+                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
                             }

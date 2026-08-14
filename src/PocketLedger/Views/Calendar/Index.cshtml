@@ -13,11 +13,7 @@
         <a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a>
     </div>
 </div>
-<div class="row g-3 mb-3">
-    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Incoming</div><div class="h4 mb-0 text-success">@MoneyFormatter.Format(Model.MonthlyIncome, "HUF") HUF</div></div></div></div>
-    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Outgoing</div><div class="h4 mb-0 text-danger">−@MoneyFormatter.Format(Model.MonthlyExpenses, "HUF") HUF</div></div></div></div>
-    <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-muted">Total</div><div class="h4 mb-0">@MoneyFormatter.Format(Model.MonthlyTotal, "HUF") HUF</div></div></div></div>
-</div>
+<div class="row g-3 mb-3">@foreach (var total in Model.MonthlyTotals) { <div class="col-12 col-md-4"><div class="card card-body"><strong>@total.Currency</strong><span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span><span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span><span>=@MoneyFormatter.Format(total.Balance, total.Currency)</span></div></div> }</div>
 <div class="calendar-grid calendar-header text-center fw-semibold">
     @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }) { <div>@day</div> }
 </div>
@@ -29,9 +25,7 @@
         <strong>@day.Date.Day</strong>
         @if (day.TransactionCount > 0)
         {
-            <small class="d-block text-success">+@MoneyFormatter.Format(day.Income, "HUF")</small>
-            <small class="d-block text-danger">−@MoneyFormatter.Format(day.Expenses, "HUF")</small>
-            <small class="d-block">=@MoneyFormatter.Format(day.Balance, "HUF")</small>
+            @foreach (var total in day.Totals) { <small class="d-block">@total.Currency: <span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span> / <span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span></small> }
         }
     </a>
 }

@@ -14,6 +14,7 @@ public class PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> optio
     public DbSet<RecurringTransactionOccurrence> RecurringTransactionOccurrences => Set<RecurringTransactionOccurrence>();
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
     public DbSet<Debt> Debts => Set<Debt>();
+    public DbSet<UserCurrencyFormat> UserCurrencyFormats => Set<UserCurrencyFormat>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

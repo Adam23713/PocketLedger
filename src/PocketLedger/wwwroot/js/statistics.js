@@ -13,7 +13,7 @@
     const percentFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 1 });
     const charts = [];
 
-    const formatMoney = value => `${moneyFormatter.format(value)} HUF`;
+    const formatMoney = value => moneyFormatter.format(value);
     const chartTextColor = () => getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#212529";
     const chartGridColor = () => getComputedStyle(document.documentElement).getPropertyValue("--surface-border").trim() || "rgba(0, 0, 0, .1)";
 

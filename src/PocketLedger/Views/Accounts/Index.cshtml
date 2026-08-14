@@ -21,7 +21,7 @@ else
                 <tr>
                     <td><a class="d-inline-flex align-items-center gap-2" asp-action="Details" asp-route-id="@account.Id"><img class="account-icon account-icon-sm" src="@account.IconPath" alt="@account.IconAlt" />@account.Name</a></td>
                     <td>@account.Type</td>
-                    <td class="text-end">@MoneyFormatter.Format(account.CurrentBalance, account.Currency) @account.Currency</td>
+                    <td class="text-end">@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</td>
                     <td>@account.DisplayOrder</td>
                     <td>
                         @if (account.IncludeInMainBalance) { <span class="badge text-bg-primary">Main balance</span> }
