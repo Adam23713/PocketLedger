@@ -28,6 +28,42 @@ public class MilestoneRulesTests
     }
 
     [Fact]
+    public void Transfer_RejectsDifferentAmountForMatchingCurrencies()
+    {
+        var source = new Account { Id = Guid.NewGuid(), Currency = "HUF" };
+        var target = new Account { Id = Guid.NewGuid(), Currency = "HUF" };
+        var transfer = new Transaction { Type = TransactionType.Transfer, Amount = 100, TargetAmount = 101, ExchangeRate = 1, AccountId = source.Id, TargetAccountId = target.Id };
+
+        Assert.Throws<BusinessRuleException>(() => TransactionRules.ValidateTransfer(transfer, source, target));
+    }
+
+    [Theory]
+    [InlineData(0, 1)]
+    [InlineData(-1, 1)]
+    [InlineData(100, 0)]
+    [InlineData(100, -1)]
+    public void Transfer_RejectsInvalidTargetAmountOrExchangeRate(decimal targetAmount, decimal exchangeRate)
+    {
+        var source = new Account { Id = Guid.NewGuid(), Currency = "HUF" };
+        var target = new Account { Id = Guid.NewGuid(), Currency = "EUR" };
+        var transfer = new Transaction { Type = TransactionType.Transfer, Amount = 100, TargetAmount = targetAmount, ExchangeRate = exchangeRate, AccountId = source.Id, TargetAccountId = target.Id };
+
+        Assert.Throws<BusinessRuleException>(() => TransactionRules.ValidateTransfer(transfer, source, target));
+    }
+
+    [Fact]
+    public void Transfer_RejectsCategoryAndAdjustmentDirection()
+    {
+        var source = new Account { Id = Guid.NewGuid(), Currency = "HUF" };
+        var target = new Account { Id = Guid.NewGuid(), Currency = "EUR" };
+        var categorized = new Transaction { Type = TransactionType.Transfer, Amount = 100, TargetAmount = 1, ExchangeRate = .01m, CategoryId = Guid.NewGuid() };
+        var adjusted = new Transaction { Type = TransactionType.Transfer, Amount = 100, TargetAmount = 1, ExchangeRate = .01m, AdjustmentDirection = AdjustmentDirection.Increase };
+
+        Assert.Throws<BusinessRuleException>(() => TransactionRules.ValidateTransfer(categorized, source, target));
+        Assert.Throws<BusinessRuleException>(() => TransactionRules.ValidateTransfer(adjusted, source, target));
+    }
+
+    [Fact]
     public void RecurringTemplate_RejectsInvalidDateRange()
     {
         var template = new RecurringTransaction
