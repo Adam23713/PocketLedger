@@ -46,13 +46,13 @@ public class PocketLedgerFeatureTests
 
     public static TheoryData<decimal, decimal?, bool> TransactionAmounts => new()
     {
-        { 100.5m, null, false },
-        { 100m, 20.5m, false },
+        { 100.5m, null, true },
+        { 100m, 20.5m, true },
         { 100m, 20m, true }
     };
 
     [Theory, MemberData(nameof(TransactionAmounts))]
-    public void TransactionAmount_RequiresWholeNumbers(decimal amount, decimal? targetAmount, bool expectedValid)
+    public void TransactionAmount_AllowsDecimalValues(decimal amount, decimal? targetAmount, bool expectedValid)
     {
         var model = new TransactionFormViewModel { AccountId = Guid.NewGuid(), Amount = amount, TargetAmount = targetAmount };
         var results = new List<ValidationResult>();
