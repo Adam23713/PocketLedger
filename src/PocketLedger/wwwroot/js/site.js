@@ -65,4 +65,24 @@
     const profileButton = document.getElementById("profile-menu-button");
     const profileMenu = document.getElementById("profile-menu");
     if (profileButton && profileMenu) setupMenu(profileButton, profileMenu);
+
+    const dashboardPrivacyButton = document.getElementById("dashboard-privacy-button");
+    if (dashboardPrivacyButton) {
+        const privacyStorageKey = "pocketledger-dashboard-amounts-hidden";
+        const applyDashboardPrivacy = hidden => {
+            if (hidden) document.documentElement.dataset.dashboardAmountsHidden = "true";
+            else delete document.documentElement.dataset.dashboardAmountsHidden;
+            const label = hidden ? "Show dashboard amounts" : "Hide dashboard amounts";
+            dashboardPrivacyButton.setAttribute("aria-label", label);
+            dashboardPrivacyButton.setAttribute("aria-pressed", String(hidden));
+            dashboardPrivacyButton.title = label;
+        };
+
+        applyDashboardPrivacy(localStorage.getItem(privacyStorageKey) === "true");
+        dashboardPrivacyButton.addEventListener("click", () => {
+            const hidden = document.documentElement.dataset.dashboardAmountsHidden !== "true";
+            localStorage.setItem(privacyStorageKey, String(hidden));
+            applyDashboardPrivacy(hidden);
+        });
+    }
 })();
