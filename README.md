@@ -1,6 +1,6 @@
 # PocketLedger
 
-PocketLedger is a self-hosted personal finance manager built with ASP.NET Core MVC and PostgreSQL. It keeps accounts, categorized transactions, recurring entries, calendar views, statistics, and backups in one private installation.
+PocketLedger is a self-hosted personal finance manager built with ASP.NET Core MVC and PostgreSQL. It keeps accounts, categorized transactions, recurring entries, loans and debts, calendar views, statistics, and backups in one private installation.
 
 > PocketLedger is intended for personal use and small trusted deployments. It is not accounting, tax, or financial advice software.
 
@@ -9,46 +9,34 @@ PocketLedger is a self-hosted personal finance manager built with ASP.NET Core M
 - Multiple cash, bank, savings, credit-card, and custom accounts
 - Income, expense, transfer, and balance-adjustment tracking
 - Hierarchical income and expense categories
-- Dashboard, calendar, and monthly statistics
-- Recurring transaction templates
+- Multi-currency accounts and transfers with exchange rates
+- Dashboard with an optional privacy mask for financial amounts
+- Calendar and monthly statistics grouped by currency
+- Recurring transaction templates with automatic occurrence processing
+- Loan and debt tracking with repayment history and optional automatic payments
 - CSV transaction import and export
 - Full JSON backup and restore
 - Local user accounts with mandatory TOTP two-factor authentication
 - Per-user data isolation and configurable user limit
-- Docker Compose deployment with PostgreSQL
-
-## Screenshots
-
-### Dashboard
-
-![PocketLedger dashboard showing balances and recent transactions](docs/images/dashboard.png)
-
-### Account editor
-
-<img src="docs/images/edit-account.png" alt="PocketLedger account editor with icon and color selection" width="507">
-
-### Categories
-
-![PocketLedger income and expense categories](docs/images/categories.png)
-
-### Calendar
-
-![PocketLedger monthly transaction calendar](docs/images/calendar.png)
-
-### Statistics
-
-![PocketLedger monthly financial statistics](docs/images/statics.png)
+- Profile, avatar, time-zone, and per-currency display settings
+- Authentication rate limiting and a per-user security audit log
+- Four selectable appearance themes
+- Docker Compose deployment with PostgreSQL and Caddy
 
 ## Basic workflow
 
 1. Create accounts for the places where you keep money, such as a current account, savings account, credit card, or cash wallet.
 2. Create income and expense categories. Categories may contain one level of subcategories.
 3. Record income, expenses, transfers, and balance adjustments from the **Transactions** page.
-4. Use **Recurring** for repeating income or expenses, and review scheduled activity in **Calendar**.
-5. Explore monthly totals and category breakdowns in **Statistics**.
-6. Use **Import / Export** to import transaction CSV files, export filtered transactions, or create a complete JSON backup.
+4. Use **Recurring** for repeating income, expenses, adjustments, or automatic loan payments. Due occurrences are created automatically.
+5. Track money you owe or expect to receive under **Loans / Debts**, including disbursements, repayments, corrections, and linked account movements.
+6. Review scheduled and completed activity in **Calendar**, and explore monthly totals and category breakdowns in **Statistics**.
+7. Open **Settings** to choose a display name, avatar, default currency, time zone, and number formatting for each supported currency.
+8. Use **Import / Export** to import transaction CSV files, export filtered transactions, or create a complete JSON backup.
 
-PocketLedger supports three-letter currency codes such as `EUR`, `USD`, and `HUF`. Transfers can connect accounts that use the same or different currencies; for different currencies, enter both the source and target amount.
+PocketLedger currently supports `HUF`, `EUR`, and `USD`. Transfers can connect accounts that use the same or different currencies. Same-currency transfers use a 1:1 exchange rate; for different currencies, enter the exchange rate and PocketLedger calculates the target amount using the target currency's configured decimal precision.
+
+The eye button beside the **Dashboard** heading masks financial amounts when the screen is visible to other people. The choice is stored in the browser and remains active after reloading the page. This is a visual privacy aid, not an access-control boundary: authorized users and browser developer tools can still access the values.
 
 ## User accounts
 
@@ -108,6 +96,14 @@ Edit `.env` and replace every placeholder. Use long, unique random values for bo
 
 PocketLedger-specific Docker and bootstrap settings use the `POCKETLEDGER_*` variable prefix.
 
+Create the Caddy configuration:
+
+```bash
+cp Caddyfile.example Caddyfile
+```
+
+Replace `<host-name>` in `Caddyfile` with the DNS name that points to the server. Caddy terminates HTTP/HTTPS traffic and forwards requests to the application container on port `5050`.
+
 ### 2. Create the database and initial user
 
 Start PostgreSQL:
@@ -125,10 +121,10 @@ docker compose run --rm app bootstrap-identity
 ### 3. Start PocketLedger
 
 ```bash
-docker compose up -d app
+docker compose up -d
 ```
 
-Open `http://localhost:5050`, or the port selected with `POCKETLEDGER_PORT`, and sign in with the initial username and password. PocketLedger will immediately require TOTP setup and display one-time recovery codes. Store those codes somewhere safe before continuing.
+Open the host name configured in `Caddyfile` and sign in with the initial username and password. PocketLedger will immediately require TOTP setup and display one-time recovery codes. Store those codes somewhere safe before continuing.
 
 Useful container commands:
 
@@ -220,7 +216,7 @@ The image listens on port `5050` and requires a reachable PostgreSQL database. D
 ## Backup and import behavior
 
 - **CSV export/import** moves income and expense transactions. Imported rows must reference accounts and categories that already exist.
-- **JSON backup/restore** moves accounts, categories, all transaction types, and recurring transaction templates.
+- **JSON backup/restore** moves accounts, categories, loans and debts, all transaction types, transfer exchange-rate data, transaction times, and recurring transaction templates.
 - JSON backups do not contain account passwords, TOTP secrets, recovery codes, or authentication audit events.
 - JSON backups contain the complete financial dataset, including account names, balances, transaction amounts, dates, categories, and notes. Store and share backup files securely.
 
@@ -228,7 +224,6 @@ The image listens on port `5050` and requires a reachable PostgreSQL database. D
 
 | Setting | Purpose | Default |
 | --- | --- | --- |
-| `POCKETLEDGER_PORT` | Host port used by Docker Compose | `5050` |
 | `POSTGRES_DB` | PostgreSQL database name used by Docker Compose | `moneymanager` |
 | `POSTGRES_USER` | PostgreSQL user used by Docker Compose | `moneymanager` |
 | `POSTGRES_PASSWORD` | PostgreSQL password used by Docker Compose | Insecure fallback; always override |
@@ -246,14 +241,14 @@ The image listens on port `5050` and requires a reachable PostgreSQL database. D
 src/PocketLedger/           ASP.NET Core MVC application
 tests/PocketLedger.Tests/   Automated tests
 examples/                   Fictional importable demo data
-docs/                       Operational documentation
-compose.yaml                Application and PostgreSQL services
+compose.yaml                Application, PostgreSQL, and Caddy services
 Dockerfile                  Multi-stage production image
+Caddyfile.example           Reverse-proxy configuration template
 ```
 
 ## Development
 
-Run the existing test suite with:
+The automated suite contains business-rule unit tests, EF Core integration tests for user isolation and settings, and HTTP smoke tests for public and protected routes. Run it with:
 
 ```bash
 dotnet test PocketLedger.slnx
