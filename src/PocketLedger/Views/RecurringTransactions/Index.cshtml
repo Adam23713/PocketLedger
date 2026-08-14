@@ -20,7 +20,7 @@ else
                 </span>
             </div>
             <div class="d-flex align-items-center gap-3 ms-auto">
-                <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</span>
+                <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(item.Amount, item.Currency)</span>
                 <span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span>
                 <span><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
             </div>
@@ -30,7 +30,7 @@ else
     {
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold">
             <span>Total recurring expenses</span>
-            <span class="d-flex flex-wrap gap-3">@foreach (var total in Model.ExpenseTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency) @total.Currency</span> }</span>
+            <span class="d-flex flex-wrap gap-3">@foreach (var total in Model.ExpenseTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span>
         </div>
     }
     </div>
@@ -47,12 +47,12 @@ else
                 @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@item.CategoryIconAlt" /> }
                 <span><strong><a asp-controller="Debts" asp-action="Details" asp-route-id="@item.DebtId">@item.DebtName</a></strong><br /><small class="text-muted">@(item.NextOccurrence is null ? "No upcoming occurrence" : $"Next: {item.NextOccurrence:yyyy-MM-dd}") · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")</small></span>
             </div>
-            <div class="d-flex align-items-center gap-3 ms-auto"><span class="text-danger">−@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</span><span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span></div>
+            <div class="d-flex align-items-center gap-3 ms-auto"><span class="text-danger">−@MoneyFormatter.Format(item.Amount, item.Currency)</span><span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span></div>
         </div>
     }
     @if (Model.MonthlyLoanPaymentTotals.Count > 0)
     {
-        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold"><span>Total monthly loan payments</span><span class="d-flex flex-wrap gap-3">@foreach (var total in Model.MonthlyLoanPaymentTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency) @total.Currency</span> }</span></div>
+        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold"><span>Total monthly loan payments</span><span class="d-flex flex-wrap gap-3">@foreach (var total in Model.MonthlyLoanPaymentTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span></div>
     }
     </div>
 }

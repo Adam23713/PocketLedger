@@ -7,14 +7,14 @@ namespace PocketLedger.Services;
 
 public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService accountService) : IStatisticsService
 {
-    public async Task<StatisticsSummary> GetSummaryAsync(int year, int month, CancellationToken cancellationToken)
+    public async Task<StatisticsSummary> GetSummaryAsync(int year, int month, string currency, CancellationToken cancellationToken)
     {
         if (year < 1 || month is < 1 or > 12) throw new BusinessRuleException("The selected month is invalid.");
         var selectedStart = new DateOnly(year, month, 1);
         var trendStart = selectedStart.AddMonths(-11);
         var end = selectedStart.AddMonths(1);
         var transactions = await dbContext.Transactions.AsNoTracking()
-            .Where(transaction => transaction.TransactionDate >= trendStart && transaction.TransactionDate < end && transaction.Type != TransactionType.Transfer)
+            .Where(transaction => transaction.TransactionDate >= trendStart && transaction.TransactionDate < end && transaction.Type != TransactionType.Transfer && transaction.SourceCurrency == currency)
             .Select(transaction => new StatisticsTransactionRow(
                 transaction.TransactionDate,
                 transaction.Type,
@@ -32,7 +32,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
         var accounts = await accountService.GetAllAsync(cancellationToken);
         var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
         var recurringTemplates = await dbContext.RecurringTransactions.AsNoTracking()
-            .Where(template => template.Enabled && template.Type == TransactionType.Expense && template.CategoryId != null && template.FirstOccurrence < end && (template.LastOccurrence == null || template.LastOccurrence >= selectedStart))
+            .Where(template => template.Enabled && template.Type == TransactionType.Expense && template.Account.Currency == currency && template.CategoryId != null && template.FirstOccurrence < end && (template.LastOccurrence == null || template.LastOccurrence >= selectedStart))
             .Select(template => new
             {
                 Template = template,

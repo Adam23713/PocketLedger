@@ -5,11 +5,11 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class CalendarController(ICalendarService calendarService) : Controller
+public class CalendarController(ICalendarService calendarService, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(int? year, int? month, CancellationToken cancellationToken)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = await userContext.TodayAsync(cancellationToken);
         var selected = new DateOnly(year ?? today.Year, month ?? today.Month, 1);
         try
         {
@@ -26,9 +26,7 @@ public class CalendarController(ICalendarService calendarService) : Controller
                     IsCurrentMonth = date.Month == selected.Month,
                     IsToday = date == today,
                     TransactionCount = summary?.TransactionCount ?? 0,
-                    Income = summary?.Income ?? 0,
-                    Expenses = summary?.Expenses ?? 0,
-                    Balance = summary?.Balance ?? 0
+                    Totals = summary?.Totals.Select(total => new CalendarCurrencyTotalViewModel(total.Currency, total.Income, total.Expenses, total.Balance)).ToList() ?? []
                 });
             }
 
@@ -37,8 +35,7 @@ public class CalendarController(ICalendarService calendarService) : Controller
                 Year = selected.Year,
                 Month = selected.Month,
                 Today = today,
-                MonthlyIncome = summaries.Values.Sum(summary => summary.Income),
-                MonthlyExpenses = summaries.Values.Sum(summary => summary.Expenses),
+                MonthlyTotals = summaries.Values.SelectMany(summary => summary.Totals).GroupBy(total => total.Currency).Select(group => new CalendarCurrencyTotalViewModel(group.Key, group.Sum(item => item.Income), group.Sum(item => item.Expenses), group.Sum(item => item.Balance))).ToList(),
                 Days = days
             });
         }

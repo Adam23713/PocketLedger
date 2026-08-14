@@ -5,7 +5,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider) : IAccountService
+public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService userContext) : IAccountService
 {
     public async Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -34,7 +34,7 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
 
         existing.Name = account.Name;
         existing.Type = account.Type;
-        existing.Currency = account.Currency;
+        if (existing.Currency != account.Currency) throw new BusinessRuleException("Account currency cannot be changed after creation.");
         var balanceDifference = account.InitialBalance - existing.InitialBalance;
         if (createInitialBalanceAdjustment && balanceDifference != 0)
         {
@@ -42,7 +42,8 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
             {
                 Id = Guid.NewGuid(), Type = Models.Enums.TransactionType.Adjustment, AccountId = existing.Id, Amount = Math.Abs(balanceDifference),
                 AdjustmentDirection = balanceDifference > 0 ? Models.Enums.AdjustmentDirection.Increase : Models.Enums.AdjustmentDirection.Decrease,
-                TransactionDate = BudapestDate.Today(timeProvider), TransactionTime = TimeOnly.FromDateTime(timeProvider.GetLocalNow().DateTime), Note = "Initial balance adjustment"
+                TransactionDate = await userContext.TodayAsync(cancellationToken), TransactionTime = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserContextService.GetTimeZone((await userContext.GetUserAsync(cancellationToken)).TimeZoneId)).DateTime),
+                OccurredAtUtc = timeProvider.GetUtcNow(), SourceCurrency = existing.Currency, Note = "Initial balance adjustment"
             });
         }
         else

@@ -8,9 +8,9 @@ public static class AccountRules
     public static string NormalizeAndValidateCurrency(string? currency)
     {
         var normalized = currency?.Trim().ToUpperInvariant() ?? string.Empty;
-        if (normalized.Length != 3 || !normalized.All(char.IsLetter))
+        if (!Currencies.Exists(normalized))
         {
-            throw new BusinessRuleException("Currency must contain exactly three letters.");
+            throw new BusinessRuleException("The selected currency is not supported.");
         }
 
         return normalized;

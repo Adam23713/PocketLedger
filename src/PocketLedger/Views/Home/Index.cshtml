@@ -7,7 +7,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <div>
         <h1 class="mb-1">Dashboard</h1>
-        <p class="text-muted mb-0">Total main balance: <strong>@MoneyFormatter.Format(Model.TotalMainBalance, "HUF") HUF</strong></p>
+        <p class="text-muted mb-0">Total main balance: @foreach (var total in Model.MainBalances) { <strong class="me-2">@MoneyFormatter.Format(total.Amount, total.Currency)</strong> }</p>
     </div>
     <div class="d-flex gap-2">
         <a class="btn btn-outline-primary" asp-controller="Accounts" asp-action="Create">New account</a>
@@ -20,12 +20,10 @@
 }
 
 <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.TotalMainBalance, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.NetWorth, "HUF") HUF</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small>@foreach (var total in Model.MainBalances) { <div class="h5 mb-0">@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small>@foreach (var total in Model.NetWorthBalances) { <div class="h5 mb-0">@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
     <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Accounts</small><div class="h4 mb-0">@Model.AccountCount</div></div></div></div>
-    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Income this month</small><div class="h4 mb-0 text-success">@MoneyFormatter.Format(Model.IncomeThisMonth, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Expenses this month</small><div class="h4 mb-0 text-danger">@MoneyFormatter.Format(Model.ExpensesThisMonth, "HUF") HUF</div></div></div></div>
-    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Monthly change</small><div class="h4 mb-0">@MoneyFormatter.Format(Model.BalanceChangeThisMonth, "HUF") HUF</div></div></div></div>
+    <div class="col-12 col-lg-4"><div class="card h-100"><div class="card-body"><small class="text-muted">This month</small>@foreach (var total in Model.MonthlyTotals) { <div><span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span> · <span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span> · @MoneyFormatter.Format(total.Change, total.Currency)</div> }</div></div></div>
 </div>
 
 <h2 class="h4">Account balances</h2>

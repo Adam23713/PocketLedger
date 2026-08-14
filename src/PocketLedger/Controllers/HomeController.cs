@@ -9,23 +9,27 @@ using PocketLedger.Services;
 
 namespace PocketLedger.Controllers;
 
-public class HomeController(IAccountService accountService, ITransactionService transactionService, IDebtService debtService, TimeProvider timeProvider) : Controller
+public class HomeController(IAccountService accountService, ITransactionService transactionService, IDebtService debtService, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var accounts = await accountService.GetAllAsync(cancellationToken);
         var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
         var recentTransactions = await transactionService.GetRecentAsync(10, cancellationToken);
-        var today = DateTime.Today;
+        var today = await userContext.TodayAsync(cancellationToken);
         var monthTransactions = await transactionService.GetForMonthAsync(today.Year, today.Month, cancellationToken);
         var incomeThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Income).Sum(transaction => transaction.Amount);
         var expensesThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Expense).Sum(transaction => transaction.Amount);
         var adjustmentsThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Adjustment).Sum(transaction => transaction.AdjustmentDirection == AdjustmentDirection.Increase ? transaction.Amount : -transaction.Amount);
-        var warnings = await debtService.GetFundingWarningsAsync(BudapestDate.Today(timeProvider), cancellationToken);
+        var monthlyTotals = monthTransactions.Where(transaction => transaction.Type != TransactionType.Transfer).GroupBy(transaction => transaction.SourceCurrency).Select(group => new CurrencyPeriodViewModel(group.Key, group.Where(item => item.Type == TransactionType.Income).Sum(item => item.Amount), group.Where(item => item.Type == TransactionType.Expense).Sum(item => item.Amount), group.Sum(item => item.Type == TransactionType.Income ? item.Amount : item.Type == TransactionType.Expense ? -item.Amount : item.AdjustmentDirection == AdjustmentDirection.Increase ? item.Amount : -item.Amount))).ToList();
+        var warnings = await debtService.GetFundingWarningsAsync(today, cancellationToken);
         var model = new HomeViewModel
         {
             TotalMainBalance = await transactionService.CalculateMainBalanceAsync(cancellationToken),
             NetWorth = accounts.Where(account => account.IncludeInNetWorth).Sum(account => balances[account.Id]),
+            MainBalances = accounts.Where(account => account.IncludeInMainBalance).GroupBy(account => account.Currency).Select(group => new CurrencyBalanceViewModel(group.Key, group.Sum(account => balances[account.Id]))).ToList(),
+            NetWorthBalances = accounts.Where(account => account.IncludeInNetWorth).GroupBy(account => account.Currency).Select(group => new CurrencyBalanceViewModel(group.Key, group.Sum(account => balances[account.Id]))).ToList(),
+            MonthlyTotals = monthlyTotals,
             AccountCount = accounts.Count,
             IncomeThisMonth = incomeThisMonth,
             ExpensesThisMonth = expensesThisMonth,

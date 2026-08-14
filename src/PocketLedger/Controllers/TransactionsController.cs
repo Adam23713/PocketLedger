@@ -9,11 +9,11 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider) : Controller
+public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search, int page = 1, CancellationToken cancellationToken = default)
     {
-        var today = DateTime.Today;
+        var today = await userContext.TodayAsync(cancellationToken);
         if (dateFrom is null && dateTo is null && year is null && month is null)
         {
             year = today.Year;
@@ -84,7 +84,8 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     [HttpGet]
     public async Task<IActionResult> Create(Guid? accountId, CancellationToken cancellationToken)
     {
-        var model = new TransactionFormViewModel { AccountId = accountId };
+        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserContextService.GetTimeZone((await userContext.GetUserAsync(cancellationToken)).TimeZoneId));
+        var model = new TransactionFormViewModel { AccountId = accountId, TransactionDate = DateOnly.FromDateTime(now.DateTime), TransactionHour = now.Hour, TransactionMinute = now.Minute };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }
@@ -100,7 +101,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
         try
         {
-            var transaction = await transactionService.CreateAsync(ToEntity(model), cancellationToken);
+            var transaction = await transactionService.CreateAsync(await ToEntityAsync(model, cancellationToken), cancellationToken);
             TempData["SuccessMessage"] = "Transaction created successfully.";
             return RedirectToAction(nameof(Details), new { id = transaction.Id });
         }
@@ -122,7 +123,6 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         }
         if (transaction.DebtId is not null) return RedirectToAction("Details", "Debts", new { id = transaction.DebtId });
 
-        var now = timeProvider.GetLocalNow();
         var model = new TransactionFormViewModel
         {
             Id = transaction.Id,
@@ -131,9 +131,10 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             TargetAccountId = transaction.TargetAccountId,
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
+            ExchangeRate = transaction.ExchangeRate,
             TransactionDate = transaction.TransactionDate,
-            TransactionHour = now.Hour,
-            TransactionMinute = now.Minute,
+            TransactionHour = transaction.TransactionTime.Hour,
+            TransactionMinute = transaction.TransactionTime.Minute,
             CategoryId = transaction.CategoryId,
             AdjustmentDirection = transaction.AdjustmentDirection,
             Note = transaction.Note
@@ -158,7 +159,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
         try
         {
-            await transactionService.UpdateAsync(ToEntity(model), cancellationToken);
+            await transactionService.UpdateAsync(await ToEntityAsync(model, cancellationToken), cancellationToken);
             TempData["SuccessMessage"] = "Transaction updated successfully.";
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -241,7 +242,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
     private static string FormatCategoryName(CategoryChoice choice) => choice.IsSubcategory ? $"|--------- {choice.Name}" : choice.Name;
 
-    private static Transaction ToEntity(TransactionFormViewModel model) => new()
+    private async Task<Transaction> ToEntityAsync(TransactionFormViewModel model, CancellationToken cancellationToken) => new()
     {
         Id = model.Id,
         Type = model.Type,
@@ -249,8 +250,10 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         TargetAccountId = model.TargetAccountId,
         Amount = model.Amount,
         TargetAmount = model.TargetAmount,
+        ExchangeRate = model.ExchangeRate,
         TransactionDate = model.TransactionDate,
         TransactionTime = new TimeOnly(model.TransactionHour, model.TransactionMinute),
+        OccurredAtUtc = await userContext.ToUtcAsync(model.TransactionDate, new TimeOnly(model.TransactionHour, model.TransactionMinute), cancellationToken),
         CategoryId = model.CategoryId,
         AdjustmentDirection = model.AdjustmentDirection,
         Note = model.Note
@@ -268,8 +271,8 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             AdjustmentDirection = transaction.AdjustmentDirection,
             AccountName = transaction.Account?.Name,
             TargetAccountName = transaction.TargetAccount?.Name,
-            Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
-            TargetCurrency = transaction.TargetAccount?.Currency,
+            Currency = transaction.SourceCurrency,
+            TargetCurrency = transaction.TargetCurrency,
             CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
             CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
             CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : icon?.DisplayName,
@@ -296,13 +299,14 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             AdjustmentDirection = transaction.AdjustmentDirection,
             AccountName = transaction.Account?.Name,
             TargetAccountName = transaction.TargetAccount?.Name,
-            Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
-            TargetCurrency = transaction.TargetAccount?.Currency,
+            Currency = transaction.SourceCurrency,
+            TargetCurrency = transaction.TargetCurrency,
             CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
             CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
             CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : icon?.DisplayName,
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
+            ExchangeRate = transaction.ExchangeRate,
             TransactionDate = transaction.TransactionDate,
             TransactionTime = transaction.TransactionTime,
             Note = transaction.Note,

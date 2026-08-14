@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
+using PocketLedger.Models;
 using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
@@ -104,9 +105,13 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         existing.TargetAccountId = transaction.TargetAccountId;
         existing.Amount = transaction.Amount;
         existing.TargetAmount = transaction.TargetAmount;
+        existing.ExchangeRate = transaction.ExchangeRate;
+        existing.SourceCurrency = transaction.SourceCurrency;
+        existing.TargetCurrency = transaction.TargetCurrency;
         existing.AdjustmentDirection = transaction.AdjustmentDirection;
         existing.TransactionDate = transaction.TransactionDate;
         existing.TransactionTime = transaction.TransactionTime;
+        existing.OccurredAtUtc = transaction.OccurredAtUtc;
         existing.CategoryId = transaction.CategoryId;
         existing.Note = transaction.Note;
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -163,9 +168,12 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
             var targetAccount = transaction.TargetAccountId is null
                 ? null
                 : await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == transaction.TargetAccountId, cancellationToken);
-            if (account is not null && targetAccount is not null && account.Currency == targetAccount.Currency)
+            if (account is not null && targetAccount is not null)
             {
-                transaction.TargetAmount = transaction.Amount;
+                transaction.SourceCurrency = account.Currency;
+                transaction.TargetCurrency = targetAccount.Currency;
+                transaction.ExchangeRate = account.Currency == targetAccount.Currency ? 1m : transaction.ExchangeRate;
+                if (transaction.ExchangeRate is not null) transaction.TargetAmount = decimal.Round(transaction.Amount * transaction.ExchangeRate.Value, Currencies.Get(targetAccount.Currency).DecimalDigits, MidpointRounding.AwayFromZero);
             }
 
             TransactionRules.ValidateTransfer(transaction, account, targetAccount);
@@ -175,6 +183,9 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
             TransactionRules.Validate(transaction, account, category);
             transaction.TargetAccountId = null;
             transaction.TargetAmount = null;
+            transaction.ExchangeRate = null;
+            transaction.TargetCurrency = null;
+            transaction.SourceCurrency = account!.Currency;
         }
 
         transaction.Note = string.IsNullOrWhiteSpace(transaction.Note) ? null : transaction.Note.Trim();

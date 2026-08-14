@@ -3,7 +3,7 @@
 <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
 <div class="row">
     <div class="col-md-6 mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.AccountType>()" class="form-select"></select></div>
-    <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label"></label><input asp-for="Currency" class="form-control text-uppercase" maxlength="3" /><span asp-validation-for="Currency" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label"></label>@if (Model.Id == Guid.Empty) { <select asp-for="Currency" class="form-select">@foreach (var currency in Currencies.All) { <option value="@currency.Code">@currency.Code — @currency.DisplayName</option> }</select> } else { <input asp-for="Currency" type="hidden" /><input class="form-control" value="@Model.Currency" disabled /><div class="form-text">Currency cannot be changed after account creation.</div> }<span asp-validation-for="Currency" class="text-danger"></span></div>
 </div>
 @if (Model.Id != Guid.Empty)
 {

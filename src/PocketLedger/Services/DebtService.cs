@@ -6,7 +6,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvider) : IDebtService
+public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService? userContext = null) : IDebtService
 {
     public async Task<IReadOnlyList<DebtSummary>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -151,7 +151,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         var remaining = CalculateRemaining(debt);
         var delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
         if (remaining + delta < 0) throw new BusinessRuleException("The operation amount cannot exceed the remaining debt.");
-        var transaction = new Transaction { Id = Guid.NewGuid(), Type = GetTransactionType(input.Type, account), AccountId = account?.Id, Amount = input.Amount, TransactionDate = input.Date, TransactionTime = input.Time, Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
+        var transaction = new Transaction { Id = Guid.NewGuid(), Type = GetTransactionType(input.Type, account), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
         dbContext.Transactions.Add(transaction);
         ApplyAutomaticStatus(debt, remaining + delta);
         if (save) await dbContext.SaveChangesAsync(cancellationToken);

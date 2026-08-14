@@ -14,13 +14,19 @@ public class CalendarService(PocketLedgerDbContext dbContext) : ICalendarService
         var end = start.AddMonths(1);
         var transactions = await dbContext.Transactions.AsNoTracking()
             .Where(transaction => transaction.TransactionDate >= start && transaction.TransactionDate < end && transaction.Type != TransactionType.Transfer)
-            .Select(transaction => new Models.Entities.Transaction { TransactionDate = transaction.TransactionDate, Type = transaction.Type, Amount = transaction.Amount, AdjustmentDirection = transaction.AdjustmentDirection })
+            .Select(transaction => new { transaction.TransactionDate, transaction.Type, transaction.Amount, transaction.AdjustmentDirection, Currency = transaction.SourceCurrency })
             .ToListAsync(cancellationToken);
 
         return transactions.GroupBy(transaction => transaction.TransactionDate).ToDictionary(group => group.Key, group =>
         {
-            var totals = PeriodCalculator.Calculate(group);
-            return new CalendarDaySummary(group.Key, totals.Income, totals.Expenses, totals.Balance, group.Count());
+            var totals = group.GroupBy(item => item.Currency).Select(currencyGroup =>
+            {
+                var income = currencyGroup.Where(item => item.Type == TransactionType.Income).Sum(item => item.Amount);
+                var expenses = currencyGroup.Where(item => item.Type == TransactionType.Expense).Sum(item => item.Amount);
+                var adjustments = currencyGroup.Where(item => item.Type == TransactionType.Adjustment).Sum(item => item.AdjustmentDirection == AdjustmentDirection.Increase ? item.Amount : -item.Amount);
+                return new CurrencyPeriodTotal(currencyGroup.Key, income, expenses, income - expenses + adjustments);
+            }).ToList();
+            return new CalendarDaySummary(group.Key, totals, group.Count());
         });
     }
 }

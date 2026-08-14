@@ -5,9 +5,7 @@ public class CalendarViewModel
     public int Year { get; init; }
     public int Month { get; init; }
     public DateOnly Today { get; init; }
-    public decimal MonthlyIncome { get; init; }
-    public decimal MonthlyExpenses { get; init; }
-    public decimal MonthlyTotal => MonthlyIncome - MonthlyExpenses;
+    public IReadOnlyList<CalendarCurrencyTotalViewModel> MonthlyTotals { get; init; } = [];
     public IReadOnlyList<CalendarDayViewModel> Days { get; init; } = [];
 }
 
@@ -17,7 +15,7 @@ public class CalendarDayViewModel
     public bool IsCurrentMonth { get; init; }
     public bool IsToday { get; init; }
     public int TransactionCount { get; init; }
-    public decimal Income { get; init; }
-    public decimal Expenses { get; init; }
-    public decimal Balance { get; init; }
+    public IReadOnlyList<CalendarCurrencyTotalViewModel> Totals { get; init; } = [];
 }
+
+public record CalendarCurrencyTotalViewModel(string Currency, decimal Income, decimal Expenses, decimal Balance);

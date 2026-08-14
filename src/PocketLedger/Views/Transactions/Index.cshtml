@@ -49,8 +49,8 @@
             <div class="d-flex flex-wrap gap-3 fs-6">
                 @foreach (var total in day.Totals)
                 {
-                    <span class="text-success">Incoming: +@MoneyFormatter.Format(total.Income, total.Currency) @total.Currency</span>
-                    <span class="text-danger">Outgoing: −@MoneyFormatter.Format(total.Expenses, total.Currency) @total.Currency</span>
+                    <span class="text-success">Incoming: +@MoneyFormatter.Format(total.Income, total.Currency)</span>
+                    <span class="text-danger">Outgoing: −@MoneyFormatter.Format(total.Expenses, total.Currency)</span>
                 }
             </div>
         }
@@ -58,13 +58,14 @@
     <div class="list-group">
     @foreach (var transaction in day.Transactions)
     {
-        var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer || transaction.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
+        var transfer = transaction.Type == TransactionType.Transfer;
+        var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
         <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" asp-action="Details" asp-route-id="@transaction.Id">
             <span class="d-flex align-items-center gap-2">
                 @if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }
                 <span><strong>@transaction.Type</strong> · @(transaction.DebtOperationType is not null ? $"{transaction.DebtOperationType} · {transaction.DebtName}" : transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")<br /><small class="text-muted">@transaction.TransactionTime.ToString("HH:mm") · @(transaction.AccountName ?? "No account movement")@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note)</small></span>
             </span>
-            <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency) @transaction.Currency</span>
+            <span class="@(transfer ? null : negative ? "text-danger" : "text-success")">@(transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span>
         </a>
     }
     </div>

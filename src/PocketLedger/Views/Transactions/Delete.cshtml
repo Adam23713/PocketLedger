@@ -7,7 +7,7 @@
     {
         <img class="category-icon" src="@Model.CategoryIconPath" alt="@Model.CategoryIconAlt" />
     }
-    <span>@Model.TransactionDate.ToString("yyyy-MM-dd") @Model.TransactionTime.ToString("HH:mm") · @MoneyFormatter.Format(Model.Amount, Model.Currency) @Model.Currency · @Model.AccountName</span>
+    <span>@Model.TransactionDate.ToString("yyyy-MM-dd") @Model.TransactionTime.ToString("HH:mm") · @MoneyFormatter.Format(Model.Amount, Model.Currency) · @Model.AccountName</span>
 </p>
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     <button class="btn btn-danger" type="submit">Delete</button>

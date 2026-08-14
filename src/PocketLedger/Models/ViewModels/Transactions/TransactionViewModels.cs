@@ -74,6 +74,7 @@ public class TransactionDetailsViewModel
     public string? CategoryIconAlt { get; init; }
     public decimal Amount { get; init; }
     public decimal? TargetAmount { get; init; }
+    public decimal? ExchangeRate { get; init; }
     public DateOnly TransactionDate { get; init; }
     public TimeOnly TransactionTime { get; init; }
     public string? Note { get; init; }
@@ -86,13 +87,6 @@ public class TransactionDetailsViewModel
 
 public class TransactionFormViewModel : IValidatableObject
 {
-    public TransactionFormViewModel()
-    {
-        var now = DateTime.Now;
-        TransactionHour = now.Hour;
-        TransactionMinute = now.Minute;
-    }
-
     public Guid Id { get; set; }
 
     [Required]
@@ -107,9 +101,10 @@ public class TransactionFormViewModel : IValidatableObject
     public decimal Amount { get; set; }
 
     public decimal? TargetAmount { get; set; }
+    public decimal? ExchangeRate { get; set; }
 
     [Required]
-    public DateOnly TransactionDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly TransactionDate { get; set; }
 
     [Range(0, 23)]
     public int TransactionHour { get; set; }
@@ -128,8 +123,7 @@ public class TransactionFormViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (Amount != decimal.Truncate(Amount)) yield return new ValidationResult("Amount must be a whole number.", [nameof(Amount)]);
-        if (TargetAmount is not null && TargetAmount != decimal.Truncate(TargetAmount.Value)) yield return new ValidationResult("Target amount must be a whole number.", [nameof(TargetAmount)]);
+        if (Type == TransactionType.Transfer && ExchangeRate is <= 0) yield return new ValidationResult("Exchange rate must be greater than zero.", [nameof(ExchangeRate)]);
     }
 }
 
