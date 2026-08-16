@@ -7,9 +7,11 @@ namespace PocketLedger.Models.ViewModels.Debts;
 
 public class DebtIndexViewModel
 {
-    public IReadOnlyList<DebtListItemViewModel> Active { get; init; } = [];
-    public IReadOnlyList<DebtListItemViewModel> Closed { get; init; } = [];
+    public IReadOnlyList<DebtCurrencyGroupViewModel> ActiveGroups { get; init; } = [];
+    public IReadOnlyList<DebtCurrencyGroupViewModel> ClosedGroups { get; init; } = [];
 }
+
+public record DebtCurrencyGroupViewModel(string Currency, IReadOnlyList<DebtListItemViewModel> Items, decimal WeOwe, decimal OwedToUs);
 
 public class DebtListItemViewModel
 {
@@ -38,7 +40,7 @@ public class DebtFormViewModel : IValidatableObject
     [Required] public DebtDirection Direction { get; set; }
     [Required] public DebtType Type { get; set; }
     [Required, StringLength(200)] public string CounterpartyName { get; set; } = string.Empty;
-    [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal OriginalAmount { get; set; }
+    [Display(Name = "Original amount"), Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal OriginalAmount { get; set; }
     [Required, StringLength(3, MinimumLength = 3)] public string Currency { get; set; } = "HUF";
     [Required] public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public DateOnly? DueDate { get; set; }

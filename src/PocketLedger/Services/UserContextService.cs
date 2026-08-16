@@ -14,6 +14,7 @@ public interface IUserContextService
     Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default);
     Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default);
     string Format(decimal amount, string? currency);
+    string FormatNumber(decimal amount, string? currency);
     MoneyInputFormat GetMoneyInputFormat(string currency);
 }
 
@@ -66,6 +67,15 @@ public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbC
         var marker = format.CurrencyDisplay == CurrencyDisplay.Symbol ? definition.Symbol : definition.Code;
         var space = format.UseSpace ? " " : string.Empty;
         return format.CurrencyPosition == CurrencyPosition.Before ? marker + space + number : number + space + marker;
+    }
+
+    public string FormatNumber(decimal amount, string? currency)
+    {
+        var definition = Currencies.Get(currency);
+        cachedUser ??= dbContext.Users.Include(user => user.CurrencyFormats).Single(user => user.Id == currentUser.UserId);
+        var format = cachedUser.CurrencyFormats.SingleOrDefault(item => item.CurrencyCode == definition.Code) ?? DefaultFormat(definition);
+        var numberFormat = new System.Globalization.NumberFormatInfo { NumberDecimalDigits = format.DecimalPlaces, NumberDecimalSeparator = format.DecimalSeparator, NumberGroupSeparator = format.ThousandsSeparator };
+        return amount.ToString($"N{format.DecimalPlaces}", numberFormat);
     }
 
     public MoneyInputFormat GetMoneyInputFormat(string currency)

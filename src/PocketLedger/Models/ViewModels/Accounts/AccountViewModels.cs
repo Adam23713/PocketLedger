@@ -51,6 +51,7 @@ public class AccountFormViewModel
     [Required, RegularExpression("^[A-Za-z]{3}$", ErrorMessage = "Currency must contain exactly three letters.")]
     public string Currency { get; set; } = "HUF";
 
+    [Display(Name = "Initial balance")]
     public decimal InitialBalance { get; set; }
     public decimal OriginalInitialBalance { get; set; }
     public bool CreateInitialBalanceAdjustment { get; set; }
@@ -63,11 +64,14 @@ public class AccountFormViewModel
     [Required, RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Color must be a valid hexadecimal color.")]
     public string Color { get; set; } = "#ffffff";
 
-    [Range(0, int.MaxValue)]
+    [Display(Name = "Display order"), Range(0, int.MaxValue)]
     public int DisplayOrder { get; set; }
 
+    [Display(Name = "Include in main balance")]
     public bool IncludeInMainBalance { get; set; } = true;
+    [Display(Name = "Include in net worth")]
     public bool IncludeInNetWorth { get; set; } = true;
+    [Display(Name = "Include in statistics")]
     public bool IncludeInStatistics { get; set; } = true;
 }
 
@@ -77,4 +81,8 @@ public class AccountDeleteViewModel
     public string Name { get; init; } = string.Empty;
     public decimal CurrentBalance { get; init; }
     public string Currency { get; init; } = string.Empty;
+    public int TransactionCount { get; init; }
+    public int RecurringTransactionCount { get; init; }
+    public int DebtCount { get; init; }
+    public bool HasRelatedData => TransactionCount + RecurringTransactionCount + DebtCount > 0;
 }

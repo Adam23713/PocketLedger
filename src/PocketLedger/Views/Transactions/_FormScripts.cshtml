@@ -2,7 +2,7 @@
 <script>
 (() => {
     const type = document.getElementById("transaction-type"), sourceAccount = document.getElementById("source-account"), targetAccount = document.getElementById("target-account");
-    const targetAccountField = document.getElementById("target-account-field"), categoryField = document.getElementById("category-field"), category = document.getElementById("category-select"), categoryIcon = document.getElementById("category-selected-icon"), adjustmentField = document.getElementById("adjustment-field");
+    const targetAccountField = document.getElementById("target-account-field"), categoryField = document.getElementById("category-field"), categories = [...document.querySelectorAll('[name="CategoryId"]')], categoryItems = [...document.querySelectorAll(".category-tree-item")], adjustmentField = document.getElementById("adjustment-field");
     const amount = document.getElementById("source-amount"), rate = document.getElementById("exchange-rate"), rateField = document.getElementById("exchange-rate-field"), target = document.getElementById("target-amount"), targetDisplay = document.getElementById("target-amount-display"), targetField = document.getElementById("target-amount-field");
     function updateTransfer() {
         const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency, targetCurrency = targetAccount.selectedOptions[0]?.dataset.currency;
@@ -17,13 +17,11 @@
     function updateFields() {
         const adjustment = type.value === "Adjustment", transfer = type.value === "Transfer";
         categoryField.hidden = adjustment || transfer; adjustmentField.hidden = !adjustment;
-        if (adjustment || transfer) category.value = "";
+        if (adjustment || transfer) categories.forEach(input => input.checked = false);
         if (!transfer) { targetAccount.value = ""; target.value = ""; rate.value = ""; }
-        for (const option of category.options) { if (option.dataset.categoryType) { option.hidden = option.dataset.categoryType !== type.value; option.disabled = option.hidden; } }
-        if (category.selectedOptions[0]?.disabled) category.value = "";
-        const selected = category.selectedOptions[0]; categoryIcon.src = selected?.dataset.iconPath || ""; categoryIcon.alt = selected?.dataset.iconAlt || ""; categoryIcon.hidden = !selected?.dataset.iconPath;
+        categoryItems.forEach(item => { item.hidden = item.dataset.categoryType !== type.value; item.querySelector("input").disabled = item.hidden; });
         updateTransfer();
     }
-    [type, sourceAccount, targetAccount, rate].forEach(element => element.addEventListener("change", updateFields)); amount.addEventListener("change", updateTransfer); category.addEventListener("change", updateFields); updateFields();
+    [type, sourceAccount, targetAccount, rate].forEach(element => element.addEventListener("change", updateFields)); amount.addEventListener("change", updateTransfer); updateFields();
 })();
 </script>

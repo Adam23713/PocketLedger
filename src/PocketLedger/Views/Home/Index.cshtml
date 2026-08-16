@@ -25,7 +25,7 @@
 </div>
 @foreach (var warning in Model.DebtFundingWarnings)
 {
-    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> @warning.Currency from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span> @warning.Currency, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span> @warning.Currency.</span></div>
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span>, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span>.</span></div>
 }
 
 <div class="row g-3 mb-4">
@@ -53,7 +53,7 @@
                         </div>
                         <span class="badge text-bg-light">@account.Type</span>
                     </div>
-                    <div class="display-6 fs-3"><span data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</span> <small class="fs-6 text-muted">@account.Currency</small></div>
+                    <div class="display-6 fs-3"><span data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</span></div>
                 </div>
             </a>
         </div>
@@ -82,7 +82,7 @@ else
                     <td>@transaction.Type</td>
                     <td>@(transaction.AccountName ?? "No account movement")</td>
                     <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
-                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")<span data-private-amount>@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span> @transaction.Currency</td>
+                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")<span data-private-amount>@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span></td>
                 </tr>
             }
             </tbody>

@@ -14,7 +14,7 @@
     <label asp-for="AccountId" class="form-label">Source account</label>
     <select asp-for="AccountId" class="form-select" id="source-account">
         <option value="">Select an account</option>
-        @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name (@account.Currency)</option> }
+        @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name — @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</option> }
     </select>
     <span asp-validation-for="AccountId" class="text-danger"></span>
 </div>
@@ -22,7 +22,7 @@
     <label asp-for="TargetAccountId" class="form-label">Target account</label>
     <select asp-for="TargetAccountId" class="form-select" id="target-account">
         <option value="">Select a target account</option>
-        @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name (@account.Currency)</option> }
+        @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name — @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</option> }
     </select>
     <span asp-validation-for="TargetAccountId" class="text-danger"></span>
 </div>
@@ -54,17 +54,12 @@
     </div>
 </div>
 <div class="mb-3" id="category-field">
-    <label asp-for="CategoryId" class="form-label">Category</label>
-    <div class="d-flex align-items-center gap-2">
-        <img class="category-icon" id="category-selected-icon" alt="" hidden />
-        <select asp-for="CategoryId" class="form-select" id="category-select">
-            <option value="">Select a category</option>
-            @foreach (var category in Model.Categories)
-            {
-                <option value="@category.Id" data-category-type="@category.Type" data-icon-path="@category.IconPath" data-icon-alt="@category.IconAlt" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
-            }
-        </select>
-    </div>
+    <fieldset><legend class="form-label">Category</legend><div class="category-tree" id="category-tree">
+        @foreach (var category in Model.Categories)
+        {
+            <label class="category-tree-item @(category.IsSubcategory ? "subcategory" : "main-category")" data-category-type="@category.Type"><input name="CategoryId" type="radio" value="@category.Id" checked="@(category.Id == Model.CategoryId)" /><span class="category-tree-content"><img class="category-icon" src="@category.IconPath" alt="@category.IconAlt" /><span>@category.Name</span></span></label>
+        }
+    </div></fieldset>
     <span asp-validation-for="CategoryId" class="text-danger"></span>
 </div>
 <div class="mb-3" id="adjustment-field">
