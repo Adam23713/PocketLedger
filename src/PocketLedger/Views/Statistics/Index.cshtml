@@ -2,6 +2,7 @@
 @using System.Text.Json
 @{
     ViewData["Title"] = "Statistics";
+    ViewData["Currency"] = Model.Currency;
     var selected = new DateOnly(Model.Year, Model.Month, 1);
     var previous = selected.AddMonths(-1);
     var next = selected.AddMonths(1);
@@ -59,13 +60,13 @@ else
     <div class="table-responsive">
         <table class="table">
             <thead><tr><th>Main category</th><th class="text-end">Occurrences</th><th class="text-end">Monthly expense</th></tr></thead>
-            <tbody>@foreach (var item in Model.RecurringExpenses) { <tr><td><img class="category-icon me-2" src="@item.IconPath" alt="@item.IconAlt" />@item.MainCategoryName</td><td class="text-end">@item.OccurrenceCount</td><td class="text-end">@MoneyFormatter.Format(item.Amount, item.Currency) @item.Currency</td></tr> }</tbody>
+            <tbody>@foreach (var item in Model.RecurringExpenses) { <tr><td><img class="category-icon me-2" src="@item.IconPath" alt="@item.IconAlt" />@item.MainCategoryName</td><td class="text-end">@item.OccurrenceCount</td><td class="text-end">@MoneyFormatter.Format(item.Amount, item.Currency)</td></tr> }</tbody>
             <tfoot><tr class="fw-semibold"><th>Total</th><td class="text-end">@Model.RecurringExpenses.Sum(item => item.OccurrenceCount)</td><td class="text-end">@MoneyFormatter.Format(Model.RecurringExpenses.Sum(item => item.Amount), Model.Currency)</td></tr></tfoot>
         </table>
     </div>
 }
 <h2 class="h4 mt-4">Account balances</h2>
-<div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var account in Model.AccountBalances) { <tr><td><a asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">@account.Name</a></td><td class="text-end">@MoneyFormatter.Format(account.Balance, account.Currency) @account.Currency</td></tr> }</tbody></table></div>
+<div class="table-responsive"><table class="table"><thead><tr><th>Account</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var account in Model.AccountBalances) { <tr><td><a asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">@account.Name</a></td><td class="text-end">@MoneyFormatter.Format(account.Balance, account.Currency)</td></tr> }</tbody></table></div>
 <h2 class="h4 mt-4">Last 12 months</h2>
 <div class="table-responsive"><table class="table table-sm"><thead><tr><th>Month</th><th class="text-end">Income</th><th class="text-end">Expenses</th><th class="text-end">Savings</th><th class="text-end">Balance</th></tr></thead><tbody>@foreach (var item in Model.MonthlyTrend) { <tr><td>@(new DateOnly(item.Year, item.Month, 1).ToString("yyyy MMM"))</td><td class="text-end">@MoneyFormatter.Format(item.Income, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Expenses, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Savings, Model.Currency)</td><td class="text-end">@MoneyFormatter.Format(item.Balance, Model.Currency)</td></tr> }</tbody></table></div>
 

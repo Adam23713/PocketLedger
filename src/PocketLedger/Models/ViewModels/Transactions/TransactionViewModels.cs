@@ -142,6 +142,7 @@ public class AccountOptionViewModel
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Currency { get; init; } = string.Empty;
+    public decimal CurrentBalance { get; init; }
 }
 
 public class TransactionDeleteViewModel : TransactionDetailsViewModel;

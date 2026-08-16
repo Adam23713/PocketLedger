@@ -1,9 +1,10 @@
 document.querySelectorAll("[data-money-value]").forEach(display => {
     const canonical = document.getElementById(display.dataset.moneyValue);
     const account = document.getElementById(display.dataset.moneyAccount);
+    const currency = document.getElementById(display.dataset.moneyCurrency);
 
     function options() {
-        const selected = account?.selectedOptions[0];
+        const selected = account?.selectedOptions[0] ?? currency?.selectedOptions[0];
         return {
             decimalPlaces: Number(selected?.dataset.decimalPlaces ?? display.dataset.decimalPlaces ?? 2),
             decimalSeparator: selected?.dataset.decimalSeparator ?? display.dataset.decimalSeparator ?? ".",
@@ -53,6 +54,7 @@ document.querySelectorAll("[data-money-value]").forEach(display => {
     display.addEventListener("input", formatInput);
     display.addEventListener("focus", () => display.select());
     account?.addEventListener("change", renderCanonical);
+    currency?.addEventListener("change", renderCanonical);
     display.closest("form")?.addEventListener("submit", formatInput, { capture: true });
     renderCanonical();
 });

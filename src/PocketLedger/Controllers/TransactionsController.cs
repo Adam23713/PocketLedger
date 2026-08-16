@@ -224,14 +224,15 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
     private async Task PopulateChoicesAsync(TransactionFormViewModel model, CancellationToken cancellationToken)
     {
-        model.Accounts = (await accountService.GetChoicesAsync(cancellationToken)).Select(choice => new AccountOptionViewModel { Id = choice.Id, Name = choice.Name, Currency = choice.Currency }).ToList();
+        var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
+        model.Accounts = (await accountService.GetChoicesAsync(cancellationToken)).Select(choice => new AccountOptionViewModel { Id = choice.Id, Name = choice.Name, Currency = choice.Currency, CurrentBalance = balances[choice.Id] }).ToList();
         model.Categories = (await categoryService.GetChoicesAsync(null, null, cancellationToken)).Select(choice =>
         {
             var icon = CategoryIcons.Resolve(choice.EffectiveIcon, choice.Type);
             return new CategoryOptionViewModel
             {
                 Id = choice.Id,
-                Name = FormatCategoryName(choice),
+                Name = choice.Name,
                 Type = choice.Type,
                 IsSubcategory = choice.IsSubcategory,
                 IconPath = icon.WebPath,

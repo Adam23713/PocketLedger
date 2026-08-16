@@ -14,7 +14,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var items = (await debtService.GetAllAsync(cancellationToken)).Select(item => ToListItem(item.Debt, item.RemainingAmount, item.NextPayment, item.AutomaticPayment?.Account.Name ?? item.Debt.Account?.Name)).ToList();
-        return View(new DebtIndexViewModel { Active = items.Where(item => item.Status == DebtStatus.Active).ToList(), Closed = items.Where(item => item.Status == DebtStatus.Closed).ToList() });
+        return View(new DebtIndexViewModel { ActiveGroups = GroupByCurrency(items.Where(item => item.Status == DebtStatus.Active)), ClosedGroups = GroupByCurrency(items.Where(item => item.Status == DebtStatus.Closed)) });
     }
 
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
@@ -82,6 +82,8 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         var progress = DebtRules.CalculateProgressPercentage(debt.OriginalAmount, remainingAmount);
         return new DebtListItemViewModel { Id = debt.Id, Name = debt.Name, IconPath = icon.WebPath, IconAlt = icon.DisplayName, Direction = debt.Direction, Type = debt.Type, OriginalAmount = debt.OriginalAmount, RemainingAmount = remainingAmount, PaidAmount = paidAmount, ProgressPercentage = progress, Currency = debt.Currency, NextPayment = nextPayment, AccountName = accountName, Status = debt.Status };
     }
+
+    private static IReadOnlyList<DebtCurrencyGroupViewModel> GroupByCurrency(IEnumerable<DebtListItemViewModel> items) => items.GroupBy(item => item.Currency).OrderBy(group => group.Key).Select(group => new DebtCurrencyGroupViewModel(group.Key, group.ToList(), group.Where(item => item.Direction == DebtDirection.Payable).Sum(item => item.RemainingAmount), group.Where(item => item.Direction == DebtDirection.Receivable).Sum(item => item.RemainingAmount))).ToList();
 
     private static void SetDefaultLastPaymentDate(DebtFormViewModel model, decimal remainingAmount)
     {

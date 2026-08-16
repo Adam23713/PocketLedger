@@ -51,7 +51,11 @@ public class AccountsController(IAccountService accountService, IUserContextServ
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(CancellationToken cancellationToken) => View(new AccountFormViewModel { Currency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency });
+    public async Task<IActionResult> Create(CancellationToken cancellationToken)
+    {
+        var accounts = await accountService.GetAllAsync(cancellationToken);
+        return View(new AccountFormViewModel { Currency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency, DisplayOrder = accounts.Count == 0 ? 0 : accounts.Max(account => account.DisplayOrder) + 1 });
+    }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AccountFormViewModel model, CancellationToken cancellationToken)
@@ -120,7 +124,8 @@ public class AccountsController(IAccountService accountService, IUserContextServ
             return NotFound();
         }
 
-        return View(new AccountDeleteViewModel { Id = id, Name = account.Name, Currency = account.Currency, CurrentBalance = await accountService.GetCurrentBalanceAsync(id, cancellationToken) });
+        var summary = await accountService.GetDeletionSummaryAsync(id, cancellationToken);
+        return View(new AccountDeleteViewModel { Id = id, Name = account.Name, Currency = account.Currency, CurrentBalance = await accountService.GetCurrentBalanceAsync(id, cancellationToken), TransactionCount = summary.TransactionCount, RecurringTransactionCount = summary.RecurringTransactionCount, DebtCount = summary.DebtCount });
     }
 
     [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken]

@@ -5,6 +5,7 @@ public class CalendarViewModel
     public int Year { get; init; }
     public int Month { get; init; }
     public DateOnly Today { get; init; }
+    public string ActiveCurrency { get; init; } = string.Empty;
     public IReadOnlyList<CalendarCurrencyTotalViewModel> MonthlyTotals { get; init; } = [];
     public IReadOnlyList<CalendarDayViewModel> Days { get; init; } = [];
 }

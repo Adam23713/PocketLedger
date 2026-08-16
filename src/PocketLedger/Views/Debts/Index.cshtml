@@ -1,6 +1,14 @@
 @model PocketLedger.Models.ViewModels.Debts.DebtIndexViewModel
 @{ ViewData["Title"] = "Loans / Debts"; }
 <div class="d-flex justify-content-between align-items-center mb-3"><h1>Loans / Debts</h1><a class="btn btn-primary" asp-action="Create">New debt</a></div>
-@await Html.PartialAsync("_DebtList", Model.Active)
+@foreach (var group in Model.ActiveGroups)
+{
+    <section class="mb-4"><h2 class="h4">@group.Currency debts</h2>@await Html.PartialAsync("_DebtList", group.Items)<div class="d-flex flex-wrap justify-content-end gap-4 mt-2 fw-semibold"><span>We owe: @MoneyFormatter.Format(group.WeOwe, group.Currency)</span><span>Owed to us: @MoneyFormatter.Format(group.OwedToUs, group.Currency)</span></div></section>
+}
+@if (Model.ActiveGroups.Count == 0) { <p class="text-muted">No active debts.</p> }
 <h2 class="h4 mt-5">Closed</h2>
-@await Html.PartialAsync("_DebtList", Model.Closed)
+@foreach (var group in Model.ClosedGroups)
+{
+    <section class="mb-4"><h3 class="h5">@group.Currency debts</h3>@await Html.PartialAsync("_DebtList", group.Items)<div class="d-flex flex-wrap justify-content-end gap-4 mt-2 fw-semibold"><span>Total debt: @MoneyFormatter.Format(group.WeOwe, group.Currency)</span><span>Total owed to us: @MoneyFormatter.Format(group.OwedToUs, group.Currency)</span></div></section>
+}
+@if (Model.ClosedGroups.Count == 0) { <p class="text-muted">No closed debts.</p> }

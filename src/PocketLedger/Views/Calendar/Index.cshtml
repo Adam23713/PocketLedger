@@ -8,12 +8,12 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Calendar</h1>
     <div class="btn-group">
-        <a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month">←</a>
+        <a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month" asp-route-currency="@Model.ActiveCurrency">←</a>
         <span class="btn btn-outline-secondary disabled">@selected.ToString("MMMM yyyy")</span>
-        <a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a>
+        <a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month" asp-route-currency="@Model.ActiveCurrency">→</a>
     </div>
 </div>
-<div class="row g-3 mb-3">@foreach (var total in Model.MonthlyTotals) { <div class="col-12 col-md-4"><div class="card card-body"><strong>@total.Currency</strong><span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span><span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span><span>=@MoneyFormatter.Format(total.Balance, total.Currency)</span></div></div> }</div>
+<div class="calendar-currency-cards mb-3">@foreach (var total in Model.MonthlyTotals) { <a class="card card-body text-decoration-none calendar-currency-card @(total.Currency == Model.ActiveCurrency ? "active" : null)" asp-route-year="@Model.Year" asp-route-month="@Model.Month" asp-route-currency="@total.Currency" aria-current="@(total.Currency == Model.ActiveCurrency ? "true" : null)"><strong>@total.Currency</strong><span class="text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</span><span class="text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</span><span>=@MoneyFormatter.Format(total.Balance, total.Currency)</span></a> }</div>
 <div class="calendar-grid calendar-header text-center fw-semibold">
     @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }) { <div>@day</div> }
 </div>
@@ -27,9 +27,9 @@
         {
             @foreach (var total in day.Totals)
             {
-                <small class="d-block text-success">+@MoneyFormatter.Format(total.Income, total.Currency)</small>
-                <small class="d-block text-danger">−@MoneyFormatter.Format(total.Expenses, total.Currency)</small>
-                <small class="d-block">=@MoneyFormatter.Format(total.Balance, total.Currency)</small>
+                <small class="d-block text-success">+ @MoneyFormatter.FormatNumber(total.Income, total.Currency)</small>
+                <small class="d-block text-danger">− @MoneyFormatter.FormatNumber(total.Expenses, total.Currency)</small>
+                <small class="d-block">= @MoneyFormatter.FormatNumber(total.Balance, total.Currency)</small>
             }
         }
     </a>
