@@ -24,7 +24,7 @@ ICON_CENTERS_X = [459, 682, 910, 1138, 1364]
 CELL_HALF_WIDTH = 96
 CELL_HALF_HEIGHT = 72
 CANVAS_SIZE = 256
-ICON_SIZE = 220
+ICON_SIZE = 216
 
 
 def source_path() -> Path:
@@ -35,34 +35,29 @@ def source_path() -> Path:
     raise FileNotFoundError("Account icon source sheet was not found.")
 
 
-def is_background(pixel: tuple[int, int, int, int]) -> bool:
-    red, green, blue, _ = pixel
-    return min(red, green, blue) >= 238 and max(red, green, blue) - min(red, green, blue) <= 12
-
-
-def remove_connected_background(image: Image.Image) -> Image.Image:
+def remove_white_matte(image: Image.Image) -> Image.Image:
     rgba = image.convert("RGBA")
     pixels = rgba.load()
     width, height = rgba.size
-    queue: deque[tuple[int, int]] = deque()
-    visited: set[tuple[int, int]] = set()
-
-    for x in range(width):
-        queue.extend(((x, 0), (x, height - 1)))
-    for y in range(height):
-        queue.extend(((0, y), (width - 1, y)))
+    queue = deque((x, y) for x in range(width) for y in (0, height - 1))
+    queue.extend((x, y) for y in range(height) for x in (0, width - 1))
+    visited = set()
 
     while queue:
         x, y = queue.popleft()
-        if (x, y) in visited or not is_background(pixels[x, y]):
+        if (x, y) in visited:
             continue
-
-        visited.add((x, y))
-        red, green, blue, _ = pixels[x, y]
+        red, green, blue, alpha = pixels[x, y]
         whiteness = min(red, green, blue)
-        alpha = max(0, min(255, (255 - whiteness) * 15))
-        pixels[x, y] = (red, green, blue, alpha)
-
+        if alpha != 0 and (whiteness < 220 or max(red, green, blue) - whiteness > 18):
+            continue
+        visited.add((x, y))
+        if alpha == 0:
+            pixels[x, y] = (0, 0, 0, 0)
+        else:
+            new_alpha = round(alpha * (255 - whiteness) / 35)
+            channels = tuple(max(0, min(255, round(255 - (255 - channel) * 255 / alpha))) for channel in (red, green, blue))
+            pixels[x, y] = channels + (new_alpha,)
         if x > 0:
             queue.append((x - 1, y))
         if x + 1 < width:
@@ -76,14 +71,17 @@ def remove_connected_background(image: Image.Image) -> Image.Image:
 
 
 def normalize_icon(icon: Image.Image) -> Image.Image:
+    icon = remove_white_matte(icon)
     alpha = icon.getchannel("A")
     bounds = alpha.getbbox()
     if bounds is None:
         raise ValueError("The extracted icon is empty.")
 
     trimmed = icon.crop(bounds)
-    trimmed.thumbnail((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
-    canvas = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (255, 255, 255, 0))
+    scale = min(ICON_SIZE / trimmed.width, ICON_SIZE / trimmed.height)
+    resized_size = (max(1, round(trimmed.width * scale)), max(1, round(trimmed.height * scale)))
+    trimmed = trimmed.convert("RGBa").resize(resized_size, Image.Resampling.LANCZOS).convert("RGBA")
+    canvas = Image.new("RGBA", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
     position = ((CANVAS_SIZE - trimmed.width) // 2, (CANVAS_SIZE - trimmed.height) // 2)
     canvas.alpha_composite(trimmed, position)
     return canvas
@@ -106,7 +104,7 @@ def main() -> int:
                 center_x + CELL_HALF_WIDTH,
                 center_y + CELL_HALF_HEIGHT,
             )
-            icon = normalize_icon(remove_connected_background(source.crop(crop_box)))
+            icon = normalize_icon(source.crop(crop_box))
             icon.save(output_directory / f"{account_type}-{index}.png", optimize=True)
             generated += 1
 
