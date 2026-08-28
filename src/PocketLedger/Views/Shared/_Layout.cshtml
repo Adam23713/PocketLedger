@@ -42,7 +42,6 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)">Dashboard</a></li>
                         <li class="nav-item"><a class="@NavClass("Accounts")" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)">Accounts</a></li>
-                        <li class="nav-item"><a class="@NavClass("Categories")" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a></li>
                         <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)">Transactions</a></li>
                         <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)">Calendar</a></li>
                         <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)">Statistics</a></li>
@@ -75,6 +74,7 @@
                                     <div><strong>@(currentProfile.DisplayName ?? currentProfile.UserName)</strong>@if (!string.IsNullOrWhiteSpace(currentProfile.DisplayName)) { <small>@@@currentProfile.UserName</small> }</div>
                                 </div>
                                 <div class="dropdown-divider" role="separator"></div>
+                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
                                 <a role="menuitem" asp-controller="Account" asp-action="Settings">Settings</a>
                                 <a role="menuitem" asp-controller="Account" asp-action="Security">Security</a>
                                 <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
