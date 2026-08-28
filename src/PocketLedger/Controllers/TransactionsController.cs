@@ -181,8 +181,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         var transaction = await transactionService.GetByIdAsync(id, cancellationToken);
         if (transaction is null) return NotFound();
         if (transaction.DebtId is not null) return RedirectToAction("Details", "Debts", new { id = transaction.DebtId });
-        var categoryIcon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
-        var isTransfer = transaction.Type == TransactionType.Transfer;
+        var categoryIcon = TransactionIcons.Resolve(transaction);
         return View(new TransactionDeleteViewModel
         {
             Id = transaction.Id,
@@ -190,9 +189,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             AdjustmentDirection = transaction.AdjustmentDirection,
             AccountName = transaction.Account?.Name,
             Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
-            CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
-            CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : categoryIcon?.WebPath,
-            CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
+            CategoryName = transaction.Category?.Name ?? categoryIcon?.DisplayName,
+            CategoryIconPath = categoryIcon?.WebPath,
+            CategoryIconAlt = categoryIcon?.DisplayName,
             Amount = transaction.Amount,
             TransactionDate = transaction.TransactionDate,
             TransactionTime = transaction.TransactionTime,
@@ -262,9 +261,8 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
     private static TransactionListItemViewModel ToListItem(Transaction transaction)
     {
-        var icon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+        var icon = TransactionIcons.Resolve(transaction);
         var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
-        var isTransfer = transaction.Type == TransactionType.Transfer;
         return new TransactionListItemViewModel
         {
             Id = transaction.Id,
@@ -274,9 +272,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             TargetAccountName = transaction.TargetAccount?.Name,
             Currency = transaction.SourceCurrency,
             TargetCurrency = transaction.TargetCurrency,
-            CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
-            CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
-            CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : icon?.DisplayName,
+            CategoryName = transaction.Category?.Name ?? icon?.DisplayName,
+            CategoryIconPath = icon?.WebPath,
+            CategoryIconAlt = icon?.DisplayName,
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
             TransactionTime = transaction.TransactionTime,
@@ -290,9 +288,8 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
     private static TransactionDetailsViewModel ToDetails(Transaction transaction)
     {
-        var icon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+        var icon = TransactionIcons.Resolve(transaction);
         var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
-        var isTransfer = transaction.Type == TransactionType.Transfer;
         return new TransactionDetailsViewModel
         {
             Id = transaction.Id,
@@ -302,9 +299,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             TargetAccountName = transaction.TargetAccount?.Name,
             Currency = transaction.SourceCurrency,
             TargetCurrency = transaction.TargetCurrency,
-            CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
-            CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : icon?.WebPath,
-            CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : icon?.DisplayName,
+            CategoryName = transaction.Category?.Name ?? icon?.DisplayName,
+            CategoryIconPath = icon?.WebPath,
+            CategoryIconAlt = icon?.DisplayName,
             Amount = transaction.Amount,
             TargetAmount = transaction.TargetAmount,
             ExchangeRate = transaction.ExchangeRate,

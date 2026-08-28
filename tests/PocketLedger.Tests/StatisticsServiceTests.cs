@@ -40,6 +40,34 @@ public class StatisticsServiceTests
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetAvailableCurrenciesAsync(2026, 13, CancellationToken.None));
     }
 
+    [Fact]
+    public async Task Summary_DistinguishesAdjustmentsDebtOperationsAndUncategorizedTransactions()
+    {
+        var ownerId = Guid.NewGuid();
+        await using var db = CreateDb(ownerId);
+        var date = new DateOnly(2026, 1, 10);
+        db.Transactions.AddRange(
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Adjustment, AdjustmentDirection.Increase),
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Adjustment, AdjustmentDirection.Decrease),
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Expense, debtOperationType: DebtOperationType.Payment),
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Expense, debtOperationType: DebtOperationType.EarlyRepayment),
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Income, debtOperationType: DebtOperationType.ReceivedRepayment),
+            CreateTransaction(ownerId, date, "HUF", TransactionType.Expense));
+        await db.SaveChangesAsync();
+        var service = CreateService(db, ownerId);
+
+        var summary = await service.GetSummaryAsync(2026, 1, "HUF", CancellationToken.None);
+
+        Assert.Contains(summary.IncomeByCategory, item => item.Name == "Adjustment increase" && item.Amount == 100);
+        Assert.Contains(summary.IncomeByCategory, item => item.Name == "Received repayment" && item.Amount == 100);
+        Assert.Contains(summary.ExpenseByCategory, item => item.Name == "Adjustment decrease" && item.Amount == 100);
+        Assert.Contains(summary.ExpenseByCategory, item => item.Name == "Loan repayment" && item.Amount == 200);
+        Assert.Contains(summary.ExpenseByCategory, item => item.Name == "Uncategorized" && item.Amount == 100);
+        Assert.Contains(summary.ExpenseMainCategories, item => item.Name == "Adjustment decrease" && item.Amount == 100);
+        Assert.Contains(summary.ExpenseMainCategories, item => item.Name == "Loan repayment" && item.Amount == 200);
+        Assert.Contains(summary.ExpenseMainCategories, item => item.Name == "Uncategorized" && item.Amount == 100);
+    }
+
     private static StatisticsService CreateService(PocketLedgerDbContext db, Guid ownerId)
     {
         var currentUser = new TestCurrentUser(ownerId);
@@ -57,10 +85,10 @@ public class StatisticsServiceTests
         return db;
     }
 
-    private static Transaction CreateTransaction(Guid ownerId, DateOnly date, string currency, TransactionType type) => new()
+    private static Transaction CreateTransaction(Guid ownerId, DateOnly date, string currency, TransactionType type, AdjustmentDirection? adjustmentDirection = null, DebtOperationType? debtOperationType = null) => new()
     {
         Id = Guid.NewGuid(), OwnerId = ownerId, TransactionDate = date, TransactionTime = new TimeOnly(12, 0), OccurredAtUtc = new DateTimeOffset(date.ToDateTime(new TimeOnly(12, 0)), TimeSpan.Zero),
-        Type = type, Amount = 100, SourceCurrency = currency
+        Type = type, Amount = 100, SourceCurrency = currency, AdjustmentDirection = adjustmentDirection, DebtOperationType = debtOperationType
     };
 
     private sealed class TestCurrentUser(Guid userId) : ICurrentUser

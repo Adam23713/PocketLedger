@@ -17,7 +17,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         var today = await userContext.TodayAsync(cancellationToken);
         var items = templates.Select(template =>
         {
-            var categoryIcon = template.Category is null ? null : CategoryIcons.Resolve(template.Category);
+            var categoryIcon = template.Category is null ? TransactionIcons.Resolve(template.Type, template.AdjustmentDirection) : CategoryIcons.Resolve(template.Category) is { } resolvedCategoryIcon ? new TransactionIconDefinition(resolvedCategoryIcon.WebPath, resolvedCategoryIcon.DisplayName) : null;
             var debtIcon = template.Debt is null ? null : CategoryIcons.Resolve(template.Debt.Icon);
             return new RecurringTransactionListItemViewModel
             {
@@ -25,7 +25,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
                 Type = template.Type,
                 AdjustmentDirection = template.AdjustmentDirection,
                 AccountName = template.Account.Name,
-                CategoryName = template.Category?.Name,
+                CategoryName = template.Category?.Name ?? categoryIcon?.DisplayName,
                 CategoryIconPath = debtIcon?.WebPath ?? categoryIcon?.WebPath,
                 CategoryIconAlt = debtIcon?.DisplayName ?? categoryIcon?.DisplayName,
                 Note = template.Note,
