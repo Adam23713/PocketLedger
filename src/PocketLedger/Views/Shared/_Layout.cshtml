@@ -74,8 +74,8 @@
                                     <div><strong>@(currentProfile.DisplayName ?? currentProfile.UserName)</strong>@if (!string.IsNullOrWhiteSpace(currentProfile.DisplayName)) { <small>@@@currentProfile.UserName</small> }</div>
                                 </div>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
                                 <a role="menuitem" asp-controller="Account" asp-action="Settings">Settings</a>
+                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
                                 <a role="menuitem" asp-controller="Account" asp-action="Security">Security</a>
                                 <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
                                 <div class="dropdown-divider" role="separator"></div>
