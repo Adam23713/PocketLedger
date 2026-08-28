@@ -90,6 +90,18 @@ public class ServiceRulesTests
         Assert.Equal(25, CategoryIcons.For(CategoryType.Income).Count);
     }
 
+    [Theory]
+    [InlineData(AdjustmentDirection.Increase, "/images/transaction-icons/adjustment-increase.svg", "Adjustment increase")]
+    [InlineData(AdjustmentDirection.Decrease, "/images/transaction-icons/adjustment-decrease.svg", "Adjustment decrease")]
+    public void Adjustment_UsesDirectionSpecificSystemIcon(AdjustmentDirection direction, string expectedPath, string expectedName)
+    {
+        var icon = TransactionIcons.Resolve(TransactionType.Adjustment, direction);
+
+        Assert.NotNull(icon);
+        Assert.Equal(expectedPath, icon.WebPath);
+        Assert.Equal(expectedName, icon.DisplayName);
+    }
+
     [Fact]
     public void CategoryIconValidation_RejectsIconFromDifferentCategoryType()
     {

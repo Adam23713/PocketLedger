@@ -51,9 +51,8 @@ public class HomeController(IAccountService accountService, ITransactionService 
             }).ToList(),
             RecentTransactions = recentTransactions.Select(transaction =>
             {
-                var categoryIcon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+                var categoryIcon = TransactionIcons.Resolve(transaction);
                 var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
-                var isTransfer = transaction.Type == TransactionType.Transfer;
                 return new RecentTransactionViewModel
                 {
                     Id = transaction.Id,
@@ -61,9 +60,9 @@ public class HomeController(IAccountService accountService, ITransactionService 
                     AdjustmentDirection = transaction.AdjustmentDirection,
                     AccountName = transaction.Account?.Name,
                     Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
-                    CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
-                    CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : categoryIcon?.WebPath,
-                    CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
+                    CategoryName = transaction.Category?.Name ?? categoryIcon?.DisplayName,
+                    CategoryIconPath = categoryIcon?.WebPath,
+                    CategoryIconAlt = categoryIcon?.DisplayName,
                     Amount = transaction.Amount,
                     TransactionDate = transaction.TransactionDate,
                     DebtOperationType = transaction.DebtOperationType,

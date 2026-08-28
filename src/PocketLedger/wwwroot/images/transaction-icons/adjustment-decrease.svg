@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Adjustment decrease</title>
+  <rect width="256" height="256" rx="56" fill="#dc3545"/>
+  <path d="M52 116h152v24H52v-24Z" fill="#fff"/>
+</svg>

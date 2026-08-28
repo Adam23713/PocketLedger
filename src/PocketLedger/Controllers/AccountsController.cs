@@ -33,9 +33,8 @@ public class AccountsController(IAccountService accountService, IUserContextServ
             InitialBalance = account.InitialBalance,
             RecentTransactions = transactions.Select(transaction =>
             {
-                var categoryIcon = transaction.Category is null ? null : CategoryIcons.Resolve(transaction.Category);
+                var categoryIcon = TransactionIcons.Resolve(transaction);
                 var debtIcon = transaction.Debt is null ? null : CategoryIcons.Resolve(transaction.Debt.Icon);
-                var isTransfer = transaction.Type == TransactionType.Transfer;
                 return new AccountTransactionViewModel
                 {
                     Id = transaction.Id,
@@ -43,9 +42,9 @@ public class AccountsController(IAccountService accountService, IUserContextServ
                     AdjustmentDirection = transaction.AdjustmentDirection,
                     Date = transaction.TransactionDate,
                     Amount = transaction.Amount,
-                    CategoryName = isTransfer ? TransactionIcons.TransferDisplayName : transaction.Category?.Name,
-                    CategoryIconPath = isTransfer ? TransactionIcons.TransferWebPath : categoryIcon?.WebPath,
-                    CategoryIconAlt = isTransfer ? TransactionIcons.TransferDisplayName : categoryIcon?.DisplayName,
+                    CategoryName = transaction.Category?.Name ?? categoryIcon?.DisplayName,
+                    CategoryIconPath = categoryIcon?.WebPath,
+                    CategoryIconAlt = categoryIcon?.DisplayName,
                     DebtName = transaction.Debt?.Name,
                     DebtOperationType = transaction.DebtOperationType,
                     DebtIconPath = debtIcon?.WebPath,

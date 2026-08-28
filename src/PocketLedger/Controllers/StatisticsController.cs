@@ -35,7 +35,7 @@ public class StatisticsController(IStatisticsService statisticsService, IUserCon
                 ExpenseByCategory = summary.ExpenseByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
                 ExpenseMainCategories = summary.ExpenseMainCategories.Select(item =>
                 {
-                    var icon = CategoryIcons.Resolve(item.Icon, Models.Enums.CategoryType.Expense);
+                    var icon = TransactionIcons.ResolveCategoryIcon(item.Icon, Models.Enums.CategoryType.Expense);
                     return new StatisticsMainCategoryViewModel(item.CategoryId, item.Name, item.Amount, icon.WebPath, icon.DisplayName, item.Subcategories.Select(subcategory => new StatisticsSubcategoryViewModel(subcategory.CategoryId, subcategory.Name, subcategory.Amount)).ToList());
                 }).ToList(),
                 AccountBalances = summary.AccountBalances.Select(item => new StatisticsAccountViewModel(item.AccountId, item.Name, item.Currency, item.Balance)).ToList(),
@@ -55,7 +55,7 @@ public class StatisticsController(IStatisticsService statisticsService, IUserCon
 
     private static StatisticsCategoryViewModel ToCategoryViewModel(StatisticsCategoryTotal item)
     {
-        var icon = CategoryIcons.Resolve(item.Icon, item.CategoryType);
+        var icon = TransactionIcons.ResolveCategoryIcon(item.Icon, item.CategoryType);
         return new StatisticsCategoryViewModel(item.Name, item.Amount, icon.WebPath, icon.DisplayName);
     }
 }

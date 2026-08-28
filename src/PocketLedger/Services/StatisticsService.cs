@@ -34,6 +34,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
                 transaction.Type,
                 transaction.Amount,
                 transaction.AdjustmentDirection,
+                transaction.DebtOperationType,
                 transaction.CategoryId,
                 transaction.Category != null ? transaction.Category.Name : null,
                 transaction.Category != null ? transaction.Category.Icon : null,
@@ -97,21 +98,21 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
 
     private static IReadOnlyList<StatisticsCategoryTotal> CategoryTotals(IEnumerable<StatisticsTransactionRow> transactions, TransactionType type)
     {
-        return transactions.Where(item => item.Type == type)
-            .GroupBy(item => new { item.CategoryId, item.CategoryName, Icon = item.ParentCategoryIcon ?? item.CategoryIcon })
-            .Select(group => new StatisticsCategoryTotal(group.Key.CategoryId, group.Key.CategoryName ?? "Uncategorized", group.Sum(item => item.Amount), group.Key.Icon, type == TransactionType.Income ? CategoryType.Income : CategoryType.Expense))
+        return transactions.Where(item => IsCategoryType(item, type))
+            .GroupBy(item => new { item.CategoryId, Name = CategoryBreakdownName(item), Icon = CategoryIcon(item) })
+            .Select(group => new StatisticsCategoryTotal(group.Key.CategoryId, group.Key.Name, group.Sum(item => item.Amount), group.Key.Icon, type == TransactionType.Income ? CategoryType.Income : CategoryType.Expense))
             .OrderByDescending(item => item.Amount)
             .ToList();
     }
 
     private static IReadOnlyList<StatisticsMainCategoryTotal> ExpenseMainCategoryTotals(IEnumerable<StatisticsTransactionRow> transactions)
     {
-        return transactions.Where(item => item.Type == TransactionType.Expense)
+        return transactions.Where(item => IsCategoryType(item, TransactionType.Expense))
             .GroupBy(item => new
             {
                 CategoryId = item.ParentCategoryId ?? item.CategoryId,
-                Name = item.ParentCategoryName ?? item.CategoryName ?? "Uncategorized",
-                Icon = item.ParentCategoryIcon ?? item.CategoryIcon
+                Name = CategoryName(item),
+                Icon = CategoryIcon(item)
             })
             .Select(group => new StatisticsMainCategoryTotal(
                 group.Key.CategoryId,
@@ -121,7 +122,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
                 group.GroupBy(item => new
                     {
                         CategoryId = item.ParentCategoryId is not null ? item.CategoryId : null,
-                        Name = item.ParentCategoryId is not null ? item.CategoryName! : item.CategoryId is null ? "Uncategorized" : "Direct"
+                        Name = item.ParentCategoryId is not null ? item.CategoryName! : item.CategoryId is null ? CategoryName(item) : "Direct"
                     })
                     .Select(subcategory => new StatisticsSubcategoryTotal(subcategory.Key.CategoryId, subcategory.Key.Name, subcategory.Sum(item => item.Amount)))
                     .OrderByDescending(item => item.Amount)
@@ -132,7 +133,29 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             .ToList();
     }
 
-    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
+    private static bool IsCategoryType(StatisticsTransactionRow item, TransactionType type) => item.Type == type || item.Type == TransactionType.Adjustment && (type == TransactionType.Income ? item.AdjustmentDirection == AdjustmentDirection.Increase : item.AdjustmentDirection == AdjustmentDirection.Decrease);
+
+    private static string CategoryName(StatisticsTransactionRow item)
+    {
+        if (item.Type == TransactionType.Adjustment) return item.AdjustmentDirection == AdjustmentDirection.Decrease ? TransactionIcons.AdjustmentDecreaseDisplayName : TransactionIcons.AdjustmentIncreaseDisplayName;
+        if (item.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment) return "Loan repayment";
+        if (item.DebtOperationType == DebtOperationType.ReceivedRepayment) return "Received repayment";
+        return item.ParentCategoryName ?? item.CategoryName ?? "Uncategorized";
+    }
+
+    private static string CategoryBreakdownName(StatisticsTransactionRow item)
+    {
+        if (item.Type == TransactionType.Adjustment || item.DebtOperationType is not null) return CategoryName(item);
+        return item.CategoryName ?? "Uncategorized";
+    }
+
+    private static string? CategoryIcon(StatisticsTransactionRow item)
+    {
+        if (item.Type == TransactionType.Adjustment) return item.AdjustmentDirection == AdjustmentDirection.Decrease ? TransactionIcons.AdjustmentDecreaseDisplayName : TransactionIcons.AdjustmentIncreaseDisplayName;
+        return item.ParentCategoryIcon ?? item.CategoryIcon;
+    }
+
+    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, DebtOperationType? DebtOperationType, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
 
     private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection };
 
