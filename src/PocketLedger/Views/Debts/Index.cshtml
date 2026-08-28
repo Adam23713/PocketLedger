@@ -9,6 +9,6 @@
 <h2 class="h4 mt-5">Closed</h2>
 @foreach (var group in Model.ClosedGroups)
 {
-    <section class="mb-4"><h3 class="h5">@group.Currency debts</h3>@await Html.PartialAsync("_DebtList", group.Items)<div class="d-flex flex-wrap justify-content-end gap-4 mt-2 fw-semibold"><span>Total debt: @MoneyFormatter.Format(group.WeOwe, group.Currency)</span><span>Total owed to us: @MoneyFormatter.Format(group.OwedToUs, group.Currency)</span></div></section>
+    <section class="mb-4"><h3 class="h5">@group.Currency debts</h3>@await Html.PartialAsync("_DebtList", group.Items)<div class="d-flex flex-wrap justify-content-end gap-4 mt-2 fw-semibold"><span>Total debt: @MoneyFormatter.Format(group.WeOwe, group.Currency)</span><span>Total owed to me: @MoneyFormatter.Format(group.OwedToUs, group.Currency)</span></div></section>
 }
 @if (Model.ClosedGroups.Count == 0) { <p class="text-muted">No closed debts.</p> }
