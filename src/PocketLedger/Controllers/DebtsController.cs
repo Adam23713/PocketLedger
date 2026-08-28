@@ -35,13 +35,16 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     [HttpGet] public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
         var item = await debtService.GetByIdAsync(id, cancellationToken); if (item is null) return NotFound();
-        var model = new DebtFormViewModel { Id = item.Debt.Id, Name = item.Debt.Name, Icon = item.Debt.Icon, Direction = item.Debt.Direction, Type = item.Debt.Type, CounterpartyName = item.Debt.CounterpartyName, OriginalAmount = item.Debt.OriginalAmount, ExistingOriginalAmount = item.Debt.OriginalAmount, RemainingAmountForSchedule = item.RemainingAmount, Currency = item.Debt.Currency, StartDate = item.Debt.StartDate, DueDate = item.Debt.DueDate, Note = item.Debt.Note, AccountId = item.AutomaticPayment?.AccountId ?? item.Debt.AccountId, AutomaticPaymentEnabled = item.AutomaticPayment?.Enabled == true, AutomaticPaymentAmount = item.AutomaticPayment?.Amount, NextPaymentDate = item.NextPayment ?? item.AutomaticPayment?.FirstOccurrence, LastPaymentDate = item.AutomaticPayment?.LastOccurrence, Frequency = item.AutomaticPayment?.Frequency ?? RecurringFrequency.Monthly };
+        var model = new DebtFormViewModel { Id = item.Debt.Id, Name = item.Debt.Name, Icon = item.Debt.Icon, Direction = item.Debt.Direction, Type = item.Debt.Type, CounterpartyName = item.Debt.CounterpartyName, OriginalAmount = item.Debt.OriginalAmount, ExistingOriginalAmount = item.Debt.OriginalAmount, RemainingAmountForSchedule = item.RemainingAmount, Currency = item.Debt.Currency, StartDate = item.Debt.StartDate, DueDate = item.Debt.DueDate, Note = item.Debt.Note, AccountId = item.AutomaticPayment?.AccountId ?? item.Debt.AccountId, AutomaticPaymentEnabled = item.AutomaticPayment?.Enabled == true, AutomaticPaymentAmount = item.AutomaticPayment?.Amount, NextPaymentDate = item.AutomaticPayment?.FirstOccurrence, LastPaymentDate = item.AutomaticPayment?.LastOccurrence, Frequency = item.AutomaticPayment?.Frequency ?? RecurringFrequency.Monthly };
         await PopulateAccountsAsync(model, cancellationToken); return View(model);
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> Edit(Guid id, DebtFormViewModel model, CancellationToken cancellationToken)
     {
-        if (id != model.Id) return BadRequest(); if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
-        try { var current = await debtService.GetByIdAsync(id, cancellationToken); if (current is null) return NotFound(); SetDefaultLastPaymentDate(model, current.RemainingAmount + model.OriginalAmount - current.Debt.OriginalAmount); await debtService.UpdateAsync(ToEntity(model), ToRecurring(model), cancellationToken); TempData["SuccessMessage"] = "Debt updated."; return RedirectToAction(nameof(Details), new { id }); }
+        if (id != model.Id) return BadRequest();
+        var current = await debtService.GetByIdAsync(id, cancellationToken); if (current is null) return NotFound();
+        ModelState.Remove(nameof(model.Currency)); model.Currency = current.Debt.Currency;
+        if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+        try { SetDefaultLastPaymentDate(model, current.RemainingAmount + model.OriginalAmount - current.Debt.OriginalAmount); await debtService.UpdateAsync(ToEntity(model), ToRecurring(model), cancellationToken); TempData["SuccessMessage"] = "Debt updated."; return RedirectToAction(nameof(Details), new { id }); }
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
 

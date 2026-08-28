@@ -4,7 +4,7 @@ document.querySelectorAll("[data-money-value]").forEach(display => {
     const currency = document.getElementById(display.dataset.moneyCurrency);
 
     function options() {
-        const selected = account?.selectedOptions[0] ?? currency?.selectedOptions[0];
+        const selected = account?.selectedOptions?.[0] ?? currency?.selectedOptions?.[0];
         return {
             decimalPlaces: Number(selected?.dataset.decimalPlaces ?? display.dataset.decimalPlaces ?? 2),
             decimalSeparator: selected?.dataset.decimalSeparator ?? display.dataset.decimalSeparator ?? ".",

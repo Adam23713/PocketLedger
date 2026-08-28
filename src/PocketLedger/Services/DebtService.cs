@@ -37,13 +37,14 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
 
     public async Task UpdateAsync(Debt debt, RecurringPaymentInput? recurringPayment, CancellationToken cancellationToken)
     {
-        await PrepareAndValidateAsync(debt, cancellationToken);
         var existing = await dbContext.Debts.Include(item => item.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == debt.Id, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
+        debt.Currency = existing.Currency;
+        await PrepareAndValidateAsync(debt, cancellationToken);
         if (existing.Direction != debt.Direction && await dbContext.Transactions.AnyAsync(item => item.DebtId == debt.Id, cancellationToken)) throw new BusinessRuleException("Debt direction cannot be changed after operations have been recorded.");
         var operationDelta = await dbContext.Transactions.Where(item => item.DebtId == debt.Id && item.DebtOperationType != null).SumAsync(item => item.DebtOperationType == DebtOperationType.Increase || item.DebtOperationType == DebtOperationType.ManualCorrectionIncrease || item.DebtOperationType == DebtOperationType.LoanDisbursement ? item.Amount : -item.Amount, cancellationToken);
         if (debt.OriginalAmount + operationDelta < 0) throw new BusinessRuleException("Original amount cannot be lower than the already repaid amount.");
         existing.Name = debt.Name; existing.Icon = debt.Icon; existing.Direction = debt.Direction; existing.Type = debt.Type; existing.CounterpartyName = debt.CounterpartyName;
-        existing.OriginalAmount = debt.OriginalAmount; existing.Currency = debt.Currency; existing.StartDate = debt.StartDate; existing.DueDate = debt.DueDate; existing.Note = debt.Note; existing.AccountId = debt.AccountId;
+        existing.OriginalAmount = debt.OriginalAmount; existing.StartDate = debt.StartDate; existing.DueDate = debt.DueDate; existing.Note = debt.Note; existing.AccountId = debt.AccountId;
         var template = existing.RecurringTransactions.SingleOrDefault();
         if (recurringPayment is null)
         {
