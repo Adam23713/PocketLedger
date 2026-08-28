@@ -5,6 +5,7 @@ using PocketLedger.Models;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.Account;
+using PocketLedger.Models.ViewModels.Debts;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
 
@@ -12,6 +13,17 @@ namespace PocketLedger.Tests;
 
 public class DebtAndSettingsRegressionTests
 {
+    [Theory]
+    [InlineData(nameof(DebtFormViewModel.AutomaticPaymentAmount), "Automatic payment amount")]
+    [InlineData(nameof(DebtFormViewModel.NextPaymentDate), "Next payment date")]
+    [InlineData(nameof(DebtFormViewModel.LastPaymentDate), "Last payment date")]
+    public void DebtForm_AutomaticPaymentFieldsHaveReadableLabels(string propertyName, string expectedLabel)
+    {
+        var property = typeof(DebtFormViewModel).GetProperty(propertyName)!;
+
+        Assert.Equal(expectedLabel, property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name);
+    }
+
     [Fact]
     public void Settings_AcceptsLiteralSpaceAsThousandsSeparator()
     {
@@ -100,6 +112,33 @@ public class DebtAndSettingsRegressionTests
         Assert.Equal(new DateOnly(2026, 10, 1), schedule.FirstOccurrence);
         Assert.Equal(new DateOnly(2027, 5, 1), schedule.LastOccurrence);
         Assert.True(schedule.Enabled);
+    }
+
+    [Fact]
+    public async Task DebtUpdate_PreservesExistingCurrency()
+    {
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        var ownerId = Guid.NewGuid();
+        var debtId = Guid.NewGuid();
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
+        db.Debts.Add(new Debt
+        {
+            Id = debtId, Name = "Loan", Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, Direction = DebtDirection.Payable,
+            Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1)
+        });
+        await db.SaveChangesAsync();
+        var service = new DebtService(db, TimeProvider.System);
+
+        await service.UpdateAsync(new Debt
+        {
+            Id = debtId, Name = "Loan", Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, Direction = DebtDirection.Payable,
+            Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = string.Empty, StartDate = new DateOnly(2026, 1, 1), Note = "Updated note"
+        }, null, CancellationToken.None);
+
+        db.ChangeTracker.Clear();
+        var saved = await db.Debts.SingleAsync(item => item.Id == debtId);
+        Assert.Equal("HUF", saved.Currency);
+        Assert.Equal("Updated note", saved.Note);
     }
 
     [Fact]

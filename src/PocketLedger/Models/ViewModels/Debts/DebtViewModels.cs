@@ -47,8 +47,11 @@ public class DebtFormViewModel : IValidatableObject
     [StringLength(500)] public string? Note { get; set; }
     public Guid? AccountId { get; set; }
     public bool AutomaticPaymentEnabled { get; set; }
+    [Display(Name = "Automatic payment amount")]
     public decimal? AutomaticPaymentAmount { get; set; }
+    [Display(Name = "Next payment date")]
     public DateOnly? NextPaymentDate { get; set; }
+    [Display(Name = "Last payment date")]
     public DateOnly? LastPaymentDate { get; set; }
     public RecurringFrequency Frequency { get; set; } = RecurringFrequency.Monthly;
     public decimal ExistingOriginalAmount { get; set; }
