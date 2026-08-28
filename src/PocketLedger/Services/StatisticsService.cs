@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
+using PocketLedger.Models;
 using PocketLedger.Models.Enums;
 using PocketLedger.Services.Interfaces;
 
@@ -7,9 +8,22 @@ namespace PocketLedger.Services;
 
 public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService accountService) : IStatisticsService
 {
+    public async Task<IReadOnlyList<string>> GetAvailableCurrenciesAsync(int year, int month, CancellationToken cancellationToken)
+    {
+        ValidatePeriod(year, month);
+        var start = new DateOnly(year, month, 1);
+        var end = start.AddMonths(1);
+        var currencies = await dbContext.Transactions.AsNoTracking()
+            .Where(transaction => transaction.TransactionDate >= start && transaction.TransactionDate < end && (transaction.Type == TransactionType.Income || transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment))
+            .Select(transaction => transaction.SourceCurrency)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        return Currencies.All.Where(definition => currencies.Contains(definition.Code)).Select(definition => definition.Code).ToList();
+    }
+
     public async Task<StatisticsSummary> GetSummaryAsync(int year, int month, string currency, CancellationToken cancellationToken)
     {
-        if (year < 1 || month is < 1 or > 12) throw new BusinessRuleException("The selected month is invalid.");
+        ValidatePeriod(year, month);
         var selectedStart = new DateOnly(year, month, 1);
         var trendStart = selectedStart.AddMonths(-11);
         var end = selectedStart.AddMonths(1);
@@ -121,4 +135,9 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
     private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
 
     private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection };
+
+    private static void ValidatePeriod(int year, int month)
+    {
+        if (year < 1 || month is < 1 or > 12) throw new BusinessRuleException("The selected month is invalid.");
+    }
 }

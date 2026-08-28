@@ -31,8 +31,8 @@ public sealed class CurrencyFormatViewModel
 {
     public string CurrencyCode { get; set; } = string.Empty;
     [Range(0, 4)] public int DecimalPlaces { get; set; }
-    [Required, StringLength(1, MinimumLength = 1)] public string DecimalSeparator { get; set; } = ",";
-    [Required, StringLength(1, MinimumLength = 1)] public string ThousandsSeparator { get; set; } = " ";
+    [StringLength(1, MinimumLength = 1), DisplayFormat(ConvertEmptyStringToNull = false)] public string DecimalSeparator { get; set; } = ",";
+    [StringLength(1, MinimumLength = 1), DisplayFormat(ConvertEmptyStringToNull = false)] public string ThousandsSeparator { get; set; } = " ";
     public CurrencyDisplay CurrencyDisplay { get; set; }
     public CurrencyPosition CurrencyPosition { get; set; }
     public bool UseSpace { get; set; } = true;

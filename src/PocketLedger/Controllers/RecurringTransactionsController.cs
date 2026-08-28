@@ -151,7 +151,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         model.Categories = (await categoryService.GetChoicesAsync(null, null, cancellationToken)).Select(choice =>
         {
             var icon = CategoryIcons.Resolve(choice.EffectiveIcon, choice.Type);
-            return new CategoryOptionViewModel { Id = choice.Id, Name = choice.IsSubcategory ? $"|--------- {choice.Name}" : choice.Name, Type = choice.Type, IsSubcategory = choice.IsSubcategory, IconPath = icon.WebPath, IconAlt = icon.DisplayName };
+            return new CategoryOptionViewModel { Id = choice.Id, Name = choice.Name, Type = choice.Type, IsSubcategory = choice.IsSubcategory, IconPath = icon.WebPath, IconAlt = icon.DisplayName };
         }).ToList();
     }
 

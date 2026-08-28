@@ -30,7 +30,17 @@ public class UserContextServiceTests
         var service = new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System);
 
         Assert.Equal("€1,234.50", await service.FormatMoneyAsync(1234.5m, "EUR"));
-        Assert.Equal(new MoneyInputFormat(2, ".", ","), service.GetMoneyInputFormat("EUR"));
+        Assert.Equal(new MoneyInputFormat(2, ".", ",", "€", CurrencyPosition.Before, false), service.GetMoneyInputFormat("EUR"));
+    }
+
+    [Fact]
+    public async Task MoneyInputFormat_UsesPersistedCurrencyCodeSelection()
+    {
+        var userId = Guid.NewGuid();
+        await using var db = CreateDb(userId, "Europe/Budapest", [new UserCurrencyFormat { CurrencyCode = "USD", DecimalPlaces = 2, DecimalSeparator = ",", ThousandsSeparator = " ", CurrencyDisplay = CurrencyDisplay.Code, CurrencyPosition = CurrencyPosition.After, UseSpace = true }]);
+        var service = new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System);
+
+        Assert.Equal(new MoneyInputFormat(2, ",", " ", "USD", CurrencyPosition.After, true), service.GetMoneyInputFormat("USD"));
     }
 
     [Fact]

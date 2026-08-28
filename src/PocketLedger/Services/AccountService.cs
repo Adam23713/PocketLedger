@@ -118,6 +118,7 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
         return await dbContext.Transactions.AsNoTracking()
             .Include(transaction => transaction.Category)
             .ThenInclude(category => category!.ParentCategory)
+            .Include(transaction => transaction.Debt)
             .Where(transaction => transaction.AccountId == accountId || transaction.TargetAccountId == accountId)
             .OrderByDescending(transaction => transaction.TransactionDate)
             .ThenByDescending(transaction => transaction.TransactionTime)

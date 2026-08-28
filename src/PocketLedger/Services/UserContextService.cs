@@ -18,7 +18,7 @@ public interface IUserContextService
     MoneyInputFormat GetMoneyInputFormat(string currency);
 }
 
-public sealed record MoneyInputFormat(int DecimalPlaces, string DecimalSeparator, string ThousandsSeparator);
+public sealed record MoneyInputFormat(int DecimalPlaces, string DecimalSeparator, string ThousandsSeparator, string CurrencyMarker = "", CurrencyPosition CurrencyPosition = CurrencyPosition.After, bool UseSpace = true);
 
 public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbContext dbContext, TimeProvider clock) : IUserContextService
 {
@@ -83,7 +83,8 @@ public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbC
         var definition = Currencies.Get(currency);
         cachedUser ??= dbContext.Users.Include(user => user.CurrencyFormats).Single(user => user.Id == currentUser.UserId);
         var format = cachedUser.CurrencyFormats.SingleOrDefault(item => item.CurrencyCode == definition.Code) ?? DefaultFormat(definition);
-        return new MoneyInputFormat(format.DecimalPlaces, format.DecimalSeparator, format.ThousandsSeparator);
+        var marker = format.CurrencyDisplay == CurrencyDisplay.Symbol ? definition.Symbol : definition.Code;
+        return new MoneyInputFormat(format.DecimalPlaces, format.DecimalSeparator, format.ThousandsSeparator, marker, format.CurrencyPosition, format.UseSpace);
     }
 
     public static UserCurrencyFormat DefaultFormat(CurrencyDefinition definition) => new()

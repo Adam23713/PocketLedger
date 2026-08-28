@@ -1,7 +1,13 @@
 @model PocketLedger.Models.ViewModels.Debts.DebtFormViewModel
 @using PocketLedger.Models.Enums
 <input asp-for="ExistingOriginalAmount" type="hidden" /><input asp-for="RemainingAmountForSchedule" type="hidden" />
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div asp-validation-summary="All" class="text-danger"></div>
+@if (Model.Id != Guid.Empty)
+{
+    <div class="alert alert-warning" role="alert">
+        Changing the original amount recalculates the remaining balance. Changing or disabling automatic payment affects future scheduled payments only; existing repayments are not changed.
+    </div>
+}
 <div class="row g-3">
 <div class="col-md-6"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
 <div class="col-md-3"><label asp-for="Direction" class="form-label"></label><select asp-for="Direction" asp-items="Html.GetEnumSelectList<DebtDirection>()" class="form-select"></select></div>

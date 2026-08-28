@@ -48,7 +48,8 @@ public class ImportExportController(IImportExportService importExportService) : 
     public async Task<IActionResult> Backup(CancellationToken cancellationToken)
     {
         var json = await importExportService.ExportBackupAsync(cancellationToken);
-        return File(Encoding.UTF8.GetBytes(json), "application/json; charset=utf-8", $"moneymanager-backup-{DateTime.Today:yyyyMMdd}.json");
+        var fileName = $"pocketledger-backup-{DateTimeOffset.UtcNow:yyyyMMdd'T'HHmmssfff'Z'}-{Guid.NewGuid():N}.json";
+        return File(Encoding.UTF8.GetBytes(json), "application/json; charset=utf-8", fileName);
     }
 
     [HttpGet]

@@ -36,6 +36,10 @@ public class AccountTransactionViewModel
     public string? CategoryName { get; init; }
     public string? CategoryIconPath { get; init; }
     public string? CategoryIconAlt { get; init; }
+    public string? DebtName { get; init; }
+    public DebtOperationType? DebtOperationType { get; init; }
+    public string? DebtIconPath { get; init; }
+    public string? DebtIconAlt { get; init; }
 }
 
 public class AccountFormViewModel

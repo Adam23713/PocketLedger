@@ -4,14 +4,23 @@
     const type = document.getElementById("transaction-type"), sourceAccount = document.getElementById("source-account"), targetAccount = document.getElementById("target-account");
     const targetAccountField = document.getElementById("target-account-field"), categoryField = document.getElementById("category-field"), categories = [...document.querySelectorAll('[name="CategoryId"]')], categoryItems = [...document.querySelectorAll(".category-tree-item")], adjustmentField = document.getElementById("adjustment-field");
     const amount = document.getElementById("source-amount"), rate = document.getElementById("exchange-rate"), rateField = document.getElementById("exchange-rate-field"), target = document.getElementById("target-amount"), targetDisplay = document.getElementById("target-amount-display"), targetField = document.getElementById("target-amount-field");
+    function formatTarget(value, option) {
+        const decimalPlaces = Number(option.dataset.decimalPlaces ?? 2), decimalSeparator = option.dataset.decimalSeparator ?? ".", thousandsSeparator = option.dataset.thousandsSeparator ?? ",";
+        const [integer, fraction] = value.toFixed(decimalPlaces).split("."), grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSeparator);
+        const number = decimalPlaces > 0 ? grouped + decimalSeparator + fraction : grouped;
+        const marker = option.dataset.currencyMarker ?? option.dataset.currency ?? "", space = option.dataset.useSpace === "true" ? " " : "";
+        return option.dataset.currencyPosition === "Before" ? marker + space + number : number + space + marker;
+    }
     function updateTransfer() {
-        const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency, targetCurrency = targetAccount.selectedOptions[0]?.dataset.currency;
+        const sourceCurrency = sourceAccount.selectedOptions[0]?.dataset.currency, targetOption = targetAccount.selectedOptions[0], targetCurrency = targetOption?.dataset.currency;
         const transfer = type.value === "Transfer", same = sourceCurrency && sourceCurrency === targetCurrency;
         targetAccountField.hidden = !transfer; targetField.hidden = !transfer; rateField.hidden = !transfer || same;
         if (transfer && same) rate.value = "1";
-        const result = transfer ? Number(amount.value) * Number(rate.value) : NaN;
-        target.value = Number.isFinite(result) ? result.toFixed(4).replace(/\.?0+$/, "") : ""; targetDisplay.value = target.value;
-        for (const [id, value] of [["source-currency-suffix", sourceCurrency], ["target-currency-suffix", targetCurrency]]) { const suffix = document.getElementById(id); suffix.textContent = value || ""; suffix.hidden = !value; }
+        const result = transfer && sourceCurrency && targetCurrency && amount.value && rate.value ? Number(amount.value) * Number(rate.value) : NaN;
+        const decimalPlaces = Number(targetOption?.dataset.decimalPlaces ?? 2);
+        target.value = Number.isFinite(result) ? result.toFixed(decimalPlaces) : "";
+        targetDisplay.value = Number.isFinite(result) && targetOption ? formatTarget(result, targetOption) : "";
+        const suffix = document.getElementById("source-currency-suffix"); suffix.textContent = sourceCurrency || ""; suffix.hidden = !sourceCurrency;
         document.getElementById("exchange-rate-help").textContent = sourceCurrency && targetCurrency ? `1 ${sourceCurrency} = X ${targetCurrency}` : "";
     }
     function updateFields() {
@@ -22,6 +31,7 @@
         categoryItems.forEach(item => { item.hidden = item.dataset.categoryType !== type.value; item.querySelector("input").disabled = item.hidden; });
         updateTransfer();
     }
-    [type, sourceAccount, targetAccount, rate].forEach(element => element.addEventListener("change", updateFields)); amount.addEventListener("change", updateTransfer); updateFields();
+    [type, sourceAccount, targetAccount].forEach(element => element.addEventListener("change", updateFields));
+    rate.addEventListener("input", updateTransfer); rate.addEventListener("change", updateTransfer); amount.addEventListener("change", updateTransfer); updateFields();
 })();
 </script>

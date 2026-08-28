@@ -147,7 +147,7 @@ body {
 [data-dashboard-amounts-hidden="true"] [data-private-amount]::after { content: "••••"; font-size: 1rem; letter-spacing: .08em; }
 .profile-button { background: color-mix(in srgb, var(--accent-color) 13%, transparent); border-color: color-mix(in srgb, var(--accent-color) 22%, transparent); color: var(--accent-color); overflow: hidden; }
 .app-dropdown { background: var(--surface-raised); border: 1px solid var(--border-color); border-radius: var(--card-radius); box-shadow: 0 14px 35px rgba(0, 0, 0, .18); min-width: 14.5rem; padding: .45rem; position: absolute; right: 0; top: calc(100% + .55rem); z-index: 1050; }
-[data-theme="glass"] .profile-menu { background: var(--dropdown-background); border-color: rgba(255, 255, 255, .28); box-shadow: 0 18px 45px rgba(1, 7, 30, .55); backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-theme="glass"] .profile-menu, [data-theme="glass"] .theme-menu { background: var(--dropdown-background); border-color: rgba(255, 255, 255, .28); box-shadow: 0 18px 45px rgba(1, 7, 30, .55); backdrop-filter: none; -webkit-backdrop-filter: none; }
 .app-dropdown[hidden] { display: none; }
 .dropdown-heading { color: var(--text-secondary); font-size: .72rem; font-weight: 700; letter-spacing: .08em; padding: .45rem .65rem; text-transform: uppercase; }
 .profile-menu { min-width: 16rem; padding: .55rem; }

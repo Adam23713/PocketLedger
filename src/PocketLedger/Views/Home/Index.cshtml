@@ -82,7 +82,7 @@ else
                     <td>@transaction.Type</td>
                     <td>@(transaction.AccountName ?? "No account movement")</td>
                     <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
-                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")<span data-private-amount>@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span></td>
+                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</td>
                 </tr>
             }
             </tbody>
