@@ -39,21 +39,45 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
 
         foreach (var template in templates)
         {
-            var zone = UserContextService.GetTimeZone(template.Owner.TimeZoneId);
-            var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), zone).DateTime);
-            if (template.FirstOccurrence > today) continue;
-            var start = template.AutomationStartsOn > template.FirstOccurrence ? template.AutomationStartsOn : template.FirstOccurrence;
-            var occurrenceDates = RecurringSchedule.GetOccurrences(template, start, today);
-            if (occurrenceDates.Count == 0) continue;
-
-            var processedDates = await dbContext.RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking()
-                .Where(occurrence => occurrence.RecurringTransactionId == template.Id && occurrence.OccurrenceDate >= start && occurrence.OccurrenceDate <= today)
-                .Select(occurrence => occurrence.OccurrenceDate)
-                .ToHashSetAsync(cancellationToken);
-
-            foreach (var occurrenceDate in occurrenceDates.Where(date => !processedDates.Contains(date)))
+            try
             {
-                await CreateOccurrenceAsync(dbContext, template, occurrenceDate, zone, cancellationToken);
+                var zone = UserContextService.GetTimeZone(template.Owner.TimeZoneId);
+                var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), zone).DateTime);
+                if (template.FirstOccurrence > today) continue;
+                var start = template.AutomationStartsOn > template.FirstOccurrence ? template.AutomationStartsOn : template.FirstOccurrence;
+                var occurrenceDates = RecurringSchedule.GetOccurrences(template, start, today);
+                if (occurrenceDates.Count == 0) continue;
+
+                var processedDates = await dbContext.RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking()
+                    .Where(occurrence => occurrence.RecurringTransactionId == template.Id && occurrence.OccurrenceDate >= start && occurrence.OccurrenceDate <= today)
+                    .Select(occurrence => occurrence.OccurrenceDate)
+                    .ToHashSetAsync(cancellationToken);
+
+                foreach (var occurrenceDate in occurrenceDates.Where(date => !processedDates.Contains(date)))
+                {
+                    try
+                    {
+                        await CreateOccurrenceAsync(dbContext, template, occurrenceDate, zone, cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        dbContext.ChangeTracker.Clear();
+                        logger.LogError(exception, "Recurring occurrence {RecurringTransactionId} for {OccurrenceDate} failed and will be retried.", template.Id, occurrenceDate);
+                    }
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                dbContext.ChangeTracker.Clear();
+                logger.LogError(exception, "Recurring transaction {RecurringTransactionId} could not be evaluated and will be retried.", template.Id);
             }
         }
     }

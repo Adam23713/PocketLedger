@@ -13,15 +13,20 @@ public class StatisticsController(IStatisticsService statisticsService, IUserCon
         var today = await userContext.TodayAsync(cancellationToken);
         var selectedYear = year ?? today.Year;
         var selectedMonth = month ?? today.Month;
-        currency = Currencies.Exists(currency) ? currency!.ToUpperInvariant() : (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency;
         try
         {
+            var availableCurrencyCodes = await statisticsService.GetAvailableCurrenciesAsync(selectedYear, selectedMonth, cancellationToken);
+            var defaultCurrency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency;
+            currency = availableCurrencyCodes.Contains(currency ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                ? currency!.ToUpperInvariant()
+                : availableCurrencyCodes.Contains(defaultCurrency, StringComparer.OrdinalIgnoreCase) ? defaultCurrency : availableCurrencyCodes.FirstOrDefault() ?? defaultCurrency;
             var summary = await statisticsService.GetSummaryAsync(selectedYear, selectedMonth, currency, cancellationToken);
             return View(new StatisticsViewModel
             {
                 Year = selectedYear,
                 Month = selectedMonth,
                 Currency = currency,
+                AvailableCurrencies = Currencies.All.Where(definition => availableCurrencyCodes.Contains(definition.Code)).ToList(),
                 Income = summary.Income,
                 Expenses = summary.Expenses,
                 Savings = summary.Savings,

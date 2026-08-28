@@ -44,6 +44,32 @@ public class PocketLedgerFeatureTests
         Assert.Equal(expected, RecurringSchedule.ToMonthlyAmount(amount, frequency));
     }
 
+    [Fact]
+    public void MonthlyRecurringSchedule_IncludesDueDateAtMonthEnd()
+    {
+        var template = new PocketLedger.Models.Entities.RecurringTransaction
+        {
+            FirstOccurrence = new DateOnly(2026, 1, 31), Frequency = RecurringFrequency.Monthly
+        };
+
+        var occurrences = RecurringSchedule.GetOccurrences(template, new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28));
+
+        Assert.Equal([new DateOnly(2026, 2, 28)], occurrences);
+    }
+
+    [Fact]
+    public void RecurringSchedule_DoesNotReturnDatesBeforeRequestedAutomationStart()
+    {
+        var template = new PocketLedger.Models.Entities.RecurringTransaction
+        {
+            FirstOccurrence = new DateOnly(2026, 8, 1), Frequency = RecurringFrequency.Daily
+        };
+
+        var occurrences = RecurringSchedule.GetOccurrences(template, new DateOnly(2026, 8, 28), new DateOnly(2026, 8, 28));
+
+        Assert.Equal([new DateOnly(2026, 8, 28)], occurrences);
+    }
+
     public static TheoryData<decimal, decimal?, bool> TransactionAmounts => new()
     {
         { 100.5m, null, true },

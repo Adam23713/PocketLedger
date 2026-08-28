@@ -12,5 +12,6 @@ public record StatisticsSummary(decimal Income, decimal Expenses, decimal Saving
 
 public interface IStatisticsService
 {
+    Task<IReadOnlyList<string>> GetAvailableCurrenciesAsync(int year, int month, CancellationToken cancellationToken);
     Task<StatisticsSummary> GetSummaryAsync(int year, int month, string currency, CancellationToken cancellationToken);
 }

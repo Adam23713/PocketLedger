@@ -10,6 +10,7 @@ RUN dotnet publish src/PocketLedger/PocketLedger.csproj -c Release -o /app/publi
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
+ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:5050
 EXPOSE 5050
 

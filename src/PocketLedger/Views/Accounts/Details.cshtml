@@ -26,9 +26,9 @@ else
     @foreach (var transaction in Model.RecentTransactions)
     {
         var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease;
-        <a class="list-group-item list-group-item-action d-flex justify-content-between" asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">
-            <span>@if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@transaction.Date.ToString("yyyy-MM-dd") · @(transaction.CategoryName ?? transaction.Type.ToString())</span>
-            <span class="@(transaction.Type == TransactionType.Transfer ? null : negative ? "text-danger" : "text-success")">@(transaction.Type == TransactionType.Transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, Model.Account.Currency)</span>
+        <a class="list-group-item list-group-item-action d-flex flex-column flex-sm-row justify-content-between gap-2" asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">
+            <span>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@transaction.Date.ToString("yyyy-MM-dd") · @(transaction.DebtOperationType is not null ? $"{transaction.DebtOperationType} · {transaction.DebtName}" : transaction.CategoryName ?? transaction.Type.ToString())</span>
+            <span class="text-sm-end @(transaction.Type == TransactionType.Transfer ? null : negative ? "text-danger" : "text-success")">@(transaction.Type == TransactionType.Transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, Model.Account.Currency)</span>
         </a>
     }
     </div>
