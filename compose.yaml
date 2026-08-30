@@ -1,55 +1,96 @@
+x-postgres-common: &postgres-common
+  image: postgres:17-alpine
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    timeout: 5s
+    retries: 10
+    start_period: 5s
+  restart: unless-stopped
+
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  web:
+    build: { context: ., dockerfile: Dockerfile, target: web }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Host=database;Port=5432;Database=${POSTGRES_DB:-moneymanager};Username=${POSTGRES_USER:-moneymanager};Password=${POSTGRES_PASSWORD:-moneymanager}
+      ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
-      HttpsRedirection__Enabled: "false"
+      Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
+      Identity__MetadataAddress: http://identity:5052/.well-known/openid-configuration
+      Identity__BackchannelBaseUrl: http://identity:5052/
+      Identity__RequireHttpsMetadata: "false"
+      Identity__ClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
+      Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      Api__BaseUrl: http://api:5051/
+      ForwardedHeaders__TrustAll: "true"
+    depends_on:
+      web-database: { condition: service_healthy }
+      api: { condition: service_started }
+      identity: { condition: service_started }
+    restart: unless-stopped
+
+  api:
+    build: { context: ., dockerfile: Dockerfile, target: api }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      Database__ApplyMigrationsOnStartup: "true"
+      Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
+      Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      ForwardedHeaders__TrustAll: "true"
+    depends_on:
+      api-database: { condition: service_healthy }
+    restart: unless-stopped
+
+  identity:
+    build: { context: ., dockerfile: Dockerfile, target: identity }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      Database__ApplyMigrationsOnStartup: "true"
+      OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
+      OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      OpenIddict__WebClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
+      OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      ForwardedHeaders__TrustAll: "true"
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
-      POCKETLEDGER_MAXIMUM_USER_COUNT: ${POCKETLEDGER_MAXIMUM_USER_COUNT:-1}
-    volumes:
-      - data-protection-keys:/home/app/.aspnet/DataProtection-Keys
     depends_on:
-      database:
-        condition: service_healthy
+      identity-database: { condition: service_healthy }
     restart: unless-stopped
 
   caddy:
     image: caddy:2-alpine
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      POCKETLEDGER_WEB_DOMAIN: ${POCKETLEDGER_WEB_DOMAIN}
+      POCKETLEDGER_API_DOMAIN: ${POCKETLEDGER_API_DOMAIN}
+      POCKETLEDGER_IDENTITY_DOMAIN: ${POCKETLEDGER_IDENTITY_DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
-    depends_on:
-      - app
+    depends_on: [web, api, identity]
     restart: unless-stopped
 
-  database:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-moneymanager}
-      POSTGRES_USER: ${POSTGRES_USER:-moneymanager}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moneymanager}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-    restart: unless-stopped
+  web-database:
+    <<: *postgres-common
+    environment: { POSTGRES_DB: pocketledger_web, POSTGRES_USER: "${POSTGRES_USER:-pocketledger}", POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-pocketledger}" }
+    volumes: [web-postgres-data:/var/lib/postgresql/data]
+
+  api-database:
+    <<: *postgres-common
+    environment: { POSTGRES_DB: pocketledger_api, POSTGRES_USER: "${POSTGRES_USER:-pocketledger}", POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-pocketledger}" }
+    volumes: [api-postgres-data:/var/lib/postgresql/data]
+
+  identity-database:
+    <<: *postgres-common
+    environment: { POSTGRES_DB: pocketledger_identity, POSTGRES_USER: "${POSTGRES_USER:-pocketledger}", POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-pocketledger}" }
+    volumes: [identity-postgres-data:/var/lib/postgresql/data]
 
 volumes:
-  postgres-data:
-  data-protection-keys:
+  web-postgres-data:
+  api-postgres-data:
+  identity-postgres-data:
   caddy-data:
   caddy-config:

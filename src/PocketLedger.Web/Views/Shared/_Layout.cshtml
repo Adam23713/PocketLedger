@@ -1,0 +1,113 @@
+@{
+    var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentProfile = User.Identity?.IsAuthenticated == true ? await MoneyFormatter.GetUserAsync() : null;
+    string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="apple" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PocketLedger</title>
+    <link rel="icon" href="~/favicon.ico" sizes="any" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/app-icons/pocketledger-32.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="64x64" href="~/images/app-icons/pocketledger-64.png" asp-append-version="true" />
+    <script>
+        (() => {
+            const themes = ["apple", "banking", "glass", "material"];
+            const savedTheme = localStorage.getItem("pocketledger-theme");
+            const theme = themes.includes(savedTheme) ? savedTheme : "apple";
+            document.documentElement.dataset.theme = theme;
+            document.documentElement.setAttribute("data-bs-theme", theme === "banking" || theme === "glass" ? "dark" : "light");
+        })();
+    </script>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PocketLedger.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="app-header">
+        <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" title="PocketLedger v@(applicationVersion)">
+                    <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
+                    <span>PocketLedger</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse" id="main-navigation">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)">Dashboard</a></li>
+                        <li class="nav-item"><a class="@NavClass("Accounts")" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)">Accounts</a></li>
+                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)">Transactions</a></li>
+                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)">Calendar</a></li>
+                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)">Statistics</a></li>
+                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)">Recurring</a></li>
+                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)">Loans / Debts</a></li>
+                    </ul>
+                </div>
+                <div class="header-actions">
+                    <div class="app-menu">
+                        <button class="header-icon-button" id="theme-menu-button" type="button" aria-label="Choose appearance theme" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">
+                            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg>
+                        </button>
+                        <div class="app-dropdown theme-menu" id="theme-menu" role="menu" aria-labelledby="theme-menu-button" hidden>
+                            <div class="dropdown-heading">Appearance</div>
+                            <button type="button" role="menuitemradio" data-theme-value="apple" aria-checked="false"><span class="theme-swatch apple-swatch"></span><span>Apple / iOS</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>Banking App</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>Glassmorphism</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="material" aria-checked="false"><span class="theme-swatch material-swatch"></span><span>Material Design 3</span><span class="theme-check">✓</span></button>
+                        </div>
+                    </div>
+                    <div class="app-menu">
+                        <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
+                            @if (currentProfile is not null) { <img class="header-avatar" src="~/images/avatars/@($"avatar-{currentProfile.AvatarId}.png")" alt="" /> }
+                        </button>
+                        <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
+                            @if (currentProfile is not null)
+                            {
+                                <div class="profile-menu-header">
+                                    <img src="~/images/avatars/@($"avatar-{currentProfile.AvatarId}.png")" alt="" />
+                                    <div><strong>@(currentProfile.DisplayName ?? User.Identity?.Name)</strong>@if (!string.IsNullOrWhiteSpace(currentProfile.DisplayName) && !string.IsNullOrWhiteSpace(User.Identity?.Name)) { <small>@@@User.Identity.Name</small> }</div>
+                                </div>
+                                <div class="dropdown-divider" role="separator"></div>
+                                <a role="menuitem" asp-controller="Settings" asp-action="Index">Settings</a>
+                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")">Security</a>
+                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
+                                <div class="dropdown-divider" role="separator"></div>
+                                <form asp-controller="Session" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
+                            }
+                            else
+                            {
+                                <a role="menuitem" asp-controller="Session" asp-action="Login">Login</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container app-content">
+        <main role="main" class="pb-3">
+            @if (TempData["SuccessMessage"] is string successMessage)
+            {
+                <div class="alert alert-success" role="alert">@successMessage</div>
+            }
+            @if (TempData["ErrorMessage"] is string errorMessage)
+            {
+                <div class="alert alert-danger" role="alert">@errorMessage</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="footer text-muted"><div class="container">&copy; 2026 - PocketLedger · v@(applicationVersion)</div></footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,6 +1,12 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/PocketLedger/PocketLedger.csproj" />
+    <Project Path="src/PocketLedger.Api/PocketLedger.Api.csproj" />
+    <Project Path="src/PocketLedger.Application/PocketLedger.Application.csproj" />
+    <Project Path="src/PocketLedger.Contracts/PocketLedger.Contracts.csproj" />
+    <Project Path="src/PocketLedger.Domain/PocketLedger.Domain.csproj" />
+    <Project Path="src/PocketLedger.Infrastructure/PocketLedger.Infrastructure.csproj" />
+    <Project Path="src/PocketLedger.Identity/PocketLedger.Identity.csproj" />
+    <Project Path="src/PocketLedger.Web/PocketLedger.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PocketLedger.Tests/PocketLedger.Tests.csproj" />
