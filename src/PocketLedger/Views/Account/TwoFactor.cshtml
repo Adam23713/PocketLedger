@@ -1,3 +1,0 @@
-@model PocketLedger.Models.ViewModels.Account.TwoFactorViewModel
-@{ ViewData["Title"] = "Authenticator code"; }
-<h1>Authenticator code</h1><form method="post"><div asp-validation-summary="All" class="text-danger"></div><label asp-for="Code"></label><input asp-for="Code" class="form-control" autocomplete="one-time-code" autofocus /><button class="btn btn-primary mt-3">Continue</button></form><a asp-action="RecoveryCode">Use a recovery code</a>

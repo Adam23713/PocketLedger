@@ -1,0 +1,11 @@
+@{ ViewData["Title"] = "Identity"; }
+<h1>PocketLedger Identity</h1>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p>Signed in as <strong>@User.Identity.Name</strong>.</p>
+    <p><a asp-controller="Account" asp-action="Security">Security and audit log</a></p>
+}
+else
+{
+    <p><a asp-controller="Account" asp-action="Login">Sign in</a></p>
+}

@@ -1,3 +1,11 @@
-<host-name> {
-	reverse_proxy app:5050
+{$POCKETLEDGER_WEB_DOMAIN} {
+	reverse_proxy web:5050
+}
+
+{$POCKETLEDGER_API_DOMAIN} {
+	reverse_proxy api:5051
+}
+
+{$POCKETLEDGER_IDENTITY_DOMAIN} {
+	reverse_proxy identity:5052
 }

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PocketLedger\PocketLedger.csproj" />
+    <ProjectReference Include="..\..\src\PocketLedger.Web\PocketLedger.Web.csproj" />
   </ItemGroup>
 
 </Project>
