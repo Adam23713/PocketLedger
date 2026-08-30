@@ -84,9 +84,9 @@ public class UserContextServiceTests
     {
         var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         var db = new PocketLedgerDbContext(options);
-        var user = new ApplicationUser { Id = userId, UserName = "test", TimeZoneId = timeZoneId };
+        var user = new UserPreference { UserId = userId, TimeZoneId = timeZoneId };
         foreach (var format in formats) { format.UserId = userId; user.CurrencyFormats.Add(format); }
-        db.Users.Add(user);
+        db.UserPreferences.Add(user);
         db.SaveChanges();
         return db;
     }

@@ -66,6 +66,7 @@ builder.Services.AddOpenIddict()
             signingKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
         options.AddSigningKey(new SymmetricSecurityKey(Convert.FromBase64String(signingKey)));
+        options.AddEphemeralSigningKey();
         options.AddEphemeralEncryptionKey();
         options.DisableAccessTokenEncryption();
         var aspNetCore = options.UseAspNetCore().EnableAuthorizationEndpointPassthrough().EnableTokenEndpointPassthrough().EnableEndSessionEndpointPassthrough();
