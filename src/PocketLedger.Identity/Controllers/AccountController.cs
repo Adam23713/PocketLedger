@@ -19,8 +19,8 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
     {
-        if (!await AllowRequestAsync(model.Username, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);
+        if (!await AllowRequestAsync(model.Username, cancellationToken)) return TooManyRequests();
         var normalized = userManager.NormalizeName(model.Username.Trim());
         var user = await userManager.FindByNameAsync(model.Username.Trim());
         var wasLocked = user is not null && await userManager.IsLockedOutAsync(user);

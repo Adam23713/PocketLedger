@@ -30,6 +30,16 @@ public class AuthenticationSecurityTests
     }
 
     [Fact]
+    public async Task RateLimiter_HandlesMissingAndWhitespaceOnlyUsernames()
+    {
+        using var limiter = CreateLimiter(60);
+        using var missing = await limiter.AcquireAsync(null, default);
+        using var whitespace = await limiter.AcquireAsync("   ", default);
+        Assert.True(missing.IsAcquired);
+        Assert.True(whitespace.IsAcquired);
+    }
+
+    [Fact]
     public async Task RateLimiter_ReplenishesAfterWindow()
     {
         using var limiter = CreateLimiter(1);
