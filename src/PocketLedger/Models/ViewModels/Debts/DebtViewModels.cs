@@ -39,7 +39,7 @@ public class DebtFormViewModel : IValidatableObject
     public IReadOnlyList<CategoryIconDefinition> AvailableIcons { get; init; } = CategoryIcons.All;
     [Required] public DebtDirection Direction { get; set; }
     [Required] public DebtType Type { get; set; }
-    [Required, StringLength(200)] public string CounterpartyName { get; set; } = string.Empty;
+    [Required, StringLength(200), Display(Name = "Person or bank name")] public string CounterpartyName { get; set; } = string.Empty;
     [Display(Name = "Original amount"), Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal OriginalAmount { get; set; }
     [Required, StringLength(3, MinimumLength = 3)] public string Currency { get; set; } = "HUF";
     [Required] public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
