@@ -54,10 +54,9 @@ public class DebtAndSettingsRegressionTests
         var userId = Guid.NewGuid();
         await using (var db = new PocketLedgerDbContext(options))
         {
-            db.Users.Add(new ApplicationUser
+            db.UserPreferences.Add(new UserPreference
             {
-                Id = userId,
-                UserName = "ada",
+                UserId = userId,
                 DisplayName = "Ada Lovelace",
                 CurrencyFormats = [new UserCurrencyFormat { UserId = userId, CurrencyCode = "HUF", DecimalPlaces = 0, DecimalSeparator = ",", ThousandsSeparator = " " }]
             });
@@ -65,7 +64,7 @@ public class DebtAndSettingsRegressionTests
         }
 
         await using var verify = new PocketLedgerDbContext(options);
-        var saved = await verify.Users.Include(user => user.CurrencyFormats).SingleAsync(user => user.Id == userId);
+        var saved = await verify.UserPreferences.Include(user => user.CurrencyFormats).SingleAsync(user => user.UserId == userId);
         Assert.Equal("Ada Lovelace", saved.DisplayName);
         Assert.Equal(" ", Assert.Single(saved.CurrencyFormats).ThousandsSeparator);
     }

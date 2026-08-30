@@ -80,7 +80,7 @@ public class StatisticsServiceTests
         var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         var currentUser = new TestCurrentUser(ownerId);
         var db = new PocketLedgerDbContext(options, currentUser);
-        db.Users.Add(new ApplicationUser { Id = ownerId, UserName = "statistics", DefaultCurrency = "HUF", TimeZoneId = "Europe/Budapest" });
+        db.UserPreferences.Add(new UserPreference { UserId = ownerId, DefaultCurrency = "HUF", TimeZoneId = "Europe/Budapest" });
         db.SaveChanges();
         return db;
     }

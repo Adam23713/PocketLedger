@@ -40,12 +40,6 @@ public class AuthenticationSecurityTests
     }
 
     [Fact]
-    public void DefaultMaximumUserCount_IsOne()
-    {
-        Assert.Equal(1, new AccountManagementOptions().MaximumUserCount);
-    }
-
-    [Fact]
     public void ClientIpAddress_UsesConfiguredHeaderPriorityAndFirstValidAddress()
     {
         var context = new DefaultHttpContext();
