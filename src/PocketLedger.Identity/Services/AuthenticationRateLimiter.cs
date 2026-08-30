@@ -7,7 +7,7 @@ namespace PocketLedger.Services;
 
 public interface IAuthenticationRateLimiter
 {
-    ValueTask<RateLimitLease> AcquireAsync(string username, CancellationToken cancellationToken);
+    ValueTask<RateLimitLease> AcquireAsync(string? username, CancellationToken cancellationToken);
 }
 
 public sealed class AuthenticationRateLimiter(IOptions<AuthenticationSecurityOptions> options) : IAuthenticationRateLimiter, IDisposable
@@ -15,9 +15,9 @@ public sealed class AuthenticationRateLimiter(IOptions<AuthenticationSecurityOpt
     private readonly ConcurrentDictionary<string, FixedWindowRateLimiter> limiters = new(StringComparer.Ordinal);
     private readonly AuthenticationSecurityOptions settings = options.Value;
 
-    public ValueTask<RateLimitLease> AcquireAsync(string username, CancellationToken cancellationToken)
+    public ValueTask<RateLimitLease> AcquireAsync(string? username, CancellationToken cancellationToken)
     {
-        var key = username.Trim().ToUpperInvariant();
+        var key = string.IsNullOrWhiteSpace(username) ? "<EMPTY>" : username.Trim().ToUpperInvariant();
         var limiter = limiters.GetOrAdd(key, _ => new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
         {
             PermitLimit = settings.RateLimitPermitCount, Window = TimeSpan.FromSeconds(settings.RateLimitWindowSeconds), QueueLimit = 0, AutoReplenishment = true
