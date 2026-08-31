@@ -63,6 +63,25 @@
             "problemMatcher": []
         },
         {
+            "label": "wait for PocketLedger Identity",
+            "type": "process",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "for attempt in {1..60}; do if curl --silent --fail http://localhost:5052/.well-known/openid-configuration >/dev/null; then exit 0; fi; sleep 1; done; echo 'PocketLedger Identity did not become ready on http://localhost:5052 within 60 seconds.' >&2; exit 1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "prepare PocketLedger Web development",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "prepare PocketLedger development",
+                "wait for PocketLedger Identity"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "bootstrap PocketLedger development identity",
             "type": "process",
             "command": "dotnet",

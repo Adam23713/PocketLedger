@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
@@ -35,8 +36,10 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
             ["client_id"] = configuration["Identity:ClientId"] ?? "pocketledger-web",
             ["client_secret"] = configuration["Identity:ClientSecret"] ?? throw new InvalidOperationException("Identity:ClientSecret is required.")
         }), cancellationToken);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (response.StatusCode == HttpStatusCode.BadRequest && IsInvalidGrant(content)) throw new BffSessionExpiredException();
         response.EnsureSuccessStatusCode();
-        using var document = JsonDocument.Parse(await response.Content.ReadAsStreamAsync(cancellationToken));
+        using var document = JsonDocument.Parse(content);
         var root = document.RootElement;
         var accessToken = root.GetProperty("access_token").GetString()!;
         var expiresIn = root.GetProperty("expires_in").GetInt32();
@@ -47,5 +50,18 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
         properties.StoreTokens(tokens);
         await context.SignInAsync("BffCookie", authentication.Principal!, properties);
         return accessToken;
+    }
+
+    private static bool IsInvalidGrant(string content)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            return document.RootElement.TryGetProperty("error", out var error) && error.GetString() == "invalid_grant";
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 }

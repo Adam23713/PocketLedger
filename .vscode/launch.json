@@ -5,11 +5,11 @@
             "name": "PocketLedger Web (5050)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "prepare PocketLedger development",
+            "preLaunchTask": "prepare PocketLedger Web development",
             "program": "${workspaceFolder}/src/PocketLedger.Web/bin/Debug/net10.0/PocketLedger.Web.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Web",
             "stopAtEntry": false,
-            "justMyCode": true,
+            "justMyCode": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://0.0.0.0:5050",
