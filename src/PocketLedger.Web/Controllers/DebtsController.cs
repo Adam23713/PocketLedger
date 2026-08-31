@@ -71,6 +71,18 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> DeleteOperation(Guid id, Guid debtId, CancellationToken cancellationToken) { try { await debtService.DeleteOperationAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt operation deleted."; return RedirectToAction(nameof(Details), new { id = debtId }); } catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; return RedirectToAction(nameof(Details), new { id = debtId }); } }
+    [HttpGet] public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var debt = await debtService.GetByIdAsync(id, cancellationToken); if (debt is null) return NotFound();
+        var summary = await debtService.GetDeletionSummaryAsync(id, cancellationToken);
+        return View(new DebtDeleteViewModel { Id = id, Name = debt.Debt.Name, TransactionCount = summary.TransactionCount, RecurringTransactionCount = summary.RecurringTransactionCount, AffectedAccountCount = summary.AffectedAccountCount });
+    }
+    [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken] public async Task<IActionResult> DeleteConfirmed(Guid id, CancellationToken cancellationToken)
+    {
+        try { await debtService.DeleteAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt deleted successfully."; return RedirectToAction(nameof(Index)); }
+        catch (EntityNotFoundException) { return NotFound(); }
+        catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; return RedirectToAction(nameof(Delete), new { id }); }
+    }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> Close(Guid id, CancellationToken cancellationToken) { try { await debtService.CloseAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt closed."; } catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; } return RedirectToAction(nameof(Details), new { id }); }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> Reopen(Guid id, CancellationToken cancellationToken) { await debtService.ReopenAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt reopened."; return RedirectToAction(nameof(Details), new { id }); }
 

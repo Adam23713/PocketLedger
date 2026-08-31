@@ -77,6 +77,15 @@ public class DebtDetailsViewModel
     public IReadOnlyList<DebtOperationListItemViewModel> Operations { get; init; } = [];
 }
 
+public class DebtDeleteViewModel
+{
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public int TransactionCount { get; init; }
+    public int RecurringTransactionCount { get; init; }
+    public int AffectedAccountCount { get; init; }
+}
+
 public class DebtOperationListItemViewModel
 {
     public Guid Id { get; init; }
