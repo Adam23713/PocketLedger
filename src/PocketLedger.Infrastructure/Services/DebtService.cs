@@ -67,6 +67,39 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<DebtDeletionSummary> GetDeletionSummaryAsync(Guid id, CancellationToken cancellationToken)
+    {
+        if (!await dbContext.Debts.AnyAsync(item => item.Id == id, cancellationToken)) throw new EntityNotFoundException("Debt not found.");
+        var transactions = dbContext.Transactions.Where(item => item.DebtId == id);
+        return new DebtDeletionSummary(
+            await transactions.CountAsync(cancellationToken),
+            await dbContext.RecurringTransactions.CountAsync(item => item.DebtId == id, cancellationToken),
+            await transactions.Where(item => item.AccountId != null).Select(item => item.AccountId).Distinct().CountAsync(cancellationToken));
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        await using var databaseTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        if (dbContext.Database.IsRelational()) await LockDebtAsync(id, cancellationToken);
+        var debt = await dbContext.Debts.SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
+        var recurringTransactions = await dbContext.RecurringTransactions.Where(item => item.DebtId == id).ToListAsync(cancellationToken);
+        var recurringIds = recurringTransactions.Select(item => item.Id).ToList();
+        var transactions = await dbContext.Transactions.Where(item => item.DebtId == id).ToListAsync(cancellationToken);
+        var transactionIds = transactions.Select(item => item.Id).ToList();
+        var occurrences = await dbContext.RecurringTransactionOccurrences.Where(item => recurringIds.Contains(item.RecurringTransactionId) || item.TransactionId != null && transactionIds.Contains(item.TransactionId.Value)).ToListAsync(cancellationToken);
+        var accountIds = transactions.Where(item => item.AccountId != null).Select(item => item.AccountId!.Value).Distinct().ToList();
+        var accounts = await dbContext.Accounts.Where(item => accountIds.Contains(item.Id)).ToListAsync(cancellationToken);
+
+        foreach (var account in accounts) account.InitialBalance += BalanceCalculator.Calculate(account.Id, 0, transactions);
+
+        dbContext.RecurringTransactionOccurrences.RemoveRange(occurrences);
+        dbContext.Transactions.RemoveRange(transactions);
+        dbContext.RecurringTransactions.RemoveRange(recurringTransactions);
+        dbContext.Debts.Remove(debt);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await databaseTransaction.CommitAsync(cancellationToken);
+    }
+
     public async Task<Transaction> AddOperationAsync(Guid debtId, DebtOperationInput input, CancellationToken cancellationToken)
     {
         await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);

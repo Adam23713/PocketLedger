@@ -12,6 +12,8 @@ public sealed class DebtsApiClient(HttpClient client) : ApiClientBase(client), I
     public Task<Transaction?> GetOperationAsync(Guid transactionId, CancellationToken token) => GetOrDefaultAsync<Transaction>($"api/v1/debts/operations/{transactionId}", token);
     public Task<Debt> CreateAsync(Debt debt, RecurringPaymentInput? recurringPayment, CancellationToken token) => PostAsync<DebtWriteRequest, Debt>("api/v1/debts", new DebtWriteRequest(debt, recurringPayment), token);
     public Task UpdateAsync(Debt debt, RecurringPaymentInput? recurringPayment, CancellationToken token) => PutAsync($"api/v1/debts/{debt.Id}", new DebtWriteRequest(debt, recurringPayment), token);
+    public Task<DebtDeletionSummary> GetDeletionSummaryAsync(Guid id, CancellationToken token) => GetAsync<DebtDeletionSummary>($"api/v1/debts/{id}/deletion-summary", token);
+    public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/debts/{id}", token);
     public Task<Transaction> AddOperationAsync(Guid debtId, DebtOperationInput input, CancellationToken token) => PostAsync<DebtOperationWriteRequest, Transaction>($"api/v1/debts/{debtId}/operations", new DebtOperationWriteRequest(input), token);
     public Task<Transaction> UpdateOperationAsync(Guid transactionId, DebtOperationInput input, CancellationToken token) => PutAndReadAsync<Transaction>($"api/v1/debts/operations/{transactionId}", new DebtOperationWriteRequest(input), token);
     public Task DeleteOperationAsync(Guid transactionId, CancellationToken token) => DeleteAsync($"api/v1/debts/operations/{transactionId}", token);
