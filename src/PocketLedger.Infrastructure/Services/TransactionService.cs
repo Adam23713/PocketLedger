@@ -133,11 +133,11 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         return accounts.ToDictionary(account => account.Id, account => BalanceCalculator.Calculate(account.Id, account.InitialBalance, transactions));
     }
 
-    public async Task<decimal> CalculateMainBalanceAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var balances = await CalculateAccountBalancesAsync(cancellationToken);
-        return BalanceCalculator.CalculateMainBalance(accounts.Select(account => (balances[account.Id], account.IncludeInMainBalance)));
+        return BalanceCalculator.CalculateMainBalance(accounts.Select(account => (account.Currency, balances[account.Id], account.IncludeInMainBalance)));
     }
 
     private IQueryable<Transaction> BaseReadQuery()

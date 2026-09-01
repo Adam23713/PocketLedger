@@ -25,9 +25,8 @@ public class HomeController(IAccountService accountService, ITransactionService 
         var warnings = await debtService.GetFundingWarningsAsync(today, cancellationToken);
         var model = new HomeViewModel
         {
-            TotalMainBalance = await transactionService.CalculateMainBalanceAsync(cancellationToken),
+            MainBalances = (await transactionService.CalculateMainBalanceAsync(cancellationToken)).Select(balance => new CurrencyBalanceViewModel(balance.Currency, balance.Amount)).ToList(),
             NetWorth = accounts.Where(account => account.IncludeInNetWorth).Sum(account => balances[account.Id]),
-            MainBalances = accounts.Where(account => account.IncludeInMainBalance).GroupBy(account => account.Currency).Select(group => new CurrencyBalanceViewModel(group.Key, group.Sum(account => balances[account.Id]))).ToList(),
             NetWorthBalances = accounts.Where(account => account.IncludeInNetWorth).GroupBy(account => account.Currency).Select(group => new CurrencyBalanceViewModel(group.Key, group.Sum(account => balances[account.Id]))).ToList(),
             MonthlyTotals = monthlyTotals,
             AccountCount = accounts.Count,

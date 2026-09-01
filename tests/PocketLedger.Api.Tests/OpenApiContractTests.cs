@@ -120,6 +120,20 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
         foreach (var propertyName in propertyNames) Assert.True(properties.TryGetProperty(propertyName, out _), $"Property {schemaName}.{propertyName} is missing from the OpenAPI contract.");
     }
 
+    [Fact]
+    public async Task MainBalance_ReturnsCurrencyBalanceCollection()
+    {
+        using var document = await GetDocumentAsync();
+        var operation = document.RootElement.GetProperty("paths").GetProperty("/api/v1/transactions/main-balance").GetProperty("get");
+        var schema = operation.GetProperty("responses").GetProperty("200").GetProperty("content").GetProperty("application/json").GetProperty("schema");
+
+        Assert.Equal("array", schema.GetProperty("type").GetString());
+        Assert.Equal("#/components/schemas/CurrencyBalanceDto", schema.GetProperty("items").GetProperty("$ref").GetString());
+        var properties = document.RootElement.GetProperty("components").GetProperty("schemas").GetProperty("CurrencyBalanceDto").GetProperty("properties");
+        Assert.True(properties.TryGetProperty("currency", out _));
+        Assert.True(properties.TryGetProperty("amount", out _));
+    }
+
     [Theory]
     [InlineData("AccountDto", "ownerId")]
     [InlineData("CategoryDto", "ownerId")]
