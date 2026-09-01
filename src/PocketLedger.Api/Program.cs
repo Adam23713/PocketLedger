@@ -21,12 +21,31 @@ builder.Services.AddOpenApi(options =>
         document.Components ??= new OpenApiComponents();
         document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
         document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme { Type = SecuritySchemeType.Http, Scheme = "bearer", BearerFormat = "JWT", Description = "OpenID Connect access token issued by PocketLedger Identity." };
+        if (builder.Environment.IsDevelopment())
+        {
+            document.Components.SecuritySchemes["OAuth2"] = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2,
+                Flows = new OpenApiOAuthFlows
+                {
+                    AuthorizationCode = new OpenApiOAuthFlow
+                    {
+                        AuthorizationUrl = new Uri(builder.Configuration["Swagger:AuthorizationEndpoint"] ?? "http://localhost:5052/connect/authorize"),
+                        TokenUrl = new Uri(builder.Configuration["Swagger:TokenEndpoint"] ?? "http://localhost:5052/connect/token"),
+                        Scopes = new Dictionary<string, string> { ["openid"] = "OpenID identity", ["profile"] = "User profile", ["pocketledger.api"] = "PocketLedger API" }
+                    }
+                }
+            };
+        }
         return Task.CompletedTask;
     });
     options.AddOperationTransformer(async (operation, context, token) =>
     {
         if (context.Description.ActionDescriptor.EndpointMetadata.OfType<Microsoft.AspNetCore.Authorization.IAuthorizeData>().Any())
+        {
             operation.Security = [new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = [] }];
+            if (builder.Environment.IsDevelopment()) operation.Security.Add(new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["openid", "profile", "pocketledger.api"] });
+        }
 
         var errorSchema = await context.GetOrCreateSchemaAsync(typeof(ApiError), null!, token);
         operation.Responses ??= new OpenApiResponses();
@@ -80,6 +99,16 @@ app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapOpenApi("/openapi/{documentName}.json");
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "PocketLedger API v1");
+        options.OAuthClientId(builder.Configuration["Swagger:ClientId"] ?? "pocketledger-swagger");
+        options.OAuthScopes("openid", "profile", "pocketledger.api");
+        options.OAuthUsePkce();
+    });
+}
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" })).AllowAnonymous();
 app.Run();
