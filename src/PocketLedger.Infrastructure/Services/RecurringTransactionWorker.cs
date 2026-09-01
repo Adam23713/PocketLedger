@@ -31,11 +31,12 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         }
     }
 
-    private async Task ProcessDueOccurrencesAsync(CancellationToken cancellationToken)
+    internal async Task ProcessDueOccurrencesAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
-        var templates = await dbContext.RecurringTransactions.IgnoreQueryFilters().AsNoTracking()
+        var dbContextFactory = scope.ServiceProvider.GetRequiredService<IRecurringTransactionProcessingDbContextFactory>();
+        await using var dbContext = dbContextFactory.CreateDbContext();
+        var templates = await dbContext.RecurringTransactions.AsNoTracking()
             .Include(template => template.Account)
             .Where(template => template.Enabled && (template.LastOccurrence == null || template.LastOccurrence >= template.AutomationStartsOn))
             .ToListAsync(cancellationToken);
@@ -52,7 +53,7 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
                 var occurrenceDates = RecurringSchedule.GetOccurrences(template, start, today);
                 if (occurrenceDates.Count == 0) continue;
 
-                var processedDates = await dbContext.RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking()
+                var processedDates = await dbContext.RecurringTransactionOccurrences.AsNoTracking()
                     .Where(occurrence => occurrence.RecurringTransactionId == template.Id && occurrence.OccurrenceDate >= start && occurrence.OccurrenceDate <= today)
                     .Select(occurrence => occurrence.OccurrenceDate)
                     .ToHashSetAsync(cancellationToken);
