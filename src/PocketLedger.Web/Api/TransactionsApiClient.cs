@@ -18,7 +18,7 @@ public sealed class TransactionsApiClient(HttpClient client) : ApiClientBase(cli
     public Task UpdateAsync(Transaction transaction, CancellationToken token) => PutAsync($"api/v1/transactions/{transaction.Id}", transaction.ToDto(), token);
     public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/transactions/{id}", token);
     public Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesAsync(CancellationToken token) => GetAsync<IReadOnlyDictionary<Guid, decimal>>("api/v1/transactions/balances", token);
-    public Task<decimal> CalculateMainBalanceAsync(CancellationToken token) => GetAsync<decimal>("api/v1/transactions/main-balance", token);
+    public async Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken token) => (await GetAsync<IReadOnlyList<CurrencyBalanceDto>>("api/v1/transactions/main-balance", token)).Select(WebContractMapper.ToServiceModel).ToArray();
 
     private static string FilterUri(TransactionFilter filter) => Query("api/v1/transactions", new Dictionary<string, string?>
     {

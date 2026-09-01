@@ -1,5 +1,6 @@
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
+using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
@@ -15,9 +16,13 @@ public static class BalanceCalculator
         return transactions.Aggregate(initialBalance, (balance, transaction) => balance + GetSignedAmount(accountId, transaction));
     }
 
-    public static decimal CalculateMainBalance(IEnumerable<(decimal Balance, bool IncludeInMainBalance)> accounts)
+    public static IReadOnlyList<CurrencyBalance> CalculateMainBalance(IEnumerable<(string Currency, decimal Balance, bool IncludeInMainBalance)> accounts)
     {
-        return accounts.Where(account => account.IncludeInMainBalance).Sum(account => account.Balance);
+        return accounts.Where(account => account.IncludeInMainBalance)
+            .GroupBy(account => account.Currency)
+            .Select(group => new CurrencyBalance(group.Key, group.Sum(account => account.Balance)))
+            .OrderBy(balance => balance.Currency)
+            .ToList();
     }
 
     private static decimal GetSignedAmount(Transaction transaction) => transaction.Type switch
