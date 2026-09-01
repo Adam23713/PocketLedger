@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,18 @@ namespace PocketLedger.Tests;
 
 public class UserIsolationTests
 {
+    [Fact]
+    public void CrossTenantConstructor_IsNotAvailableToExternalSubclasses()
+    {
+        var constructor = typeof(PocketLedgerDbContext).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
+            .Single(item => item.GetParameters() is [{ ParameterType: var optionsType }, { ParameterType: var accessType }]
+                && optionsType == typeof(DbContextOptions<PocketLedgerDbContext>) && accessType == typeof(bool));
+
+        Assert.True(constructor.IsFamilyAndAssembly);
+        Assert.False(constructor.IsFamily);
+        Assert.False(constructor.IsFamilyOrAssembly);
+    }
+
     [Fact]
     public async Task QueryFilters_ReturnOnlyCurrentUsersFinancialData()
     {
