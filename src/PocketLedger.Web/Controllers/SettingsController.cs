@@ -23,7 +23,7 @@ public sealed class SettingsController(IPreferencesApiClient preferences) : Cont
     public async Task<IActionResult> Index(SettingsViewModel model, CancellationToken token)
     {
         if (!ModelState.IsValid) return View("~/Views/Account/Settings.cshtml", model);
-        await preferences.UpdateAsync(new UserPreferenceUpdateRequest(model.DisplayName, model.AvatarId, Currencies.Get(model.DefaultCurrency).Code, UserTimeZones.Get(model.TimeZoneId).Id, model.CurrencyFormats.Select(item => new UserCurrencyFormat { CurrencyCode = Currencies.Get(item.CurrencyCode).Code, DecimalPlaces = item.DecimalPlaces, DecimalSeparator = item.DecimalSeparator, ThousandsSeparator = item.ThousandsSeparator, CurrencyDisplay = item.CurrencyDisplay, CurrencyPosition = item.CurrencyPosition, UseSpace = item.UseSpace }).ToList()), token);
+        await preferences.UpdateAsync(new UserPreferenceUpdateRequest(model.DisplayName, model.AvatarId, Currencies.Get(model.DefaultCurrency).Code, UserTimeZones.Get(model.TimeZoneId).Id, model.CurrencyFormats.Select(item => new UserCurrencyFormatDto(Currencies.Get(item.CurrencyCode).Code, item.DecimalPlaces, item.DecimalSeparator, item.ThousandsSeparator, item.CurrencyDisplay, item.CurrencyPosition, item.UseSpace)).ToList()), token);
         TempData["SuccessMessage"] = "Settings saved.";
         return RedirectToAction(nameof(Index));
     }
@@ -33,7 +33,7 @@ public sealed class SettingsController(IPreferencesApiClient preferences) : Cont
         DisplayName = item.DisplayName, AvatarId = item.AvatarId, DefaultCurrency = item.DefaultCurrency, TimeZoneId = item.TimeZoneId,
         CurrencyFormats = Currencies.All.Select(definition =>
         {
-            var format = item.CurrencyFormats.SingleOrDefault(value => value.CurrencyCode == definition.Code) ?? new UserCurrencyFormat { CurrencyCode = definition.Code, DecimalPlaces = definition.DecimalDigits, DecimalSeparator = ",", ThousandsSeparator = " ", CurrencyDisplay = PocketLedger.Models.Enums.CurrencyDisplay.Code, CurrencyPosition = PocketLedger.Models.Enums.CurrencyPosition.After, UseSpace = true };
+            var format = item.CurrencyFormats.SingleOrDefault(value => value.CurrencyCode == definition.Code) ?? new UserCurrencyFormatDto(definition.Code, definition.DecimalDigits, ",", " ", PocketLedger.Models.Enums.CurrencyDisplay.Code, PocketLedger.Models.Enums.CurrencyPosition.After, true);
             return new CurrencyFormatViewModel { CurrencyCode = definition.Code, DecimalPlaces = format.DecimalPlaces, DecimalSeparator = format.DecimalSeparator, ThousandsSeparator = format.ThousandsSeparator, CurrencyDisplay = format.CurrencyDisplay, CurrencyPosition = format.CurrencyPosition, UseSpace = format.UseSpace };
         }).ToList()
     };

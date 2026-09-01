@@ -16,7 +16,7 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
     public async Task<IActionResult> Get(CancellationToken token)
     {
         var item = await GetOrCreateAsync(token);
-        return Ok(new UserPreferenceResponse(item.DisplayName, item.AvatarId, item.DefaultCurrency, item.TimeZoneId, item.CurrencyFormats.ToList()));
+        return Ok(new UserPreferenceResponse(item.DisplayName, item.AvatarId, item.DefaultCurrency, item.TimeZoneId, item.CurrencyFormats.Select(ApiContractMapper.ToDto).ToArray()));
     }
 
     [HttpPut]

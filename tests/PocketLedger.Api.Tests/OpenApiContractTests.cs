@@ -90,8 +90,18 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
         Assert.Equal("bearer", bearer.GetProperty("scheme").GetString());
         Assert.Equal("JWT", bearer.GetProperty("bearerFormat").GetString());
 
-        var security = document.RootElement.GetProperty("security");
-        Assert.Contains(security.EnumerateArray(), requirement => requirement.TryGetProperty("Bearer", out _));
+        foreach (var path in document.RootElement.GetProperty("paths").EnumerateObject())
+        foreach (var operation in path.Value.EnumerateObject())
+        {
+            if (path.Name == "/health")
+            {
+                Assert.False(operation.Value.TryGetProperty("security", out _));
+                continue;
+            }
+
+            var security = operation.Value.GetProperty("security");
+            Assert.Contains(security.EnumerateArray(), requirement => requirement.TryGetProperty("Bearer", out _));
+        }
     }
 
     [Theory]
@@ -108,6 +118,38 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
 
         var properties = schema.GetProperty("properties");
         foreach (var propertyName in propertyNames) Assert.True(properties.TryGetProperty(propertyName, out _), $"Property {schemaName}.{propertyName} is missing from the OpenAPI contract.");
+    }
+
+    [Theory]
+    [InlineData("AccountDto", "ownerId")]
+    [InlineData("CategoryDto", "ownerId")]
+    [InlineData("DebtDto", "ownerId", "transactions", "recurringTransactions")]
+    [InlineData("RecurringTransactionDto", "ownerId", "occurrences")]
+    [InlineData("TransactionDto", "ownerId")]
+    [InlineData("UserCurrencyFormatDto", "userId", "user")]
+    public async Task PublicDto_DoesNotExposePersistenceProperties(string schemaName, params string[] forbiddenProperties)
+    {
+        using var document = await GetDocumentAsync();
+        var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
+        Assert.True(schemas.TryGetProperty(schemaName, out var schema), $"OpenAPI schema is missing: {schemaName}");
+
+        var properties = schema.GetProperty("properties");
+        foreach (var propertyName in forbiddenProperties) Assert.False(properties.TryGetProperty(propertyName, out _), $"Persistence property {schemaName}.{propertyName} leaked into the OpenAPI contract.");
+    }
+
+    [Fact]
+    public async Task Operations_DocumentTheSharedErrorContract()
+    {
+        using var document = await GetDocumentAsync();
+        foreach (var path in document.RootElement.GetProperty("paths").EnumerateObject())
+        foreach (var operation in path.Value.EnumerateObject())
+        foreach (var status in new[] { "400", "404", "500" })
+        {
+            var response = operation.Value.GetProperty("responses").GetProperty(status);
+            var properties = response.GetProperty("content").GetProperty("application/json").GetProperty("schema").GetProperty("properties");
+            Assert.True(properties.TryGetProperty("code", out _));
+            Assert.True(properties.TryGetProperty("message", out _));
+        }
     }
 
     private async Task<JsonDocument> GetDocumentAsync()

@@ -1,15 +1,16 @@
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 using PocketLedger.Services.Interfaces;
+using PocketLedger.Contracts;
 
 namespace PocketLedger.Web.Api;
 
 public sealed class CategoriesApiClient(HttpClient client) : ApiClientBase(client), ICategoryService
 {
-    public Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken token) => GetAsync<IReadOnlyList<Category>>("api/v1/categories", token);
-    public Task<Category?> GetByIdAsync(Guid id, CancellationToken token) => GetOrDefaultAsync<Category>($"api/v1/categories/{id}", token);
-    public Task<Category> CreateAsync(Category category, CancellationToken token) => PostAsync<Category, Category>("api/v1/categories", category, token);
-    public Task UpdateAsync(Category category, CancellationToken token) => PutAsync($"api/v1/categories/{category.Id}", category, token);
+    public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken token) => (await GetAsync<IReadOnlyList<CategoryDto>>("api/v1/categories", token)).Select(WebContractMapper.ToEntity).ToArray();
+    public async Task<Category?> GetByIdAsync(Guid id, CancellationToken token) => (await GetOrDefaultAsync<CategoryDto>($"api/v1/categories/{id}", token))?.ToEntity();
+    public async Task<Category> CreateAsync(Category category, CancellationToken token) => (await PostAsync<CategoryDto, CategoryDto>("api/v1/categories", category.ToDto(), token)).ToEntity();
+    public Task UpdateAsync(Category category, CancellationToken token) => PutAsync($"api/v1/categories/{category.Id}", category.ToDto(), token);
     public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/categories/{id}", token);
     public Task<IReadOnlyList<CategoryChoice>> GetChoicesAsync(CategoryType? type, Guid? excludeId, CancellationToken token) => GetAsync<IReadOnlyList<CategoryChoice>>(Query("api/v1/categories/choices", new Dictionary<string, string?> { ["type"] = type?.ToString(), ["excludeId"] = excludeId?.ToString() }), token);
 }
