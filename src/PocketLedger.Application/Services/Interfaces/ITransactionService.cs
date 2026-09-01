@@ -2,6 +2,8 @@ using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Services.Interfaces;
 
+public sealed record CurrencyBalance(string Currency, decimal Amount);
+
 public interface ITransactionService
 {
     Task<IReadOnlyList<Transaction>> GetForMonthAsync(int year, int month, CancellationToken cancellationToken);
@@ -14,5 +16,5 @@ public interface ITransactionService
     Task UpdateAsync(Transaction transaction, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesAsync(CancellationToken cancellationToken);
-    Task<decimal> CalculateMainBalanceAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken cancellationToken);
 }

@@ -20,5 +20,5 @@ public sealed class TransactionsController(ITransactionService service) : Contro
     [HttpPut("{id:guid}")] public async Task<IActionResult> Update(Guid id, TransactionDto item, CancellationToken token) { if (id != item.Id) return BadRequest(); await service.UpdateAsync(item.ToEntity(), token); return NoContent(); }
     [HttpDelete("{id:guid}")] public async Task<IActionResult> Delete(Guid id, CancellationToken token) { await service.DeleteAsync(id, token); return NoContent(); }
     [HttpGet("balances")] public async Task<IActionResult> Balances(CancellationToken token) => Ok(await service.CalculateAccountBalancesAsync(token));
-    [HttpGet("main-balance")] public async Task<IActionResult> MainBalance(CancellationToken token) => Ok(await service.CalculateMainBalanceAsync(token));
+    [HttpGet("main-balance")] public async Task<ActionResult<IReadOnlyList<CurrencyBalanceDto>>> MainBalance(CancellationToken token) => Ok((await service.CalculateMainBalanceAsync(token)).Select(ApiContractMapper.ToDto).ToArray());
 }

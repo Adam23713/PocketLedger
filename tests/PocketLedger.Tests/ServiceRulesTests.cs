@@ -2,6 +2,7 @@ using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models;
 using PocketLedger.Services;
+using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Tests;
 
@@ -24,11 +25,35 @@ public class ServiceRulesTests
     }
 
     [Fact]
-    public void CalculateMainBalance_UsesOnlyIncludedAccounts()
+    public void CalculateMainBalance_ReturnsSingleCurrencyTotal()
     {
-        var balance = BalanceCalculator.CalculateMainBalance([(100m, true), (50m, false), (-20m, true)]);
+        var balances = BalanceCalculator.CalculateMainBalance([("HUF", 100m, true), ("HUF", -20m, true)]);
 
-        Assert.Equal(80, balance);
+        Assert.Equal(new CurrencyBalance("HUF", 80m), Assert.Single(balances));
+    }
+
+    [Fact]
+    public void CalculateMainBalance_KeepsEqualAmountsInDifferentCurrenciesSeparate()
+    {
+        var balances = BalanceCalculator.CalculateMainBalance([("HUF", 100m, true), ("EUR", 100m, true), ("USD", 100m, true)]);
+
+        Assert.Equal([new CurrencyBalance("EUR", 100m), new CurrencyBalance("HUF", 100m), new CurrencyBalance("USD", 100m)], balances);
+    }
+
+    [Fact]
+    public void CalculateMainBalance_ExcludesAccountsNotIncludedInMainBalance()
+    {
+        var balances = BalanceCalculator.CalculateMainBalance([("HUF", 100m, true), ("HUF", 50m, false), ("EUR", 20m, false)]);
+
+        Assert.Equal(new CurrencyBalance("HUF", 100m), Assert.Single(balances));
+    }
+
+    [Fact]
+    public void CalculateMainBalance_ReturnsEmptyCollectionForEmptyAccounts()
+    {
+        var balances = BalanceCalculator.CalculateMainBalance([]);
+
+        Assert.Empty(balances);
     }
 
     [Theory]
