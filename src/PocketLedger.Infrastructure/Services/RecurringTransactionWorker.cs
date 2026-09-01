@@ -34,7 +34,7 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
     internal async Task ProcessDueOccurrencesAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var dbContextFactory = scope.ServiceProvider.GetRequiredService<ICrossTenantPocketLedgerDbContextFactory>();
+        var dbContextFactory = scope.ServiceProvider.GetRequiredService<IRecurringTransactionProcessingDbContextFactory>();
         await using var dbContext = dbContextFactory.CreateDbContext();
         var templates = await dbContext.RecurringTransactions.AsNoTracking()
             .Include(template => template.Account)

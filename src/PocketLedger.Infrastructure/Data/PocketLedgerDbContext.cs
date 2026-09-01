@@ -43,6 +43,7 @@ public class PocketLedgerDbContext : DbContext
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         PrepareFinanceChanges();
+        ValidatePersistedOwners();
         ValidateFinanceReferences();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
@@ -53,6 +54,7 @@ public class PocketLedgerDbContext : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         PrepareFinanceChanges();
+        await ValidatePersistedOwnersAsync(cancellationToken);
         await ValidateFinanceReferencesAsync(cancellationToken);
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
@@ -78,6 +80,20 @@ public class PocketLedgerDbContext : DbContext
         foreach (var entry in FinanceEntries().Where(entry => entry.State is EntityState.Added or EntityState.Modified))
             foreach (var reference in GetReferences(entry.Entity))
                 if (!ReferenceHasOwner(reference.Type, reference.Id, GetOwnerId(entry.Entity))) throw new BusinessRuleException("Referenced financial data must belong to the same owner.");
+    }
+
+    private void ValidatePersistedOwners()
+    {
+        if (crossTenantAccess) return;
+        foreach (var entry in FinanceEntries().Where(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+            if (!PersistedOwnerMatches(entry.Entity, tenantId)) throw new BusinessRuleException("Financial data owned by another user cannot be modified.");
+    }
+
+    private async Task ValidatePersistedOwnersAsync(CancellationToken cancellationToken)
+    {
+        if (crossTenantAccess) return;
+        foreach (var entry in FinanceEntries().Where(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+            if (!await PersistedOwnerMatchesAsync(entry.Entity, tenantId, cancellationToken)) throw new BusinessRuleException("Financial data owned by another user cannot be modified.");
     }
 
     private async Task ValidateFinanceReferencesAsync(CancellationToken cancellationToken)
@@ -117,6 +133,28 @@ public class PocketLedgerDbContext : DbContext
         if (type == typeof(Transaction)) return Transactions.IgnoreQueryFilters().Any(entity => entity.Id == id && entity.OwnerId == ownerId);
         return RecurringTransactions.IgnoreQueryFilters().Any(entity => entity.Id == id && entity.OwnerId == ownerId);
     }
+
+    private bool PersistedOwnerMatches(object entity, Guid ownerId) => entity switch
+    {
+        Account value => Accounts.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        Category value => Categories.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        Transaction value => Transactions.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        RecurringTransaction value => RecurringTransactions.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        RecurringTransactionOccurrence value => RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        Debt value => Debts.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        _ => false
+    };
+
+    private Task<bool> PersistedOwnerMatchesAsync(object entity, Guid ownerId, CancellationToken cancellationToken) => entity switch
+    {
+        Account value => Accounts.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        Category value => Categories.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        Transaction value => Transactions.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        RecurringTransaction value => RecurringTransactions.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        RecurringTransactionOccurrence value => RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        Debt value => Debts.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        _ => Task.FromResult(false)
+    };
 
     private async Task<bool> ReferenceHasOwnerAsync(Type type, Guid id, Guid ownerId, CancellationToken cancellationToken)
     {

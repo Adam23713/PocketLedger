@@ -1,15 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PocketLedger.Data;
 
 internal sealed class CrossTenantPocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options) : PocketLedgerDbContext(options, true);
 
-public interface ICrossTenantPocketLedgerDbContextFactory
+internal interface IRecurringTransactionProcessingDbContextFactory
 {
     PocketLedgerDbContext CreateDbContext();
 }
 
-public sealed class CrossTenantPocketLedgerDbContextFactory(DbContextOptions<PocketLedgerDbContext> options) : ICrossTenantPocketLedgerDbContextFactory
+internal sealed class RecurringTransactionProcessingDbContextFactory(DbContextOptions<PocketLedgerDbContext> options) : IRecurringTransactionProcessingDbContextFactory
 {
     public PocketLedgerDbContext CreateDbContext() => new CrossTenantPocketLedgerDbContext(options);
+}
+
+public static class RecurringTransactionProcessingServiceCollectionExtensions
+{
+    public static IServiceCollection AddRecurringTransactionProcessingDataAccess(this IServiceCollection services)
+        => services.AddScoped<IRecurringTransactionProcessingDbContextFactory, RecurringTransactionProcessingDbContextFactory>();
 }

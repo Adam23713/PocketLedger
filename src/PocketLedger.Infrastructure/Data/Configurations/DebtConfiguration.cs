@@ -16,7 +16,7 @@ public class DebtConfiguration : IEntityTypeConfiguration<Debt>
         });
         builder.HasKey(debt => debt.Id).HasName("pk_debts");
         builder.Property(debt => debt.Id).HasColumnName("id");
-        builder.Property(debt => debt.OwnerId).HasColumnName("owner_id");
+        builder.Property(debt => debt.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(debt => debt.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
         builder.Property(debt => debt.Icon).HasColumnName("icon").HasMaxLength(100).IsRequired();
         builder.Property(debt => debt.Direction).HasColumnName("direction").HasConversion<string>().HasMaxLength(20).IsRequired();

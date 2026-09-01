@@ -23,7 +23,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 
         builder.HasKey(transaction => transaction.Id).HasName("pk_transactions");
         builder.Property(transaction => transaction.Id).HasColumnName("id");
-        builder.Property(transaction => transaction.OwnerId).HasColumnName("owner_id");
+        builder.Property(transaction => transaction.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(transaction => transaction.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(10).IsRequired();
         builder.Property(transaction => transaction.AccountId).HasColumnName("account_id");
         builder.Property(transaction => transaction.TargetAccountId).HasColumnName("target_account_id");
