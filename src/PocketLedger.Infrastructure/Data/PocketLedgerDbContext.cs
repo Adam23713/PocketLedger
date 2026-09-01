@@ -17,7 +17,7 @@ public class PocketLedgerDbContext : DbContext
         hasTenantContext = currentUser?.IsAuthenticated == true;
         tenantId = hasTenantContext ? currentUser!.UserId : Guid.Empty;
     }
-    protected PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, bool crossTenantAccess) : base(options) => this.crossTenantAccess = crossTenantAccess;
+    private protected PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, bool crossTenantAccess) : base(options) => this.crossTenantAccess = crossTenantAccess;
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
