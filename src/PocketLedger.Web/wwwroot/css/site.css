@@ -19,6 +19,9 @@
   --header-background: rgba(255, 255, 255, .88);
   --header-shadow: 0 1px 12px rgba(20, 35, 55, .06);
   --focus-ring: rgba(8, 122, 255, .28);
+  --icon-background: #fff;
+  --icon-border-color: #d7dce2;
+  --icon-shadow: 0 2px 6px rgba(20, 35, 55, .08);
   --backdrop-filter: blur(18px);
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
@@ -43,6 +46,9 @@
   --header-background: rgba(13, 17, 21, .94);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .07);
   --focus-ring: rgba(16, 191, 168, .3);
+  --icon-background: #becac7;
+  --icon-border-color: #9eada9;
+  --icon-shadow: 0 3px 8px rgba(0, 0, 0, .24);
   --backdrop-filter: blur(18px);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -69,6 +75,9 @@
   --header-background: rgba(7, 25, 69, .58);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .16);
   --focus-ring: rgba(191, 170, 255, .42);
+  --icon-background: #c1c9e2;
+  --icon-border-color: rgba(255, 255, 255, .34);
+  --icon-shadow: 0 4px 12px rgba(1, 7, 30, .3);
   --backdrop-filter: blur(22px) saturate(135%);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -93,6 +102,9 @@
   --header-background: rgba(255, 251, 254, .92);
   --header-shadow: 0 1px 5px rgba(45, 35, 65, .09);
   --focus-ring: rgba(103, 80, 164, .28);
+  --icon-background: #f2ecf7;
+  --icon-border-color: #d8cfe2;
+  --icon-shadow: 0 2px 5px rgba(45, 35, 65, .1);
   --backdrop-filter: blur(16px);
   --font-family: Roboto, "Segoe UI", sans-serif;
 }
@@ -225,10 +237,20 @@ h2, h3, h4 { letter-spacing: -.02em; }
 [data-theme="glass"] .account-card::before { background: rgba(8, 22, 64, .55); }
 .account-card:hover { box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .16); transform: translateY(-2px); }
 .account-card, .account-card .text-body { color: var(--text-primary) !important; }
-.account-icon { flex: 0 0 auto; height: 3rem; object-fit: contain; width: 3rem; }
+.account-icon, .category-icon {
+  background: var(--icon-background);
+  border: 1px solid var(--icon-border-color);
+  border-radius: calc(var(--control-radius) * .85);
+  box-shadow: var(--icon-shadow);
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  object-fit: contain;
+  padding: .3rem;
+}
+.account-icon { height: 3rem; width: 3rem; }
 .account-icon-sm { height: 2rem; width: 2rem; }
 .account-icon-lg { height: 5rem; width: 5rem; }
-.category-icon { height: 2.25rem; object-fit: contain; width: 2.25rem; }
+.category-icon { height: 2.25rem; width: 2.25rem; }
 .category-tree { background: var(--surface-background); border: 1px solid var(--border-color); border-radius: var(--control-radius); max-height: 22rem; overflow-y: auto; padding: .4rem; }
 .category-tree-item { cursor: pointer; display: block; margin: 0; position: relative; }
 .category-tree-item input { opacity: 0; position: absolute; }
@@ -243,7 +265,7 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .category-icon-group { border: 1px solid var(--border-color); border-radius: var(--card-radius); padding: .75rem; }
 .account-icon-option { cursor: pointer; margin: 0; min-width: 0; }
 .account-icon-option input { opacity: 0; pointer-events: none; position: absolute; }
-.account-icon-selection { align-items: center; aspect-ratio: 1; border: 2px solid var(--border-color); border-radius: var(--card-radius); display: flex; justify-content: center; padding: .5rem; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.account-icon-selection { align-items: center; aspect-ratio: 1; background: var(--icon-background); border: 2px solid var(--border-color); border-radius: var(--card-radius); box-shadow: var(--icon-shadow); display: flex; justify-content: center; padding: .5rem; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
 .account-icon-selection img { height: 100%; max-height: 6rem; max-width: 100%; object-fit: contain; width: 100%; }
 .account-icon-option:hover .account-icon-selection { border-color: var(--accent-color); transform: translateY(-2px); }
 .account-icon-option input:checked + .account-icon-selection { border-color: var(--accent-color); box-shadow: 0 0 0 .2rem var(--focus-ring); }
