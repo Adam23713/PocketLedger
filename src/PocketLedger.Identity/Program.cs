@@ -48,6 +48,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+if (builder.Environment.IsDevelopment()) builder.Services.AddCors(options => options.AddPolicy("Swagger", policy => policy.WithOrigins(builder.Configuration["OpenIddict:SwaggerBaseUrl"] ?? "http://localhost:5051").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddOpenIddict()
     .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityDbContext>())
     .AddServer(options =>
@@ -95,6 +96,7 @@ app.UseForwardedHeaders(forwarded);
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseStaticFiles();
 app.UseRouting();
+if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
