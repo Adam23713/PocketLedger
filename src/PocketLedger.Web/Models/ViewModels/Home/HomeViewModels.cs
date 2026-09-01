@@ -7,7 +7,6 @@ public class HomeViewModel
     public IReadOnlyList<CurrencyBalanceViewModel> MainBalances { get; init; } = [];
     public IReadOnlyList<CurrencyBalanceViewModel> NetWorthBalances { get; init; } = [];
     public IReadOnlyList<CurrencyPeriodViewModel> MonthlyTotals { get; init; } = [];
-    public decimal TotalMainBalance { get; init; }
     public decimal NetWorth { get; init; }
     public int AccountCount { get; init; }
     public decimal IncomeThisMonth { get; init; }

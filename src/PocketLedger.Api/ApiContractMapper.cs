@@ -7,6 +7,7 @@ namespace PocketLedger.Api;
 
 internal static class ApiContractMapper
 {
+    public static CurrencyBalanceDto ToDto(this CurrencyBalance value) => new(value.Currency, value.Amount);
     public static AccountDto ToDto(this Account value) => new(value.Id, value.Name, value.Type, value.Currency, value.InitialBalance, value.Icon, value.Color, value.DisplayOrder, value.IncludeInMainBalance, value.IncludeInNetWorth, value.IncludeInStatistics);
     public static Account ToEntity(this AccountDto value) => new() { Id = value.Id, Name = value.Name, Type = value.Type, Currency = value.Currency, InitialBalance = value.InitialBalance, Icon = value.Icon, Color = value.Color, DisplayOrder = value.DisplayOrder, IncludeInMainBalance = value.IncludeInMainBalance, IncludeInNetWorth = value.IncludeInNetWorth, IncludeInStatistics = value.IncludeInStatistics };
     public static CategoryDto ToDto(this Category value) => new(value.Id, value.Name, value.Type, value.Icon, value.ParentCategoryId, value.ParentCategory?.ToShallowDto(), value.Subcategories.Select(ToShallowDto).ToArray(), value.DisplayOrder);
