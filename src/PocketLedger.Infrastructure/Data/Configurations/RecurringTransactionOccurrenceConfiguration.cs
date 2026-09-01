@@ -11,7 +11,7 @@ public class RecurringTransactionOccurrenceConfiguration : IEntityTypeConfigurat
         builder.ToTable("recurring_transaction_occurrences");
         builder.HasKey(occurrence => occurrence.Id).HasName("pk_recurring_transaction_occurrences");
         builder.Property(occurrence => occurrence.Id).HasColumnName("id");
-        builder.Property(occurrence => occurrence.OwnerId).HasColumnName("owner_id");
+        builder.Property(occurrence => occurrence.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(occurrence => occurrence.RecurringTransactionId).HasColumnName("recurring_transaction_id");
         builder.Property(occurrence => occurrence.OccurrenceDate).HasColumnName("occurrence_date").HasColumnType("date");
         builder.Property(occurrence => occurrence.TransactionId).HasColumnName("transaction_id");

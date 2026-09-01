@@ -12,7 +12,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 
         builder.HasKey(account => account.Id).HasName("pk_accounts");
         builder.Property(account => account.Id).HasColumnName("id");
-        builder.Property(account => account.OwnerId).HasColumnName("owner_id");
+        builder.Property(account => account.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(account => account.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
         builder.Property(account => account.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(account => account.Currency).HasColumnName("currency").HasMaxLength(3).IsFixedLength().IsRequired();
