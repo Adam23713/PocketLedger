@@ -214,6 +214,7 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .form-control::placeholder { color: var(--text-secondary); }
 .form-check-input:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
 .form-label { color: var(--text-secondary); font-weight: 550; }
+[data-theme="glass"] .form-select option, [data-theme="glass"] .form-select optgroup { background-color: var(--dropdown-background); color: var(--text-primary); }
 
 .btn { border-radius: var(--control-radius); font-weight: 600; }
 .btn-primary { --bs-btn-bg: var(--accent-color); --bs-btn-border-color: var(--accent-color); --bs-btn-hover-bg: var(--accent-hover); --bs-btn-hover-border-color: var(--accent-hover); --bs-btn-color: var(--accent-contrast); --bs-btn-hover-color: var(--accent-contrast); }
