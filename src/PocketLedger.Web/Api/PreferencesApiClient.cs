@@ -1,4 +1,5 @@
 using PocketLedger.Contracts;
+using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Web.Api;
 
