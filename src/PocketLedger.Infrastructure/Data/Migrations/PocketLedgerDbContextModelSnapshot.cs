@@ -75,6 +75,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("name");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
@@ -116,6 +117,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("name");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
@@ -209,6 +211,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("original_amount");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
@@ -311,6 +314,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("note");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
@@ -362,6 +366,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("occurrence_date");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 
@@ -439,6 +444,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("occurred_at_utc");
 
                     b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
                         .HasColumnType("uuid")
                         .HasColumnName("owner_id");
 

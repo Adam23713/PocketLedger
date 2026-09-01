@@ -57,7 +57,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddDbContext<PocketLedgerDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ApiConnection")));
-builder.Services.AddScoped<ICrossTenantPocketLedgerDbContextFactory, CrossTenantPocketLedgerDbContextFactory>();
+builder.Services.AddRecurringTransactionProcessingDataAccess();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();

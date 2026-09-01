@@ -18,7 +18,7 @@ public class RecurringTransactionConfiguration : IEntityTypeConfiguration<Recurr
 
         builder.HasKey(template => template.Id).HasName("pk_recurring_transactions");
         builder.Property(template => template.Id).HasColumnName("id");
-        builder.Property(template => template.OwnerId).HasColumnName("owner_id");
+        builder.Property(template => template.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(template => template.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(10).IsRequired();
         builder.Property(template => template.AccountId).HasColumnName("account_id");
         builder.Property(template => template.CategoryId).HasColumnName("category_id");

@@ -106,6 +106,44 @@ public class UserIsolationTests
         await Assert.ThrowsAsync<BusinessRuleException>(() => db.SaveChangesAsync());
     }
 
+    [Theory]
+    [InlineData("Account")]
+    [InlineData("Category")]
+    [InlineData("Debt")]
+    [InlineData("Transaction")]
+    [InlineData("RecurringTransaction")]
+    [InlineData("RecurringTransactionOccurrence")]
+    public async Task SaveChanges_RejectsForgedUpdateWithCurrentOwnerId(string entityType)
+    {
+        var currentOwner = Guid.NewGuid();
+        var otherOwner = Guid.NewGuid();
+        var options = CreateOptions();
+        var ids = await SeedFinanceGraphAsync(options, otherOwner);
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(currentOwner));
+        db.Update(CreateForgedEntity(entityType, ids, currentOwner));
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => db.SaveChangesAsync());
+    }
+
+    [Theory]
+    [InlineData("Account")]
+    [InlineData("Category")]
+    [InlineData("Debt")]
+    [InlineData("Transaction")]
+    [InlineData("RecurringTransaction")]
+    [InlineData("RecurringTransactionOccurrence")]
+    public async Task SaveChanges_RejectsForgedDeleteWithCurrentOwnerId(string entityType)
+    {
+        var currentOwner = Guid.NewGuid();
+        var otherOwner = Guid.NewGuid();
+        var options = CreateOptions();
+        var ids = await SeedFinanceGraphAsync(options, otherOwner);
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(currentOwner));
+        db.Remove(CreateForgedEntity(entityType, ids, currentOwner));
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => db.SaveChangesAsync());
+    }
+
     [Fact]
     public async Task SaveChanges_RejectsReferenceToAnotherOwnersFinancialEntity()
     {
@@ -149,6 +187,24 @@ public class UserIsolationTests
     }
 
     [Fact]
+    public async Task SaveChanges_RejectsAllCrossOwnerFinanceReferences()
+    {
+        var owner = Guid.NewGuid();
+        var other = Guid.NewGuid();
+        var options = CreateOptions();
+        var ids = await SeedFinanceGraphAsync(options, other);
+
+        await AssertReferenceRejectedAsync(options, owner, new Transaction { Id = Guid.NewGuid(), TargetAccountId = ids.AccountId, Type = TransactionType.Transfer, Amount = 10, TransactionDate = new DateOnly(2026, 1, 1), SourceCurrency = "HUF" });
+        await AssertReferenceRejectedAsync(options, owner, new Category { Id = Guid.NewGuid(), ParentCategoryId = ids.CategoryId, Name = "Child", Type = CategoryType.Expense });
+        await AssertReferenceRejectedAsync(options, owner, new Debt { Id = Guid.NewGuid(), AccountId = ids.AccountId, Name = "Debt", CounterpartyName = "Test", Currency = "HUF", OriginalAmount = 10, StartDate = new DateOnly(2026, 1, 1) });
+        await AssertReferenceRejectedAsync(options, owner, new RecurringTransaction { Id = Guid.NewGuid(), AccountId = ids.AccountId, Type = TransactionType.Adjustment, Amount = 10, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly });
+        await AssertReferenceRejectedAsync(options, owner, new RecurringTransaction { Id = Guid.NewGuid(), AccountId = Guid.NewGuid(), CategoryId = ids.CategoryId, Type = TransactionType.Expense, Amount = 10, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly }, createOwnedAccount: true);
+        await AssertReferenceRejectedAsync(options, owner, new RecurringTransaction { Id = Guid.NewGuid(), AccountId = Guid.NewGuid(), DebtId = ids.DebtId, Type = TransactionType.Expense, Amount = 10, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly }, createOwnedAccount: true);
+        await AssertReferenceRejectedAsync(options, owner, new RecurringTransactionOccurrence { Id = Guid.NewGuid(), RecurringTransactionId = ids.RecurringTransactionId, OccurrenceDate = new DateOnly(2026, 1, 1) });
+        await AssertReferenceRejectedAsync(options, owner, new RecurringTransactionOccurrence { Id = Guid.NewGuid(), RecurringTransactionId = Guid.NewGuid(), TransactionId = ids.TransactionId, OccurrenceDate = new DateOnly(2026, 1, 1) }, createOwnedTemplate: true);
+    }
+
+    [Fact]
     public async Task RecurringWorker_UsesExplicitCrossTenantContextForAllOwners()
     {
         var firstOwner = Guid.NewGuid();
@@ -162,7 +218,7 @@ public class UserIsolationTests
         }
         var services = new ServiceCollection()
             .AddSingleton(options)
-            .AddScoped<ICrossTenantPocketLedgerDbContextFactory, CrossTenantPocketLedgerDbContextFactory>()
+            .AddRecurringTransactionProcessingDataAccess()
             .BuildServiceProvider();
         var worker = new RecurringTransactionWorker(services.GetRequiredService<IServiceScopeFactory>(), new FixedTimeProvider(new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero)), NullLogger<RecurringTransactionWorker>.Instance);
 
@@ -185,6 +241,59 @@ public class UserIsolationTests
             AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly, Enabled = true
         });
     }
+
+    private static async Task AssertReferenceRejectedAsync(DbContextOptions<PocketLedgerDbContext> options, Guid ownerId, object entity, bool createOwnedAccount = false, bool createOwnedTemplate = false)
+    {
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
+        if (createOwnedAccount && entity is RecurringTransaction template)
+        {
+            var account = CreateAccount(ownerId, "Owned");
+            account.Id = template.AccountId;
+            db.Accounts.Add(account);
+        }
+        if (createOwnedTemplate && entity is RecurringTransactionOccurrence occurrence)
+        {
+            var account = CreateAccount(ownerId, "Owned");
+            var ownedTemplate = new RecurringTransaction { Id = occurrence.RecurringTransactionId, OwnerId = ownerId, AccountId = account.Id, Account = account, Type = TransactionType.Adjustment, Amount = 10, AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = occurrence.OccurrenceDate, AutomationStartsOn = occurrence.OccurrenceDate, Frequency = RecurringFrequency.Monthly };
+            db.AddRange(account, ownedTemplate);
+        }
+        db.Add(entity);
+        await Assert.ThrowsAsync<BusinessRuleException>(() => db.SaveChangesAsync());
+    }
+
+    private static async Task<FinanceGraphIds> SeedFinanceGraphAsync(DbContextOptions<PocketLedgerDbContext> options, Guid ownerId)
+    {
+        await using var db = new CrossTenantPocketLedgerDbContext(options);
+        var account = CreateAccount(ownerId, "Account");
+        var category = CreateCategory(ownerId, "Category");
+        var debt = CreateDebt(ownerId, "Debt");
+        var transaction = CreateTransaction(ownerId);
+        var template = new RecurringTransaction { Id = Guid.NewGuid(), OwnerId = ownerId, AccountId = account.Id, Account = account, Type = TransactionType.Adjustment, Amount = 10, AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly };
+        var occurrence = new RecurringTransactionOccurrence { Id = Guid.NewGuid(), OwnerId = ownerId, RecurringTransactionId = template.Id, RecurringTransaction = template, TransactionId = transaction.Id, Transaction = transaction, OccurrenceDate = new DateOnly(2026, 1, 1) };
+        db.AddRange(account, category, debt, transaction, template, occurrence);
+        await db.SaveChangesAsync();
+        return new FinanceGraphIds(account.Id, category.Id, debt.Id, transaction.Id, template.Id, occurrence.Id);
+    }
+
+    private static object CreateForgedEntity(string entityType, FinanceGraphIds ids, Guid ownerId) => entityType switch
+    {
+        "Account" => CreateForgedAccount(ids.AccountId, ownerId),
+        "Category" => new Category { Id = ids.CategoryId, OwnerId = ownerId, Name = "Forged", Type = CategoryType.Expense },
+        "Debt" => new Debt { Id = ids.DebtId, OwnerId = ownerId, Name = "Forged", CounterpartyName = "Test", Currency = "HUF", OriginalAmount = 10, StartDate = new DateOnly(2026, 1, 1) },
+        "Transaction" => new Transaction { Id = ids.TransactionId, OwnerId = ownerId, Type = TransactionType.Adjustment, Amount = 10, AdjustmentDirection = AdjustmentDirection.Increase, TransactionDate = new DateOnly(2026, 1, 1), SourceCurrency = "HUF" },
+        "RecurringTransaction" => new RecurringTransaction { Id = ids.RecurringTransactionId, OwnerId = ownerId, AccountId = ids.AccountId, Type = TransactionType.Adjustment, Amount = 10, AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly },
+        "RecurringTransactionOccurrence" => new RecurringTransactionOccurrence { Id = ids.OccurrenceId, OwnerId = ownerId, RecurringTransactionId = ids.RecurringTransactionId, TransactionId = ids.TransactionId, OccurrenceDate = new DateOnly(2026, 1, 1) },
+        _ => throw new ArgumentOutOfRangeException(nameof(entityType))
+    };
+
+    private static Account CreateForgedAccount(Guid id, Guid ownerId)
+    {
+        var account = CreateAccount(ownerId, "Forged");
+        account.Id = id;
+        return account;
+    }
+
+    private sealed record FinanceGraphIds(Guid AccountId, Guid CategoryId, Guid DebtId, Guid TransactionId, Guid RecurringTransactionId, Guid OccurrenceId);
 
     private static DbContextOptions<PocketLedgerDbContext> CreateOptions() => new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
 
