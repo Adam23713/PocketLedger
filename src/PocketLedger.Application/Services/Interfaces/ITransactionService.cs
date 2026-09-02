@@ -12,8 +12,8 @@ public interface ITransactionService
     Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsAsync(TransactionFilter filter, CancellationToken cancellationToken);
     Task<IReadOnlyList<Transaction>> GetForExportAsync(TransactionFilter filter, CancellationToken cancellationToken);
     Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
-    Task<Transaction> CreateAsync(Transaction transaction, CancellationToken cancellationToken);
-    Task UpdateAsync(Transaction transaction, CancellationToken cancellationToken);
+    Task<Transaction> CreateAsync(TransactionCreateInput input, CancellationToken cancellationToken);
+    Task UpdateAsync(Guid id, TransactionUpdateInput input, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken cancellationToken);

@@ -101,7 +101,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
         try
         {
-            var transaction = await transactionService.CreateAsync(await ToEntityAsync(model, cancellationToken), cancellationToken);
+            var transaction = await transactionService.CreateAsync(ToCreateInput(model), cancellationToken);
             TempData["SuccessMessage"] = "Transaction created successfully.";
             return RedirectToAction(nameof(Details), new { id = transaction.Id });
         }
@@ -159,7 +159,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
         try
         {
-            await transactionService.UpdateAsync(await ToEntityAsync(model, cancellationToken), cancellationToken);
+            await transactionService.UpdateAsync(id, ToUpdateInput(model), cancellationToken);
             TempData["SuccessMessage"] = "Transaction updated successfully.";
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -242,22 +242,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
 
     private static string FormatCategoryName(CategoryChoice choice) => choice.IsSubcategory ? $"|--------- {choice.Name}" : choice.Name;
 
-    private async Task<Transaction> ToEntityAsync(TransactionFormViewModel model, CancellationToken cancellationToken) => new()
-    {
-        Id = model.Id,
-        Type = model.Type,
-        AccountId = model.AccountId ?? Guid.Empty,
-        TargetAccountId = model.TargetAccountId,
-        Amount = model.Amount,
-        TargetAmount = model.TargetAmount,
-        ExchangeRate = model.ExchangeRate,
-        TransactionDate = model.TransactionDate,
-        TransactionTime = new TimeOnly(model.TransactionHour, model.TransactionMinute),
-        OccurredAtUtc = await userContext.ToUtcAsync(model.TransactionDate, new TimeOnly(model.TransactionHour, model.TransactionMinute), cancellationToken),
-        CategoryId = model.CategoryId,
-        AdjustmentDirection = model.AdjustmentDirection,
-        Note = model.Note
-    };
+    private static TransactionCreateInput ToCreateInput(TransactionFormViewModel model) => new(model.Type, model.AccountId, model.TargetAccountId, model.Amount, model.TargetAmount, model.ExchangeRate, model.AdjustmentDirection, model.TransactionDate, new TimeOnly(model.TransactionHour, model.TransactionMinute), model.CategoryId, model.Note);
+
+    private static TransactionUpdateInput ToUpdateInput(TransactionFormViewModel model) => new(model.Type, model.AccountId, model.TargetAccountId, model.Amount, model.TargetAmount, model.ExchangeRate, model.AdjustmentDirection, model.TransactionDate, new TimeOnly(model.TransactionHour, model.TransactionMinute), model.CategoryId, model.Note);
 
     private static TransactionListItemViewModel ToListItem(Transaction transaction)
     {
