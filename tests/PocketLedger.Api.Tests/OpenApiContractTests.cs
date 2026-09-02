@@ -109,6 +109,8 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
     [InlineData("AccountUpdateRequest", "account", "createInitialBalanceAdjustment")]
     [InlineData("DebtWriteRequest", "debt", "recurringPayment")]
     [InlineData("DebtOperationWriteRequest", "operation")]
+    [InlineData("TransactionCreateRequest", "type", "accountId", "amount", "transactionDate", "transactionTime")]
+    [InlineData("TransactionUpdateRequest", "type", "accountId", "amount", "transactionDate", "transactionTime")]
     [InlineData("UserPreferenceUpdateRequest", "displayName", "avatarId", "defaultCurrency", "timeZoneId", "currencyFormats")]
     public async Task PublicContractSchema_ContainsRequiredProperties(string schemaName, params string[] propertyNames)
     {
@@ -149,6 +151,18 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
 
         var properties = schema.GetProperty("properties");
         foreach (var propertyName in forbiddenProperties) Assert.False(properties.TryGetProperty(propertyName, out _), $"Persistence property {schemaName}.{propertyName} leaked into the OpenAPI contract.");
+    }
+
+    [Theory]
+    [InlineData("TransactionCreateRequest")]
+    [InlineData("TransactionUpdateRequest")]
+    public async Task TransactionWriteContract_DoesNotExposeServerManagedProperties(string schemaName)
+    {
+        using var document = await GetDocumentAsync();
+        var properties = document.RootElement.GetProperty("components").GetProperty("schemas").GetProperty(schemaName).GetProperty("properties");
+
+        foreach (var propertyName in new[] { "occurredAtUtc", "sourceCurrency", "targetCurrency", "debtId", "debtOperationType" })
+            Assert.False(properties.TryGetProperty(propertyName, out _), $"Server-managed property {schemaName}.{propertyName} leaked into the write contract.");
     }
 
     [Fact]

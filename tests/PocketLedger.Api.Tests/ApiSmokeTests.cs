@@ -84,6 +84,62 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         await cleanupScope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>().Database.EnsureDeletedAsync();
     }
 
+    [Fact]
+    public async Task TransactionWriteEndpoints_IgnoreManipulatedServerManagedProperties()
+    {
+        var ownerId = Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3");
+        var hufAccountId = Guid.NewGuid();
+        var eurAccountId = Guid.NewGuid();
+        using (var scope = factory.Services.CreateScope())
+        {
+            scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, ownerId.ToString())], TestAuthenticationHandler.SchemeName))
+            };
+            var db = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
+            await db.Database.EnsureDeletedAsync();
+            db.Accounts.AddRange(
+                new Account { Id = hufAccountId, OwnerId = ownerId, Name = "Forint", Type = AccountType.BankAccount, Currency = "HUF" },
+                new Account { Id = eurAccountId, OwnerId = ownerId, Name = "Euro", Type = AccountType.BankAccount, Currency = "EUR" });
+            db.UserPreferences.Add(new UserPreference { UserId = ownerId, TimeZoneId = "UTC" });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        using var createResponse = await client.PostAsJsonAsync("/api/v1/transactions", new
+        {
+            type = TransactionType.Adjustment, accountId = hufAccountId, amount = 10m, adjustmentDirection = AdjustmentDirection.Increase, transactionDate = "2026-09-02", transactionTime = "10:30:00", note = "create",
+            occurredAtUtc = "1999-01-01T00:00:00Z", sourceCurrency = "USD", targetCurrency = "USD", debtId = Guid.NewGuid(), debtOperationType = DebtOperationType.Payment
+        });
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.Content.ReadFromJsonAsync<TransactionDto>();
+
+        Assert.NotNull(created);
+        Assert.Equal("HUF", created.SourceCurrency);
+        Assert.Null(created.TargetCurrency);
+        Assert.Equal(new DateTimeOffset(2026, 9, 2, 10, 30, 0, TimeSpan.Zero), created.OccurredAtUtc);
+        Assert.Null(created.DebtId);
+        Assert.Null(created.DebtOperationType);
+
+        using var updateResponse = await client.PutAsJsonAsync($"/api/v1/transactions/{created.Id}", new
+        {
+            type = TransactionType.Adjustment, accountId = eurAccountId, amount = 20m, adjustmentDirection = AdjustmentDirection.Decrease, transactionDate = "2026-09-03", transactionTime = "11:45:00", note = "update",
+            occurredAtUtc = "1998-01-01T00:00:00Z", sourceCurrency = "GBP", targetCurrency = "GBP", debtId = Guid.NewGuid(), debtOperationType = DebtOperationType.ManualCorrectionIncrease
+        });
+        updateResponse.EnsureSuccessStatusCode();
+        var updated = await client.GetFromJsonAsync<TransactionDto>($"/api/v1/transactions/{created.Id}");
+
+        Assert.NotNull(updated);
+        Assert.Equal("EUR", updated.SourceCurrency);
+        Assert.Null(updated.TargetCurrency);
+        Assert.Equal(new DateTimeOffset(2026, 9, 3, 11, 45, 0, TimeSpan.Zero), updated.OccurredAtUtc);
+        Assert.Null(updated.DebtId);
+        Assert.Null(updated.DebtOperationType);
+
+        using var cleanupScope = factory.Services.CreateScope();
+        await cleanupScope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>().Database.EnsureDeletedAsync();
+    }
+
     private sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string SchemeName = "Test";
