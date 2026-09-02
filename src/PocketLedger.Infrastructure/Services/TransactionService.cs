@@ -7,7 +7,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionService
+public class TransactionService(PocketLedgerDbContext dbContext, IUserContextService userContext) : ITransactionService
 {
     public async Task<IReadOnlyList<Transaction>> GetForMonthAsync(int year, int month, CancellationToken cancellationToken)
     {
@@ -83,37 +83,41 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         return BaseReadQuery().SingleOrDefaultAsync(transaction => transaction.Id == id, cancellationToken);
     }
 
-    public async Task<Transaction> CreateAsync(Transaction transaction, CancellationToken cancellationToken)
+    public async Task<Transaction> CreateAsync(TransactionCreateInput input, CancellationToken cancellationToken)
     {
-        if (transaction.DebtId is not null || transaction.Type == TransactionType.DebtEntry) throw new BusinessRuleException("Debt transactions must be created from the debt page.");
+        if (input.Type == TransactionType.DebtEntry) throw new BusinessRuleException("Debt transactions must be created from the debt page.");
+        var transaction = new Transaction
+        {
+            Id = Guid.NewGuid(), Type = input.Type, AccountId = input.AccountId, TargetAccountId = input.TargetAccountId, Amount = input.Amount, TargetAmount = input.TargetAmount,
+            ExchangeRate = input.ExchangeRate, AdjustmentDirection = input.AdjustmentDirection, TransactionDate = input.TransactionDate, TransactionTime = input.TransactionTime,
+            CategoryId = input.CategoryId, Note = input.Note
+        };
         await PrepareAndValidateAsync(transaction, cancellationToken);
-        transaction.Id = transaction.Id == Guid.Empty ? Guid.NewGuid() : transaction.Id;
         dbContext.Transactions.Add(transaction);
         await dbContext.SaveChangesAsync(cancellationToken);
         return transaction;
     }
 
-    public async Task UpdateAsync(Transaction transaction, CancellationToken cancellationToken)
+    public async Task UpdateAsync(Guid id, TransactionUpdateInput input, CancellationToken cancellationToken)
     {
-        await PrepareAndValidateAsync(transaction, cancellationToken);
-        var existing = await dbContext.Transactions.SingleOrDefaultAsync(item => item.Id == transaction.Id, cancellationToken)
+        var existing = await dbContext.Transactions.SingleOrDefaultAsync(item => item.Id == id, cancellationToken)
             ?? throw new EntityNotFoundException("Transaction not found.");
         if (existing.DebtId is not null) throw new BusinessRuleException("Debt transactions must be edited from the debt page.");
+        existing.DebtId = null;
+        existing.DebtOperationType = null;
 
-        existing.Type = transaction.Type;
-        existing.AccountId = transaction.AccountId;
-        existing.TargetAccountId = transaction.TargetAccountId;
-        existing.Amount = transaction.Amount;
-        existing.TargetAmount = transaction.TargetAmount;
-        existing.ExchangeRate = transaction.ExchangeRate;
-        existing.SourceCurrency = transaction.SourceCurrency;
-        existing.TargetCurrency = transaction.TargetCurrency;
-        existing.AdjustmentDirection = transaction.AdjustmentDirection;
-        existing.TransactionDate = transaction.TransactionDate;
-        existing.TransactionTime = transaction.TransactionTime;
-        existing.OccurredAtUtc = transaction.OccurredAtUtc;
-        existing.CategoryId = transaction.CategoryId;
-        existing.Note = transaction.Note;
+        existing.Type = input.Type;
+        existing.AccountId = input.AccountId;
+        existing.TargetAccountId = input.TargetAccountId;
+        existing.Amount = input.Amount;
+        existing.TargetAmount = input.TargetAmount;
+        existing.ExchangeRate = input.ExchangeRate;
+        existing.AdjustmentDirection = input.AdjustmentDirection;
+        existing.TransactionDate = input.TransactionDate;
+        existing.TransactionTime = input.TransactionTime;
+        existing.CategoryId = input.CategoryId;
+        existing.Note = input.Note;
+        await PrepareAndValidateAsync(existing, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -151,6 +155,8 @@ public class TransactionService(PocketLedgerDbContext dbContext) : ITransactionS
         {
             throw new BusinessRuleException("Transaction date is required.");
         }
+
+        transaction.OccurredAtUtc = await userContext.ToUtcAsync(transaction.TransactionDate, transaction.TransactionTime, cancellationToken);
 
         var account = transaction.AccountId is null ? null : await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == transaction.AccountId, cancellationToken);
         Category? category = null;
