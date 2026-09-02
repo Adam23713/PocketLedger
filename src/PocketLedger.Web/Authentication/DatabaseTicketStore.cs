@@ -6,8 +6,9 @@ using PocketLedger.Web.Data;
 
 namespace PocketLedger.Web.Authentication;
 
-public sealed class DatabaseTicketStore(IServiceScopeFactory scopeFactory, IDataProtectionProvider protectionProvider) : ITicketStore
+public sealed class DatabaseTicketStore(IServiceScopeFactory scopeFactory, IDataProtectionProvider protectionProvider) : ITicketStore, ISessionTicketReader
 {
+    public const string SessionKeyProperty = ".session-key";
     private readonly IDataProtector protector = protectionProvider.CreateProtector("PocketLedger.Web.BffSession.v1");
 
     public async Task<string> StoreAsync(AuthenticationTicket ticket) => await StoreAsync(ticket, CancellationToken.None);
@@ -40,7 +41,9 @@ public sealed class DatabaseTicketStore(IServiceScopeFactory scopeFactory, IData
         var db = scope.ServiceProvider.GetRequiredService<WebDbContext>();
         var item = await db.Sessions.AsNoTracking().SingleOrDefaultAsync(session => session.Id == key, cancellationToken);
         if (item is null || item.ExpiresAtUtc <= DateTimeOffset.UtcNow) return null;
-        return TicketSerializer.Default.Deserialize(protector.Unprotect(item.ProtectedTicket));
+        var ticket = TicketSerializer.Default.Deserialize(protector.Unprotect(item.ProtectedTicket)) ?? throw new InvalidOperationException("The stored BFF session ticket is invalid.");
+        ticket.Properties.Items[SessionKeyProperty] = key;
+        return ticket;
     }
 
     public Task RemoveAsync(string key) => RemoveAsync(key, CancellationToken.None);
