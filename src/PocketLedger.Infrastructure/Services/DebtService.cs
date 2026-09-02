@@ -41,8 +41,9 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         debt.Currency = existing.Currency;
         await PrepareAndValidateAsync(debt, cancellationToken);
         if (existing.Direction != debt.Direction && await dbContext.Transactions.AnyAsync(item => item.DebtId == debt.Id, cancellationToken)) throw new BusinessRuleException("Debt direction cannot be changed after operations have been recorded.");
-        var operationDelta = await dbContext.Transactions.Where(item => item.DebtId == debt.Id && item.DebtOperationType != null).SumAsync(item => item.DebtOperationType == DebtOperationType.Increase || item.DebtOperationType == DebtOperationType.ManualCorrectionIncrease || item.DebtOperationType == DebtOperationType.LoanDisbursement ? item.Amount : -item.Amount, cancellationToken);
-        if (debt.OriginalAmount + operationDelta < 0) throw new BusinessRuleException("Original amount cannot be lower than the already repaid amount.");
+        var operations = await dbContext.Transactions.AsNoTracking().Where(item => item.DebtId == debt.Id && item.DebtOperationType != null).ToListAsync(cancellationToken);
+        var remaining = DebtBalanceCalculator.Calculate(debt.OriginalAmount, operations);
+        if (remaining < 0) throw new BusinessRuleException("Original amount cannot be lower than the already repaid amount.");
         existing.Name = debt.Name; existing.Icon = debt.Icon; existing.Direction = debt.Direction; existing.Type = debt.Type; existing.CounterpartyName = debt.CounterpartyName;
         existing.OriginalAmount = debt.OriginalAmount; existing.StartDate = debt.StartDate; existing.DueDate = debt.DueDate; existing.Note = debt.Note; existing.AccountId = debt.AccountId;
         var template = existing.RecurringTransactions.SingleOrDefault();
@@ -63,7 +64,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
             template.LastOccurrence = recurringPayment.LastOccurrence; template.Frequency = recurringPayment.Frequency; template.Enabled = recurringPayment.Enabled && existing.Status == DebtStatus.Active;
             if (scheduleChanged || !wasEnabled && template.Enabled) template.AutomationStartsOn = BudapestDate.Today(timeProvider);
         }
-        ApplyAutomaticStatus(existing, debt.OriginalAmount + operationDelta);
+        ApplyAutomaticStatus(existing, remaining);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -218,7 +219,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         if (input.LastOccurrence < input.NextOccurrence) throw new BusinessRuleException("Last occurrence cannot be before the next occurrence.");
     }
     private async Task<Debt> GetTrackedAsync(Guid id, CancellationToken cancellationToken) => await dbContext.Debts.Include(item => item.Transactions).Include(item => item.RecurringTransactions).SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Debt not found.");
-    private static decimal CalculateRemaining(Debt debt, Guid? excludingTransactionId = null) => debt.OriginalAmount + debt.Transactions.Where(item => item.Id != excludingTransactionId && item.DebtOperationType is not null).Sum(item => DebtRules.GetDebtDelta(item.DebtOperationType!.Value, item.Amount));
+    private static decimal CalculateRemaining(Debt debt, Guid? excludingTransactionId = null) => DebtBalanceCalculator.Calculate(debt.OriginalAmount, debt.Transactions, excludingTransactionId);
     private static void ApplyAutomaticStatus(Debt debt, decimal remaining)
     {
         if (remaining != 0) { if (debt.Status == DebtStatus.Closed) { debt.Status = DebtStatus.Active; debt.ClosedAt = null; } return; }

@@ -14,8 +14,8 @@ public sealed class TransactionsApiClient(HttpClient client) : ApiClientBase(cli
     public Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsAsync(TransactionFilter filter, CancellationToken token) => PostAsync<TransactionFilter, IReadOnlyList<TransactionDailyTotal>>("api/v1/transactions/daily-totals", filter, token);
     public async Task<IReadOnlyList<Transaction>> GetForExportAsync(TransactionFilter filter, CancellationToken token) => (await PostAsync<TransactionFilter, IReadOnlyList<TransactionDto>>("api/v1/transactions/export-query", filter, token)).Select(WebContractMapper.ToEntity).ToArray();
     public async Task<Transaction?> GetByIdAsync(Guid id, CancellationToken token) => (await GetOrDefaultAsync<TransactionDto>($"api/v1/transactions/{id}", token))?.ToEntity();
-    public async Task<Transaction> CreateAsync(Transaction transaction, CancellationToken token) => (await PostAsync<TransactionDto, TransactionDto>("api/v1/transactions", transaction.ToDto(), token)).ToEntity();
-    public Task UpdateAsync(Transaction transaction, CancellationToken token) => PutAsync($"api/v1/transactions/{transaction.Id}", transaction.ToDto(), token);
+    public async Task<Transaction> CreateAsync(TransactionCreateInput input, CancellationToken token) => (await PostAsync<TransactionCreateRequest, TransactionDto>("api/v1/transactions", input.ToRequest(), token)).ToEntity();
+    public Task UpdateAsync(Guid id, TransactionUpdateInput input, CancellationToken token) => PutAsync($"api/v1/transactions/{id}", input.ToRequest(), token);
     public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/transactions/{id}", token);
     public Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesAsync(CancellationToken token) => GetAsync<IReadOnlyDictionary<Guid, decimal>>("api/v1/transactions/balances", token);
     public async Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken token) => (await GetAsync<IReadOnlyList<CurrencyBalanceDto>>("api/v1/transactions/main-balance", token)).Select(WebContractMapper.ToServiceModel).ToArray();
