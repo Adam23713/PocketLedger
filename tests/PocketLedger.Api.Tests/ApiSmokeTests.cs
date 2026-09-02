@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -61,6 +62,10 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         var ownerId = Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3");
         using (var scope = factory.Services.CreateScope())
         {
+            scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, ownerId.ToString())], TestAuthenticationHandler.SchemeName))
+            };
             var db = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
             await db.Database.EnsureDeletedAsync();
             db.Accounts.AddRange(
