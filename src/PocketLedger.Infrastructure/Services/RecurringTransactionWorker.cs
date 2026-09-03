@@ -8,7 +8,7 @@ using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Services;
 
-public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory, TimeProvider timeProvider, ILogger<RecurringTransactionWorker> logger) : BackgroundService
+public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory, TimeProvider timeProvider, IUserDateProvider userDates, Microsoft.Extensions.Options.IOptions<UserDateOptions> dateOptions, ILogger<RecurringTransactionWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -46,8 +46,8 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         {
             try
             {
-                var zone = UserContextService.GetTimeZone(timeZones.GetValueOrDefault(template.OwnerId, "Europe/Budapest"));
-                var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), zone).DateTime);
+                var timeZoneId = timeZones.GetValueOrDefault(template.OwnerId, dateOptions.Value.DefaultTimeZoneId);
+                var today = userDates.Today(timeZoneId);
                 if (template.FirstOccurrence > today) continue;
                 var start = template.AutomationStartsOn > template.FirstOccurrence ? template.AutomationStartsOn : template.FirstOccurrence;
                 var occurrenceDates = RecurringSchedule.GetOccurrences(template, start, today);
@@ -62,7 +62,7 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
                 {
                     try
                     {
-                        await CreateOccurrenceAsync(dbContext, template, occurrenceDate, zone, cancellationToken);
+                        await CreateOccurrenceAsync(dbContext, template, occurrenceDate, timeZoneId, cancellationToken);
                     }
                     catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                     {
@@ -87,17 +87,17 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         }
     }
 
-    private async Task CreateOccurrenceAsync(PocketLedgerDbContext dbContext, RecurringTransaction template, DateOnly occurrenceDate, TimeZoneInfo zone, CancellationToken cancellationToken)
+    private async Task CreateOccurrenceAsync(PocketLedgerDbContext dbContext, RecurringTransaction template, DateOnly occurrenceDate, string timeZoneId, CancellationToken cancellationToken)
     {
         await using var dbTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         if (template.DebtId is not null) await dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({template.DebtId.Value.ToString()}, 0))", cancellationToken);
         Transaction transaction;
         if (template.DebtId is not null)
         {
-            transaction = await new DebtService(dbContext, timeProvider).AddAutomaticOperationAsync(template, occurrenceDate, cancellationToken);
+            transaction = await new DebtService(dbContext).AddAutomaticOperationAsync(template, occurrenceDate, cancellationToken);
             transaction.OwnerId = template.OwnerId;
             transaction.SourceCurrency = template.Account.Currency;
-            transaction.OccurredAtUtc = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(occurrenceDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone), TimeSpan.Zero);
+            transaction.OccurredAtUtc = userDates.ToUtc(occurrenceDate, TimeOnly.MinValue, timeZoneId);
         }
         else
         {
@@ -105,7 +105,7 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
             {
                 Id = Guid.NewGuid(), OwnerId = template.OwnerId, Type = template.Type, AccountId = template.AccountId, Amount = template.Amount,
                 AdjustmentDirection = template.AdjustmentDirection, TransactionDate = occurrenceDate, TransactionTime = TimeOnly.MinValue,
-                OccurredAtUtc = new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(occurrenceDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified), zone), TimeSpan.Zero),
+                OccurredAtUtc = userDates.ToUtc(occurrenceDate, TimeOnly.MinValue, timeZoneId),
                 SourceCurrency = template.Account.Currency, CategoryId = template.CategoryId, Note = template.Note
             };
             dbContext.Transactions.Add(transaction);

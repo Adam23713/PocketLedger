@@ -5,7 +5,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService userContext) : IAccountService
+public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService userContext, IUserDateProvider userDates) : IAccountService
 {
     public async Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -42,7 +42,7 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
             {
                 Id = Guid.NewGuid(), Type = Models.Enums.TransactionType.Adjustment, AccountId = existing.Id, Amount = Math.Abs(balanceDifference),
                 AdjustmentDirection = balanceDifference > 0 ? Models.Enums.AdjustmentDirection.Increase : Models.Enums.AdjustmentDirection.Decrease,
-                TransactionDate = await userContext.TodayAsync(cancellationToken), TransactionTime = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserContextService.GetTimeZone((await userContext.GetUserAsync(cancellationToken)).TimeZoneId)).DateTime),
+                TransactionDate = await userContext.TodayAsync(cancellationToken), TransactionTime = userDates.LocalTime((await userContext.GetUserAsync(cancellationToken)).TimeZoneId),
                 OccurredAtUtc = timeProvider.GetUtcNow(), SourceCurrency = existing.Currency, Note = "Initial balance adjustment"
             });
         }

@@ -44,7 +44,7 @@ public class RecurringTransactionFormViewModel : IValidatableObject
     [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal Amount { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }
     [StringLength(500)] public string? Note { get; set; }
-    [Required] public DateOnly FirstOccurrence { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Required] public DateOnly FirstOccurrence { get; set; }
     public DateOnly? LastOccurrence { get; set; }
     public bool NoEndDate { get; set; } = true;
     [Required] public RecurringFrequency Frequency { get; set; } = RecurringFrequency.Monthly;
