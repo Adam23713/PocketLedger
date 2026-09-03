@@ -165,7 +165,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
 
     private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, DebtOperationType? DebtOperationType, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
 
-    private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection };
+    private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection, DebtOperationType = row.DebtOperationType };
 
     private static void ValidatePeriod(int year, int month)
     {
