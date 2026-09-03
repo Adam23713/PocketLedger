@@ -13,11 +13,12 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
         ValidatePeriod(year, month);
         var start = new DateOnly(year, month, 1);
         var end = start.AddMonths(1);
-        var currencies = await dbContext.Transactions.AsNoTracking()
-            .Where(transaction => transaction.TransactionDate >= start && transaction.TransactionDate < end && (transaction.Type == TransactionType.Income || transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment))
-            .Select(transaction => transaction.SourceCurrency)
-            .Distinct()
+        var transactionRows = await dbContext.Transactions.AsNoTracking()
+            .Where(transaction => transaction.TransactionDate >= start && transaction.TransactionDate < end && transaction.Type != TransactionType.Transfer && transaction.Type != TransactionType.DebtEntry)
+            .Select(transaction => new { transaction.SourceCurrency, transaction.Type, transaction.Amount, transaction.AdjustmentDirection, transaction.DebtOperationType })
             .ToListAsync(cancellationToken);
+        var currencies = transactionRows.Where(transaction => TransactionSemantics.Resolve(transaction.Type, transaction.Amount, adjustmentDirection: transaction.AdjustmentDirection, debtOperationType: transaction.DebtOperationType).ReportingClassification != TransactionReportingClassification.Excluded)
+            .Select(transaction => transaction.SourceCurrency).Distinct().ToList();
         return Currencies.All.Where(definition => currencies.Contains(definition.Code)).Select(definition => definition.Code).ToList();
     }
 
@@ -133,7 +134,14 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             .ToList();
     }
 
-    private static bool IsCategoryType(StatisticsTransactionRow item, TransactionType type) => item.Type == type || item.Type == TransactionType.Adjustment && (type == TransactionType.Income ? item.AdjustmentDirection == AdjustmentDirection.Increase : item.AdjustmentDirection == AdjustmentDirection.Decrease);
+    private static bool IsCategoryType(StatisticsTransactionRow item, TransactionType type)
+    {
+        // Category reporting intentionally groups adjustments with their matching income/expense side.
+        var classification = TransactionSemantics.Resolve(item.Type, item.Amount, adjustmentDirection: item.AdjustmentDirection, debtOperationType: item.DebtOperationType).ReportingClassification;
+        return type == TransactionType.Income
+            ? classification is TransactionReportingClassification.Income or TransactionReportingClassification.AdjustmentIncrease
+            : classification is TransactionReportingClassification.Expense or TransactionReportingClassification.AdjustmentDecrease;
+    }
 
     private static string CategoryName(StatisticsTransactionRow item)
     {

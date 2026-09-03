@@ -186,7 +186,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         var remaining = CalculateRemaining(debt);
         var delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
         if (remaining + delta < 0) throw new BusinessRuleException("The operation amount cannot exceed the remaining debt.");
-        var transaction = new Transaction { Id = Guid.NewGuid(), Type = GetTransactionType(input.Type, account), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
+        var transaction = new Transaction { Id = Guid.NewGuid(), Type = TransactionSemantics.GetDebtTransactionType(input.Type, account is not null), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
         dbContext.Transactions.Add(transaction);
         ApplyAutomaticStatus(debt, remaining + delta);
         if (save) await dbContext.SaveChangesAsync(cancellationToken);
@@ -226,7 +226,6 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         debt.Status = DebtStatus.Closed; debt.ClosedAt = DateTimeOffset.UtcNow;
         foreach (var template in debt.RecurringTransactions) template.Enabled = false;
     }
-    private static TransactionType GetTransactionType(DebtOperationType type, Account? account) => account is null ? TransactionType.DebtEntry : type is DebtOperationType.ReceivedRepayment ? TransactionType.Income : TransactionType.Expense;
     private async Task<IReadOnlyDictionary<Guid, decimal>> CalculateBalancesAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken); var transactions = await dbContext.Transactions.AsNoTracking().ToListAsync(cancellationToken);
