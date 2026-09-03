@@ -9,7 +9,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class DebtsController(IDebtService debtService, IAccountService accountService, TimeProvider timeProvider, IUserContextService userContext) : Controller
+public class DebtsController(IDebtService debtService, IAccountService accountService, IUserDateProvider userDates, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -105,5 +105,5 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         if (!model.AutomaticPaymentEnabled || model.LastPaymentDate is not null || model.NextPaymentDate is null || model.AutomaticPaymentAmount is not > 0 || remainingAmount <= 0) return;
         model.LastPaymentDate = DebtRules.CalculateLastPaymentDate(remainingAmount, model.AutomaticPaymentAmount.Value, model.NextPaymentDate.Value, model.Frequency);
     }
-    private TimeOnly UserLocalTime(UserPreference user) => TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserTimeZones.Get(user.TimeZoneId)).DateTime);
+    private TimeOnly UserLocalTime(UserPreference user) => userDates.LocalTime(user.TimeZoneId);
 }

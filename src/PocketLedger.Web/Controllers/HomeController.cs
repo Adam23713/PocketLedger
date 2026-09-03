@@ -18,10 +18,12 @@ public class HomeController(IAccountService accountService, ITransactionService 
         var recentTransactions = await transactionService.GetRecentAsync(10, cancellationToken);
         var today = await userContext.TodayAsync(cancellationToken);
         var monthTransactions = await transactionService.GetForMonthAsync(today.Year, today.Month, cancellationToken);
-        var incomeThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Income).Sum(transaction => transaction.Amount);
-        var expensesThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Expense).Sum(transaction => transaction.Amount);
-        var adjustmentsThisMonth = monthTransactions.Where(transaction => transaction.Type == TransactionType.Adjustment).Sum(transaction => transaction.AdjustmentDirection == AdjustmentDirection.Increase ? transaction.Amount : -transaction.Amount);
-        var monthlyTotals = monthTransactions.Where(transaction => transaction.Type != TransactionType.Transfer).GroupBy(transaction => transaction.SourceCurrency).Select(group => new CurrencyPeriodViewModel(group.Key, group.Where(item => item.Type == TransactionType.Income).Sum(item => item.Amount), group.Where(item => item.Type == TransactionType.Expense).Sum(item => item.Amount), group.Sum(item => item.Type == TransactionType.Income ? item.Amount : item.Type == TransactionType.Expense ? -item.Amount : item.AdjustmentDirection == AdjustmentDirection.Increase ? item.Amount : -item.Amount))).ToList();
+        var classifiedMonth = monthTransactions.Select(transaction => (Transaction: transaction, Semantics: TransactionSemantics.Resolve(transaction.Type, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.DebtOperationType))).ToList();
+        // Dashboard headline income/expense intentionally excludes adjustments; BalanceChange includes their account effect.
+        var incomeThisMonth = classifiedMonth.Where(item => item.Semantics.ReportingClassification == TransactionReportingClassification.Income).Sum(item => item.Transaction.Amount);
+        var expensesThisMonth = classifiedMonth.Where(item => item.Semantics.ReportingClassification == TransactionReportingClassification.Expense).Sum(item => item.Transaction.Amount);
+        var adjustmentsThisMonth = classifiedMonth.Where(item => item.Semantics.ReportingClassification is TransactionReportingClassification.AdjustmentIncrease or TransactionReportingClassification.AdjustmentDecrease).Sum(item => item.Semantics.SourceAccountChange);
+        var monthlyTotals = classifiedMonth.Where(item => item.Semantics.ReportingClassification != TransactionReportingClassification.Excluded).GroupBy(item => item.Transaction.SourceCurrency).Select(group => new CurrencyPeriodViewModel(group.Key, group.Where(item => item.Semantics.ReportingClassification == TransactionReportingClassification.Income).Sum(item => item.Transaction.Amount), group.Where(item => item.Semantics.ReportingClassification == TransactionReportingClassification.Expense).Sum(item => item.Transaction.Amount), group.Sum(item => item.Semantics.SourceAccountChange))).ToList();
         var warnings = await debtService.GetFundingWarningsAsync(today, cancellationToken);
         var model = new HomeViewModel
         {

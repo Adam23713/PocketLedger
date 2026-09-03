@@ -27,7 +27,7 @@ public class RecurringTransactionConfiguration : IEntityTypeConfiguration<Recurr
         builder.Property(template => template.Note).HasColumnName("note").HasMaxLength(500);
         builder.Property(template => template.FirstOccurrence).HasColumnName("first_occurrence").HasColumnType("date");
         builder.Property(template => template.LastOccurrence).HasColumnName("last_occurrence").HasColumnType("date");
-        builder.Property(template => template.AutomationStartsOn).HasColumnName("automation_starts_on").HasColumnType("date").HasDefaultValueSql("(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Budapest')::date");
+        builder.Property(template => template.AutomationStartsOn).HasColumnName("automation_starts_on").HasColumnType("date");
         builder.Property(template => template.Frequency).HasColumnName("frequency").HasConversion<string>().HasMaxLength(10).IsRequired();
         builder.Property(template => template.Enabled).HasColumnName("enabled");
         builder.Property(template => template.DebtId).HasColumnName("debt_id");

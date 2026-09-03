@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
@@ -233,7 +234,8 @@ public class UserIsolationTests
             .AddSingleton(options)
             .AddRecurringTransactionProcessingDataAccess()
             .BuildServiceProvider();
-        var worker = new RecurringTransactionWorker(services.GetRequiredService<IServiceScopeFactory>(), new FixedTimeProvider(new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero)), NullLogger<RecurringTransactionWorker>.Instance);
+        var clock = new FixedTimeProvider(new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.Zero));
+        var worker = new RecurringTransactionWorker(services.GetRequiredService<IServiceScopeFactory>(), clock, new UserDateProvider(clock), Options.Create(new UserDateOptions()), NullLogger<RecurringTransactionWorker>.Instance);
 
         await worker.ProcessDueOccurrencesAsync(CancellationToken.None);
 
@@ -244,14 +246,42 @@ public class UserIsolationTests
         Assert.Contains(transactions, item => item.OwnerId == secondOwner);
     }
 
-    private static void AddRecurringTemplate(PocketLedgerDbContext db, Guid ownerId, string name)
+    [Fact]
+    public async Task RecurringWorker_EvaluatesEachOwnerInTheirOwnTimeZone()
+    {
+        var nextDayOwner = Guid.NewGuid();
+        var currentDayOwner = Guid.NewGuid();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)).Options;
+        await using (var seed = new CrossTenantPocketLedgerDbContext(options))
+        {
+            AddRecurringTemplate(seed, nextDayOwner, "Next day", new DateOnly(2026, 1, 2));
+            AddRecurringTemplate(seed, currentDayOwner, "Current day", new DateOnly(2026, 1, 2));
+            seed.UserPreferences.AddRange(
+                new UserPreference { UserId = nextDayOwner, TimeZoneId = "Pacific/Kiritimati" },
+                new UserPreference { UserId = currentDayOwner, TimeZoneId = "Pacific/Honolulu" });
+            await seed.SaveChangesAsync();
+        }
+        var services = new ServiceCollection().AddSingleton(options).AddRecurringTransactionProcessingDataAccess().BuildServiceProvider();
+        var clock = new FixedTimeProvider(new DateTimeOffset(2026, 1, 1, 12, 30, 0, TimeSpan.Zero));
+        var worker = new RecurringTransactionWorker(services.GetRequiredService<IServiceScopeFactory>(), clock, new UserDateProvider(clock), Options.Create(new UserDateOptions()), NullLogger<RecurringTransactionWorker>.Instance);
+
+        await worker.ProcessDueOccurrencesAsync(CancellationToken.None);
+
+        await using var verify = new CrossTenantPocketLedgerDbContext(options);
+        var transaction = Assert.Single(await verify.Transactions.ToListAsync());
+        Assert.Equal(nextDayOwner, transaction.OwnerId);
+        Assert.Equal(new DateOnly(2026, 1, 2), transaction.TransactionDate);
+        Assert.Equal(new DateTimeOffset(2026, 1, 1, 10, 0, 0, TimeSpan.Zero), transaction.OccurredAtUtc);
+    }
+
+    private static void AddRecurringTemplate(PocketLedgerDbContext db, Guid ownerId, string name, DateOnly? firstOccurrence = null)
     {
         var account = CreateAccount(ownerId, name);
         db.Accounts.Add(account);
         db.RecurringTransactions.Add(new RecurringTransaction
         {
             Id = Guid.NewGuid(), OwnerId = ownerId, Type = TransactionType.Adjustment, AccountId = account.Id, Account = account, Amount = 10,
-            AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = new DateOnly(2026, 1, 1), AutomationStartsOn = new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly, Enabled = true
+            AdjustmentDirection = AdjustmentDirection.Increase, FirstOccurrence = firstOccurrence ?? new DateOnly(2026, 1, 1), AutomationStartsOn = firstOccurrence ?? new DateOnly(2026, 1, 1), Frequency = RecurringFrequency.Monthly, Enabled = true
         });
     }
 
