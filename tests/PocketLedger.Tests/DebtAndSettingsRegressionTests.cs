@@ -90,7 +90,7 @@ public class DebtAndSettingsRegressionTests
             FirstOccurrence = new DateOnly(2026, 9, 1), Frequency = RecurringFrequency.Monthly, Enabled = true, DebtOperationType = DebtOperationType.Payment
         });
         await db.SaveChangesAsync();
-        var service = new DebtService(db, TimeProvider.System);
+        var service = new DebtService(db, new FixedUserContext(new DateOnly(2026, 8, 30)));
 
         await service.UpdateAsync(new Debt
         {
@@ -127,7 +127,7 @@ public class DebtAndSettingsRegressionTests
             Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1)
         });
         await db.SaveChangesAsync();
-        var service = new DebtService(db, TimeProvider.System);
+        var service = new DebtService(db);
 
         await service.UpdateAsync(new Debt
         {
@@ -161,7 +161,7 @@ public class DebtAndSettingsRegressionTests
             Type = TransactionType.Expense, Amount = 100, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 28)
         });
         await db.SaveChangesAsync();
-        var service = new AccountService(db, TimeProvider.System, null!);
+        var service = new AccountService(db, TimeProvider.System, null!, new UserDateProvider(TimeProvider.System));
 
         var transaction = Assert.Single(await service.GetRecentTransactionsAsync(accountId, 10, CancellationToken.None));
 
@@ -200,7 +200,7 @@ public class DebtAndSettingsRegressionTests
         db.RecurringTransactions.Add(new RecurringTransaction { Id = recurringId, AccountId = firstAccountId, DebtId = debtId, DebtOperationType = DebtOperationType.Payment, Type = TransactionType.Expense, Amount = 100, FirstOccurrence = new DateOnly(2026, 9, 1), Frequency = RecurringFrequency.Monthly, Enabled = true });
         db.RecurringTransactionOccurrences.Add(new RecurringTransactionOccurrence { Id = Guid.NewGuid(), RecurringTransactionId = recurringId, TransactionId = generatedTransactionId, OccurrenceDate = new DateOnly(2026, 8, 1) });
         await db.SaveChangesAsync();
-        var service = new DebtService(db, TimeProvider.System);
+        var service = new DebtService(db);
         var balancesBefore = await CurrentBalancesAsync(db);
 
         var summary = await service.GetDeletionSummaryAsync(debtId, CancellationToken.None);
@@ -234,7 +234,7 @@ public class DebtAndSettingsRegressionTests
         db.Debts.Add(new Debt { Id = debtId, Name = "Loan", Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, Direction = DebtDirection.Payable, Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1), AccountId = accountId });
         await db.SaveChangesAsync();
 
-        await new DebtService(db, TimeProvider.System).DeleteAsync(debtId, CancellationToken.None);
+        await new DebtService(db).DeleteAsync(debtId, CancellationToken.None);
 
         db.ChangeTracker.Clear();
         Assert.Equal(1000, (await db.Accounts.SingleAsync()).InitialBalance);
@@ -252,5 +252,16 @@ public class DebtAndSettingsRegressionTests
     {
         public Guid UserId => userId;
         public bool IsAuthenticated => true;
+    }
+
+    private sealed class FixedUserContext(DateOnly today) : IUserContextService
+    {
+        public Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default) => Task.FromResult(today);
+        public Task<UserPreference> GetUserAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<DateTimeOffset> ToUtcAsync(DateOnly date, TimeOnly time, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public string Format(decimal amount, string? currency) => throw new NotSupportedException();
+        public string FormatNumber(decimal amount, string? currency) => throw new NotSupportedException();
+        public MoneyInputFormat GetMoneyInputFormat(string currency) => throw new NotSupportedException();
     }
 }

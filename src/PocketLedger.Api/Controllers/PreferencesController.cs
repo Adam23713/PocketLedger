@@ -10,7 +10,7 @@ using PocketLedger.Services;
 namespace PocketLedger.Api.Controllers;
 
 [ApiController, Authorize, Route("api/v1/preferences")]
-public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurrentUser currentUser) : ControllerBase
+public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurrentUser currentUser, IUserDateProvider userDates, Microsoft.Extensions.Options.IOptions<UserDateOptions> dateOptions) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken token)
@@ -26,7 +26,7 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
         item.DisplayName = string.IsNullOrWhiteSpace(request.DisplayName) ? null : request.DisplayName.Trim();
         item.AvatarId = request.AvatarId;
         item.DefaultCurrency = Currencies.Get(request.DefaultCurrency).Code;
-        item.TimeZoneId = UserContextService.GetTimeZone(request.TimeZoneId).Id;
+        item.TimeZoneId = userDates.NormalizeTimeZoneId(request.TimeZoneId);
         dbContext.UserCurrencyFormats.RemoveRange(item.CurrencyFormats);
         item.CurrencyFormats = request.CurrencyFormats.Select(format => new UserCurrencyFormat { UserId = currentUser.UserId, CurrencyCode = Currencies.Get(format.CurrencyCode).Code, DecimalPlaces = format.DecimalPlaces, DecimalSeparator = format.DecimalSeparator, ThousandsSeparator = format.ThousandsSeparator, CurrencyDisplay = format.CurrencyDisplay, CurrencyPosition = format.CurrencyPosition, UseSpace = format.UseSpace }).ToList();
         await dbContext.SaveChangesAsync(token);
@@ -37,7 +37,7 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
     {
         var item = await dbContext.UserPreferences.Include(user => user.CurrencyFormats).SingleOrDefaultAsync(user => user.UserId == currentUser.UserId, token);
         if (item is not null) return item;
-        item = new UserPreference { UserId = currentUser.UserId };
+        item = new UserPreference { UserId = currentUser.UserId, TimeZoneId = userDates.NormalizeTimeZoneId(dateOptions.Value.DefaultTimeZoneId) };
         dbContext.UserPreferences.Add(item);
         await dbContext.SaveChangesAsync(token);
         return item;
