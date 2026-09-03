@@ -129,6 +129,6 @@ public class MilestoneRulesTests
         var transaction = new TransactionBackup(Guid.NewGuid(), TransactionType.Income, Guid.NewGuid(), null, 10, null, null, new DateOnly(2026, 1, 1), null, null);
         var backup = new PocketLedgerBackup(1, DateTimeOffset.UtcNow, [], [], [transaction], []);
 
-        Assert.Contains("Transaction references a missing account.", BackupValidator.Validate(backup));
+        Assert.Contains(BackupValidator.Validate(backup), error => error.Contains(transaction.Id.ToString()) && error.Contains("source-account-reference"));
     }
 }
