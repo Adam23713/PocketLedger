@@ -21,8 +21,10 @@ public class CalendarService(PocketLedgerDbContext dbContext) : ICalendarService
         {
             var totals = group.GroupBy(item => item.Currency).Select(currencyGroup =>
             {
-                var income = currencyGroup.Where(item => item.Type == TransactionType.Income || item.Type == TransactionType.Adjustment && item.AdjustmentDirection == AdjustmentDirection.Increase).Sum(item => item.Amount);
-                var expenses = currencyGroup.Where(item => item.Type == TransactionType.Expense || item.Type == TransactionType.Adjustment && item.AdjustmentDirection == AdjustmentDirection.Decrease).Sum(item => item.Amount);
+                // Calendar cash-flow intentionally presents adjustments on the income/expense sides.
+                var classified = currencyGroup.Select(item => (item.Amount, Classification: TransactionSemantics.Resolve(item.Type, item.Amount, adjustmentDirection: item.AdjustmentDirection).ReportingClassification)).ToList();
+                var income = classified.Where(item => item.Classification is TransactionReportingClassification.Income or TransactionReportingClassification.AdjustmentIncrease).Sum(item => item.Amount);
+                var expenses = classified.Where(item => item.Classification is TransactionReportingClassification.Expense or TransactionReportingClassification.AdjustmentDecrease).Sum(item => item.Amount);
                 return new CurrencyPeriodTotal(currencyGroup.Key, income, expenses, income - expenses);
             }).ToList();
             return new CalendarDaySummary(group.Key, totals, group.Count());

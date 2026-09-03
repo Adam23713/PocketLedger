@@ -50,24 +50,31 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
     public async Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
-        var totals = await ApplyFilter(BaseReadQuery(), filter)
-            .Where(transaction => transaction.Type == TransactionType.Income || transaction.Type == TransactionType.Expense)
+        var rows = await ApplyFilter(BaseReadQuery(), filter)
+            .Where(transaction => transaction.Type != TransactionType.Transfer && transaction.Type != TransactionType.DebtEntry)
             .Select(transaction => new
             {
                 Date = transaction.TransactionDate,
                 transaction.Account!.Currency,
-                Income = transaction.Type == TransactionType.Income ? transaction.Amount : 0m,
-                Expenses = transaction.Type == TransactionType.Expense ? transaction.Amount : 0m
+                transaction.Type,
+                transaction.Amount,
+                transaction.AdjustmentDirection,
+                transaction.DebtOperationType
             })
+            .ToListAsync(cancellationToken);
+
+        // Transaction-list subtotals intentionally exclude adjustments; they summarize posted income and expense rows only.
+        var totals = rows.Select(transaction => (transaction.Date, transaction.Currency, transaction.Amount, Classification: TransactionSemantics.Resolve(transaction.Type, transaction.Amount, adjustmentDirection: transaction.AdjustmentDirection, debtOperationType: transaction.DebtOperationType).ReportingClassification))
+            .Where(transaction => transaction.Classification is TransactionReportingClassification.Income or TransactionReportingClassification.Expense)
             .GroupBy(transaction => new { transaction.Date, transaction.Currency })
             .Select(group => new
             {
                 group.Key.Date,
                 group.Key.Currency,
-                Income = group.Sum(transaction => transaction.Income),
-                Expenses = group.Sum(transaction => transaction.Expenses)
+                Income = group.Where(transaction => transaction.Classification == TransactionReportingClassification.Income).Sum(transaction => transaction.Amount),
+                Expenses = group.Where(transaction => transaction.Classification == TransactionReportingClassification.Expense).Sum(transaction => transaction.Amount)
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         return totals.Select(total => new TransactionDailyTotal(total.Date, total.Currency, total.Income, total.Expenses)).ToList();
     }
