@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace PocketLedger.Web.Authentication;
 
-public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHttpClientFactory clients, IConfiguration configuration) : DelegatingHandler
+public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHttpClientFactory clients, IConfiguration configuration, ISessionTicketReader ticketReader, SessionRefreshCoordinator refreshCoordinator) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -18,10 +18,21 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
         var expiresAt = properties.GetTokenValue("expires_at");
         if (string.IsNullOrWhiteSpace(accessToken) || !DateTimeOffset.TryParse(expiresAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expiration) || expiration <= DateTimeOffset.UtcNow.AddMinutes(1))
         {
-            accessToken = await RefreshAsync(context, authentication, cancellationToken);
+            accessToken = await GetRefreshedAccessTokenAsync(context, authentication, cancellationToken);
         }
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         return await base.SendAsync(request, cancellationToken);
+    }
+
+    private async Task<string> GetRefreshedAccessTokenAsync(HttpContext context, AuthenticateResult authentication, CancellationToken cancellationToken)
+    {
+        if (authentication.Properties is null || !authentication.Properties.Items.TryGetValue(DatabaseTicketStore.SessionKeyProperty, out var sessionKey) || string.IsNullOrWhiteSpace(sessionKey)) throw new InvalidOperationException("The BFF session has no session key.");
+        using var refreshLock = await refreshCoordinator.AcquireAsync(sessionKey, cancellationToken);
+        var currentTicket = await ticketReader.RetrieveAsync(sessionKey, cancellationToken) ?? throw new BffSessionExpiredException();
+        var accessToken = currentTicket.Properties.GetTokenValue("access_token");
+        var expiresAt = currentTicket.Properties.GetTokenValue("expires_at");
+        if (!string.IsNullOrWhiteSpace(accessToken) && DateTimeOffset.TryParse(expiresAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expiration) && expiration > DateTimeOffset.UtcNow.AddMinutes(1)) return accessToken;
+        return await RefreshAsync(context, AuthenticateResult.Success(currentTicket), cancellationToken);
     }
 
     private async Task<string> RefreshAsync(HttpContext context, AuthenticateResult authentication, CancellationToken cancellationToken)

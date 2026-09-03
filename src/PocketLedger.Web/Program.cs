@@ -20,6 +20,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebConnection")));
 builder.Services.AddDataProtection().SetApplicationName("PocketLedger.Web").PersistKeysToDbContext<WebDbContext>();
 builder.Services.AddSingleton<DatabaseTicketStore>();
+builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
+builder.Services.AddSingleton<SessionRefreshCoordinator>();
 builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, ConfigureBffCookie>();
 builder.Services.AddAuthentication(options =>
 {
