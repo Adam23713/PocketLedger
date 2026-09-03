@@ -165,7 +165,7 @@ public class BackupSemanticValidationTests
         var backup = ValidBackup();
         var transaction = backup.Transactions[0] with { AccountId = otherOwnerAccountId };
         await using var currentOwnerDb = new PocketLedgerDbContext(options, new TestCurrentUser(Guid.NewGuid()));
-        var preview = new ImportExportService(currentOwnerDb, null!).PreviewRestore(BackupJson.Serialize(backup with { Transactions = [transaction] }));
+        var preview = new ImportExportService(currentOwnerDb, null!, new TestUserContext()).PreviewRestore(BackupJson.Serialize(backup with { Transactions = [transaction] }));
 
         Assert.False(preview.IsValid);
         AssertRule(preview.Errors, transaction.Id, "source-account-reference");
@@ -186,7 +186,7 @@ public class BackupSemanticValidationTests
         await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
         var existingId = Guid.NewGuid(); db.Accounts.Add(new Account { Id = existingId, Name = "Existing", Type = AccountType.Cash, Currency = "HUF" }); await db.SaveChangesAsync();
         var backup = ValidBackup(); var invalid = backup with { Accounts = [backup.Accounts[0] with { Currency = "XYZ" }, .. backup.Accounts.Skip(1)] }; var json = BackupJson.Serialize(invalid);
-        var service = new ImportExportService(db, null!); var preview = service.PreviewRestore(json); var exception = await Assert.ThrowsAsync<BusinessRuleException>(() => service.RestoreAsync(json, CancellationToken.None));
+        var service = new ImportExportService(db, null!, new TestUserContext()); var preview = service.PreviewRestore(json); var exception = await Assert.ThrowsAsync<BusinessRuleException>(() => service.RestoreAsync(json, CancellationToken.None));
         Assert.False(preview.IsValid); Assert.Equal(string.Join(" ", preview.Errors), exception.Message); Assert.Equal(existingId, (await db.Accounts.SingleAsync()).Id);
     }
 
@@ -203,13 +203,15 @@ public class BackupSemanticValidationTests
         db.Accounts.Add(new Account { Id = existingId, Name = "Existing", Type = AccountType.Cash, Currency = "HUF" });
         await db.SaveChangesAsync();
 
-        await new ImportExportService(db, null!).RestoreAsync(BackupJson.Serialize(ValidBackup()), CancellationToken.None);
+        var restoreDate = new DateOnly(2026, 9, 3);
+        await new ImportExportService(db, null!, new TestUserContext(restoreDate)).RestoreAsync(BackupJson.Serialize(ValidBackup()), CancellationToken.None);
 
         Assert.DoesNotContain(await db.Accounts.AsNoTracking().ToListAsync(), item => item.Id == existingId);
         Assert.All(await db.Accounts.AsNoTracking().ToListAsync(), item => Assert.Equal(ownerId, item.OwnerId));
         Assert.All(await db.Categories.AsNoTracking().ToListAsync(), item => Assert.Equal(ownerId, item.OwnerId));
         Assert.All(await db.Transactions.AsNoTracking().ToListAsync(), item => Assert.Equal(ownerId, item.OwnerId));
         Assert.All(await db.RecurringTransactions.AsNoTracking().ToListAsync(), item => Assert.Equal(ownerId, item.OwnerId));
+        Assert.All(await db.RecurringTransactions.AsNoTracking().ToListAsync(), item => Assert.Equal(restoreDate, item.AutomationStartsOn));
         Assert.All(await db.Debts.AsNoTracking().ToListAsync(), item => Assert.Equal(ownerId, item.OwnerId));
     }
 
@@ -229,7 +231,7 @@ public class BackupSemanticValidationTests
         db.ChangeTracker.Clear();
         interceptor.Arm();
 
-        var service = new ImportExportService(db, null!);
+        var service = new ImportExportService(db, null!, new TestUserContext());
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.RestoreAsync(BackupJson.Serialize(ValidBackup()), CancellationToken.None));
 
         db.ChangeTracker.Clear();
@@ -255,12 +257,22 @@ public class BackupSemanticValidationTests
 
     private static Task CreateSqliteSchemaAsync(PocketLedgerDbContext db)
     {
-        var createScript = db.Database.GenerateCreateScript().Replace("(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Budapest')::date", "CURRENT_DATE", StringComparison.Ordinal);
-        return db.Database.ExecuteSqlRawAsync(createScript);
+        return db.Database.EnsureCreatedAsync();
     }
 
     private static void AssertRule(IReadOnlyList<string> errors, Guid id, string rule) => Assert.Contains(errors, error => error.Contains(id.ToString()) && error.Contains($"rule '{rule}'"));
     private sealed class TestCurrentUser(Guid userId) : ICurrentUser { public Guid UserId => userId; public bool IsAuthenticated => true; }
+
+    private sealed class TestUserContext(DateOnly today = default) : IUserContextService
+    {
+        public Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default) => Task.FromResult(today == default ? new DateOnly(2026, 9, 3) : today);
+        public Task<UserPreference> GetUserAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<DateTimeOffset> ToUtcAsync(DateOnly date, TimeOnly time, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public string Format(decimal amount, string? currency) => throw new NotSupportedException();
+        public string FormatNumber(decimal amount, string? currency) => throw new NotSupportedException();
+        public MoneyInputFormat GetMoneyInputFormat(string currency) => throw new NotSupportedException();
+    }
 
     private sealed class FailSecondSaveInterceptor : SaveChangesInterceptor
     {

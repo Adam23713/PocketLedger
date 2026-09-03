@@ -92,6 +92,7 @@ public static class BackupValidator
         }
         if (account is not null && !SameCurrency(item.SourceCurrency, account.Currency)) Add(errors, "Transaction", item.Id, "currency-consistency", "Source currency must match the source account currency.");
         if (target is not null && !SameCurrency(item.TargetCurrency, target.Currency)) Add(errors, "Transaction", item.Id, "currency-consistency", "Target currency must match the target account currency.");
+        TryRule(errors, "Transaction", item.Id, "financial-semantics", () => TransactionSemantics.Resolve(item.Type, item.Amount, item.TargetAmount, item.AdjustmentDirection, item.DebtOperationType));
         if (item.DebtId is not null || item.DebtOperationType is not null)
         {
             ValidateDebtTransaction(item, account, debt, errors);
@@ -154,7 +155,7 @@ public static class BackupValidator
         if (item.Amount <= 0 || item.TransactionDate == default) Add(errors, "Transaction", item.Id, "debt-operation", "A positive amount and date are required.");
         if (item.DebtOperationType is DebtOperationType.ManualCorrectionIncrease or DebtOperationType.ManualCorrectionDecrease && string.IsNullOrWhiteSpace(item.Note)) Add(errors, "Transaction", item.Id, "debt-operation", "A note is required for a manual correction.");
         if (account is not null && !SameCurrency(account.Currency, debt.Currency)) Add(errors, "Transaction", item.Id, "currency-consistency", "Debt and account currencies must match.");
-        var expectedType = account is null ? TransactionType.DebtEntry : item.DebtOperationType == DebtOperationType.ReceivedRepayment ? TransactionType.Income : TransactionType.Expense;
+        var expectedType = TransactionSemantics.GetDebtTransactionType(item.DebtOperationType.Value, account is not null);
         if (item.Type != expectedType) Add(errors, "Transaction", item.Id, "debt-operation", $"Debt operation requires transaction type {expectedType}.");
         if (debt.Direction == DebtDirection.Payable && item.DebtOperationType is DebtOperationType.LoanDisbursement or DebtOperationType.ReceivedRepayment || debt.Direction == DebtDirection.Receivable && item.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment) Add(errors, "Transaction", item.Id, "debt-operation", "Debt operation does not match the debt direction.");
     }
@@ -178,7 +179,7 @@ public static class BackupValidator
             }
             if (debt is not null && account is not null && !SameCurrency(debt.Currency, account.Currency)) Add(errors, "RecurringTransaction", item.Id, "currency-consistency", "Debt and account currencies must match.");
             var expectedOperation = debt?.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment;
-            var expectedType = debt?.Direction == DebtDirection.Payable ? TransactionType.Expense : TransactionType.Income;
+            var expectedType = debt is null ? item.Type : TransactionSemantics.GetDebtTransactionType(expectedOperation, true);
             if (debt is not null && (item.DebtOperationType != expectedOperation || item.Type != expectedType || item.CategoryId is not null || item.AdjustmentDirection is not null)) Add(errors, "RecurringTransaction", item.Id, "debt-operation", "Recurring debt operation does not match the debt direction or contains unsupported fields.");
             TryRule(errors, "RecurringTransaction", item.Id, "recurring-schedule", () => RecurringTransactionRules.ValidateSchedule(entity));
             if (item.Amount <= 0) Add(errors, "RecurringTransaction", item.Id, "recurring-transaction", "Amount must be greater than zero.");
