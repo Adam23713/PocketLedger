@@ -29,6 +29,16 @@ public class TransactionSemanticsTests
         Assert.Equal(TransactionReportingClassification.Excluded, result.ReportingClassification);
     }
 
+    [Fact]
+    public void Resolve_TransferWithoutTargetAmountUsesSourceAmount()
+    {
+        var result = TransactionSemantics.Resolve(TransactionType.Transfer, 100);
+
+        Assert.Equal(-100, result.SourceAccountChange);
+        Assert.Equal(100, result.TargetAccountChange);
+        Assert.Equal(TransactionReportingClassification.Excluded, result.ReportingClassification);
+    }
+
     [Theory]
     [InlineData(DebtOperationType.Payment, true, TransactionType.Expense)]
     [InlineData(DebtOperationType.EarlyRepayment, true, TransactionType.Expense)]
@@ -50,14 +60,25 @@ public class TransactionSemanticsTests
     }
 
     [Theory]
-    [InlineData((TransactionType)999, null, null, null)]
-    [InlineData(TransactionType.Transfer, null, AdjustmentDirection.Increase, null)]
-    [InlineData(TransactionType.Adjustment, null, null, null)]
-    [InlineData(TransactionType.Income, null, null, DebtOperationType.Payment)]
-    [InlineData(TransactionType.DebtEntry, null, null, DebtOperationType.Payment)]
-    public void Resolve_RejectsUnknownOrUnsupportedCombinations(TransactionType type, decimal? targetAmount, AdjustmentDirection? direction, DebtOperationType? debtOperationType)
+    [InlineData((TransactionType)999, false, null, null)]
+    [InlineData(TransactionType.Transfer, false, AdjustmentDirection.Increase, null)]
+    [InlineData(TransactionType.Transfer, false, null, DebtOperationType.Payment)]
+    [InlineData(TransactionType.Adjustment, false, null, null)]
+    [InlineData(TransactionType.Adjustment, true, AdjustmentDirection.Increase, null)]
+    [InlineData(TransactionType.Adjustment, false, AdjustmentDirection.Increase, DebtOperationType.Payment)]
+    [InlineData(TransactionType.Income, true, null, null)]
+    [InlineData(TransactionType.Income, false, AdjustmentDirection.Increase, null)]
+    [InlineData(TransactionType.Income, false, null, DebtOperationType.Payment)]
+    [InlineData(TransactionType.Expense, true, null, null)]
+    [InlineData(TransactionType.Expense, false, AdjustmentDirection.Decrease, null)]
+    [InlineData(TransactionType.Expense, false, null, DebtOperationType.ReceivedRepayment)]
+    [InlineData(TransactionType.DebtEntry, true, null, DebtOperationType.Increase)]
+    [InlineData(TransactionType.DebtEntry, false, AdjustmentDirection.Increase, DebtOperationType.Increase)]
+    [InlineData(TransactionType.DebtEntry, false, null, null)]
+    [InlineData(TransactionType.DebtEntry, false, null, DebtOperationType.Payment)]
+    public void Resolve_RejectsUnknownOrUnsupportedCombinations(TransactionType type, bool hasTargetAmount, AdjustmentDirection? direction, DebtOperationType? debtOperationType)
     {
-        Assert.Throws<BusinessRuleException>(() => TransactionSemantics.Resolve(type, 100, targetAmount, direction, debtOperationType));
+        Assert.Throws<BusinessRuleException>(() => TransactionSemantics.Resolve(type, 100, hasTargetAmount ? 125m : null, direction, debtOperationType));
     }
 
     [Fact]

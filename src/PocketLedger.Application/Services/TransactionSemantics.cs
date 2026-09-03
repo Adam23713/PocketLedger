@@ -19,6 +19,8 @@ public static class TransactionSemantics
     {
         if (!Enum.IsDefined(type)) throw new BusinessRuleException("The transaction type is invalid.");
         if (debtOperationType is not null && !Enum.IsDefined(debtOperationType.Value)) throw new BusinessRuleException("The debt operation type is invalid.");
+        if (type != TransactionType.Transfer && targetAmount is not null) throw new BusinessRuleException("Only transfers can define a target amount.");
+        if (type != TransactionType.Adjustment && adjustmentDirection is not null) throw new BusinessRuleException("Only adjustments can define an adjustment direction.");
 
         return type switch
         {
