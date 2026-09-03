@@ -6,6 +6,6 @@ public sealed class UserPreference
     public string? DisplayName { get; set; }
     public int AvatarId { get; set; } = 1;
     public string DefaultCurrency { get; set; } = "HUF";
-    public string TimeZoneId { get; set; } = "Europe/Budapest";
+    public string TimeZoneId { get; set; } = "UTC";
     public ICollection<UserCurrencyFormat> CurrencyFormats { get; set; } = [];
 }

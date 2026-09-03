@@ -42,7 +42,7 @@ public class DebtFormViewModel : IValidatableObject
     [Required, StringLength(200), Display(Name = "Person or bank name")] public string CounterpartyName { get; set; } = string.Empty;
     [Display(Name = "Original amount"), Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal OriginalAmount { get; set; }
     [Required, StringLength(3, MinimumLength = 3)] public string Currency { get; set; } = "HUF";
-    [Required] public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Required] public DateOnly StartDate { get; set; }
     public DateOnly? DueDate { get; set; }
     [StringLength(500)] public string? Note { get; set; }
     public Guid? AccountId { get; set; }
@@ -105,7 +105,7 @@ public class DebtOperationFormViewModel
     [Required] public DebtOperationType Type { get; set; }
     [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal Amount { get; set; }
     public Guid? AccountId { get; set; }
-    [Required] public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Required] public DateOnly Date { get; set; }
     [StringLength(500)] public string? Note { get; set; }
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
@@ -71,8 +72,9 @@ public class StatisticsServiceTests
     private static StatisticsService CreateService(PocketLedgerDbContext db, Guid ownerId)
     {
         var currentUser = new TestCurrentUser(ownerId);
-        var userContext = new UserContextService(currentUser, db, TimeProvider.System);
-        return new StatisticsService(db, new AccountService(db, TimeProvider.System, userContext));
+        var userDates = new UserDateProvider(TimeProvider.System);
+        var userContext = new UserContextService(currentUser, db, userDates, Options.Create(new UserDateOptions()));
+        return new StatisticsService(db, new AccountService(db, TimeProvider.System, userContext, userDates));
     }
 
     private static PocketLedgerDbContext CreateDb(Guid ownerId)
