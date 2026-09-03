@@ -6,7 +6,7 @@ using PocketLedger.Web.Api;
 
 namespace PocketLedger.Web.Services;
 
-public sealed class WebUserContextService(IPreferencesApiClient preferences, TimeProvider clock) : IUserContextService
+public sealed class WebUserContextService(IPreferencesApiClient preferences, IUserDateProvider userDates) : IUserContextService
 {
     private UserPreference? cachedUser;
 
@@ -20,13 +20,10 @@ public sealed class WebUserContextService(IPreferencesApiClient preferences, Tim
 
     public async Task<DateTimeOffset> ToUtcAsync(DateOnly date, TimeOnly time, CancellationToken cancellationToken = default)
     {
-        var zone = UserTimeZones.Get((await GetUserAsync(cancellationToken)).TimeZoneId);
-        var local = date.ToDateTime(time, DateTimeKind.Unspecified);
-        if (zone.IsInvalidTime(local)) throw new BusinessRuleException("The selected local time does not exist because of a daylight-saving transition.");
-        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(local, zone), TimeSpan.Zero);
+        return userDates.ToUtc(date, time, (await GetUserAsync(cancellationToken)).TimeZoneId);
     }
 
-    public async Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default) => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(clock.GetUtcNow(), UserTimeZones.Get((await GetUserAsync(cancellationToken)).TimeZoneId)).DateTime);
+    public async Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default) => userDates.Today((await GetUserAsync(cancellationToken)).TimeZoneId);
     public async Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default) { await GetUserAsync(cancellationToken); return Format(amount, currency); }
     public string Format(decimal amount, string? currency) => FormatCore(amount, currency, includeMarker: true);
     public string FormatNumber(decimal amount, string? currency) => FormatCore(amount, currency, includeMarker: false);

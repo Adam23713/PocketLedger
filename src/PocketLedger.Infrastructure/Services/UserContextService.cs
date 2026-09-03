@@ -6,7 +6,7 @@ using PocketLedger.Models.Enums;
 
 namespace PocketLedger.Services;
 
-public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbContext dbContext, TimeProvider clock) : IUserContextService
+public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbContext dbContext, IUserDateProvider userDates, Microsoft.Extensions.Options.IOptions<UserDateOptions> dateOptions) : IUserContextService
 {
     private UserPreference? cachedUser;
 
@@ -15,7 +15,7 @@ public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbC
         if (cachedUser is not null) return cachedUser;
         cachedUser = await dbContext.UserPreferences.Include(user => user.CurrencyFormats).SingleOrDefaultAsync(user => user.UserId == currentUser.UserId, cancellationToken);
         if (cachedUser is not null) return cachedUser;
-        cachedUser = new UserPreference { UserId = currentUser.UserId };
+        cachedUser = new UserPreference { UserId = currentUser.UserId, TimeZoneId = userDates.NormalizeTimeZoneId(dateOptions.Value.DefaultTimeZoneId) };
         dbContext.UserPreferences.Add(cachedUser);
         await dbContext.SaveChangesAsync(cancellationToken);
         return cachedUser;
@@ -23,16 +23,12 @@ public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbC
 
     public async Task<DateTimeOffset> ToUtcAsync(DateOnly date, TimeOnly time, CancellationToken cancellationToken = default)
     {
-        var zone = GetTimeZone((await GetUserAsync(cancellationToken)).TimeZoneId);
-        var local = date.ToDateTime(time, DateTimeKind.Unspecified);
-        if (zone.IsInvalidTime(local)) throw new BusinessRuleException("The selected local time does not exist because of a daylight-saving transition.");
-        return new DateTimeOffset(TimeZoneInfo.ConvertTimeToUtc(local, zone), TimeSpan.Zero);
+        return userDates.ToUtc(date, time, (await GetUserAsync(cancellationToken)).TimeZoneId);
     }
 
     public async Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default)
     {
-        var zone = GetTimeZone((await GetUserAsync(cancellationToken)).TimeZoneId);
-        return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(clock.GetUtcNow(), zone).DateTime);
+        return userDates.Today((await GetUserAsync(cancellationToken)).TimeZoneId);
     }
 
     public async Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default)
@@ -88,10 +84,4 @@ public sealed class UserContextService(ICurrentUser currentUser, PocketLedgerDbC
         CurrencyDisplay = CurrencyDisplay.Code, CurrencyPosition = CurrencyPosition.After, UseSpace = true
     };
 
-    public static TimeZoneInfo GetTimeZone(string id)
-    {
-        try { return TimeZoneInfo.FindSystemTimeZoneById(id); }
-        catch (TimeZoneNotFoundException) { throw new BusinessRuleException("The selected time zone is not available."); }
-        catch (InvalidTimeZoneException) { throw new BusinessRuleException("The selected time zone is invalid."); }
-    }
 }

@@ -17,7 +17,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.4")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -272,10 +272,8 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("amount");
 
                     b.Property<DateOnly>("AutomationStartsOn")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasColumnName("automation_starts_on")
-                        .HasDefaultValueSql("(CURRENT_TIMESTAMP AT TIME ZONE 'Europe/Budapest')::date");
+                        .HasColumnName("automation_starts_on");
 
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid")

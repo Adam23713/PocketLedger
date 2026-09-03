@@ -61,6 +61,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddScoped<IUserContextService, WebUserContextService>();
 builder.Services.AddTransient<AccessTokenHandler>();
 builder.Services.AddHttpClient("IdentityToken", client => client.BaseAddress = new Uri(builder.Configuration["Identity:BackchannelBaseUrl"] ?? "https://identity.localhost/"));

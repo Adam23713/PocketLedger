@@ -9,7 +9,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, TimeProvider timeProvider, IUserContextService userContext) : Controller
+public class TransactionsController(ITransactionService transactionService, IAccountService accountService, ICategoryService categoryService, IUserDateProvider userDates, IUserContextService userContext) : Controller
 {
     public async Task<IActionResult> Index(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search, int page = 1, CancellationToken cancellationToken = default)
     {
@@ -84,8 +84,9 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     [HttpGet]
     public async Task<IActionResult> Create(Guid? accountId, CancellationToken cancellationToken)
     {
-        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), UserTimeZones.Get((await userContext.GetUserAsync(cancellationToken)).TimeZoneId));
-        var model = new TransactionFormViewModel { AccountId = accountId, TransactionDate = DateOnly.FromDateTime(now.DateTime), TransactionHour = now.Hour, TransactionMinute = now.Minute };
+        var user = await userContext.GetUserAsync(cancellationToken);
+        var now = userDates.LocalTime(user.TimeZoneId);
+        var model = new TransactionFormViewModel { AccountId = accountId, TransactionDate = userDates.Today(user.TimeZoneId), TransactionHour = now.Hour, TransactionMinute = now.Minute };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }
