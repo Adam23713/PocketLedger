@@ -6,19 +6,20 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService? userContext = null) : IDebtService
+public class DebtService(PocketLedgerDbContext dbContext, IUserContextService? userContext = null) : IDebtService
 {
     public async Task<IReadOnlyList<DebtSummary>> GetAllAsync(CancellationToken cancellationToken)
     {
         var debts = await BaseQuery().ToListAsync(cancellationToken);
-        return debts.Select(ToSummary).OrderBy(item => item.Debt.Status).ThenBy(item => item.NextPayment is null).ThenBy(item => item.NextPayment).ThenBy(item => item.Debt.Name).ToList();
+        var today = await RequireUserContext().TodayAsync(cancellationToken);
+        return debts.Select(debt => ToSummary(debt, today)).OrderBy(item => item.Debt.Status).ThenBy(item => item.NextPayment is null).ThenBy(item => item.NextPayment).ThenBy(item => item.Debt.Name).ToList();
     }
 
     public async Task<DebtDetails?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var debt = await BaseQuery().SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
         if (debt is null) return null;
-        var summary = ToSummary(debt);
+        var summary = ToSummary(debt, await RequireUserContext().TodayAsync(cancellationToken));
         return new DebtDetails(debt, summary.RemainingAmount, debt.Transactions.OrderByDescending(item => item.TransactionDate).ThenByDescending(item => item.TransactionTime).ToList(), summary.AutomaticPayment, summary.NextPayment);
     }
 
@@ -62,7 +63,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
             var scheduleChanged = template.FirstOccurrence != recurringPayment.NextOccurrence || template.LastOccurrence != recurringPayment.LastOccurrence || template.Frequency != recurringPayment.Frequency;
             template.AccountId = recurringPayment.AccountId; template.Amount = recurringPayment.Amount; template.FirstOccurrence = recurringPayment.NextOccurrence;
             template.LastOccurrence = recurringPayment.LastOccurrence; template.Frequency = recurringPayment.Frequency; template.Enabled = recurringPayment.Enabled && existing.Status == DebtStatus.Active;
-            if (scheduleChanged || !wasEnabled && template.Enabled) template.AutomationStartsOn = BudapestDate.Today(timeProvider);
+            if (scheduleChanged || !wasEnabled && template.Enabled) template.AutomationStartsOn = await RequireUserContext().TodayAsync(cancellationToken);
         }
         ApplyAutomaticStatus(existing, remaining);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -186,7 +187,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         var remaining = CalculateRemaining(debt);
         var delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
         if (remaining + delta < 0) throw new BusinessRuleException("The operation amount cannot exceed the remaining debt.");
-        var transaction = new Transaction { Id = Guid.NewGuid(), Type = GetTransactionType(input.Type, account), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
+        var transaction = new Transaction { Id = Guid.NewGuid(), Type = TransactionSemantics.GetDebtTransactionType(input.Type, account is not null), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
         dbContext.Transactions.Add(transaction);
         ApplyAutomaticStatus(debt, remaining + delta);
         if (save) await dbContext.SaveChangesAsync(cancellationToken);
@@ -194,10 +195,10 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
     }
 
     private IQueryable<Debt> BaseQuery() => dbContext.Debts.AsNoTracking().Include(item => item.Account).Include(item => item.Transactions).ThenInclude(item => item.Account).Include(item => item.RecurringTransactions).ThenInclude(item => item.Account);
-    private DebtSummary ToSummary(Debt debt)
+    private static DebtSummary ToSummary(Debt debt, DateOnly today)
     {
         var template = debt.RecurringTransactions.SingleOrDefault();
-        var next = template?.Enabled == true ? RecurringSchedule.GetNextOccurrence(template, BudapestDate.Today(timeProvider)) : null;
+        var next = template?.Enabled == true ? RecurringSchedule.GetNextOccurrence(template, today) : null;
         return new DebtSummary(debt, CalculateRemaining(debt), template, next);
     }
     private async Task PrepareAndValidateAsync(Debt debt, CancellationToken cancellationToken)
@@ -209,7 +210,7 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
     private async Task<RecurringTransaction> CreateTemplateAsync(Debt debt, RecurringPaymentInput input, CancellationToken cancellationToken)
     {
         await ValidateRecurringAsync(debt, input, cancellationToken);
-        return new RecurringTransaction { Id = Guid.NewGuid(), Type = debt.Direction == DebtDirection.Payable ? TransactionType.Expense : TransactionType.Income, AccountId = input.AccountId, Amount = input.Amount, Note = debt.Name, FirstOccurrence = input.NextOccurrence, LastOccurrence = input.LastOccurrence, AutomationStartsOn = BudapestDate.Today(timeProvider), Frequency = input.Frequency, Enabled = input.Enabled, DebtId = debt.Id, DebtOperationType = debt.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment };
+        return new RecurringTransaction { Id = Guid.NewGuid(), Type = debt.Direction == DebtDirection.Payable ? TransactionType.Expense : TransactionType.Income, AccountId = input.AccountId, Amount = input.Amount, Note = debt.Name, FirstOccurrence = input.NextOccurrence, LastOccurrence = input.LastOccurrence, AutomationStartsOn = await RequireUserContext().TodayAsync(cancellationToken), Frequency = input.Frequency, Enabled = input.Enabled, DebtId = debt.Id, DebtOperationType = debt.Direction == DebtDirection.Payable ? DebtOperationType.Payment : DebtOperationType.ReceivedRepayment };
     }
     private async Task ValidateRecurringAsync(Debt debt, RecurringPaymentInput input, CancellationToken cancellationToken)
     {
@@ -226,11 +227,11 @@ public class DebtService(PocketLedgerDbContext dbContext, TimeProvider timeProvi
         debt.Status = DebtStatus.Closed; debt.ClosedAt = DateTimeOffset.UtcNow;
         foreach (var template in debt.RecurringTransactions) template.Enabled = false;
     }
-    private static TransactionType GetTransactionType(DebtOperationType type, Account? account) => account is null ? TransactionType.DebtEntry : type is DebtOperationType.ReceivedRepayment ? TransactionType.Income : TransactionType.Expense;
     private async Task<IReadOnlyDictionary<Guid, decimal>> CalculateBalancesAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken); var transactions = await dbContext.Transactions.AsNoTracking().ToListAsync(cancellationToken);
         return accounts.ToDictionary(account => account.Id, account => BalanceCalculator.Calculate(account.Id, account.InitialBalance, transactions));
     }
     private Task LockDebtAsync(Guid debtId, CancellationToken cancellationToken) => dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({debtId.ToString()}, 0))", cancellationToken);
+    private IUserContextService RequireUserContext() => userContext ?? throw new InvalidOperationException("A request user context is required for user-date calculations.");
 }

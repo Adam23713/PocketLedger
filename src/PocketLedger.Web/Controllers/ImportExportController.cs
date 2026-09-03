@@ -7,7 +7,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Controllers;
 
-public class ImportExportController(IImportExportService importExportService) : Controller
+public class ImportExportController(IImportExportService importExportService, IUserContextService userContext) : Controller
 {
     public IActionResult Index() => View();
 
@@ -15,7 +15,7 @@ public class ImportExportController(IImportExportService importExportService) : 
     public async Task<IActionResult> ExportCsv(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search, CancellationToken cancellationToken)
     {
         var csv = await importExportService.ExportCsvAsync(new TransactionFilter { DateFrom = dateFrom, DateTo = dateTo, Year = year, Month = month, AccountId = accountId, CategoryId = categoryId, Type = type, AmountFrom = amountFrom, AmountTo = amountTo, Search = search }, cancellationToken);
-        return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", $"transactions-{DateTime.Today:yyyyMMdd}.csv");
+        return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", $"transactions-{await userContext.TodayAsync(cancellationToken):yyyyMMdd}.csv");
     }
 
     [HttpGet]

@@ -56,6 +56,8 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.Configure<UserDateOptions>(builder.Configuration.GetSection(UserDateOptions.SectionName));
+builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddDbContext<PocketLedgerDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ApiConnection")));
 builder.Services.AddRecurringTransactionProcessingDataAccess();
 builder.Services.AddScoped<IAccountService, AccountService>();

@@ -48,15 +48,40 @@ public class CalendarServiceTests
             huf => { Assert.Equal("HUF", huf.Currency); Assert.Equal(100, huf.Income); Assert.Equal(0, huf.Expenses); Assert.Equal(100, huf.Balance); });
     }
 
+    [Fact]
+    public async Task DailyTotals_ExcludeValidAccountlessDebtEntries()
+    {
+        await using var db = CreateDb();
+        var date = new DateOnly(2026, 8, 28);
+        db.Transactions.Add(Transaction(TransactionType.DebtEntry, 100, date, debtOperationType: DebtOperationType.ManualCorrectionIncrease));
+        await db.SaveChangesAsync();
+
+        var result = await new CalendarService(db).GetMonthAsync(2026, 8, CancellationToken.None);
+
+        var day = result[date];
+        var total = Assert.Single(day.Totals);
+        Assert.Equal(1, day.TransactionCount);
+        Assert.Equal(0, total.Income);
+        Assert.Equal(0, total.Expenses);
+        Assert.Equal(0, total.Balance);
+    }
+
     private PocketLedgerDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         return new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
     }
 
-    private Transaction Transaction(TransactionType type, decimal amount, DateOnly date, AdjustmentDirection? direction = null, string currency = "HUF") => new()
+    private Transaction Transaction(TransactionType type, decimal amount, DateOnly date, AdjustmentDirection? direction = null, string currency = "HUF", DebtOperationType? debtOperationType = null) => new()
     {
-        Id = Guid.NewGuid(), OwnerId = ownerId, Type = type, Amount = amount, TransactionDate = date, AdjustmentDirection = direction ?? AdjustmentDirection.Increase, SourceCurrency = currency
+        Id = Guid.NewGuid(),
+        OwnerId = ownerId,
+        Type = type,
+        Amount = amount,
+        TransactionDate = date,
+        AdjustmentDirection = direction,
+        SourceCurrency = currency,
+        DebtOperationType = debtOperationType
     };
 
     private sealed class TestCurrentUser(Guid userId) : ICurrentUser

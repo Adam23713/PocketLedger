@@ -25,32 +25,13 @@ public static class BalanceCalculator
             .ToList();
     }
 
-    private static decimal GetSignedAmount(Transaction transaction) => transaction.Type switch
-    {
-        TransactionType.Income => transaction.Amount,
-        TransactionType.Expense => -transaction.Amount,
-        TransactionType.Adjustment when transaction.AdjustmentDirection == AdjustmentDirection.Increase => transaction.Amount,
-        TransactionType.Adjustment when transaction.AdjustmentDirection == AdjustmentDirection.Decrease => -transaction.Amount,
-        _ => 0
-    };
+    private static decimal GetSignedAmount(Transaction transaction) => TransactionSemantics.Resolve(transaction.Type, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.DebtOperationType).SourceAccountChange;
 
     private static decimal GetSignedAmount(Guid accountId, Transaction transaction)
     {
-        if (transaction.Type == TransactionType.Transfer)
-        {
-            if (transaction.AccountId == accountId)
-            {
-                return -transaction.Amount;
-            }
-
-            if (transaction.TargetAccountId == accountId)
-            {
-                return transaction.TargetAmount ?? transaction.Amount;
-            }
-
-            return 0;
-        }
-
-        return transaction.AccountId == accountId ? GetSignedAmount(transaction) : 0;
+        var semantics = TransactionSemantics.Resolve(transaction.Type, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.DebtOperationType);
+        if (transaction.AccountId == accountId) return semantics.SourceAccountChange;
+        if (transaction.TargetAccountId == accountId) return semantics.TargetAccountChange;
+        return 0;
     }
 }
