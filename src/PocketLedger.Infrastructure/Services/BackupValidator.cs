@@ -25,11 +25,12 @@ public static class BackupValidator
         foreach (var account in backup.Accounts)
         {
             TryRule(errors, "Account", account.Id, "account", () => AccountRules.Validate(account.Name, account.Type, account.DisplayOrder));
-            TryRule(errors, "Account", account.Id, "currency", () => AccountRules.NormalizeAndValidateCurrency(account.Currency));
+            ValidateCurrency(errors, "Account", account.Id, "currency", account.Currency);
         }
         foreach (var category in backup.Categories) ValidateCategory(category, categories, errors);
         foreach (var debt in debts) ValidateDebt(debt, accounts, errors);
         foreach (var transaction in backup.Transactions) ValidateTransaction(transaction, accounts, categories, debtLookup, errors);
+        ValidateDebtBalances(debts, backup.Transactions, errors);
         foreach (var recurring in backup.RecurringTransactions) ValidateRecurring(recurring, accounts, categories, debtLookup, errors);
         return errors;
     }
@@ -56,7 +57,7 @@ public static class BackupValidator
 
     private static void ValidateDebt(DebtBackup item, IReadOnlyDictionary<Guid, AccountBackup> accounts, List<string> errors)
     {
-        TryRule(errors, "Debt", item.Id, "currency", () => AccountRules.NormalizeAndValidateCurrency(item.Currency));
+        ValidateCurrency(errors, "Debt", item.Id, "currency", item.Currency);
         var account = Lookup(accounts, item.AccountId, errors, "Debt", item.Id, "account-reference");
         var entity = new Debt
         {
@@ -84,10 +85,10 @@ public static class BackupValidator
         var target = Lookup(accounts, item.TargetAccountId, errors, "Transaction", item.Id, "target-account-reference");
         var category = Lookup(categories, item.CategoryId, errors, "Transaction", item.Id, "category-reference");
         var debt = Lookup(debts, item.DebtId, errors, "Transaction", item.Id, "debt-reference");
-        TryRule(errors, "Transaction", item.Id, "source-currency", () => AccountRules.NormalizeAndValidateCurrency(item.SourceCurrency));
+        ValidateCurrency(errors, "Transaction", item.Id, "source-currency", item.SourceCurrency);
         if (item.TargetCurrency is not null)
         {
-            TryRule(errors, "Transaction", item.Id, "target-currency", () => AccountRules.NormalizeAndValidateCurrency(item.TargetCurrency));
+            ValidateCurrency(errors, "Transaction", item.Id, "target-currency", item.TargetCurrency);
         }
         if (account is not null && !SameCurrency(item.SourceCurrency, account.Currency)) Add(errors, "Transaction", item.Id, "currency-consistency", "Source currency must match the source account currency.");
         if (target is not null && !SameCurrency(item.TargetCurrency, target.Currency)) Add(errors, "Transaction", item.Id, "currency-consistency", "Target currency must match the target account currency.");
@@ -103,6 +104,32 @@ public static class BackupValidator
         if (item.Type == TransactionType.Transfer) TryRule(errors, "Transaction", item.Id, "transfer", () => TransactionRules.ValidateTransfer(entity, sourceEntity, target is null ? null : ToEntity(target)));
         else TryRule(errors, "Transaction", item.Id, "transaction", () => TransactionRules.Validate(entity, sourceEntity, categoryEntity));
         if (item.Type != TransactionType.Transfer && item.TargetCurrency is not null) Add(errors, "Transaction", item.Id, "target-currency", "Target currency is only valid for transfers.");
+    }
+
+    private static void ValidateDebtBalances(IReadOnlyList<DebtBackup> debts, IReadOnlyList<TransactionBackup> transactions, List<string> errors)
+    {
+        foreach (var debt in debts)
+        {
+            var remaining = debt.OriginalAmount;
+            var operations = transactions
+                .Where(item => item.DebtId == debt.Id && item.DebtOperationType is not null && Enum.IsDefined(item.DebtOperationType.Value) && item.Amount > 0)
+                .OrderBy(item => item.TransactionDate)
+                .ThenBy(item => item.TransactionTime)
+                .ThenBy(item => item.OccurredAtUtc)
+                .ThenBy(item => item.Id);
+
+            foreach (var operation in operations)
+            {
+                var nextRemaining = remaining + DebtRules.GetDebtDelta(operation.DebtOperationType!.Value, operation.Amount);
+                if (nextRemaining < 0)
+                {
+                    Add(errors, "Transaction", operation.Id, "debt-balance", "The operation amount cannot exceed the remaining debt at this point in the operation sequence.");
+                    continue;
+                }
+
+                remaining = nextRemaining;
+            }
+        }
     }
 
     private static void ValidateDebtTransaction(TransactionBackup item, AccountBackup? account, DebtBackup? debt, List<string> errors)
@@ -184,6 +211,22 @@ public static class BackupValidator
         try
         {
             action();
+        }
+        catch (BusinessRuleException exception)
+        {
+            Add(errors, recordType, recordId, rule, exception.Message);
+        }
+    }
+
+    private static void ValidateCurrency(List<string> errors, string recordType, Guid recordId, string rule, string? currency)
+    {
+        try
+        {
+            var normalized = AccountRules.NormalizeAndValidateCurrency(currency);
+            if (!string.Equals(currency, normalized, StringComparison.Ordinal))
+            {
+                Add(errors, recordType, recordId, rule, $"Currency must use the canonical code '{normalized}'.");
+            }
         }
         catch (BusinessRuleException exception)
         {

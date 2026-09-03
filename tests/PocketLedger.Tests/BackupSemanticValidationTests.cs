@@ -31,6 +31,24 @@ public class BackupSemanticValidationTests
         AssertRule(BackupValidator.Validate(backup with { Transactions = [transaction with { SourceCurrency = "EUR" }] }), transaction.Id, "currency-consistency");
     }
 
+    [Theory]
+    [InlineData("huf")]
+    [InlineData(" HUF ")]
+    public void NonCanonicalCurrency_IsRejectedBeforeRawValueCanBeRestored(string currency)
+    {
+        var backup = ValidBackup();
+        var account = backup.Accounts[0];
+        var transaction = backup.Transactions[0];
+        var errors = BackupValidator.Validate(backup with
+        {
+            Accounts = [account with { Currency = currency }, .. backup.Accounts.Skip(1)],
+            Transactions = [transaction with { SourceCurrency = currency }]
+        });
+
+        AssertRule(errors, account.Id, "currency");
+        AssertRule(errors, transaction.Id, "source-currency");
+    }
+
     [Fact]
     public void WrongCategoryType_IsRejectedBySharedTransactionRules()
     {
@@ -53,6 +71,31 @@ public class BackupSemanticValidationTests
     {
         var backup = ValidBackup(); var debt = backup.Debts![0]; var transaction = backup.Transactions[0] with { Type = TransactionType.Income, CategoryId = null, DebtId = debt.Id, DebtOperationType = DebtOperationType.Payment };
         AssertRule(BackupValidator.Validate(backup with { Transactions = [transaction] }), transaction.Id, "debt-operation");
+    }
+
+    [Fact]
+    public void DebtPaymentCannotExceedRemainingBalanceAtItsPointInTheSequence()
+    {
+        var backup = ValidBackup();
+        var debt = backup.Debts![0];
+        var account = backup.Accounts[0];
+        var overpayment = DebtOperation(debt.Id, account.Id, DebtOperationType.Payment, 120, new DateOnly(2026, 1, 2));
+        var laterIncrease = DebtOperation(debt.Id, null, DebtOperationType.Increase, 50, new DateOnly(2026, 1, 3));
+
+        AssertRule(BackupValidator.Validate(backup with { Transactions = [laterIncrease, overpayment] }), overpayment.Id, "debt-balance");
+    }
+
+    [Fact]
+    public void MultipleDebtOperations_AreAppliedInDeterministicBusinessOrder()
+    {
+        var backup = ValidBackup();
+        var debt = backup.Debts![0];
+        var account = backup.Accounts[0];
+        var firstPayment = DebtOperation(debt.Id, account.Id, DebtOperationType.Payment, 80, new DateOnly(2026, 1, 2));
+        var increase = DebtOperation(debt.Id, null, DebtOperationType.Increase, 50, new DateOnly(2026, 1, 3));
+        var finalPayment = DebtOperation(debt.Id, account.Id, DebtOperationType.Payment, 70, new DateOnly(2026, 1, 4));
+
+        Assert.Empty(BackupValidator.Validate(backup with { Transactions = [finalPayment, increase, firstPayment] }));
     }
 
     [Fact]
@@ -107,11 +150,25 @@ public class BackupSemanticValidationTests
     }
 
     [Fact]
-    public void ReferenceCannotResolveThroughDataOutsideBackupTenantGraph()
+    public async Task ReferenceCannotResolveThroughAnotherOwnersPersistedData()
     {
-        var backup = ValidBackup(); var otherOwnerAccountId = Guid.NewGuid(); var transaction = backup.Transactions[0] with { AccountId = otherOwnerAccountId };
-        var errors = BackupValidator.Validate(backup with { Transactions = [transaction] });
-        AssertRule(errors, transaction.Id, "source-account-reference");
+        var databaseName = Guid.NewGuid().ToString();
+        var otherOwnerId = Guid.NewGuid();
+        var otherOwnerAccountId = Guid.NewGuid();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(databaseName).Options;
+        await using (var otherOwnerDb = new PocketLedgerDbContext(options, new TestCurrentUser(otherOwnerId)))
+        {
+            otherOwnerDb.Accounts.Add(new Account { Id = otherOwnerAccountId, Name = "Other owner", Type = AccountType.Cash, Currency = "HUF" });
+            await otherOwnerDb.SaveChangesAsync();
+        }
+
+        var backup = ValidBackup();
+        var transaction = backup.Transactions[0] with { AccountId = otherOwnerAccountId };
+        await using var currentOwnerDb = new PocketLedgerDbContext(options, new TestCurrentUser(Guid.NewGuid()));
+        var preview = new ImportExportService(currentOwnerDb, null!).PreviewRestore(BackupJson.Serialize(backup with { Transactions = [transaction] }));
+
+        Assert.False(preview.IsValid);
+        AssertRule(preview.Errors, transaction.Id, "source-account-reference");
     }
 
     [Fact]
@@ -188,6 +245,12 @@ public class BackupSemanticValidationTests
         var recurring = new RecurringTransactionBackup(Guid.NewGuid(), TransactionType.Expense, huf.Id, expense.Id, 10, null, null, new DateOnly(2026, 2, 1), null, RecurringFrequency.Monthly, true);
         var debt = new DebtBackup(Guid.NewGuid(), "Loan", DebtDirection.Payable, DebtType.Bank, "Bank", 100, "HUF", new DateOnly(2026, 1, 1), null, null, DebtStatus.Active, null, huf.Id);
         return new PocketLedgerBackup(2, DateTimeOffset.UtcNow, [huf, eur], [expense], [transaction], [recurring], [debt]);
+    }
+
+    private static TransactionBackup DebtOperation(Guid debtId, Guid? accountId, DebtOperationType operationType, decimal amount, DateOnly date)
+    {
+        var type = accountId is null ? TransactionType.DebtEntry : TransactionType.Expense;
+        return new TransactionBackup(Guid.NewGuid(), type, accountId, null, amount, null, null, date, null, null, DebtId: debtId, DebtOperationType: operationType, SourceCurrency: "HUF");
     }
 
     private static Task CreateSqliteSchemaAsync(PocketLedgerDbContext db)
