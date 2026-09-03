@@ -79,7 +79,7 @@ public class CalendarServiceTests
         Type = type,
         Amount = amount,
         TransactionDate = date,
-        AdjustmentDirection = direction ?? AdjustmentDirection.Increase,
+        AdjustmentDirection = direction,
         SourceCurrency = currency,
         DebtOperationType = debtOperationType
     };
