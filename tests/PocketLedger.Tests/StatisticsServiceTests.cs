@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
@@ -68,11 +69,34 @@ public class StatisticsServiceTests
         Assert.Contains(summary.ExpenseMainCategories, item => item.Name == "Uncategorized" && item.Amount == 100);
     }
 
+    [Fact]
+    public async Task Summary_MapsValidAccountlessDebtEntrySemantics()
+    {
+        var ownerId = Guid.NewGuid();
+        await using var db = CreateDb(ownerId);
+        var date = new DateOnly(2026, 1, 10);
+        db.Transactions.Add(CreateTransaction(ownerId, date, "HUF", TransactionType.DebtEntry, debtOperationType: DebtOperationType.ManualCorrectionIncrease));
+        await db.SaveChangesAsync();
+        var service = CreateService(db, ownerId);
+
+        var summary = await service.GetSummaryAsync(2026, 1, "HUF", CancellationToken.None);
+
+        Assert.Equal(0, summary.Income);
+        Assert.Equal(0, summary.Expenses);
+        Assert.Equal(0, summary.Savings);
+        Assert.Equal(0, summary.Balance);
+        var january = Assert.Single(summary.MonthlyTrend, item => item.Year == 2026 && item.Month == 1);
+        Assert.Equal(0, january.Income);
+        Assert.Equal(0, january.Expenses);
+        Assert.Equal(0, january.Balance);
+    }
+
     private static StatisticsService CreateService(PocketLedgerDbContext db, Guid ownerId)
     {
         var currentUser = new TestCurrentUser(ownerId);
-        var userContext = new UserContextService(currentUser, db, TimeProvider.System);
-        return new StatisticsService(db, new AccountService(db, TimeProvider.System, userContext));
+        var userDates = new UserDateProvider(TimeProvider.System);
+        var userContext = new UserContextService(currentUser, db, userDates, Options.Create(new UserDateOptions()));
+        return new StatisticsService(db, new AccountService(db, TimeProvider.System, userContext, userDates));
     }
 
     private static PocketLedgerDbContext CreateDb(Guid ownerId)
@@ -80,7 +104,7 @@ public class StatisticsServiceTests
         var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         var currentUser = new TestCurrentUser(ownerId);
         var db = new PocketLedgerDbContext(options, currentUser);
-        db.Users.Add(new ApplicationUser { Id = ownerId, UserName = "statistics", DefaultCurrency = "HUF", TimeZoneId = "Europe/Budapest" });
+        db.UserPreferences.Add(new UserPreference { UserId = ownerId, DefaultCurrency = "HUF", TimeZoneId = "Europe/Budapest" });
         db.SaveChanges();
         return db;
     }

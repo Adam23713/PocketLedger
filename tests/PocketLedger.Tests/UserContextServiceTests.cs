@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PocketLedger.Data;
 using PocketLedger.Models;
 using PocketLedger.Models.Entities;
@@ -27,7 +28,7 @@ public class UserContextServiceTests
     {
         var userId = Guid.NewGuid();
         await using var db = CreateDb(userId, "Europe/Budapest", [new UserCurrencyFormat { CurrencyCode = "EUR", DecimalPlaces = 2, DecimalSeparator = ".", ThousandsSeparator = ",", CurrencyDisplay = CurrencyDisplay.Symbol, CurrencyPosition = CurrencyPosition.Before, UseSpace = false }]);
-        var service = new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System);
+        var service = CreateService(userId, db, TimeProvider.System);
 
         Assert.Equal("€1,234.50", await service.FormatMoneyAsync(1234.5m, "EUR"));
         Assert.Equal(new MoneyInputFormat(2, ".", ",", "€", CurrencyPosition.Before, false), service.GetMoneyInputFormat("EUR"));
@@ -38,7 +39,7 @@ public class UserContextServiceTests
     {
         var userId = Guid.NewGuid();
         await using var db = CreateDb(userId, "Europe/Budapest", [new UserCurrencyFormat { CurrencyCode = "USD", DecimalPlaces = 2, DecimalSeparator = ",", ThousandsSeparator = " ", CurrencyDisplay = CurrencyDisplay.Code, CurrencyPosition = CurrencyPosition.After, UseSpace = true }]);
-        var service = new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System);
+        var service = CreateService(userId, db, TimeProvider.System);
 
         Assert.Equal(new MoneyInputFormat(2, ",", " ", "USD", CurrencyPosition.After, true), service.GetMoneyInputFormat("USD"));
     }
@@ -50,7 +51,7 @@ public class UserContextServiceTests
         await using var db = CreateDb(userId, "Pacific/Kiritimati", []);
         var clock = new FixedTimeProvider(new DateTimeOffset(2026, 8, 14, 12, 30, 0, TimeSpan.Zero));
 
-        Assert.Equal(new DateOnly(2026, 8, 15), await new UserContextService(new TestCurrentUser(userId), db, clock).TodayAsync());
+        Assert.Equal(new DateOnly(2026, 8, 15), await CreateService(userId, db, clock).TodayAsync());
     }
 
     [Fact]
@@ -58,7 +59,7 @@ public class UserContextServiceTests
     {
         var userId = Guid.NewGuid();
         await using var db = CreateDb(userId, "Europe/Budapest", []);
-        var service = new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System);
+        var service = CreateService(userId, db, TimeProvider.System);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.ToUtcAsync(new DateOnly(2026, 3, 29), new TimeOnly(2, 30)));
     }
@@ -69,7 +70,7 @@ public class UserContextServiceTests
         var userId = Guid.NewGuid();
         await using var db = CreateDb(userId, "Europe/Budapest", []);
 
-        var result = await new UserContextService(new TestCurrentUser(userId), db, TimeProvider.System).ToUtcAsync(new DateOnly(2026, 1, 15), new TimeOnly(12, 0));
+        var result = await CreateService(userId, db, TimeProvider.System).ToUtcAsync(new DateOnly(2026, 1, 15), new TimeOnly(12, 0));
 
         Assert.Equal(new DateTimeOffset(2026, 1, 15, 11, 0, 0, TimeSpan.Zero), result);
     }
@@ -77,16 +78,18 @@ public class UserContextServiceTests
     [Fact]
     public void GetTimeZone_RejectsUnknownZone()
     {
-        Assert.Throws<BusinessRuleException>(() => UserContextService.GetTimeZone("Not/A-Time-Zone"));
+        Assert.Throws<BusinessRuleException>(() => new UserDateProvider(TimeProvider.System).NormalizeTimeZoneId("Not/A-Time-Zone"));
     }
+
+    private static UserContextService CreateService(Guid userId, PocketLedgerDbContext db, TimeProvider clock) => new(new TestCurrentUser(userId), db, new UserDateProvider(clock), Options.Create(new UserDateOptions()));
 
     private static PocketLedgerDbContext CreateDb(Guid userId, string timeZoneId, IReadOnlyCollection<UserCurrencyFormat> formats)
     {
         var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         var db = new PocketLedgerDbContext(options);
-        var user = new ApplicationUser { Id = userId, UserName = "test", TimeZoneId = timeZoneId };
+        var user = new UserPreference { UserId = userId, TimeZoneId = timeZoneId };
         foreach (var format in formats) { format.UserId = userId; user.CurrencyFormats.Add(format); }
-        db.Users.Add(user);
+        db.UserPreferences.Add(user);
         db.SaveChanges();
         return db;
     }

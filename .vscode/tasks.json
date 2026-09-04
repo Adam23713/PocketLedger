@@ -7,9 +7,120 @@
             "command": "dotnet",
             "args": [
                 "build",
-                "${workspaceFolder}/src/PocketLedger/PocketLedger.csproj"
+                "${workspaceFolder}/PocketLedger.slnx",
+                "--maxcpucount:1"
             ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "start Podman socket",
+            "type": "process",
+            "command": "systemctl",
+            "args": [
+                "--user",
+                "start",
+                "podman.socket"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "start PocketLedger development databases",
+            "type": "process",
+            "command": "docker",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "start Podman socket"
+            ],
+            "args": [
+                "compose",
+                "--project-name",
+                "pocketledger-dev",
+                "--env-file",
+                "${workspaceFolder}/.env.development",
+                "-f",
+                "${workspaceFolder}/compose.yaml",
+                "-f",
+                "${workspaceFolder}/compose.development.yaml",
+                "up",
+                "-d",
+                "web-database",
+                "api-database",
+                "identity-database"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "prepare PocketLedger development",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "start PocketLedger development databases",
+                "build PocketLedger"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "wait for PocketLedger Identity",
+            "type": "process",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "for attempt in {1..60}; do if curl --silent --fail http://localhost:5052/.well-known/openid-configuration >/dev/null; then exit 0; fi; sleep 1; done; echo 'PocketLedger Identity did not become ready on http://localhost:5052 within 60 seconds.' >&2; exit 1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "prepare PocketLedger Web development",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "prepare PocketLedger development",
+                "wait for PocketLedger Identity"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "bootstrap PocketLedger development identity",
+            "type": "process",
+            "command": "dotnet",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "prepare PocketLedger development"
+            ],
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/src/PocketLedger.Identity/PocketLedger.Identity.csproj",
+                "--no-build",
+                "--no-launch-profile",
+                "--",
+                "bootstrap-identity"
+            ],
+            "options": {
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development",
+                    "ConnectionStrings__IdentityConnection": "Host=localhost;Port=5435;Database=pocketledger_identity;Username=pocketledger;Password=pocketledger",
+                    "POCKETLEDGER_INITIAL_USERNAME": "${input:identityUsername}",
+                    "POCKETLEDGER_INITIAL_PASSWORD": "${input:identityPassword}"
+                }
+            },
             "problemMatcher": "$msCompile"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "identityUsername",
+            "type": "promptString",
+            "description": "Initial PocketLedger username",
+            "default": "admin"
+        },
+        {
+            "id": "identityPassword",
+            "type": "promptString",
+            "description": "Initial PocketLedger password",
+            "password": true
         }
     ]
 }
