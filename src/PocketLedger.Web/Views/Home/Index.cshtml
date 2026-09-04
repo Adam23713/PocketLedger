@@ -1,0 +1,91 @@
+@model PocketLedger.Models.ViewModels.Home.HomeViewModel
+@using PocketLedger.Models.Enums
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<script>
+    if (localStorage.getItem("pocketledger-dashboard-amounts-hidden") === "true") document.documentElement.dataset.dashboardAmountsHidden = "true";
+</script>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <h1 class="mb-1">Dashboard</h1>
+            <button class="dashboard-privacy-button" id="dashboard-privacy-button" type="button" aria-label="Hide dashboard amounts" aria-pressed="false" title="Hide dashboard amounts">
+                <svg class="privacy-visible-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.75" /></svg>
+                <svg class="privacy-hidden-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+            </button>
+        </div>
+        <p class="text-muted mb-0">Total main balance: @foreach (var total in Model.MainBalances) { <strong class="me-2">@total.Currency <span data-private-amount>@MoneyFormatter.FormatNumber(total.Amount, total.Currency)</span></strong> }</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" asp-controller="Accounts" asp-action="Create">New account</a>
+        <a class="btn btn-primary" asp-controller="Transactions" asp-action="Create">New transaction</a>
+    </div>
+</div>
+@foreach (var warning in Model.DebtFundingWarnings)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span>, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span>.</span></div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Total balance</small>@foreach (var total in Model.MainBalances) { <div class="h5 mb-0">@total.Currency <span data-private-amount>@MoneyFormatter.FormatNumber(total.Amount, total.Currency)</span></div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Net worth</small>@foreach (var total in Model.NetWorthBalances) { <div class="h5 mb-0"><span data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</span></div> }</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card h-100"><div class="card-body"><small class="text-muted">Accounts</small><div class="h4 mb-0">@Model.AccountCount</div></div></div></div>
+    <div class="col-12 col-lg-4"><div class="card h-100"><div class="card-body"><small class="text-muted">This month</small>@foreach (var total in Model.MonthlyTotals) { <div><span class="text-success">+<span data-private-amount>@MoneyFormatter.Format(total.Income, total.Currency)</span></span> · <span class="text-danger">−<span data-private-amount>@MoneyFormatter.Format(total.Expenses, total.Currency)</span></span> · <span data-private-amount>@MoneyFormatter.Format(total.Change, total.Currency)</span></div> }</div></div></div>
+</div>
+
+<h2 class="h4">Account balances</h2>
+<div class="row g-3 mb-5">
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="col"><div class="alert alert-info">No accounts yet. Create your first account to get started.</div></div>
+    }
+    @foreach (var account in Model.Accounts)
+    {
+        <div class="col-12 col-md-6 col-xl-4">
+            <a class="card account-card h-100 text-decoration-none text-body" style="background-color: @account.Color" asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <img class="account-icon" src="@account.IconPath" alt="@account.IconAlt" />
+                            <h2 class="h5 mb-0">@account.Name</h2>
+                        </div>
+                        <span class="badge text-bg-light">@account.Type</span>
+                    </div>
+                    <div class="display-6 fs-3"><span data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</span></div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h4 mb-0">Latest transactions</h2>
+    <a asp-controller="Transactions" asp-action="Index">View all</a>
+</div>
+@if (Model.RecentTransactions.Count == 0)
+{
+    <p class="text-muted">No transactions yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Category</th><th class="text-end">Amount</th></tr></thead>
+            <tbody>
+            @foreach (var transaction in Model.RecentTransactions)
+            {
+                var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer || transaction.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
+                <tr>
+                    <td><a asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">@transaction.TransactionDate.ToString("yyyy-MM-dd")</a></td>
+                    <td>@transaction.Type</td>
+                    <td>@(transaction.AccountName ?? "No account movement")</td>
+                    <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
+                    <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

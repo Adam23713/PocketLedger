@@ -1,0 +1,28 @@
+using PocketLedger.Contracts;
+using PocketLedger.Models.Entities;
+using PocketLedger.Services;
+using PocketLedger.Services.Interfaces;
+
+namespace PocketLedger.Api;
+
+internal static class ApiContractMapper
+{
+    public static CurrencyBalanceDto ToDto(this CurrencyBalance value) => new(value.Currency, value.Amount);
+    public static AccountDto ToDto(this Account value) => new(value.Id, value.Name, value.Type, value.Currency, value.InitialBalance, value.Icon, value.Color, value.DisplayOrder, value.IncludeInMainBalance, value.IncludeInNetWorth, value.IncludeInStatistics);
+    public static Account ToEntity(this AccountDto value) => new() { Id = value.Id, Name = value.Name, Type = value.Type, Currency = value.Currency, InitialBalance = value.InitialBalance, Icon = value.Icon, Color = value.Color, DisplayOrder = value.DisplayOrder, IncludeInMainBalance = value.IncludeInMainBalance, IncludeInNetWorth = value.IncludeInNetWorth, IncludeInStatistics = value.IncludeInStatistics };
+    public static CategoryDto ToDto(this Category value) => new(value.Id, value.Name, value.Type, value.Icon, value.ParentCategoryId, value.ParentCategory?.ToShallowDto(), value.Subcategories.Select(ToShallowDto).ToArray(), value.DisplayOrder);
+    private static CategoryDto ToShallowDto(this Category value) => new(value.Id, value.Name, value.Type, value.Icon, value.ParentCategoryId, null, [], value.DisplayOrder);
+    public static Category ToEntity(this CategoryDto value) => new() { Id = value.Id, Name = value.Name, Type = value.Type, Icon = value.Icon, ParentCategoryId = value.ParentCategoryId, DisplayOrder = value.DisplayOrder };
+    public static DebtDto ToDto(this Debt value) => new(value.Id, value.Name, value.Icon, value.Direction, value.Type, value.CounterpartyName, value.OriginalAmount, value.Currency, value.StartDate, value.DueDate, value.Note, value.Status, value.ClosedAt, value.AccountId, value.Account?.ToDto());
+    public static Debt ToEntity(this DebtDto value) => new() { Id = value.Id, Name = value.Name, Icon = value.Icon, Direction = value.Direction, Type = value.Type, CounterpartyName = value.CounterpartyName, OriginalAmount = value.OriginalAmount, Currency = value.Currency, StartDate = value.StartDate, DueDate = value.DueDate, Note = value.Note, Status = value.Status, ClosedAt = value.ClosedAt, AccountId = value.AccountId };
+    public static RecurringTransactionDto ToDto(this RecurringTransaction value) => new(value.Id, value.Type, value.AccountId, value.Account?.ToDto(), value.CategoryId, value.Category?.ToDto(), value.Amount, value.AdjustmentDirection, value.Note, value.FirstOccurrence, value.LastOccurrence, value.AutomationStartsOn, value.Frequency, value.Enabled, value.DebtId, value.Debt?.ToDto(), value.DebtOperationType);
+    public static RecurringTransaction ToEntity(this RecurringTransactionDto value) => new() { Id = value.Id, Type = value.Type, AccountId = value.AccountId, CategoryId = value.CategoryId, Amount = value.Amount, AdjustmentDirection = value.AdjustmentDirection, Note = value.Note, FirstOccurrence = value.FirstOccurrence, LastOccurrence = value.LastOccurrence, AutomationStartsOn = value.AutomationStartsOn, Frequency = value.Frequency, Enabled = value.Enabled, DebtId = value.DebtId, DebtOperationType = value.DebtOperationType };
+    public static TransactionDto ToDto(this Transaction value) => new(value.Id, value.Type, value.AccountId, value.Account?.ToDto(), value.TargetAccountId, value.TargetAccount?.ToDto(), value.Amount, value.TargetAmount, value.ExchangeRate, value.SourceCurrency, value.TargetCurrency, value.AdjustmentDirection, value.TransactionDate, value.TransactionTime, value.OccurredAtUtc, value.CategoryId, value.Category?.ToDto(), value.Note, value.DebtId, value.Debt?.ToDto(), value.DebtOperationType);
+    public static TransactionCreateInput ToInput(this TransactionCreateRequest value) => new(value.Type, value.AccountId, value.TargetAccountId, value.Amount, value.TargetAmount, value.ExchangeRate, value.AdjustmentDirection, value.TransactionDate, value.TransactionTime, value.CategoryId, value.Note);
+    public static TransactionUpdateInput ToInput(this TransactionUpdateRequest value) => new(value.Type, value.AccountId, value.TargetAccountId, value.Amount, value.TargetAmount, value.ExchangeRate, value.AdjustmentDirection, value.TransactionDate, value.TransactionTime, value.CategoryId, value.Note);
+    public static DebtSummaryResponse ToResponse(this DebtSummary value) => new(value.Debt.ToDto(), value.RemainingAmount, value.AutomaticPayment?.ToDto(), value.NextPayment);
+    public static DebtDetailsResponse ToResponse(this DebtDetails value) => new(value.Debt.ToDto(), value.RemainingAmount, value.Transactions.Select(ToDto).ToArray(), value.AutomaticPayment?.ToDto(), value.NextPayment);
+    public static PagedResponse<TransactionDto> ToResponse(this PagedResult<Transaction> value) => new(value.Items.Select(ToDto).ToArray(), value.TotalCount, value.Page, value.PageSize);
+    public static UserCurrencyFormatDto ToDto(this UserCurrencyFormat value) => new(value.CurrencyCode, value.DecimalPlaces, value.DecimalSeparator, value.ThousandsSeparator, value.CurrencyDisplay, value.CurrencyPosition, value.UseSpace);
+    public static UserCurrencyFormat ToEntity(this UserCurrencyFormatDto value) => new() { CurrencyCode = value.CurrencyCode, DecimalPlaces = value.DecimalPlaces, DecimalSeparator = value.DecimalSeparator, ThousandsSeparator = value.ThousandsSeparator, CurrencyDisplay = value.CurrencyDisplay, CurrencyPosition = value.CurrencyPosition, UseSpace = value.UseSpace };
+}

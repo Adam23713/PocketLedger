@@ -1,0 +1,24 @@
+services:
+  web-database:
+    environment:
+      POSTGRES_DB: pocketledger_web
+      POSTGRES_USER: pocketledger
+      POSTGRES_PASSWORD: pocketledger
+    ports:
+      - "127.0.0.1:5433:5432"
+
+  api-database:
+    environment:
+      POSTGRES_DB: pocketledger_api
+      POSTGRES_USER: pocketledger
+      POSTGRES_PASSWORD: pocketledger
+    ports:
+      - "127.0.0.1:5434:5432"
+
+  identity-database:
+    environment:
+      POSTGRES_DB: pocketledger_identity
+      POSTGRES_USER: pocketledger
+      POSTGRES_PASSWORD: pocketledger
+    ports:
+      - "127.0.0.1:5435:5432"

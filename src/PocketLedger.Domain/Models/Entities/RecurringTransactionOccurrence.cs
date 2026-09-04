@@ -1,0 +1,12 @@
+namespace PocketLedger.Models.Entities;
+
+public class RecurringTransactionOccurrence
+{
+    public Guid Id { get; set; }
+    public Guid OwnerId { get; set; }
+    public Guid RecurringTransactionId { get; set; }
+    public RecurringTransaction RecurringTransaction { get; set; } = null!;
+    public DateOnly OccurrenceDate { get; set; }
+    public Guid? TransactionId { get; set; }
+    public Transaction? Transaction { get; set; }
+}

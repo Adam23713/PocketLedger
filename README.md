@@ -1,261 +1,129 @@
 # PocketLedger
 
-PocketLedger is a self-hosted personal finance manager built with ASP.NET Core MVC and PostgreSQL. It keeps accounts, categorized transactions, recurring entries, loans and debts, calendar views, statistics, and backups in one private installation.
+PocketLedger is a self-hosted personal finance manager built with ASP.NET Core and PostgreSQL. It provides accounts, categorized transactions, recurring entries, loans and debts, calendar views, statistics, CSV import/export, and JSON backup/restore.
 
-> PocketLedger is intended for personal use and small trusted deployments. It is not accounting, tax, or financial advice software.
+## Architecture
 
-## Features
+PocketLedger runs as three independently built and deployed server processes:
 
-- Multiple cash, bank, savings, credit-card, and custom accounts
-- Income, expense, transfer, and balance-adjustment tracking
-- Hierarchical income and expense categories
-- Multi-currency accounts and transfers with exchange rates
-- Dashboard with an optional privacy mask for financial amounts
-- Calendar and monthly statistics grouped by currency
-- Recurring transaction templates with automatic occurrence processing
-- Loan and debt tracking with repayment history and optional automatic payments
-- CSV transaction import and export
-- Full JSON backup and restore
-- Local user accounts with mandatory TOTP two-factor authentication
-- Per-user data isolation and configurable user limit
-- Profile, avatar, time-zone, and per-currency display settings
-- Authentication rate limiting and a per-user security audit log
-- Four selectable appearance themes
-- Docker Compose deployment with PostgreSQL and Caddy
+- **PocketLedger.Web** is the server-side Razor MVC application and browser-facing BFF. The browser receives only an encrypted session cookie. OIDC access and refresh tokens are protected and stored in the Web database.
+- **PocketLedger.Api** owns financial data and exposes the first-party client API below `/api/v1`. It accepts bearer access tokens issued by PocketLedger.Identity. The recurring transaction worker runs here; only one API instance may run at a time.
+- **PocketLedger.Identity** owns users, credentials, TOTP configuration, recovery codes, security audit events, and the OpenIddict authorization server. Public self-registration is intentionally disabled; accounts are bootstrapped or managed administratively.
 
-## Basic workflow
+Each server owns a separate PostgreSQL database. The Web process never connects to the API or Identity database, and the API process never connects to the Web or Identity database.
 
-1. Create accounts for the places where you keep money, such as a current account, savings account, credit card, or cash wallet.
-2. Create income and expense categories. Categories may contain one level of subcategories.
-3. Record income, expenses, transfers, and balance adjustments from the **Transactions** page.
-4. Use **Recurring** for repeating income, expenses, adjustments, or automatic loan payments. Due occurrences are created automatically.
-5. Track money you owe or expect to receive under **Loans / Debts**, including disbursements, repayments, corrections, and linked account movements.
-6. Review scheduled and completed activity in **Calendar**, and explore monthly totals and category breakdowns in **Statistics**.
-7. Open **Settings** to choose a display name, avatar, default currency, time zone, and number formatting for each supported currency.
-8. Use **Import / Export** to import transaction CSV files, export filtered transactions, or create a complete JSON backup.
-
-PocketLedger currently supports `HUF`, `EUR`, and `USD`. Transfers can connect accounts that use the same or different currencies. Same-currency transfers use a 1:1 exchange rate; for different currencies, enter the exchange rate and PocketLedger calculates the target amount using the target currency's configured decimal precision.
-
-The eye button beside the **Dashboard** heading masks financial amounts when the screen is visible to other people. The choice is stored in the browser and remains active after reloading the page. This is a visual privacy aid, not an access-control boundary: authorized users and browser developer tools can still access the values.
-
-## User accounts
-
-PocketLedger allows one registered user by default. Once the configured limit is reached, public registration is no longer available. Financial records are isolated by user, so increasing the limit does not give users access to each other's accounts or transactions.
-
-For a Docker Compose installation, change this value in `.env` before starting or recreating the application container:
-
-```dotenv
-POCKETLEDGER_MAXIMUM_USER_COUNT=5
-```
-
-Then apply the updated configuration:
-
-```bash
-docker compose up -d app
-```
-
-For local development, set the same environment variable before starting PocketLedger:
-
-```bash
-export POCKETLEDGER_MAXIMUM_USER_COUNT=5
-dotnet run --project src/PocketLedger
-```
-
-The default can also be changed in `AccountManagement:MaximumUserCount` inside `src/PocketLedger/appsettings.json`. Environment variables are recommended for deployments because they keep environment-specific settings out of source control. The accepted range is 1–100 users. Increase the limit only when every person allowed to register is trusted to use the installation.
-
-## Try the demo data
-
-A fictional dataset is included at [`examples/pocketledger-demo.json`](examples/pocketledger-demo.json). It contains sample accounts, categories, transactions, a transfer, a balance adjustment, and recurring entries. It contains no real personal or financial information.
-
-To load it:
-
-1. Start PocketLedger and sign in.
-2. Open **Import / Export**.
-3. Choose **Restore backup**.
-4. Select `examples/pocketledger-demo.json`.
-5. Review the preview, confirm the replacement, and restore it.
-
-> Restoring a JSON backup replaces all PocketLedger finance data owned by the signed-in user. Export a backup first if the current data matters.
-
-## Run with Docker Compose
-
-### Requirements
-
-- Docker Engine with Docker Compose v2
-- An authenticator app that supports TOTP
-
-### 1. Configure the deployment
-
-Copy the example environment file:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and replace every placeholder. Use long, unique random values for both `POCKETLEDGER_INITIAL_PASSWORD` and `POSTGRES_PASSWORD`. The initial application password must be at least 14 characters long and contain uppercase and lowercase letters, a digit, a non-alphanumeric character, and at least eight unique characters.
-
-PocketLedger-specific Docker and bootstrap settings use the `POCKETLEDGER_*` variable prefix.
-
-Create the Caddy configuration:
-
-```bash
-cp Caddyfile.example Caddyfile
-```
-
-Replace `<host-name>` in `Caddyfile` with the DNS name that points to the server. Caddy terminates HTTP/HTTPS traffic and forwards requests to the application container on port `5050`.
-
-### 2. Create the database and initial user
-
-Start PostgreSQL:
-
-```bash
-docker compose up -d database
-```
-
-Apply the database migrations and create the initial user:
-
-```bash
-docker compose run --rm app bootstrap-identity
-```
-
-### 3. Start PocketLedger
-
-```bash
-docker compose up -d
-```
-
-Open the host name configured in `Caddyfile` and sign in with the initial username and password. PocketLedger will immediately require TOTP setup and display one-time recovery codes. Store those codes somewhere safe before continuing.
-
-Useful container commands:
-
-```bash
-docker compose logs -f app
-docker compose ps
-docker compose down
-```
-
-`docker compose down` preserves the PostgreSQL named volume. Adding `--volumes` deletes the database volume and all application data.
-
-## Build and run locally
-
-### Requirements
-
-- .NET 10 SDK
-- PostgreSQL 17 or another PostgreSQL version supported by the configured EF Core provider
-- An authenticator app that supports TOTP
-
-### 1. Prepare PostgreSQL
-
-Create a PostgreSQL database and user. The default development configuration expects:
+Supporting projects:
 
 ```text
-Host=localhost;Port=5432;Database=moneymanager;Username=moneymanager;Password=moneymanager
+src/PocketLedger.Domain/          Finance entities and value definitions
+src/PocketLedger.Application/     Application interfaces and shared business rules
+src/PocketLedger.Contracts/       API request and response contracts
+src/PocketLedger.Infrastructure/  EF Core finance persistence and service implementations
+src/PocketLedger.Web/             Razor MVC / BFF host
+src/PocketLedger.Api/             Versioned finance API host
+src/PocketLedger.Identity/        Identity and OpenIddict host
 ```
 
-For anything other than an isolated local development machine, override it instead of using the development password:
+## URL topology
 
-```bash
-export ConnectionStrings__DefaultConnection='Host=localhost;Port=5432;Database=moneymanager;Username=moneymanager;Password=replace-with-a-strong-password'
+The recommended public topology is three subdomains behind Cloudflare and Caddy:
+
+```text
+https://ledger.example.com           Web/BFF
+https://api.ledger.example.com       API
+https://identity.ledger.example.com  Identity/OIDC
 ```
 
-### 2. Restore tools, migrate, and build
+The browser uses the Web/BFF for finance operations. The public API hostname remains available for future first-party clients. Caddy is the only published entry point in the supplied Compose topology; the application containers trust forwarded headers because they are reachable only on the private Compose network.
+
+## Docker Compose deployment
+
+Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflare, and an authenticator app supporting TOTP.
+
+1. Copy and edit the environment and Caddy templates:
+
+   ```bash
+   cp .env.example .env
+   cp Caddyfile.example Caddyfile
+   ```
+
+2. Set all three domain names and replace every secret. Generate the shared signing key from at least 32 random bytes, Base64 encoded. For example:
+
+   ```bash
+   openssl rand -base64 64
+   ```
+
+3. Build the images and initialize the Identity database and first user:
+
+   ```bash
+   docker compose build
+   docker compose up -d identity-database
+   docker compose run --rm identity bootstrap-identity
+   ```
+
+4. Start the complete deployment:
+
+   ```bash
+   docker compose up -d
+   ```
+
+On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as JSON can then be restored from **Import / Export**.
+
+The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
+
+## Local development
+
+The default settings expect three local PostgreSQL databases:
+
+```text
+pocketledger_web
+pocketledger_api
+pocketledger_identity
+```
+
+Restore tools, apply each initial migration, and build:
 
 ```bash
 dotnet tool restore
-dotnet restore tests/PocketLedger.Tests/PocketLedger.Tests.csproj
-dotnet tool run dotnet-ef database update --project src/PocketLedger --startup-project src/PocketLedger
-dotnet build PocketLedger.slnx -c Release --no-restore
+dotnet tool run dotnet-ef database update --project src/PocketLedger.Infrastructure --startup-project src/PocketLedger.Api --context PocketLedgerDbContext
+dotnet tool run dotnet-ef database update --project src/PocketLedger.Identity --startup-project src/PocketLedger.Identity --context IdentityDbContext
+dotnet tool run dotnet-ef database update --project src/PocketLedger.Web --startup-project src/PocketLedger.Web --context WebDbContext
+dotnet build PocketLedger.slnx
 ```
 
-### 3. Create an initial user
-
-Set the bootstrap credentials in the current shell:
+Bootstrap the first identity:
 
 ```bash
 export POCKETLEDGER_INITIAL_USERNAME='demo-admin'
 export POCKETLEDGER_INITIAL_PASSWORD='replace-with-a-strong-password'
-dotnet run --project src/PocketLedger -- bootstrap-identity
+dotnet run --project src/PocketLedger.Identity -- bootstrap-identity
 ```
 
-Alternatively, omit the bootstrap command and register the first user from the web interface. Registration becomes unavailable when `POCKETLEDGER_MAXIMUM_USER_COUNT` is reached; its default value is `1`.
-
-### 4. Run the application
+Run the three hosts in separate terminals:
 
 ```bash
-dotnet run --project src/PocketLedger
+dotnet run --project src/PocketLedger.Identity
+dotnet run --project src/PocketLedger.Api
+dotnet run --project src/PocketLedger.Web
 ```
 
-Then open the URL printed by ASP.NET Core, normally `http://localhost:5050`.
+Development uses one checked-in signing key for interoperability. It is not a production secret. Production must override `OpenIddict__SigningKey` and `Authentication__SigningKey` with the same private Base64 value.
 
-## Create a release build
+## API and backups
 
-Publish a framework-dependent release:
+All finance endpoints start with `/api/v1`. OpenAPI metadata is served by the API host at `/openapi/v1.json`. The current API is designed for PocketLedger-owned clients; compatibility is versioned at the URL boundary, while generated clients are intentionally deferred.
+
+JSON backups contain the complete signed-in user's finance dataset but no passwords, TOTP secrets, recovery codes, authentication audit events, or BFF tokens. A fictional importable dataset is available at [`examples/pocketledger-demo.json`](examples/pocketledger-demo.json).
+
+## Validation
+
+Build all projects and run the existing test suite with:
 
 ```bash
-dotnet publish src/PocketLedger/PocketLedger.csproj -c Release -o ./artifacts/publish /p:UseAppHost=false
-```
-
-Run the published application with a production connection string and environment:
-
-```bash
-export ASPNETCORE_ENVIRONMENT=Production
-export ConnectionStrings__DefaultConnection='Host=localhost;Port=5432;Database=moneymanager;Username=moneymanager;Password=replace-with-a-strong-password'
-dotnet artifacts/publish/PocketLedger.dll
-```
-
-Database migrations are applied automatically only when `Database__ApplyMigrationsOnStartup=true`. Otherwise run `dotnet-ef database update` as a separate deployment step.
-
-## Build a container image manually
-
-```bash
-docker build -t pocketledger:local .
-```
-
-The image listens on port `5050` and requires a reachable PostgreSQL database. Docker Compose is the recommended local container workflow because it supplies the database, connection string, persistent volume, and health check.
-
-## Backup and import behavior
-
-- **CSV export/import** moves income and expense transactions. Imported rows must reference accounts and categories that already exist.
-- **JSON backup/restore** moves accounts, categories, loans and debts, all transaction types, transfer exchange-rate data, transaction times, and recurring transaction templates.
-- JSON backups do not contain account passwords, TOTP secrets, recovery codes, or authentication audit events.
-- JSON backups contain the complete financial dataset, including account names, balances, transaction amounts, dates, categories, and notes. Store and share backup files securely.
-
-## Configuration reference
-
-| Setting | Purpose | Default |
-| --- | --- | --- |
-| `POSTGRES_DB` | PostgreSQL database name used by Docker Compose | `moneymanager` |
-| `POSTGRES_USER` | PostgreSQL user used by Docker Compose | `moneymanager` |
-| `POSTGRES_PASSWORD` | PostgreSQL password used by Docker Compose | Insecure fallback; always override |
-| `POCKETLEDGER_INITIAL_USERNAME` | Username consumed by `bootstrap-identity` | None |
-| `POCKETLEDGER_INITIAL_PASSWORD` | Password consumed by `bootstrap-identity` | None |
-| `POCKETLEDGER_MAXIMUM_USER_COUNT` | Maximum number of local application users | `1` |
-| `ConnectionStrings__DefaultConnection` | Application connection string | Development value only |
-| `Database__ApplyMigrationsOnStartup` | Apply EF Core migrations when the process starts | `false` (`true` in Compose) |
-| `HttpsRedirection__Enabled` | Enable application-level HTTPS redirection in production | `true` (`false` in Compose) |
-| `ForwardedHeaders__KnownProxies__0` | First trusted reverse-proxy IP; add further numeric entries as needed | None |
-
-## Project structure
-
-```text
-src/PocketLedger/           ASP.NET Core MVC application
-tests/PocketLedger.Tests/   Automated tests
-examples/                   Fictional importable demo data
-compose.yaml                Application, PostgreSQL, and Caddy services
-Dockerfile                  Multi-stage production image
-Caddyfile.example           Reverse-proxy configuration template
-```
-
-## Development
-
-The automated suite contains business-rule unit tests, EF Core integration tests for user isolation and settings, and HTTP smoke tests for public and protected routes. Run it with:
-
-```bash
+dotnet build PocketLedger.slnx
 dotnet test PocketLedger.slnx
 ```
 
-The .NET namespaces, assembly name, configuration keys, executable, solution, and project directories use the PocketLedger name. The existing PostgreSQL database and user defaults remain `moneymanager` so current Docker volumes continue to work without moving or recreating financial data.
-
 ## License
 
-PocketLedger is available under the [MIT License](LICENSE).
+PocketLedger is free and open-source software licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).

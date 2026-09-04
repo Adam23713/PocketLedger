@@ -1,0 +1,3 @@
+@model PocketLedger.Models.ViewModels.Account.RecoveryCodesViewModel
+@{ ViewData["Title"] = "Recovery codes"; }
+<h1>Recovery codes</h1><div class="alert alert-warning">Save these single-use codes now. They will not be shown again.</div><ul>@foreach (var code in Model.Codes) { <li><code>@code</code></li> }</ul><form asp-action="RecoveryCodes" method="post"><input asp-for="ReturnUrl" type="hidden" /><div><input asp-for="Confirmed" /> <label asp-for="Confirmed">I saved the recovery codes</label></div><span asp-validation-for="Confirmed" class="text-danger"></span><button class="btn btn-primary mt-3">Continue</button></form>

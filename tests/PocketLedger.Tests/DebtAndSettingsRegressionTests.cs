@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using PocketLedger.Data;
 using PocketLedger.Models;
 using PocketLedger.Models.Entities;
@@ -54,10 +55,9 @@ public class DebtAndSettingsRegressionTests
         var userId = Guid.NewGuid();
         await using (var db = new PocketLedgerDbContext(options))
         {
-            db.Users.Add(new ApplicationUser
+            db.UserPreferences.Add(new UserPreference
             {
-                Id = userId,
-                UserName = "ada",
+                UserId = userId,
                 DisplayName = "Ada Lovelace",
                 CurrencyFormats = [new UserCurrencyFormat { UserId = userId, CurrencyCode = "HUF", DecimalPlaces = 0, DecimalSeparator = ",", ThousandsSeparator = " " }]
             });
@@ -65,7 +65,7 @@ public class DebtAndSettingsRegressionTests
         }
 
         await using var verify = new PocketLedgerDbContext(options);
-        var saved = await verify.Users.Include(user => user.CurrencyFormats).SingleAsync(user => user.Id == userId);
+        var saved = await verify.UserPreferences.Include(user => user.CurrencyFormats).SingleAsync(user => user.UserId == userId);
         Assert.Equal("Ada Lovelace", saved.DisplayName);
         Assert.Equal(" ", Assert.Single(saved.CurrencyFormats).ThousandsSeparator);
     }
@@ -90,7 +90,7 @@ public class DebtAndSettingsRegressionTests
             FirstOccurrence = new DateOnly(2026, 9, 1), Frequency = RecurringFrequency.Monthly, Enabled = true, DebtOperationType = DebtOperationType.Payment
         });
         await db.SaveChangesAsync();
-        var service = new DebtService(db, TimeProvider.System);
+        var service = new DebtService(db, new FixedUserContext(new DateOnly(2026, 8, 30)));
 
         await service.UpdateAsync(new Debt
         {
@@ -127,7 +127,7 @@ public class DebtAndSettingsRegressionTests
             Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1)
         });
         await db.SaveChangesAsync();
-        var service = new DebtService(db, TimeProvider.System);
+        var service = new DebtService(db);
 
         await service.UpdateAsync(new Debt
         {
@@ -161,7 +161,7 @@ public class DebtAndSettingsRegressionTests
             Type = TransactionType.Expense, Amount = 100, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 28)
         });
         await db.SaveChangesAsync();
-        var service = new AccountService(db, TimeProvider.System, null!);
+        var service = new AccountService(db, TimeProvider.System, null!, new UserDateProvider(TimeProvider.System));
 
         var transaction = Assert.Single(await service.GetRecentTransactionsAsync(accountId, 10, CancellationToken.None));
 
@@ -170,9 +170,98 @@ public class DebtAndSettingsRegressionTests
         Assert.Equal(DebtOperationType.Payment, transaction.DebtOperationType);
     }
 
+    [Fact]
+    public async Task DebtDeletion_RemovesRelatedDataAndPreservesAffectedAccountBalances()
+    {
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        var ownerId = Guid.NewGuid();
+        var firstAccountId = Guid.NewGuid();
+        var secondAccountId = Guid.NewGuid();
+        var debtId = Guid.NewGuid();
+        var recurringId = Guid.NewGuid();
+        var generatedTransactionId = Guid.NewGuid();
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
+        db.Accounts.AddRange(
+            new Account { Id = firstAccountId, Name = "Checking", Type = AccountType.BankAccount, Currency = "HUF", InitialBalance = 1000 },
+            new Account { Id = secondAccountId, Name = "Cash", Type = AccountType.Cash, Currency = "HUF", InitialBalance = 500 });
+        db.Debts.Add(new Debt
+        {
+            Id = debtId, Name = "Loan", Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, Direction = DebtDirection.Payable,
+            Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1)
+        });
+        db.Transactions.AddRange(
+            new Transaction { Id = generatedTransactionId, AccountId = firstAccountId, DebtId = debtId, DebtOperationType = DebtOperationType.Payment, Type = TransactionType.Expense, Amount = 100, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 1) },
+            new Transaction { Id = Guid.NewGuid(), AccountId = secondAccountId, DebtId = debtId, DebtOperationType = DebtOperationType.Payment, Type = TransactionType.Expense, Amount = 50, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 2) },
+            new Transaction { Id = Guid.NewGuid(), DebtId = debtId, DebtOperationType = DebtOperationType.ManualCorrectionIncrease, Type = TransactionType.DebtEntry, Amount = 25, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 3) },
+            new Transaction { Id = Guid.NewGuid(), AccountId = firstAccountId, Type = TransactionType.Income, Amount = 200, SourceCurrency = "HUF", TransactionDate = new DateOnly(2026, 8, 4) });
+        db.RecurringTransactions.Add(new RecurringTransaction { Id = recurringId, AccountId = firstAccountId, DebtId = debtId, DebtOperationType = DebtOperationType.Payment, Type = TransactionType.Expense, Amount = 100, FirstOccurrence = new DateOnly(2026, 9, 1), Frequency = RecurringFrequency.Monthly, Enabled = true });
+        db.RecurringTransactionOccurrences.Add(new RecurringTransactionOccurrence { Id = Guid.NewGuid(), RecurringTransactionId = recurringId, TransactionId = generatedTransactionId, OccurrenceDate = new DateOnly(2026, 8, 1) });
+        await db.SaveChangesAsync();
+        var service = new DebtService(db);
+        var balancesBefore = await CurrentBalancesAsync(db);
+
+        var summary = await service.GetDeletionSummaryAsync(debtId, CancellationToken.None);
+        await service.DeleteAsync(debtId, CancellationToken.None);
+
+        db.ChangeTracker.Clear();
+        var balancesAfter = await CurrentBalancesAsync(db);
+        Assert.Equal(new DebtDeletionSummary(3, 1, 2), summary);
+        Assert.False(await db.Debts.AnyAsync(item => item.Id == debtId));
+        Assert.False(await db.Transactions.AnyAsync(item => item.DebtId == debtId));
+        Assert.False(await db.RecurringTransactions.AnyAsync(item => item.DebtId == debtId));
+        Assert.Empty(await db.RecurringTransactionOccurrences.ToListAsync());
+        Assert.Single(await db.Transactions.ToListAsync());
+        Assert.Equal(balancesBefore, balancesAfter);
+        Assert.Equal(900, (await db.Accounts.SingleAsync(item => item.Id == firstAccountId)).InitialBalance);
+        Assert.Equal(450, (await db.Accounts.SingleAsync(item => item.Id == secondAccountId)).InitialBalance);
+    }
+
+    [Fact]
+    public async Task DebtDeletion_WithoutTransactionsLeavesAccountInitialBalanceUnchanged()
+    {
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        var ownerId = Guid.NewGuid();
+        var accountId = Guid.NewGuid();
+        var debtId = Guid.NewGuid();
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(ownerId));
+        db.Accounts.Add(new Account { Id = accountId, Name = "Checking", Type = AccountType.BankAccount, Currency = "HUF", InitialBalance = 1000 });
+        db.Debts.Add(new Debt { Id = debtId, Name = "Loan", Icon = CategoryIcons.DefaultFor(CategoryType.Expense).Id, Direction = DebtDirection.Payable, Type = DebtType.Bank, CounterpartyName = "Bank", OriginalAmount = 1000, Currency = "HUF", StartDate = new DateOnly(2026, 1, 1), AccountId = accountId });
+        await db.SaveChangesAsync();
+
+        await new DebtService(db).DeleteAsync(debtId, CancellationToken.None);
+
+        db.ChangeTracker.Clear();
+        Assert.Equal(1000, (await db.Accounts.SingleAsync()).InitialBalance);
+        Assert.Empty(await db.Debts.ToListAsync());
+    }
+
+    private static async Task<Dictionary<Guid, decimal>> CurrentBalancesAsync(PocketLedgerDbContext db)
+    {
+        var accounts = await db.Accounts.AsNoTracking().ToListAsync();
+        var transactions = await db.Transactions.AsNoTracking().ToListAsync();
+        return accounts.ToDictionary(account => account.Id, account => BalanceCalculator.Calculate(account.Id, account.InitialBalance, transactions));
+    }
+
     private sealed class TestCurrentUser(Guid userId) : ICurrentUser
     {
         public Guid UserId => userId;
         public bool IsAuthenticated => true;
+    }
+
+    private sealed class FixedUserContext(DateOnly today) : IUserContextService
+    {
+        public Task<DateOnly> TodayAsync(CancellationToken cancellationToken = default) => Task.FromResult(today);
+        public Task<UserPreference> GetUserAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<DateTimeOffset> ToUtcAsync(DateOnly date, TimeOnly time, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public string Format(decimal amount, string? currency) => throw new NotSupportedException();
+        public string FormatNumber(decimal amount, string? currency) => throw new NotSupportedException();
+        public MoneyInputFormat GetMoneyInputFormat(string currency) => throw new NotSupportedException();
     }
 }
