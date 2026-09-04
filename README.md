@@ -126,4 +126,4 @@ dotnet test PocketLedger.slnx
 
 ## License
 
-PocketLedger is available under the [MIT License](LICENSE).
+PocketLedger is free and open-source software licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).
