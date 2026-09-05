@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore PocketLedger.slnx
+
+      - name: Build
+        run: dotnet build PocketLedger.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test PocketLedger.slnx -c Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/test-results.trx"
+
+  docker-build-and-smoketest:
+    name: Docker build & startup smoke test
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create CI .env file
+        run: |
+          SIGNING_KEY=$(openssl rand -base64 64)
+          cat > .env <<EOF
+          POCKETLEDGER_WEB_DOMAIN=ledger.ci.local
+          POCKETLEDGER_API_DOMAIN=api.ledger.ci.local
+          POCKETLEDGER_IDENTITY_DOMAIN=identity.ledger.ci.local
+          POCKETLEDGER_WEB_CLIENT_SECRET=ci-client-secret-not-for-production
+          POCKETLEDGER_SIGNING_KEY=${SIGNING_KEY}
+          POSTGRES_USER=pocketledger
+          POSTGRES_PASSWORD=ci-postgres-password
+          POCKETLEDGER_INITIAL_USERNAME=ci-admin
+          POCKETLEDGER_INITIAL_PASSWORD=Ci-Admin-Password-123!
+          EOF
+
+      - name: Build images (web, api, identity)
+        run: docker compose build
+
+      - name: Start stack (without Caddy, no real domains/TLS in CI)
+        run: docker compose up -d web api identity
+
+      - name: Wait for services to actually start
+        run: |
+          set -e
+          SERVICES="web-database api-database identity-database web api identity"
+          TIMEOUT=120
+          ELAPSED=0
+
+          echo "Waiting for database healthchecks..."
+          for DB in web-database api-database identity-database; do
+            until [ "$(docker inspect -f '{{.State.Health.Status}}' "$(docker compose ps -q $DB)" 2>/dev/null)" = "healthy" ]; do
+              ELAPSED=$((ELAPSED+2))
+              if [ $ELAPSED -ge $TIMEOUT ]; then
+                echo "::error::$DB did not become healthy in time"
+                docker compose logs "$DB"
+                exit 1
+              fi
+              sleep 2
+            done
+            echo "$DB is healthy"
+          done
+
+          echo "Waiting for app hosts to report they are listening..."
+          for APP in web api identity; do
+            ELAPSED=0
+            until docker compose logs "$APP" 2>&1 | grep -q "Now listening on"; do
+              # Fail fast if the container already exited
+              STATE="$(docker inspect -f '{{.State.Status}}' "$(docker compose ps -q $APP)" 2>/dev/null || echo missing)"
+              if [ "$STATE" = "exited" ] || [ "$STATE" = "missing" ]; then
+                echo "::error::$APP container exited unexpectedly"
+                docker compose logs "$APP"
+                exit 1
+              fi
+              ELAPSED=$((ELAPSED+2))
+              if [ $ELAPSED -ge $TIMEOUT ]; then
+                echo "::error::$APP did not start listening in time"
+                docker compose logs "$APP"
+                exit 1
+              fi
+              sleep 2
+            done
+            echo "$APP is listening"
+          done
+
+          echo "Checking no container has crashed/restarted..."
+          for SVC in $SERVICES; do
+            STATE="$(docker inspect -f '{{.State.Status}}' "$(docker compose ps -q $SVC)")"
+            RESTARTS="$(docker inspect -f '{{.RestartCount}}' "$(docker compose ps -q $SVC)")"
+            echo "$SVC: state=$STATE restarts=$RESTARTS"
+            if [ "$STATE" != "running" ]; then
+              echo "::error::$SVC is not running (state=$STATE)"
+              docker compose logs "$SVC"
+              exit 1
+            fi
+          done
+
+      - name: Dump logs (always, for debugging)
+        if: always()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
