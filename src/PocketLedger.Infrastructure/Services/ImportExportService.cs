@@ -96,6 +96,8 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         var errors = BackupValidator.Validate(backup);
         if (errors.Count > 0) throw new BusinessRuleException(string.Join(" ", errors));
 
+        backup = RemapBackupIds(backup);
+
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
@@ -121,6 +123,34 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    private static PocketLedgerBackup RemapBackupIds(PocketLedgerBackup backup)
+    {
+        var accountIds = backup.Accounts.ToDictionary(item => item.Id, _ => Guid.NewGuid());
+        var categoryIds = backup.Categories.ToDictionary(item => item.Id, _ => Guid.NewGuid());
+        var debtIds = (backup.Debts ?? []).ToDictionary(item => item.Id, _ => Guid.NewGuid());
+        // IDs break ties for debt operations with identical timestamps; preserve their relative order.
+        var transactionIds = backup.Transactions.Select(item => item.Id).Order()
+            .Zip(backup.Transactions.Select(_ => Guid.NewGuid()).Order()).ToDictionary(pair => pair.First, pair => pair.Second);
+
+        return backup with
+        {
+            Accounts = backup.Accounts.Select(item => item with { Id = accountIds[item.Id] }).ToArray(),
+            Categories = backup.Categories.Select(item => item with { Id = categoryIds[item.Id], ParentCategoryId = Remap(categoryIds, item.ParentCategoryId) }).ToArray(),
+            Debts = backup.Debts?.Select(item => item with { Id = debtIds[item.Id], AccountId = Remap(accountIds, item.AccountId) }).ToArray(),
+            Transactions = backup.Transactions.Select(item => item with
+            {
+                Id = transactionIds[item.Id], AccountId = Remap(accountIds, item.AccountId), TargetAccountId = Remap(accountIds, item.TargetAccountId),
+                CategoryId = Remap(categoryIds, item.CategoryId), DebtId = Remap(debtIds, item.DebtId)
+            }).ToArray(),
+            RecurringTransactions = backup.RecurringTransactions.Select(item => item with
+            {
+                Id = Guid.NewGuid(), AccountId = accountIds[item.AccountId], CategoryId = Remap(categoryIds, item.CategoryId), DebtId = Remap(debtIds, item.DebtId)
+            }).ToArray()
+        };
+
+        static Guid? Remap(IReadOnlyDictionary<Guid, Guid> ids, Guid? id) => id is { } value ? ids[value] : null;
     }
 
     private static CsvImportPreview ParseImport(string csv, IReadOnlyList<Account> accounts, IReadOnlyList<Category> categories, HashSet<string> existingKeys)

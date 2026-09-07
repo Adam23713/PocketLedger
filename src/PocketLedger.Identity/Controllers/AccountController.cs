@@ -10,6 +10,7 @@ using QRCoder;
 
 namespace PocketLedger.Controllers;
 
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver) : Controller
 {
@@ -181,7 +182,12 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         return false;
     }
 
-    private ObjectResult TooManyRequests() { Response.Headers.RetryAfter = "60"; return StatusCode(StatusCodes.Status429TooManyRequests, "Too many authentication requests. Try again later."); }
+    private ViewResult TooManyRequests()
+    {
+        Response.Headers.RetryAfter = "60";
+        Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        return View("TooManyRequests");
+    }
 
     private static AuthenticatorSetupViewModel BuildSetupModel(ApplicationUser user, string key, string code = "", string? returnUrl = null)
     {

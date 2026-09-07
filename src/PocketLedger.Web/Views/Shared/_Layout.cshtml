@@ -77,6 +77,7 @@
                                 <a role="menuitem" asp-controller="Settings" asp-action="Index">Settings</a>
                                 <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
                                 <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")">Security</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")">PocketLedger website</a>
                                 <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <form asp-controller="Session" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
