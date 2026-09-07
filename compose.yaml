@@ -24,9 +24,9 @@ services:
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
-      Identity__MetadataAddress: http://identity:5052/.well-known/openid-configuration
-      Identity__BackchannelBaseUrl: http://identity:5052/
-      Identity__RequireHttpsMetadata: "false"
+      Identity__MetadataAddress: https://${POCKETLEDGER_IDENTITY_DOMAIN}/.well-known/openid-configuration
+      Identity__BackchannelBaseUrl: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
+      Identity__RequireHttpsMetadata: "true"
       Identity__ClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       Api__BaseUrl: http://api:5051/
