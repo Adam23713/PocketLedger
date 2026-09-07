@@ -5,7 +5,7 @@
             "name": "PocketLedger Web (5050)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "prepare PocketLedger Web development",
+            "preLaunchTask": "prepare PocketLedger development",
             "program": "${workspaceFolder}/src/PocketLedger.Web/bin/Debug/net10.0/PocketLedger.Web.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Web",
             "stopAtEntry": false,
@@ -14,12 +14,8 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://0.0.0.0:5050",
                 "ConnectionStrings__WebConnection": "Host=localhost;Port=5433;Database=pocketledger_web;Username=pocketledger;Password=pocketledger",
-                "Database__ApplyMigrationsOnStartup": "true"
-            },
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
-                "uriFormat": "http://localhost:%s"
+                "Database__ApplyMigrationsOnStartup": "true",
+                "Landing__BaseUrl": "http://localhost:5053"
             }
         },
         {
@@ -53,6 +49,26 @@
                 "ConnectionStrings__IdentityConnection": "Host=localhost;Port=5435;Database=pocketledger_identity;Username=pocketledger;Password=pocketledger",
                 "Database__ApplyMigrationsOnStartup": "true"
             }
+        },
+        {
+            "name": "PocketLedger Landing (5053)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build PocketLedger",
+            "program": "${workspaceFolder}/src/PocketLedger.Landing/bin/Debug/net10.0/PocketLedger.Landing.dll",
+            "cwd": "${workspaceFolder}/src/PocketLedger.Landing",
+            "stopAtEntry": false,
+            "justMyCode": true,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5053",
+                "Landing__AppBaseUrl": "http://localhost:5050"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
+                "uriFormat": "http://localhost:%s"
+            }
         }
     ],
     "compounds": [
@@ -61,7 +77,8 @@
             "configurations": [
                 "PocketLedger Identity (5052)",
                 "PocketLedger API (5051)",
-                "PocketLedger Web (5050)"
+                "PocketLedger Web (5050)",
+                "PocketLedger Landing (5053)"
             ],
             "stopAll": true
         }

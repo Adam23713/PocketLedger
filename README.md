@@ -4,13 +4,14 @@ PocketLedger is a self-hosted personal finance manager built with ASP.NET Core a
 
 ## Architecture
 
-PocketLedger runs as three independently built and deployed server processes:
+PocketLedger runs as four independently deployed components:
 
+- **PocketLedger.Landing** serves the public English landing page with Razor Pages and static assets. It has no database or authentication of its own.
 - **PocketLedger.Web** is the server-side Razor MVC application and browser-facing BFF. The browser receives only an encrypted session cookie. OIDC access and refresh tokens are protected and stored in the Web database.
 - **PocketLedger.Api** owns financial data and exposes the first-party client API below `/api/v1`. It accepts bearer access tokens issued by PocketLedger.Identity. The recurring transaction worker runs here; only one API instance may run at a time.
 - **PocketLedger.Identity** owns users, credentials, TOTP configuration, recovery codes, security audit events, and the OpenIddict authorization server. Public self-registration is intentionally disabled; accounts are bootstrapped or managed administratively.
 
-Each server owns a separate PostgreSQL database. The Web process never connects to the API or Identity database, and the API process never connects to the Web or Identity database.
+Web, API and Identity each own a separate PostgreSQL database. The Web process never connects to the API or Identity database, and the API process never connects to the Web or Identity database.
 
 Supporting projects:
 
@@ -19,6 +20,7 @@ src/PocketLedger.Domain/          Finance entities and value definitions
 src/PocketLedger.Application/     Application interfaces and shared business rules
 src/PocketLedger.Contracts/       API request and response contracts
 src/PocketLedger.Infrastructure/  EF Core finance persistence and service implementations
+src/PocketLedger.Landing/         Public landing page host
 src/PocketLedger.Web/             Razor MVC / BFF host
 src/PocketLedger.Api/             Versioned finance API host
 src/PocketLedger.Identity/        Identity and OpenIddict host
@@ -26,12 +28,13 @@ src/PocketLedger.Identity/        Identity and OpenIddict host
 
 ## URL topology
 
-The recommended public topology is three subdomains behind Cloudflare and Caddy:
+The recommended public topology is a public domain and three subdomains behind Cloudflare and Caddy:
 
 ```text
-https://ledger.example.com           Web/BFF
-https://api.ledger.example.com       API
-https://identity.ledger.example.com  Identity/OIDC
+https://pocketledger.dev           Public landing page
+https://app.pocketledger.dev       Web/BFF
+https://api.pocketledger.dev       API
+https://identity.pocketledger.dev  Identity/OIDC
 ```
 
 The browser uses the Web/BFF for finance operations. The public API hostname remains available for future first-party clients. Caddy is the only published entry point in the supplied Compose topology; the application containers trust forwarded headers because they are reachable only on the private Compose network.
@@ -47,7 +50,7 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    cp Caddyfile.example Caddyfile
    ```
 
-2. Set all three domain names and replace every secret. Generate the shared signing key from at least 32 random bytes, Base64 encoded. For example:
+2. Set all four domain names and replace every secret. Generate the shared signing key from at least 32 random bytes, Base64 encoded. For example:
 
    ```bash
    openssl rand -base64 64
@@ -71,7 +74,17 @@ On first login, configure TOTP and save the generated recovery codes. Finance da
 
 The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
 
+## Moving an existing deployment to the app subdomain
+
+Set `POCKETLEDGER_LANDING_DOMAIN` to the public domain and `POCKETLEDGER_WEB_DOMAIN` to the app subdomain. Update the deployed Caddyfile from the example, add the app DNS record in Cloudflare, and ensure HTTPS works for both hosts (Cloudflare Full (strict) to the origin). Keep the two origins on the same site, such as `pocketledger.dev` and `app.pocketledger.dev`, so the existing SameSite=Lax app cookie works for the landing session check.
+
+On Identity startup, the existing Web OIDC client's login and logout redirect URIs are synchronized with `OpenIddict:WebBaseUrl`; the client secret and permissions are preserved. Roll out the Identity, Web, landing and proxy configuration together. Existing host-only browser cookies do not move to the app subdomain, so users may need to sign in again. Existing bookmarks to application paths on the old domain should be updated to the app subdomain.
+
+`Landing:AppBaseUrl` configures the landing's app links. `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status`. This endpoint returns only an authentication boolean with no-store caching; app cookies and tokens are not shared with the landing. Login and logout continue to use the existing OIDC flow and POST antiforgery protection. Configure Cloudflare to bypass caching for `/Session/*` on the app domain; do not apply public-page caching rules to authenticated app routes. When the app cannot be reached, the landing retains a working login link. Contact functionality is deliberately outside PL-81's scope.
+
 ## Local development
+
+Run the landing locally with `ASPNETCORE_ENVIRONMENT=Development dotnet run --project src/PocketLedger.Landing --urls http://localhost:5053`. Its Development configuration links to the Web app on `http://localhost:5050`. The landing itself needs no database.
 
 The default settings expect three local PostgreSQL databases:
 

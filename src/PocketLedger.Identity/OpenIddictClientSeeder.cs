@@ -8,7 +8,8 @@ public sealed class OpenIddictClientSeeder(IServiceProvider services, IConfigura
     {
         await using var scope = services.CreateAsyncScope();
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-        if (await manager.FindByClientIdAsync("pocketledger-web", cancellationToken) is null)
+        var webClient = await manager.FindByClientIdAsync("pocketledger-web", cancellationToken);
+        if (webClient is null)
         {
             var clientSecret = configuration["OpenIddict:WebClientSecret"] ?? throw new InvalidOperationException("OpenIddict:WebClientSecret is required.");
             var webBaseUrl = configuration["OpenIddict:WebBaseUrl"] ?? "https://app.localhost";
@@ -35,6 +36,22 @@ public sealed class OpenIddictClientSeeder(IServiceProvider services, IConfigura
                 },
                 Requirements = { OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange }
             }, cancellationToken);
+        }
+        else
+        {
+            var webBaseUrl = (configuration["OpenIddict:WebBaseUrl"] ?? "https://app.localhost").TrimEnd('/');
+            var redirectUri = new Uri($"{webBaseUrl}/signin-oidc");
+            var logoutUri = new Uri($"{webBaseUrl}/signout-callback-oidc");
+            var descriptor = new OpenIddictApplicationDescriptor();
+            await manager.PopulateAsync(descriptor, webClient, cancellationToken);
+            if (!descriptor.RedirectUris.SetEquals([redirectUri]) || !descriptor.PostLogoutRedirectUris.SetEquals([logoutUri]))
+            {
+                descriptor.RedirectUris.Clear();
+                descriptor.RedirectUris.Add(redirectUri);
+                descriptor.PostLogoutRedirectUris.Clear();
+                descriptor.PostLogoutRedirectUris.Add(logoutUri);
+                await manager.UpdateAsync(webClient, descriptor, cancellationToken);
+            }
         }
 
         if (environment.IsDevelopment() && await manager.FindByClientIdAsync("pocketledger-swagger", cancellationToken) is null)
