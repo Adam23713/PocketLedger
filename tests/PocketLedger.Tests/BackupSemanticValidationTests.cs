@@ -238,6 +238,155 @@ public class BackupSemanticValidationTests
         Assert.Equal(existingId, (await db.Accounts.AsNoTracking().SingleAsync()).Id);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Restore_ExportedBackupCanReplaceSameOrDifferentOwnersData(bool differentOwner)
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseSqlite(connection).Options;
+        var sourceOwner = Guid.NewGuid();
+        await using var sourceDb = new PocketLedgerDbContext(options, new TestCurrentUser(sourceOwner));
+        await CreateSqliteSchemaAsync(sourceDb);
+        var sourceService = new ImportExportService(sourceDb, null!, new TestUserContext());
+        await sourceService.RestoreAsync(BackupJson.Serialize(ValidBackup()), CancellationToken.None);
+        var exported = BackupJson.Deserialize(await sourceService.ExportBackupAsync(CancellationToken.None));
+        var destinationOwner = differentOwner ? Guid.NewGuid() : sourceOwner;
+        await using var destinationDb = new PocketLedgerDbContext(options, new TestCurrentUser(destinationOwner));
+        var destinationService = new ImportExportService(destinationDb, null!, new TestUserContext());
+        var existingId = Guid.NewGuid();
+        destinationDb.Accounts.Add(new Account { Id = existingId, Name = "Replaced", Type = AccountType.Cash, Currency = "HUF" });
+        await destinationDb.SaveChangesAsync();
+
+        await destinationService.RestoreAsync(BackupJson.Serialize(exported), CancellationToken.None);
+        // A second restore must replace the first import, without accumulating duplicates.
+        await destinationService.RestoreAsync(BackupJson.Serialize(exported), CancellationToken.None);
+        var restored = BackupJson.Deserialize(await destinationService.ExportBackupAsync(CancellationToken.None));
+
+        Assert.Equal(exported.Accounts.Count, restored.Accounts.Count);
+        Assert.Equal(exported.Categories.Count, restored.Categories.Count);
+        Assert.Equal(exported.Debts!.Count, restored.Debts!.Count);
+        Assert.Equal(exported.Transactions.Count, restored.Transactions.Count);
+        Assert.Equal(exported.RecurringTransactions.Count, restored.RecurringTransactions.Count);
+        var originalIds = exported.Accounts.Select(item => item.Id).Concat(exported.Categories.Select(item => item.Id))
+            .Concat(exported.Debts.Select(item => item.Id)).Concat(exported.Transactions.Select(item => item.Id)).Concat(exported.RecurringTransactions.Select(item => item.Id)).ToHashSet();
+        var restoredIds = restored.Accounts.Select(item => item.Id).Concat(restored.Categories.Select(item => item.Id))
+            .Concat(restored.Debts.Select(item => item.Id)).Concat(restored.Transactions.Select(item => item.Id)).Concat(restored.RecurringTransactions.Select(item => item.Id));
+        Assert.All(restoredIds, id => Assert.DoesNotContain(id, originalIds));
+        Assert.DoesNotContain(restored.Accounts, item => item.Id == existingId);
+        Assert.All(await destinationDb.Accounts.AsNoTracking().ToListAsync(), item => Assert.Equal(destinationOwner, item.OwnerId));
+        Assert.Empty(BackupValidator.Validate(restored));
+        if (differentOwner)
+        {
+            var unchanged = BackupJson.Deserialize(await sourceService.ExportBackupAsync(CancellationToken.None));
+            Assert.Equal(exported.Accounts.OrderBy(item => item.Id), unchanged.Accounts.OrderBy(item => item.Id));
+            Assert.Equal(exported.Categories.OrderBy(item => item.Id), unchanged.Categories.OrderBy(item => item.Id));
+            Assert.Equal(exported.Debts.OrderBy(item => item.Id), unchanged.Debts!.OrderBy(item => item.Id));
+            Assert.Equal(exported.Transactions.OrderBy(item => item.Id), unchanged.Transactions.OrderBy(item => item.Id));
+            Assert.Equal(exported.RecurringTransactions.OrderBy(item => item.Id), unchanged.RecurringTransactions.OrderBy(item => item.Id));
+        }
+    }
+
+    [Fact]
+    public async Task Restore_PreservesAllRelationshipsAndFinancialValuesWithNewIds()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseSqlite(connection).Options;
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(Guid.NewGuid()));
+        await CreateSqliteSchemaAsync(db);
+        var backup = ValidBackup();
+        backup = backup with { Accounts = [backup.Accounts[0] with { Color = "#123456", InitialBalance = 1234.50m }, backup.Accounts[1] with { Color = "#abcdef", InitialBalance = 12.34m }] };
+        var huf = backup.Accounts[0]; var eur = backup.Accounts[1]; var parent = backup.Categories[0]; var debt = backup.Debts![0];
+        var child = new CategoryBackup(Guid.NewGuid(), "Groceries", CategoryType.Expense, null, parent.Id, 1);
+        var expense = backup.Transactions[0] with { CategoryId = child.Id, Note = "Groceries", TransactionTime = new TimeOnly(12, 30), OccurredAtUtc = new DateTimeOffset(2026, 1, 2, 11, 30, 0, TimeSpan.Zero) };
+        var transfer = new TransactionBackup(Guid.NewGuid(), TransactionType.Transfer, huf.Id, eur.Id, 400, 1, null, new DateOnly(2026, 1, 3), null, "Transfer", ExchangeRate: 0.0025m, SourceCurrency: "HUF", TargetCurrency: "EUR");
+        var payment = DebtOperation(debt.Id, huf.Id, DebtOperationType.Payment, 20, new DateOnly(2026, 1, 4));
+        var increase = DebtOperation(debt.Id, null, DebtOperationType.Increase, 30, new DateOnly(2026, 1, 5));
+        var recurring = backup.RecurringTransactions[0] with { CategoryId = child.Id };
+        var recurringPayment = recurring with { Id = Guid.NewGuid(), CategoryId = null, DebtId = debt.Id, DebtOperationType = DebtOperationType.Payment };
+        var unlinkedDebt = debt with { Id = Guid.NewGuid(), Name = "Unlinked", AccountId = null };
+        backup = backup with { Categories = [parent, child], Transactions = [expense, transfer, payment, increase], RecurringTransactions = [recurring, recurringPayment], Debts = [debt, unlinkedDebt] };
+        var service = new ImportExportService(db, null!, new TestUserContext());
+
+        await service.RestoreAsync(BackupJson.Serialize(backup), CancellationToken.None);
+        var restored = BackupJson.Deserialize(await service.ExportBackupAsync(CancellationToken.None));
+
+        var restoredHuf = Assert.Single(restored.Accounts, item => item.Name == huf.Name);
+        var restoredEur = Assert.Single(restored.Accounts, item => item.Name == eur.Name);
+        var restoredParent = Assert.Single(restored.Categories, item => item.Name == parent.Name);
+        var restoredChild = Assert.Single(restored.Categories, item => item.Name == child.Name);
+        var restoredDebt = Assert.Single(restored.Debts!, item => item.Name == debt.Name);
+        Assert.Equal(huf with { Id = restoredHuf.Id }, restoredHuf);
+        Assert.Equal(eur with { Id = restoredEur.Id }, restoredEur);
+        Assert.Null(restoredParent.ParentCategoryId);
+        Assert.Equal(restoredParent.Id, restoredChild.ParentCategoryId);
+        Assert.Equal(restoredHuf.Id, restoredDebt.AccountId);
+        Assert.Null(Assert.Single(restored.Debts!, item => item.Name == "Unlinked").AccountId);
+        var restoredExpense = Assert.Single(restored.Transactions, item => item.Note == "Groceries");
+        Assert.Equal(expense with { Id = restoredExpense.Id, AccountId = restoredHuf.Id, CategoryId = restoredChild.Id }, restoredExpense);
+        var restoredTransfer = Assert.Single(restored.Transactions, item => item.Type == TransactionType.Transfer);
+        Assert.Equal(transfer with { Id = restoredTransfer.Id, AccountId = restoredHuf.Id, TargetAccountId = restoredEur.Id }, restoredTransfer);
+        var restoredPayment = Assert.Single(restored.Transactions, item => item.DebtOperationType == DebtOperationType.Payment);
+        Assert.Equal(payment with { Id = restoredPayment.Id, AccountId = restoredHuf.Id, DebtId = restoredDebt.Id }, restoredPayment);
+        var restoredIncrease = Assert.Single(restored.Transactions, item => item.DebtOperationType == DebtOperationType.Increase);
+        Assert.Equal(increase with { Id = restoredIncrease.Id, DebtId = restoredDebt.Id }, restoredIncrease);
+        var restoredRecurring = Assert.Single(restored.RecurringTransactions, item => item.DebtId is null);
+        Assert.Equal(recurring with { Id = restoredRecurring.Id, AccountId = restoredHuf.Id, CategoryId = restoredChild.Id }, restoredRecurring);
+        var restoredRecurringPayment = Assert.Single(restored.RecurringTransactions, item => item.DebtId is not null);
+        Assert.Equal(recurringPayment with { Id = restoredRecurringPayment.Id, AccountId = restoredHuf.Id, DebtId = restoredDebt.Id }, restoredRecurringPayment);
+        Assert.Empty(BackupValidator.Validate(restored));
+    }
+
+    [Fact]
+    public async Task Restore_PreservesDebtOperationOrderForIdenticalTimestamps()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseSqlite(connection).Options;
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(Guid.NewGuid()));
+        await CreateSqliteSchemaAsync(db);
+        var backup = ValidBackup(); var debt = backup.Debts![0];
+        var increase = DebtOperation(debt.Id, null, DebtOperationType.Increase, 100, new DateOnly(2026, 1, 2)) with { Id = Guid.Parse("00000001-0000-0000-0000-000000000000") };
+        var payment = DebtOperation(debt.Id, debt.AccountId, DebtOperationType.Payment, 200, increase.TransactionDate) with { Id = Guid.Parse("00000002-0000-0000-0000-000000000000") };
+        backup = backup with { Transactions = [payment, increase] };
+        var service = new ImportExportService(db, null!, new TestUserContext());
+
+        await service.RestoreAsync(BackupJson.Serialize(backup), CancellationToken.None);
+        var restored = BackupJson.Deserialize(await service.ExportBackupAsync(CancellationToken.None));
+
+        Assert.Equal(new[] { DebtOperationType.Increase, DebtOperationType.Payment }, restored.Transactions.OrderBy(item => item.Id).Select(item => item.DebtOperationType!.Value));
+        Assert.Empty(BackupValidator.Validate(restored));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task Restore_BackupWithoutDebts_PreservesNullableReferences(int version)
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseSqlite(connection).Options;
+        await using var db = new PocketLedgerDbContext(options, new TestCurrentUser(Guid.NewGuid()));
+        await CreateSqliteSchemaAsync(db);
+        var backup = ValidBackup() with { Version = version, Debts = null };
+        var service = new ImportExportService(db, null!, new TestUserContext());
+
+        await service.RestoreAsync(BackupJson.Serialize(backup), CancellationToken.None);
+        var restored = BackupJson.Deserialize(await service.ExportBackupAsync(CancellationToken.None));
+
+        Assert.Empty(restored.Debts!);
+        Assert.Null(Assert.Single(restored.Categories).ParentCategoryId);
+        var transaction = Assert.Single(restored.Transactions);
+        Assert.Null(transaction.DebtId);
+        Assert.Null(transaction.TargetAccountId);
+        Assert.Contains(restored.Accounts, item => item.Id == transaction.AccountId);
+        Assert.Equal(Assert.Single(restored.Categories).Id, transaction.CategoryId);
+        Assert.Null(Assert.Single(restored.RecurringTransactions).DebtId);
+        Assert.Empty(BackupValidator.Validate(restored));
+    }
+
     private static PocketLedgerBackup ValidBackup()
     {
         var huf = new AccountBackup(Guid.NewGuid(), "HUF account", AccountType.BankAccount, "HUF", 0, null, 0, true, true, true);

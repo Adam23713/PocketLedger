@@ -1,3 +1,7 @@
+{$POCKETLEDGER_LANDING_DOMAIN} {
+	reverse_proxy landing:5053
+}
+
 {$POCKETLEDGER_WEB_DOMAIN} {
 	reverse_proxy web:5050
 }

@@ -9,12 +9,20 @@ x-postgres-common: &postgres-common
   restart: unless-stopped
 
 services:
+  landing:
+    build: { context: ., dockerfile: Dockerfile, target: landing }
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+    restart: unless-stopped
+
   web:
     build: { context: ., dockerfile: Dockerfile, target: web }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
+      Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
       Identity__MetadataAddress: http://identity:5052/.well-known/openid-configuration
       Identity__BackchannelBaseUrl: http://identity:5052/
@@ -63,6 +71,7 @@ services:
     image: caddy:2-alpine
     ports: ["80:80", "443:443", "443:443/udp"]
     environment:
+      POCKETLEDGER_LANDING_DOMAIN: ${POCKETLEDGER_LANDING_DOMAIN}
       POCKETLEDGER_WEB_DOMAIN: ${POCKETLEDGER_WEB_DOMAIN}
       POCKETLEDGER_API_DOMAIN: ${POCKETLEDGER_API_DOMAIN}
       POCKETLEDGER_IDENTITY_DOMAIN: ${POCKETLEDGER_IDENTITY_DOMAIN}
@@ -70,7 +79,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
-    depends_on: [web, api, identity]
+    depends_on: [landing, web, api, identity]
     restart: unless-stopped
 
   web-database:
