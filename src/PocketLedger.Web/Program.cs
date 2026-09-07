@@ -57,6 +57,14 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("profile");
     options.Scope.Add("offline_access");
     options.Scope.Add("pocketledger.api");
+    options.Events.OnRemoteFailure = context =>
+    {
+        context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("PocketLedger.Web.Authentication")
+            .LogWarning(context.Failure, "Remote login failed; redirecting to login recovery.");
+        context.HandleResponse();
+        context.Response.Redirect($"{context.Request.PathBase}/Session/LoginFailed");
+        return Task.CompletedTask;
+    };
 });
 builder.Services.AddCors(options => options.AddPolicy("LandingSession", policy => policy
     .WithOrigins((builder.Configuration["Landing:BaseUrl"] ?? "https://pocketledger.dev").TrimEnd('/'))
