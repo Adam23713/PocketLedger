@@ -6,6 +6,7 @@
     <Project Path="src/PocketLedger.Domain/PocketLedger.Domain.csproj" />
     <Project Path="src/PocketLedger.Infrastructure/PocketLedger.Infrastructure.csproj" />
     <Project Path="src/PocketLedger.Identity/PocketLedger.Identity.csproj" />
+    <Project Path="src/PocketLedger.Landing/PocketLedger.Landing.csproj" />
     <Project Path="src/PocketLedger.Web/PocketLedger.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
