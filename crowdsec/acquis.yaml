@@ -1,0 +1,6 @@
+# Watch the directory even before Caddy creates the first log file.
+force_inotify: true
+filenames:
+  - /var/log/caddy/access.log
+labels:
+  type: caddy

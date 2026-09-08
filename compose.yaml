@@ -69,18 +69,47 @@ services:
     restart: unless-stopped
 
   caddy:
-    image: caddy:2-alpine
+    build: { context: ./caddy, dockerfile: Dockerfile }
     ports: ["80:80", "443:443", "443:443/udp"]
     environment:
       POCKETLEDGER_LANDING_DOMAIN: ${POCKETLEDGER_LANDING_DOMAIN}
       POCKETLEDGER_WEB_DOMAIN: ${POCKETLEDGER_WEB_DOMAIN}
       POCKETLEDGER_API_DOMAIN: ${POCKETLEDGER_API_DOMAIN}
       POCKETLEDGER_IDENTITY_DOMAIN: ${POCKETLEDGER_IDENTITY_DOMAIN}
+      CROWDSEC_API_KEY: ${CROWDSEC_API_KEY:?Set CROWDSEC_API_KEY in .env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-logs:/var/log/caddy
       - caddy-data:/data
       - caddy-config:/config
-    depends_on: [landing, web, api, identity]
+    depends_on:
+      landing: { condition: service_started }
+      web: { condition: service_started }
+      api: { condition: service_started }
+      identity: { condition: service_started }
+      crowdsec: { condition: service_healthy }
+    restart: unless-stopped
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.8.1@sha256:0f2523fa61ef507f15d953045cface490cc880670c62f2755ced17524107f71a
+    environment:
+      COLLECTIONS: crowdsecurity/caddy
+      DISABLE_ONLINE_API: "true"
+      BOUNCER_KEY_pocketledger_caddy: ${CROWDSEC_API_KEY:?Set CROWDSEC_API_KEY in .env}
+    volumes:
+      - caddy-logs:/var/log/caddy:ro
+      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
+      - ./crowdsec/scenarios/pocketledger-http-flood.yaml:/etc/crowdsec/scenarios/pocketledger-http-flood.yaml:ro
+      - ./crowdsec/parsers/cloudflare-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/cloudflare-whitelist.yaml:ro
+      - crowdsec-config:/etc/crowdsec
+      - crowdsec-data:/var/lib/crowdsec/data
+    healthcheck:
+      test: ["CMD", "cscli", "lapi", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
 
   web-database:
@@ -109,3 +138,6 @@ volumes:
   identity-postgres-data:
   caddy-data:
   caddy-config:
+  caddy-logs:
+  crowdsec-config:
+  crowdsec-data:
