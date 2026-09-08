@@ -7,6 +7,7 @@ public class PlannerItem
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
     public DateOnly Month { get; set; }
+    public int? CopyDay { get; set; }
     public DateOnly? PlannedDate { get; set; }
     public TransactionType Type { get; set; }
     public Guid AccountId { get; set; }

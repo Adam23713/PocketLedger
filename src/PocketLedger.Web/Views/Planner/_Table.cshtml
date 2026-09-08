@@ -1,25 +1,25 @@
 @model PocketLedger.Models.ViewModels.Planner.PlannerTableViewModel
 @using PocketLedger.Services.Interfaces
 <section class="planner-panel">
-    <div class="planner-panel-header"><h2>@Model.Title</h2><a class="btn btn-sm btn-primary" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Tétel hozzáadása</a></div>
-    @if (Model.Items.Count == 0) { <p class="planner-muted">Erre a hónapra még nincs ilyen tétel.</p> }
+    <div class="planner-panel-header"><h2>@Model.Title</h2>@if (!Model.ReadOnly) { <a class="btn btn-sm btn-primary" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Add item</a> }</div>
+    @if (Model.Items.Count == 0) { <p class="planner-muted">No items for this month yet.</p> }
     else
     {
-        <div class="table-responsive"><table class="table planner-table"><thead><tr><th>Név / kategória</th><th>Összeg</th><th>Dátum / eredet</th><th>Számla</th><th><span class="visually-hidden">Műveletek</span></th></tr></thead><tbody>
+        <div class="table-responsive"><table class="table planner-table"><thead><tr><th>Name / category</th><th>Amount</th><th>Date</th><th>Account</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
         @foreach (var item in Model.Items)
         {
             <tr>
-                <td>@(item.Note ?? item.CategoryName ?? "Átvezetés")<small>@item.CategoryName</small></td>
+                <td>@(item.Note ?? item.CategoryName ?? "Transfer")<small>@item.CategoryName</small></td>
                 <td class="planner-money">@MoneyFormatter.Format(item.Amount, item.Currency)
-                    @if (item.Currency != item.AccountCurrency) { <small>Számlán: @MoneyFormatter.Format(item.AccountAmount, item.AccountCurrency)</small> }
+                    @if (item.Currency != item.AccountCurrency) { <small>Account amount: @MoneyFormatter.Format(item.AccountAmount, item.AccountCurrency)</small> }
                     @if (item.TargetAmount is { } targetAmount) { <small>→ @MoneyFormatter.Format(targetAmount, item.TargetCurrency)</small> }
                 </td>
-                <td>@(item.Date?.ToString("MM. dd.") ?? "Havi keret")<small><span class="planner-tag">@(item.Source switch { PlannerEventSource.Actual => "Tényleges", PlannerEventSource.Recurring => "Rendszeres · várható", _ => "Manuális terv" })</span></small></td>
+                <td>@(item.Date?.ToString("MM. dd.") ?? "Undated")@if (item.Source == PlannerEventSource.Recurring) { <small><span class="planner-tag">Recurring · read-only</span></small> }</td>
                 <td>@item.AccountName @if (item.TargetAccountName is not null) { <small>→ @item.TargetAccountName</small> }</td>
-                <td>@if (item.Source == PlannerEventSource.Manual) { <a asp-action="Edit" asp-route-id="@item.Id" aria-label="Tervtétel szerkesztése">Szerkesztés</a><small><a asp-action="Delete" asp-route-id="@item.Id">Törlés</a></small> }</td>
+                <td>@if (!Model.ReadOnly && item.Source == PlannerEventSource.Planned) { <a asp-action="Edit" asp-route-id="@item.Id" aria-label="Edit item">Edit</a><small><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></small> }</td>
             </tr>
         }
         </tbody></table></div>
     }
-    <a class="planner-add" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Új @(Model.Type == PocketLedger.Models.Enums.TransactionType.Income ? "bevételi" : Model.Type == PocketLedger.Models.Enums.TransactionType.Expense ? "kiadási" : "transfer") tervtétel</a>
+    @if (!Model.ReadOnly) { <a class="planner-add" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Add item</a> }
 </section>

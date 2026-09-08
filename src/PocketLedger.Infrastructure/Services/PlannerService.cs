@@ -1,4 +1,3 @@
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
@@ -10,27 +9,34 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
 {
     public async Task<PlannerMonth> GetMonthAsync(int year, int month, CancellationToken cancellationToken)
     {
-        if (year is < 2 or > 9998 || month is < 1 or > 12) throw new BusinessRuleException("The selected month is invalid.");
-        var selected = new DateOnly(year, month, 1);
+        var selected = ValidateMonth(year, month);
         var today = await userContext.TodayAsync(cancellationToken);
-        // Bound recurrence expansion while still allowing historical inspection and long-term planning.
         if (selected > new DateOnly(today.Year, today.Month, 1).AddYears(10)) throw new BusinessRuleException("Plans can be viewed up to ten years ahead.");
-        // Keep actual transactions and processed occurrences in the same snapshot while the worker runs.
-        await using var snapshot = dbContext.Database.IsRelational()
-            ? await dbContext.Database.BeginTransactionAsync(dbContext.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL" ? IsolationLevel.RepeatableRead : IsolationLevel.Serializable, cancellationToken)
-            : null;
-        var end = selected.AddMonths(1);
-        var accounts = await dbContext.Accounts.AsNoTracking().OrderBy(account => account.DisplayOrder).ThenBy(account => account.Name).ToListAsync(cancellationToken);
-        var transactions = await dbContext.Transactions.AsNoTracking().Include(item => item.Category).ThenInclude(category => category!.ParentCategory).ToListAsync(cancellationToken);
-        var currentMonth = new DateOnly(today.Year, today.Month, 1);
-        var from = selected.AddMonths(-1) < currentMonth ? selected.AddMonths(-1) : currentMonth;
-        var plans = await dbContext.PlannerItems.AsNoTracking().Include(item => item.Category).ThenInclude(category => category!.ParentCategory)
-            .Where(item => item.Month >= from && item.Month < end).ToListAsync(cancellationToken);
-        var templates = await dbContext.RecurringTransactions.AsNoTracking().Include(item => item.Category).ThenInclude(category => category!.ParentCategory)
-            .Where(item => item.Enabled && item.FirstOccurrence < end && (item.LastOccurrence == null || item.LastOccurrence >= from)).ToListAsync(cancellationToken);
-        var occurrences = await dbContext.RecurringTransactionOccurrences.AsNoTracking().Where(item => item.OccurrenceDate >= from && item.OccurrenceDate < end).ToListAsync(cancellationToken);
-        var debts = await dbContext.Debts.AsNoTracking().ToListAsync(cancellationToken);
-        return PlannerProjection.Calculate(selected, today, accounts, transactions, plans, templates, occurrences, debts);
+        await EnsureMonthAsync(selected, today, cancellationToken);
+        var record = await dbContext.PlannerMonths.SingleOrDefaultAsync(item => item.Month == selected, cancellationToken);
+        return record is null ? new PlannerMonth(selected, today, [], [], [], [], true, false) : PlannerHistory.Deserialize<PlannerMonth>(record.SnapshotJson) with { Today = today };
+    }
+
+    public async Task UpdateOpeningBalanceAsync(int year, int month, Guid accountId, PlannerOpeningBalanceInput input, CancellationToken cancellationToken)
+    {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+
+        var selected = ValidateMonth(year, month);
+        await RequireEditableAsync(selected, cancellationToken);
+        if (!await dbContext.Accounts.AnyAsync(item => item.Id == accountId, cancellationToken)) throw new EntityNotFoundException("Account not found.");
+        if (input.Amount is { } amount && (amount is < -999999999999999.9999m or > 999999999999999.9999m || decimal.Round(amount, 4) != amount))
+            throw new BusinessRuleException("The opening balance supports at most four decimal places.");
+        var record = await dbContext.PlannerMonths.SingleAsync(item => item.Month == selected, cancellationToken);
+        var settings = PlannerHistory.Deserialize<List<PlannerOpeningBalance>>(record.OpeningBalancesJson);
+        var previous = settings.SingleOrDefault(item => item.AccountId == accountId);
+        var snapshot = PlannerHistory.Deserialize<PlannerMonth>(record.SnapshotJson);
+        var value = input.UseCurrentBalance ? previous?.Amount : input.Amount ?? previous?.Amount ?? snapshot.Accounts.Single(item => item.Id == accountId).OpeningBalance;
+        settings.RemoveAll(item => item.AccountId == accountId);
+        settings.Add(new PlannerOpeningBalance(accountId, input.UseCurrentBalance, value));
+        record.OpeningBalancesJson = PlannerHistory.Serialize(settings);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<PlannerItemInput?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -41,27 +47,75 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
 
     public async Task<Guid> CreateAsync(PlannerItemInput input, CancellationToken cancellationToken)
     {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+
+        await RequireEditableAsync(input.Month, cancellationToken);
         await ValidateAsync(input, cancellationToken);
         var item = new PlannerItem { Id = Guid.NewGuid() };
         Apply(item, input);
         dbContext.PlannerItems.Add(item);
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
         return item.Id;
     }
 
     public async Task UpdateAsync(Guid id, PlannerItemInput input, CancellationToken cancellationToken)
     {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+
         var item = await dbContext.PlannerItems.SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Planner item not found.");
+        await RequireEditableAsync(item.Month, cancellationToken);
+        await RequireEditableAsync(input.Month, cancellationToken);
         await ValidateAsync(input, cancellationToken);
         Apply(item, input);
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+
         var item = await dbContext.PlannerItems.SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Planner item not found.");
+        await RequireEditableAsync(item.Month, cancellationToken);
         dbContext.PlannerItems.Remove(item);
         await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+    }
+
+    private async Task RequireEditableAsync(DateOnly month, CancellationToken token)
+    {
+        ValidateMonth(month.Year, month.Month);
+        if (month.Day != 1) throw new BusinessRuleException("The plan month must be the first day of the month.");
+        var today = await userContext.TodayAsync(token);
+        if (month < new DateOnly(today.Year, today.Month, 1)) throw new BusinessRuleException("Closed months are read-only.");
+        if (month > new DateOnly(today.Year, today.Month, 1).AddYears(10)) throw new BusinessRuleException("Plans can be viewed up to ten years ahead.");
+        await EnsureMonthAsync(month, today, token);
+        if (await dbContext.PlannerMonths.AnyAsync(item => item.Month == month && item.IsClosed, token)) throw new BusinessRuleException("Closed months are read-only.");
+    }
+
+    private async Task EnsureMonthAsync(DateOnly month, DateOnly today, CancellationToken token)
+    {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(token) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, token);
+        var skipHistory = dbContext.SkipPlannerHistory;
+        try
+        {
+            dbContext.SkipPlannerHistory = true;
+            await PlannerHistory.RefreshAsync(dbContext, dbContext.PlannerOwnerId, today, month, token);
+            await dbContext.SaveChangesAsync(token);
+            if (transaction is not null) await transaction.CommitAsync(token);
+        }
+        finally { dbContext.SkipPlannerHistory = skipHistory; }
+    }
+
+    private static DateOnly ValidateMonth(int year, int month)
+    {
+        if (year is < 2 or > 9998 || month is < 1 or > 12) throw new BusinessRuleException("The selected month is invalid.");
+        return new DateOnly(year, month, 1);
     }
 
     private async Task ValidateAsync(PlannerItemInput input, CancellationToken cancellationToken)
@@ -78,6 +132,7 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
     {
         item.Month = input.Month;
         item.PlannedDate = input.PlannedDate;
+        item.CopyDay = input.PlannedDate?.Day;
         item.Type = input.Type;
         item.AccountId = input.AccountId;
         item.TargetAccountId = input.TargetAccountId;

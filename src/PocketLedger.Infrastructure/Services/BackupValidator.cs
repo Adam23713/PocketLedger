@@ -8,7 +8,7 @@ public static class BackupValidator
     public static IReadOnlyList<string> Validate(PocketLedgerBackup backup)
     {
         var errors = new List<string>();
-        if (backup.Version is not (1 or 2 or 3))
+        if (backup.Version is not (1 or 2 or 3 or 4))
         {
             errors.Add("Backup: rule 'version': Unsupported backup version.");
         }
@@ -44,6 +44,17 @@ public static class BackupValidator
                 target is null ? null : new Account { Id = target.Id, Currency = target.Currency },
                 category is null ? null : new Category { Id = category.Id, Type = category.Type }));
         }
+        if ((backup.PlannerMonths ?? []).GroupBy(item => item.Month).Any(group => group.Count() > 1)) errors.Add("Planner months must be unique.");
+        foreach (var saved in backup.PlannerMonths ?? [])
+        {
+            if (saved.Month.Day != 1 || saved.Month.Year is < 2 or > 9998 || saved.Snapshot is null || saved.Snapshot.Month != saved.Month || saved.Snapshot.IsClosed != saved.IsClosed || saved.OpeningBalances is null || saved.Snapshot.Accounts is null || saved.Snapshot.Events is null || saved.Snapshot.Totals is null || saved.Snapshot.Points is null)
+            {
+                errors.Add("Invalid saved planner month.");
+                continue;
+            }
+            if (saved.OpeningBalances.GroupBy(item => item.AccountId).Any(group => group.Count() > 1) || saved.OpeningBalances.Any(item => item.Amount is { } amount && (amount is < -999999999999999.9999m or > 999999999999999.9999m || decimal.Round(amount, 4) != amount))) errors.Add("Invalid planner opening balances.");
+        }
+        if ((backup.PlannerItems ?? []).Any(item => item.CopyDay is < 1 or > 31)) errors.Add("Invalid planner copy day.");
         return errors;
     }
 

@@ -1,42 +1,42 @@
 @model PocketLedger.Models.ViewModels.Planner.PlannerFormViewModel
 @using PocketLedger.Models
 @{
-    ViewData["Title"] = Model.Id == Guid.Empty ? "Tervtétel hozzáadása" : "Tervtétel szerkesztése";
+    ViewData["Title"] = Model.Id == Guid.Empty ? "Add planned item" : "Edit planned item";
 }
 <div class="planner-form planner-panel">
     <div class="planner-panel-header"><h1 class="h3">@ViewData["Title"]</h1><span class="planner-muted">@Model.Month.ToString("yyyy. MM.")</span></div>
-    <p class="planner-muted">Ez a tétel csak a tervet módosítja, tényleges tranzakciót nem hoz létre.</p>
+    <p class="planner-muted">Add an item to your monthly plan.</p>
     <form asp-action="@(Model.Id == Guid.Empty ? "Create" : "Edit")" asp-route-id="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)" method="post" id="planner-form">
         <input asp-for="Id" type="hidden" /><input asp-for="Month" type="hidden" value="@Model.Month.ToString("yyyy-MM-dd")" />
         <div asp-validation-summary="All" class="text-danger" role="alert"></div>
         <div class="row">
-            <div class="col-md-6 mb-3"><label for="planner-type" class="form-label">Típus</label><select asp-for="Type" id="planner-type" class="form-select"><option value="Income">Income · Bevétel</option><option value="Expense">Expense · Kiadás</option><option value="Transfer">Transfer · Átvezetés</option></select></div>
-            <div class="col-md-6 mb-3"><label asp-for="PlannedDate" class="form-label">Tervezett dátum</label><input asp-for="PlannedDate" type="date" class="form-control" min="@Model.Month.ToString("yyyy-MM-dd")" max="@Model.Month.AddMonths(1).AddDays(-1).ToString("yyyy-MM-dd")" /><small class="planner-muted" id="planner-date-help">Havi kerethez hagyd üresen. Dátum nélkül nem szerepel a napi egyenlegben.</small></div>
+            <div class="col-md-6 mb-3"><label for="planner-type" class="form-label">Type</label><select asp-for="Type" id="planner-type" class="form-select"><option value="Income">Income</option><option value="Expense">Expense</option><option value="Transfer">Transfer</option></select></div>
+            <div class="col-md-6 mb-3"><label asp-for="PlannedDate" class="form-label">Planned date</label><input asp-for="PlannedDate" type="date" class="form-control" min="@Model.Month.ToString("yyyy-MM-dd")" max="@Model.Month.AddMonths(1).AddDays(-1).ToString("yyyy-MM-dd")" /><small class="planner-muted" id="planner-date-help">Leave blank for an undated monthly item. Undated items do not appear on the daily chart.</small></div>
         </div>
-        <div class="mb-3"><label asp-for="Note" class="form-label">Név / megjegyzés</label><input asp-for="Note" class="form-control" maxlength="500" /></div>
+        <div class="mb-3"><label asp-for="Note" class="form-label">Name / note</label><input asp-for="Note" class="form-control" maxlength="500" /></div>
         <div class="row">
-            <div class="col-md-6 mb-3"><label for="planner-account" class="form-label">Számla / forrás számla</label><select asp-for="AccountId" class="form-select" id="planner-account" required><option value="">Válassz számlát</option>
+            <div class="col-md-6 mb-3"><label for="planner-account" class="form-label">Account / source account</label><select asp-for="AccountId" class="form-select" id="planner-account" required><option value="">Select account</option>
                 @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name (@account.Currency)</option> }
             </select></div>
-            <div class="col-md-6 mb-3" id="planner-target-field"><label for="planner-target" class="form-label">Cél számla</label><select asp-for="TargetAccountId" class="form-select" id="planner-target"><option value="">Válassz cél számlát</option>
+            <div class="col-md-6 mb-3" id="planner-target-field"><label for="planner-target" class="form-label">Target account</label><select asp-for="TargetAccountId" class="form-select" id="planner-target"><option value="">Select target account</option>
                 @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@account.Name (@account.Currency)</option> }
             </select></div>
         </div>
         <div class="row">
-            <div class="col-md-6 mb-3"><label for="planner-currency" class="form-label">Eredeti pénznem</label><select asp-for="Currency" class="form-select" id="planner-currency">
+            <div class="col-md-6 mb-3"><label for="planner-currency" class="form-label">Original currency</label><select asp-for="Currency" class="form-select" id="planner-currency">
                 @foreach (var currency in Currencies.All) { var format = MoneyFormatter.GetMoneyInputFormat(currency.Code); <option value="@currency.Code" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@currency.Code</option> }
             </select></div>
-            <div class="col-md-6 mb-3"><label for="planner-amount-display" class="form-label">Eredeti összeg / forrás összeg</label><input asp-for="Amount" type="hidden" id="planner-amount" /><input id="planner-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-amount" data-money-currency="planner-currency" required autocomplete="off" /></div>
+            <div class="col-md-6 mb-3"><label for="planner-amount-display" class="form-label">Original / source amount</label><input asp-for="Amount" type="hidden" id="planner-amount" /><input id="planner-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-amount" data-money-currency="planner-currency" required autocomplete="off" /></div>
         </div>
         <div class="row">
-            <div class="col-md-6 mb-3" id="planner-conversion-field"><label for="planner-account-amount-display" class="form-label">Számlán elszámolandó összeg · <span id="planner-account-currency"></span></label><input asp-for="AccountAmount" type="hidden" id="planner-account-amount" /><input id="planner-account-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-account-amount" data-money-account="planner-account" autocomplete="off" /><small class="planner-muted">Manuális konverzió: ennyit vonunk le vagy írunk jóvá a számlán.</small></div>
-            <div class="col-md-6 mb-3" id="planner-target-amount-field"><label for="planner-target-amount-display" class="form-label">Cél számlán jóváírandó · <span id="planner-target-currency"></span></label><input asp-for="TargetAmount" type="hidden" id="planner-target-amount" /><input id="planner-target-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-target-amount" data-money-account="planner-target" autocomplete="off" /></div>
+            <div class="col-md-6 mb-3" id="planner-conversion-field"><label for="planner-account-amount-display" class="form-label">Amount in account currency · <span id="planner-account-currency"></span></label><input asp-for="AccountAmount" type="hidden" id="planner-account-amount" /><input id="planner-account-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-account-amount" data-money-account="planner-account" autocomplete="off" /><small class="planner-muted">The amount expected to be credited or debited in the account currency.</small></div>
+            <div class="col-md-6 mb-3" id="planner-target-amount-field"><label for="planner-target-amount-display" class="form-label">Amount credited to target account · <span id="planner-target-currency"></span></label><input asp-for="TargetAmount" type="hidden" id="planner-target-amount" /><input id="planner-target-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-target-amount" data-money-account="planner-target" autocomplete="off" /></div>
         </div>
         <p id="planner-conversion-preview" class="planner-notice" aria-live="polite"></p>
-        <fieldset class="mb-3" id="planner-category-field"><legend class="form-label">Kategória / alkategória</legend><div class="category-tree">
+        <fieldset class="mb-3" id="planner-category-field"><legend class="form-label">Category / subcategory</legend><div class="category-tree">
             @foreach (var category in Model.Categories) { <label class="category-tree-item @(category.IsSubcategory ? "subcategory" : "main-category")" data-category-type="@category.Type"><input name="CategoryId" type="radio" value="@category.Id" checked="@(category.Id == Model.CategoryId)" /><span class="category-tree-content"><img class="category-icon" src="@category.IconPath" alt="@category.IconAlt" /><span>@category.Name</span></span></label> }
         </div></fieldset>
-        <div class="d-flex gap-2"><button type="submit" class="btn btn-primary">Tervtétel mentése</button><a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month">Mégse</a></div>
+        <div class="d-flex gap-2"><button type="submit" class="btn btn-primary">Save item</button><a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month">Cancel</a></div>
     </form>
 </div>
 @section Scripts {

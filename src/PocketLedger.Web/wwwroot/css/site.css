@@ -342,6 +342,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .planner-tag { display: inline-block; border: 1px solid var(--border-color); border-radius: .3rem; padding: .1rem .35rem; font-size: .7rem; color: var(--text-secondary); }
 .planner-add { display: block; padding: .7rem; margin-top: .75rem; border-radius: var(--control-radius); background: var(--surface-background-hover); text-decoration: none; }
 .planner-account { display: flex; gap: .8rem; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+.planner-opening { padding-top: 1rem; }
+.planner-opening .form-control { min-width: 0; }
 .planner-account small { display: block; color: var(--text-secondary); }
 .planner-account > :last-child { text-align: right; }
 .planner-positive { color: var(--positive-color); }

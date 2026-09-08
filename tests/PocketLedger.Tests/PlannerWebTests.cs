@@ -38,14 +38,14 @@ public class PlannerWebTests
         var recurring = new RecurringTransaction { Id = Guid.NewGuid(), AccountId = account.Id, FirstOccurrence = month.AddDays(9), AutomationStartsOn = month, Frequency = RecurringFrequency.Monthly, Enabled = true, Amount = 450000, Type = TransactionType.Income, Note = "Fizetés (munkahely)" };
         var actual = new Transaction { Id = Guid.NewGuid(), AccountId = account.Id, Type = TransactionType.Income, Amount = 1000, SourceCurrency = "HUF", TransactionDate = month.AddDays(-1), Note = "Previous actual transaction must not appear" };
         var currentActual = new Transaction { Id = Guid.NewGuid(), AccountId = account.Id, Type = TransactionType.Expense, Amount = 1000, SourceCurrency = "HUF", TransactionDate = month.AddDays(1), Note = "Current actual transaction must not appear" };
-        var model = PlannerProjection.Calculate(month, month.AddDays(7), [account, euro], [actual, currentActual], [plan, budget], [recurring], []);
+        var model = PlannerProjection.Calculate(month, month.AddDays(7), [account, euro], new Dictionary<Guid, decimal> { [account.Id] = 520000, [euro.Id] = 300 }, [], [plan, budget], [recurring]);
         var html = await RenderAsync("/Views/Planner/Index.cshtml", model);
         var decoded = WebUtility.HtmlDecode(html);
-        Assert.Contains("Havi tervező", decoded);
-        Assert.Contains("Várható egyenleg alakulása", decoded);
+        Assert.Contains("Monthly planner", decoded);
+        Assert.Contains("Expected balance over time", decoded);
         Assert.Contains("820,000 HUF", decoded);
         Assert.Contains("300.00 EUR", decoded);
-        Assert.Contains("Havi keret", decoded);
+        Assert.Contains("Undated", decoded);
         Assert.DoesNotContain("actual transaction must not appear", decoded);
         Assert.Contains("polyline", html);
         Assert.DoesNotContain("<script>alert('x')</script>", html);
@@ -54,7 +54,16 @@ public class PlannerWebTests
         var accounts = html.IndexOf("href=\"/Accounts/Index\"", StringComparison.Ordinal);
         var categories = html.IndexOf("href=\"/Categories/Index\"", StringComparison.Ordinal);
         Assert.True(profile >= 0 && accounts > profile && categories > accounts);
+        Assert.Contains("Fixed expenses", decoded);
+        Assert.Contains("Use current balance", decoded);
+        Assert.DoesNotContain("Manuális", decoded);
+        var closed = await RenderAsync("/Views/Planner/Index.cshtml", model with { IsClosed = true });
+        Assert.DoesNotContain("/Planner/Edit", closed);
+        Assert.DoesNotContain("/Planner/Create", closed);
+        Assert.DoesNotContain("planner-opening\"", closed);
+        Assert.Contains("read-only", closed);
         await SavePreviewAsync("planner.html", html);
+        await SavePreviewAsync("planner-closed.html", closed);
     }
 
     [Fact]

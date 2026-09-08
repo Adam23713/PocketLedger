@@ -23,6 +23,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         var today = await userContext.TodayAsync(cancellationToken);
         if ((year ?? today.Year) is < 2 or > 9998 || (month ?? today.Month) is < 1 or > 12) return BadRequest();
         var selected = new DateOnly(year ?? today.Year, month ?? today.Month, 1);
+        if ((await plannerService.GetMonthAsync(selected.Year, selected.Month, cancellationToken)).IsClosed) return BadRequest("Closed months are read-only.");
         var model = new PlannerFormViewModel { Month = selected, PlannedDate = selected.Year == today.Year && selected.Month == today.Month ? today : selected, Type = type, Currency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency };
         await PopulateAsync(model, cancellationToken);
         return View("Form", model);
@@ -36,6 +37,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
     {
         var item = await plannerService.GetByIdAsync(id, cancellationToken);
         if (item is null) return NotFound();
+        if ((await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken)).IsClosed) return BadRequest("Closed months are read-only.");
         var model = new PlannerFormViewModel { Id = id, Month = item.Month, PlannedDate = item.PlannedDate, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, CategoryId = item.CategoryId, Amount = item.Amount, Currency = item.Currency, AccountAmount = item.AccountAmount, TargetAmount = item.TargetAmount, Note = item.Note };
         await PopulateAsync(model, cancellationToken);
         return View("Form", model);
@@ -53,6 +55,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
     {
         var item = await plannerService.GetByIdAsync(id, cancellationToken);
         if (item is null) return NotFound();
+        if ((await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken)).IsClosed) return BadRequest("Closed months are read-only.");
         ViewData["Id"] = id;
         return View(item);
     }
@@ -62,9 +65,23 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
     {
         var item = await plannerService.GetByIdAsync(id, cancellationToken);
         if (item is null) return NotFound();
+        if ((await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken)).IsClosed) return BadRequest("Closed months are read-only.");
         try { await plannerService.DeleteAsync(id, cancellationToken); }
         catch (EntityNotFoundException) { return NotFound(); }
         return RedirectToAction(nameof(Index), new { year = item.Month.Year, month = item.Month.Month });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> OpeningBalance(int year, int month, Guid accountId, bool useCurrentBalance, decimal? amount, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!ModelState.IsValid) throw new BusinessRuleException("Enter a valid opening balance.");
+            await plannerService.UpdateOpeningBalanceAsync(year, month, accountId, new(useCurrentBalance, amount), cancellationToken);
+        }
+        catch (EntityNotFoundException) { return NotFound(); }
+        catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; }
+        return RedirectToAction(nameof(Index), new { year, month });
     }
 
     private async Task<IActionResult> SaveAsync(PlannerFormViewModel model, bool editing, CancellationToken cancellationToken)
@@ -75,7 +92,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
             {
                 if (editing) await plannerService.UpdateAsync(model.Id, model.ToInput(), cancellationToken);
                 else await plannerService.CreateAsync(model.ToInput(), cancellationToken);
-                TempData["SuccessMessage"] = "A tervtétel mentve.";
+                TempData["SuccessMessage"] = "Planned item saved.";
                 return RedirectToAction(nameof(Index), new { year = model.Month.Year, month = model.Month.Month });
             }
             catch (EntityNotFoundException) { return NotFound(); }

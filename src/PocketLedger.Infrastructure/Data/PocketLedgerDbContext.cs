@@ -10,14 +10,26 @@ public class PocketLedgerDbContext : DbContext
     private readonly bool crossTenantAccess;
     private readonly bool hasTenantContext;
     private readonly Guid tenantId;
+    private readonly IUserDateProvider plannerDates;
+    private readonly string defaultTimeZone;
+    internal bool SkipPlannerHistory { get; set; }
+    internal Guid PlannerOwnerId => hasTenantContext ? tenantId : throw new InvalidOperationException("An authenticated tenant context is required.");
 
-    public PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, ICurrentUser? currentUser = null) : base(options)
+    public PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, ICurrentUser? currentUser = null, IUserDateProvider? plannerDates = null, Microsoft.Extensions.Options.IOptions<UserDateOptions>? dateOptions = null) : base(options)
     {
         this.currentUser = currentUser;
+        this.plannerDates = plannerDates ?? new UserDateProvider(TimeProvider.System);
+        defaultTimeZone = dateOptions?.Value.DefaultTimeZoneId ?? "UTC";
         hasTenantContext = currentUser?.IsAuthenticated == true;
         tenantId = hasTenantContext ? currentUser!.UserId : Guid.Empty;
     }
-    private protected PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, bool crossTenantAccess) : base(options) => this.crossTenantAccess = crossTenantAccess;
+    private protected PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, bool crossTenantAccess) : base(options)
+    {
+        this.crossTenantAccess = crossTenantAccess;
+        plannerDates = new UserDateProvider(TimeProvider.System);
+        defaultTimeZone = "UTC";
+    }
+    public DbSet<PlannerMonthRecord> PlannerMonths => Set<PlannerMonthRecord>();
     public DbSet<PlannerItem> PlannerItems => Set<PlannerItem>();
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Category> Categories => Set<Category>();
@@ -33,6 +45,7 @@ public class PocketLedgerDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PocketLedgerDbContext).Assembly);
 
+        modelBuilder.Entity<PlannerMonthRecord>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<PlannerItem>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<Account>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<Category>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
@@ -43,12 +56,7 @@ public class PocketLedgerDbContext : DbContext
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
-    {
-        PrepareFinanceChanges();
-        ValidatePersistedOwners();
-        ValidateFinanceReferences();
-        return base.SaveChanges(acceptAllChangesOnSuccess);
-    }
+        => SaveChangesAsync(acceptAllChangesOnSuccess, CancellationToken.None).GetAwaiter().GetResult();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         => SaveChangesAsync(true, cancellationToken);
@@ -58,7 +66,34 @@ public class PocketLedgerDbContext : DbContext
         PrepareFinanceChanges();
         await ValidatePersistedOwnersAsync(cancellationToken);
         await ValidateFinanceReferencesAsync(cancellationToken);
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        var owners = FinanceEntries().Select(entry => GetOwnerId(entry.Entity)).Distinct().Order().ToList();
+        await using var transaction = !SkipPlannerHistory && owners.Count > 0 && Database.IsRelational() && Database.CurrentTransaction is null
+            ? await Database.BeginTransactionAsync(cancellationToken) : null;
+        if (!SkipPlannerHistory)
+        {
+            foreach (var owner in owners)
+            {
+                await LockPlannerOwnerAsync(owner, cancellationToken);
+                var timeZone = await UserPreferences.Where(item => item.UserId == owner).Select(item => item.TimeZoneId).SingleOrDefaultAsync(cancellationToken) ?? defaultTimeZone;
+                var today = plannerDates.Today(timeZone);
+                var month = new DateOnly(today.Year, today.Month, 1);
+                // Catch up missed boundaries before applying this write to the current plan.
+                if (await PlannerMonths.AnyAsync(item => item.OwnerId == owner && !item.IsClosed && item.Month < month, cancellationToken))
+                    await PlannerHistory.RefreshAsync(this, owner, today, null, cancellationToken, includePendingChanges: false);
+                await PlannerHistory.RefreshAsync(this, owner, today, null, cancellationToken);
+            }
+        }
+        PrepareFinanceChanges();
+        await ValidateFinanceReferencesAsync(cancellationToken);
+        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+        return result;
+    }
+
+    internal async Task LockPlannerOwnerAsync(Guid owner, CancellationToken token)
+    {
+        if (Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL")
+            await Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({owner.ToString()}, 83))", token);
     }
 
     private void PrepareFinanceChanges()
@@ -106,12 +141,12 @@ public class PocketLedgerDbContext : DbContext
     }
 
     private IEnumerable<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry> FinanceEntries() => ChangeTracker.Entries().Where(entry => IsFinanceEntity(entry.Entity) && entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
-    private static bool IsFinanceEntity(object entity) => entity is PlannerItem or Account or Category or Transaction or RecurringTransaction or RecurringTransactionOccurrence or Debt;
-    private static Guid GetOwnerId(object entity) => entity switch { PlannerItem value => value.OwnerId, Account value => value.OwnerId, Category value => value.OwnerId, Transaction value => value.OwnerId, RecurringTransaction value => value.OwnerId, RecurringTransactionOccurrence value => value.OwnerId, Debt value => value.OwnerId, _ => throw new InvalidOperationException() };
-    private static Guid GetEntityId(object entity) => entity switch { PlannerItem value => value.Id, Account value => value.Id, Category value => value.Id, Transaction value => value.Id, RecurringTransaction value => value.Id, RecurringTransactionOccurrence value => value.Id, Debt value => value.Id, _ => Guid.Empty };
+    private static bool IsFinanceEntity(object entity) => entity is PlannerMonthRecord or PlannerItem or Account or Category or Transaction or RecurringTransaction or RecurringTransactionOccurrence or Debt;
+    private static Guid GetOwnerId(object entity) => entity switch { PlannerMonthRecord value => value.OwnerId, PlannerItem value => value.OwnerId, Account value => value.OwnerId, Category value => value.OwnerId, Transaction value => value.OwnerId, RecurringTransaction value => value.OwnerId, RecurringTransactionOccurrence value => value.OwnerId, Debt value => value.OwnerId, _ => throw new InvalidOperationException() };
+    private static Guid GetEntityId(object entity) => entity switch { PlannerMonthRecord value => value.Id, PlannerItem value => value.Id, Account value => value.Id, Category value => value.Id, Transaction value => value.Id, RecurringTransaction value => value.Id, RecurringTransactionOccurrence value => value.Id, Debt value => value.Id, _ => Guid.Empty };
     private static void SetOwnerId(object entity, Guid ownerId)
     {
-        switch (entity) { case PlannerItem value: value.OwnerId = ownerId; break; case Account value: value.OwnerId = ownerId; break; case Category value: value.OwnerId = ownerId; break; case Transaction value: value.OwnerId = ownerId; break; case RecurringTransaction value: value.OwnerId = ownerId; break; case RecurringTransactionOccurrence value: value.OwnerId = ownerId; break; case Debt value: value.OwnerId = ownerId; break; }
+        switch (entity) { case PlannerMonthRecord value: value.OwnerId = ownerId; break; case PlannerItem value: value.OwnerId = ownerId; break; case Account value: value.OwnerId = ownerId; break; case Category value: value.OwnerId = ownerId; break; case Transaction value: value.OwnerId = ownerId; break; case RecurringTransaction value: value.OwnerId = ownerId; break; case RecurringTransactionOccurrence value: value.OwnerId = ownerId; break; case Debt value: value.OwnerId = ownerId; break; }
     }
 
     private static IEnumerable<(Type Type, Guid Id)> GetReferences(object entity) => entity switch
@@ -139,6 +174,7 @@ public class PocketLedgerDbContext : DbContext
 
     private bool PersistedOwnerMatches(object entity, Guid ownerId) => entity switch
     {
+        PlannerMonthRecord value => PlannerMonths.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         PlannerItem value => PlannerItems.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         Account value => Accounts.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         Category value => Categories.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
@@ -151,6 +187,7 @@ public class PocketLedgerDbContext : DbContext
 
     private Task<bool> PersistedOwnerMatchesAsync(object entity, Guid ownerId, CancellationToken cancellationToken) => entity switch
     {
+        PlannerMonthRecord value => PlannerMonths.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         PlannerItem value => PlannerItems.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         Account value => Accounts.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         Category value => Categories.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),

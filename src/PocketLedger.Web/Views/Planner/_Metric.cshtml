@@ -8,8 +8,8 @@
         <small>@(difference > 0 ? "+" : "")@MoneyFormatter.Format(difference, value.Currency)
             @if (value.Previous > 0) { <span> · @(difference > 0 ? "↑" : difference < 0 ? "↓" : "") @((Math.Abs(difference) / value.Previous * 100).ToString("0.#"))%</span> }
             else { <span> · %: —</span> }
-            <br />az előző hónaphoz képest
+            <br />compared with the previous month
         </small>
     }
-    @if (Model.Amounts.Count == 0) { <strong>—</strong><small>Még nincs számla.</small> }
+    @if (Model.Amounts.Count == 0) { <strong>—</strong><small>No accounts yet.</small> }
 </section>
