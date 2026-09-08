@@ -140,3 +140,13 @@ dotnet test PocketLedger.slnx
 ## License
 
 PocketLedger is free and open-source software licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).
+
+## Financial cache
+
+The API uses Valkey for on-demand caching of current and previous month transaction queries (including filters, pages and daily totals), statistics for the current month and preceding 11 months, and current account/main balances. Month eligibility uses the user's time zone. Older or unbounded transaction queries continue to use PostgreSQL.
+
+Production Compose includes a private Valkey service with a 256 MB eviction limit and no persistence. For a locally running API, start Valkey with `docker compose -f compose.yaml -f compose.development.yaml up -d valkey` and set `FinancialCache__ConnectionString=localhost:6379`. An absent connection string disables caching. `FinancialCache__LifetimeMinutes` defaults to 30 (allowed range: 1–1440); expiration bounds unused entries, while writes invalidate immediately.
+
+Apply API migrations before enabling caching. Database triggers atomically rotate a per-user revision whenever accounts, categories, transactions, debts or recurring data change, including backup restores and background processing. Cache reads check this small indexed revision row instead of repeating the financial queries. Keys include the revision and query dimensions; a concurrent old fill or a Valkey outage cannot make old entries current again. Invalidation deliberately covers all financial cache entries for the affected user. Valkey failures fall back to PostgreSQL.
+
+The PostgreSQL/Valkey integration tests run in CI. To run them locally, set `PL_TEST_POSTGRES` to a test PostgreSQL connection string whose role can create databases, and `PL_TEST_VALKEY` to a test Valkey endpoint, then run `dotnet test tests/PocketLedger.Tests --filter FullyQualifiedName~FinancialCacheTests`. The fixture creates and drops its own uniquely named database. Without both variables these integration tests are reported as skipped.
