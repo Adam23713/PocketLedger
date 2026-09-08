@@ -24,6 +24,6 @@ public class PlannerFormViewModel
     public PlannerItemInput ToInput() => new(Month, PlannedDate, Type, AccountId ?? Guid.Empty, TargetAccountId, CategoryId, Amount, Currency, AccountAmount, TargetAmount, Note);
 }
 
-public record PlannerTableViewModel(string Title, TransactionType Type, DateOnly Month, IReadOnlyList<PlannerEvent> Items);
+public record PlannerTableViewModel(string Title, TransactionType Type, DateOnly Month, IReadOnlyList<PlannerEvent> Items, bool ReadOnly = false);
 public record PlannerMetricViewModel(string Label, string Icon, string Tone, IReadOnlyList<PlannerMetricAmount> Amounts);
 public record PlannerMetricAmount(string Currency, decimal Amount, decimal Previous);

@@ -72,6 +72,7 @@ builder.Services.AddScoped<IImportExportService, ImportExportService>();
 builder.Services.AddScoped<IDebtService, DebtService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHostedService<RecurringTransactionWorker>();
+builder.Services.AddHostedService<PlannerMonthWorker>();
 var signingKey = builder.Configuration["Authentication:SigningKey"] ?? throw new InvalidOperationException("Authentication:SigningKey is required.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

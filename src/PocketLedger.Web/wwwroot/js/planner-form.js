@@ -44,10 +44,10 @@
             targetDisplay.value = field("planner-amount-display").value;
         }
         if (!transfer) targetAmount.value = "";
-        const verb = type.value === "Income" ? "Várható jóváírás" : "Várható levonás";
+        const verb = type.value === "Income" ? "Expected credit" : "Expected debit";
         field("planner-conversion-preview").textContent = transfer
-            ? (accountAmount.value || "0") + " " + accountCurrency() + " → " + (targetAmount.value || "0") + " " + targetCurrency() + " · manuális átvezetés"
-            : verb + ": " + (accountAmount.value || "0") + " " + accountCurrency() + " · eredeti összeg: " + (amount.value || "0") + " " + currency.value;
+            ? (accountAmount.value || "0") + " " + accountCurrency() + " → " + (targetAmount.value || "0") + " " + targetCurrency() + " · planned transfer"
+            : verb + ": " + (accountAmount.value || "0") + " " + accountCurrency() + " · original amount: " + (amount.value || "0") + " " + currency.value;
     }
     for (const input of [type, account, target, currency]) input.addEventListener("change", update);
     for (const input of [amount, accountAmount, targetAmount]) input.addEventListener("change", sync);

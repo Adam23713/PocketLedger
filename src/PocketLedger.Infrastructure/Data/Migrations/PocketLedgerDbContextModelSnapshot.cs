@@ -275,6 +275,10 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
 
+                    b.Property<int?>("CopyDay")
+                        .HasColumnType("integer")
+                        .HasColumnName("copy_day");
+
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -337,6 +341,46 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                             t.HasCheckConstraint("ck_planner_items_type", "type IN ('Income', 'Expense', 'Transfer')");
                         });
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.PlannerMonthRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_closed");
+
+                    b.Property<DateOnly>("Month")
+                        .HasColumnType("date")
+                        .HasColumnName("month");
+
+                    b.Property<string>("OpeningBalancesJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("opening_balances_json");
+
+                    b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot_json");
+
+                    b.HasKey("Id")
+                        .HasName("pk_planner_months");
+
+                    b.HasIndex("OwnerId", "Month")
+                        .IsUnique()
+                        .HasDatabaseName("ix_planner_months_owner_id_month");
+
+                    b.ToTable("planner_months", (string)null);
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>

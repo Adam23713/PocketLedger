@@ -18,6 +18,7 @@ public class PlannerItemConfiguration : IEntityTypeConfiguration<PlannerItem>
         builder.Property(item => item.Id).HasColumnName("id");
         builder.Property(item => item.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
         builder.Property(item => item.Month).HasColumnName("month").HasColumnType("date");
+        builder.Property(item => item.CopyDay).HasColumnName("copy_day");
         builder.Property(item => item.PlannedDate).HasColumnName("planned_date").HasColumnType("date");
         builder.Property(item => item.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(10);
         builder.Property(item => item.AccountId).HasColumnName("account_id");
