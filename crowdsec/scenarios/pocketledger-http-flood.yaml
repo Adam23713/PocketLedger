@@ -1,0 +1,18 @@
+type: leaky
+name: pocketledger/http-flood
+description: Detect sustained high request volume from one client IP across PocketLedger hosts
+filter: "evt.Meta.service == 'http' && evt.Meta.log_type == 'http_access-log' && evt.Meta.http_status != '403'"
+groupby: evt.Meta.source_ip
+capacity: 1000
+# 1 event leaks every 60 ms ~= 1000 requests/minute sustained rate.
+leakspeed: 60ms
+blackhole: 5m
+labels:
+  service: http
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1498
+  behavior: "http:flood"
+  label: "PocketLedger HTTP flood"
+  remediation: true

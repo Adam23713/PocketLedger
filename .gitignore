@@ -1,3 +1,5 @@
 .env
 **/bin/
 **/obj/
+Caddyfile
+caddy/logs/
