@@ -11,6 +11,24 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    services:
+      postgres-cache-tests:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: cache-test-password
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      valkey-cache-tests:
+        image: valkey/valkey:8-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PL_TEST_POSTGRES: Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=cache-test-password
+      PL_TEST_VALKEY: localhost:6379
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,7 +85,7 @@ jobs:
         run: docker compose build
 
       - name: Start stack (without Caddy, no real domains/TLS in CI)
-        run: docker compose up -d web api identity landing
+        run: docker compose up -d valkey web api identity landing
 
       - name: Wait for services to actually start
         run: |
