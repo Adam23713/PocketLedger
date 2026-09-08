@@ -81,6 +81,7 @@ AddApiClient<ICategoryService, CategoriesApiClient>();
 AddApiClient<ITransactionService, TransactionsApiClient>();
 AddApiClient<IRecurringTransactionService, RecurringTransactionsApiClient>();
 AddApiClient<ICalendarService, CalendarApiClient>();
+AddApiClient<IPlannerService, PlannerApiClient>();
 AddApiClient<IStatisticsService, StatisticsApiClient>();
 AddApiClient<IImportExportService, ImportExportApiClient>();
 AddApiClient<IDebtService, DebtsApiClient>();

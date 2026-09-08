@@ -1,0 +1,30 @@
+@model IReadOnlyList<PocketLedger.Services.Interfaces.PlannerBalancePoint>
+@using System.Globalization
+@{
+    var min = Math.Min(0, Model.Min(point => point.Balance));
+    var max = Math.Max(0, Model.Max(point => point.Balance));
+    if (min == max) max = min + 1;
+    var range = max - min;
+    var start = Model[0].Date;
+    var days = DateTime.DaysInMonth(start.Year, start.Month);
+    string N(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    decimal X(DateOnly date) => 88 + (date.Day - 1) * 350m / Math.Max(1, days - 1);
+    decimal Y(decimal amount) => 210 - (amount - min) / range * 170;
+    var line = string.Join(" ", Model.Select(point => $"{N(X(point.Date))},{N(Y(point.Balance))}"));
+    var area = $"88,210 {line} 438,210";
+}
+<figure class="mb-3">
+    <figcaption class="planner-muted">@Model[0].Currency · Várható főegyenleg</figcaption>
+    <svg class="planner-chart" viewBox="0 0 460 250" role="img" aria-label="@($"Várható egyenleg {Model[0].Currency}: {MoneyFormatter.Format(Model[0].Balance, Model[0].Currency)} kezdőértékről {MoneyFormatter.Format(Model[^1].Balance, Model[0].Currency)} záróértékre")">
+        @for (var i = 0; i <= 4; i++)
+        {
+            var amount = min + range * i / 4;
+            <line class="grid" x1="88" x2="438" y1="@N(Y(amount))" y2="@N(Y(amount))" />
+            <g><text x="80" y="@N(Y(amount) + 4)" text-anchor="end">@MoneyFormatter.FormatNumber(amount, Model[0].Currency)</text></g>
+        }
+        <polygon points="@area" fill="currentColor" opacity=".08" />
+        <polyline points="@line" stroke="currentColor" stroke-width="2.5" fill="none" />
+        @foreach (var day in new[] { 1, 8, 15, 22, days }.Distinct()) { <g><text x="@N(X(start.AddDays(day - 1)))" y="235" text-anchor="middle">@($"{start.Month:00}. {day:00}.")</text></g> }
+        @foreach (var point in Model) { <circle cx="@N(X(point.Date))" cy="@N(Y(point.Balance))" r="2" fill="currentColor"><title>@point.Date.ToString("MM. dd."): @MoneyFormatter.Format(point.Balance, point.Currency)</title></circle> }
+    </svg>
+</figure>

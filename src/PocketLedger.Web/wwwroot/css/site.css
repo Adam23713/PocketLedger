@@ -316,3 +316,43 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .avatar-selector label:has(input:checked) { border-color: var(--bs-primary); background: color-mix(in srgb, var(--bs-primary) 10%, transparent); }
 .avatar-selector input { position: absolute; opacity: 0; }
 .avatar-selector img { width: 72px; height: 72px; object-fit: contain; }
+
+.navigation-icon { width: 1.15rem; height: 1.15rem; flex-shrink: 0; vertical-align: -.2em; }
+.nav-link .navigation-icon, .profile-menu .navigation-icon { margin-right: .3rem; }
+.planner-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.planner-header h1 { margin-bottom: .35rem; }
+.planner-header p, .planner-muted { color: var(--text-secondary); }
+.planner-month { display: flex; align-items: center; gap: 1rem; background: var(--surface-background); border: 1px solid var(--border-color); border-radius: var(--card-radius); padding: .5rem; }
+.planner-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.planner-metric, .planner-panel { background: var(--surface-background); border: 1px solid var(--border-color); border-radius: var(--card-radius); box-shadow: var(--card-shadow); padding: 1.25rem; min-width: 0; }
+.planner-metric { border-top: 3px solid var(--accent-color); }
+.planner-metric.positive { border-top-color: var(--positive-color); }
+.planner-metric.negative { border-top-color: var(--negative-color); }
+.planner-metric h2 { font-size: .95rem; display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; }
+.planner-metric strong { display: block; font-size: clamp(1.15rem, 1.8vw, 1.65rem); overflow-wrap: anywhere; }
+.planner-metric small { display: block; color: var(--text-secondary); margin: .25rem 0 .65rem; }
+.planner-columns { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.planner-stack { display: grid; gap: 1rem; }
+.planner-panel h2 { font-size: 1.25rem; margin: 0; }
+.planner-panel-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+.planner-table { font-size: .85rem; margin: 0; }
+.planner-table td { vertical-align: middle; }
+.planner-table small { display: block; color: var(--text-secondary); }
+.planner-table .planner-money { white-space: nowrap; }
+.planner-tag { display: inline-block; border: 1px solid var(--border-color); border-radius: .3rem; padding: .1rem .35rem; font-size: .7rem; color: var(--text-secondary); }
+.planner-add { display: block; padding: .7rem; margin-top: .75rem; border-radius: var(--control-radius); background: var(--surface-background-hover); text-decoration: none; }
+.planner-account { display: flex; gap: .8rem; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+.planner-account small { display: block; color: var(--text-secondary); }
+.planner-account > :last-child { text-align: right; }
+.planner-positive { color: var(--positive-color); }
+.planner-negative { color: var(--negative-color); }
+.planner-notice { padding: 1rem; background: var(--surface-background-hover); border-left: 3px solid var(--accent-color); border-radius: var(--control-radius); margin-top: 1rem; }
+.planner-notice.positive { border-left-color: var(--positive-color); }
+.planner-notice.negative { border-left-color: var(--negative-color); }
+.planner-chart { width: 100%; height: auto; color: var(--positive-color); }
+.planner-chart text { fill: var(--text-secondary); font-size: 11px; }
+.planner-chart .grid { stroke: var(--border-color); stroke-width: 1; }
+.planner-form { max-width: 850px; margin: auto; }
+.planner-form .category-tree { max-height: 260px; overflow: auto; }
+@media (max-width: 1100px) { .planner-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .planner-columns { grid-template-columns: 1fr; } }
+@media (max-width: 550px) { .planner-summary { grid-template-columns: 1fr; } .planner-panel { padding: .85rem; } .planner-header { align-items: stretch; } .planner-month { justify-content: space-between; width: 100%; } }

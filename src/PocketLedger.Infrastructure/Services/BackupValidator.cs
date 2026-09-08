@@ -8,7 +8,7 @@ public static class BackupValidator
     public static IReadOnlyList<string> Validate(PocketLedgerBackup backup)
     {
         var errors = new List<string>();
-        if (backup.Version is not (1 or 2))
+        if (backup.Version is not (1 or 2 or 3))
         {
             errors.Add("Backup: rule 'version': Unsupported backup version.");
         }
@@ -32,6 +32,18 @@ public static class BackupValidator
         foreach (var transaction in backup.Transactions) ValidateTransaction(transaction, accounts, categories, debtLookup, errors);
         ValidateDebtBalances(debts, backup.Transactions, errors);
         foreach (var recurring in backup.RecurringTransactions) ValidateRecurring(recurring, accounts, categories, debtLookup, errors);
+        AddDuplicates(errors, "PlannerItem", (backup.PlannerItems ?? []).Select(item => item.Id));
+        foreach (var saved in backup.PlannerItems ?? [])
+        {
+            if (saved.Item is not { } item) { Add(errors, "PlannerItem", saved.Id, "item", "Planner item is required."); continue; }
+            var account = accounts.GetValueOrDefault(item.AccountId);
+            var target = item.TargetAccountId is { } targetId ? accounts.GetValueOrDefault(targetId) : null;
+            var category = item.CategoryId is { } categoryId ? categories.GetValueOrDefault(categoryId) : null;
+            TryRule(errors, "PlannerItem", saved.Id, "planner", () => PlannerRules.Validate(item,
+                account is null ? null : new Account { Id = account.Id, Currency = account.Currency },
+                target is null ? null : new Account { Id = target.Id, Currency = target.Currency },
+                category is null ? null : new Category { Id = category.Id, Type = category.Type }));
+        }
         return errors;
     }
 
