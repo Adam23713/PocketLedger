@@ -1,0 +1,25 @@
+@model PocketLedger.Models.ViewModels.Planner.PlannerTableViewModel
+@using PocketLedger.Services.Interfaces
+<section class="planner-panel">
+    <div class="planner-panel-header"><h2>@Model.Title</h2><a class="btn btn-sm btn-primary" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Tétel hozzáadása</a></div>
+    @if (Model.Items.Count == 0) { <p class="planner-muted">Erre a hónapra még nincs ilyen tétel.</p> }
+    else
+    {
+        <div class="table-responsive"><table class="table planner-table"><thead><tr><th>Név / kategória</th><th>Összeg</th><th>Dátum / eredet</th><th>Számla</th><th><span class="visually-hidden">Műveletek</span></th></tr></thead><tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@(item.Note ?? item.CategoryName ?? "Átvezetés")<small>@item.CategoryName</small></td>
+                <td class="planner-money">@MoneyFormatter.Format(item.Amount, item.Currency)
+                    @if (item.Currency != item.AccountCurrency) { <small>Számlán: @MoneyFormatter.Format(item.AccountAmount, item.AccountCurrency)</small> }
+                    @if (item.TargetAmount is { } targetAmount) { <small>→ @MoneyFormatter.Format(targetAmount, item.TargetCurrency)</small> }
+                </td>
+                <td>@(item.Date?.ToString("MM. dd.") ?? "Havi keret")<small><span class="planner-tag">@(item.Source switch { PlannerEventSource.Actual => "Tényleges", PlannerEventSource.Recurring => "Rendszeres · várható", _ => "Manuális terv" })</span></small></td>
+                <td>@item.AccountName @if (item.TargetAccountName is not null) { <small>→ @item.TargetAccountName</small> }</td>
+                <td>@if (item.Source == PlannerEventSource.Manual) { <a asp-action="Edit" asp-route-id="@item.Id" aria-label="Tervtétel szerkesztése">Szerkesztés</a><small><a asp-action="Delete" asp-route-id="@item.Id">Törlés</a></small> }</td>
+            </tr>
+        }
+        </tbody></table></div>
+    }
+    <a class="planner-add" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Új @(Model.Type == PocketLedger.Models.Enums.TransactionType.Income ? "bevételi" : Model.Type == PocketLedger.Models.Enums.TransactionType.Expense ? "kiadási" : "transfer") tervtétel</a>
+</section>

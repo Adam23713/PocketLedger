@@ -40,13 +40,13 @@
                 </button>
                 <div class="navbar-collapse collapse" id="main-navigation">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)">Dashboard</a></li>
-                        <li class="nav-item"><a class="@NavClass("Accounts")" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)">Accounts</a></li>
-                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)">Transactions</a></li>
-                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)">Calendar</a></li>
-                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)">Statistics</a></li>
-                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)">Recurring</a></li>
-                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)">Loans / Debts</a></li>
+                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> Dashboard</a></li>
+                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> Transactions</a></li>
+                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> Calendar</a></li>
+                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> Havi tervező</a></li>
+                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> Statistics</a></li>
+                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> Recurring</a></li>
+                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> Loans / Debts</a></li>
                     </ul>
                 </div>
                 <div class="header-actions">
@@ -74,17 +74,18 @@
                                     <div><strong>@(currentProfile.DisplayName ?? User.Identity?.Name)</strong>@if (!string.IsNullOrWhiteSpace(currentProfile.DisplayName) && !string.IsNullOrWhiteSpace(User.Identity?.Name)) { <small>@@@User.Identity.Name</small> }</div>
                                 </div>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <a role="menuitem" asp-controller="Settings" asp-action="Index">Settings</a>
-                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)">Categories</a>
-                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")">Security</a>
-                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")">PocketLedger website</a>
-                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index">Import / Export</a>
+                                <a role="menuitem" asp-controller="Settings" asp-action="Index"><partial name="_NavigationIcon" model='"Settings"' /> Settings</a>
+                                <a class="@(currentController == "Accounts" ? "active" : null)" role="menuitem" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)"><partial name="_NavigationIcon" model='"Accounts"' /> Accounts</a>
+                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)"><partial name="_NavigationIcon" model='"Categories"' /> Categories</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")"><partial name="_NavigationIcon" model='"Security"' /> Security</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
+                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index"><partial name="_NavigationIcon" model='"ImportExport"' /> Import / Export</a>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <form asp-controller="Session" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
+                                <form asp-controller="Session" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit"><partial name="_NavigationIcon" model='"Session"' /> Logout</button></form>
                             }
                             else
                             {
-                                <a role="menuitem" asp-controller="Session" asp-action="Login">Login</a>
+                                <a role="menuitem" asp-controller="Session" asp-action="Login"><partial name="_NavigationIcon" model='"Session"' /> Login</a>
                             }
                         </div>
                     </div>

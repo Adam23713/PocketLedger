@@ -1,0 +1,67 @@
+@model PocketLedger.Services.Interfaces.PlannerMonth
+@using System.Globalization
+@using PocketLedger.Models.Enums
+@using PocketLedger.Models.ViewModels.Planner
+@using PocketLedger.Services
+@using PocketLedger.Services.Interfaces
+@{
+    ViewData["Title"] = "Havi tervező";
+    var plannedEvents = Model.Events.Where(item => item.Source != PlannerEventSource.Actual).ToList();
+    var previous = Model.Month.AddMonths(-1);
+    var next = Model.Month.AddMonths(1);
+}
+<div class="planner-header">
+    <div><h1>Havi tervező</h1><p class="mb-0">Tervezd meg a hónapodat, tudd előre, mire számíthatsz.</p></div>
+    <nav class="planner-month" aria-label="Hónap kiválasztása">
+        @if (previous.Year >= 2) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month" aria-label="Előző hónap">‹</a> }
+        <strong>@Model.Month.ToString("yyyy. MMMM", CultureInfo.GetCultureInfo("hu-HU"))</strong>
+        @if (next <= new DateOnly(Model.Today.Year, Model.Today.Month, 1).AddYears(10)) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month" aria-label="Következő hónap">›</a> }
+    </nav>
+</div>
+<div class="planner-summary">
+    <partial name="_Metric" model='new PlannerMetricViewModel("Várható bevétel", "Income", "positive", Model.Totals.Select(item => new PlannerMetricAmount(item.Currency, item.Income, item.PreviousIncome)).ToList())' />
+    <partial name="_Metric" model='new PlannerMetricViewModel("Várható kiadás", "Expense", "negative", Model.Totals.Select(item => new PlannerMetricAmount(item.Currency, item.Expenses, item.PreviousExpenses)).ToList())' />
+    <partial name="_Metric" model='new PlannerMetricViewModel("Várható hónap végi egyenleg", "Accounts", "", Model.Totals.Select(item => new PlannerMetricAmount(item.Currency, item.ClosingBalance, item.PreviousClosingBalance)).ToList())' />
+    <partial name="_Metric" model='new PlannerMetricViewModel("Szabadon felhasználható", "Available", "positive", Model.Totals.Select(item => new PlannerMetricAmount(item.Currency, item.Available, item.PreviousAvailable)).ToList())' />
+</div>
+<div class="planner-columns">
+    <div class="planner-stack">
+        <partial name="_Table" model='new PlannerTableViewModel("Várható bevételek", TransactionType.Income, Model.Month, plannedEvents.Where(item => item.Classification == TransactionReportingClassification.Income).ToList())' />
+        <partial name="_Table" model='new PlannerTableViewModel("Várható kiadások", TransactionType.Expense, Model.Month, plannedEvents.Where(item => item.Classification == TransactionReportingClassification.Expense).ToList())' />
+        <partial name="_Table" model='new PlannerTableViewModel("Számlák közötti transzferek", TransactionType.Transfer, Model.Month, plannedEvents.Where(item => item.Type == TransactionType.Transfer).ToList())' />
+        @if (plannedEvents.Any(item => item.Type == TransactionType.Adjustment))
+        {
+            <section class="planner-panel"><h2>Egyenlegkorrekciók</h2><p class="planner-muted">Az egyenlegek tartalmazzák az alábbi korrekciókat; ezek nem bevételek vagy kiadások.</p>
+                @foreach (var item in plannedEvents.Where(item => item.Type == TransactionType.Adjustment)) { <p>@item.Date?.ToString("MM. dd.") · @item.AccountName · @MoneyFormatter.Format(item.SourceChange, item.AccountCurrency)</p> }
+            </section>
+        }
+    </div>
+    <div class="planner-stack">
+        <section class="planner-panel">
+            <div class="planner-panel-header"><h2>Várható egyenleg alakulása</h2></div>
+            @foreach (var currency in Model.Points.Select(point => point.Currency).Distinct())
+            {
+                <partial name="_Chart" model="Model.Points.Where(point => point.Currency == currency).ToList()" />
+            }
+            @if (Model.Points.Count == 0) { <p class="planner-muted">A grafikonhoz jelölj meg legalább egy számlát a főegyenleg részeként.</p> }
+            <small class="planner-muted">A főegyenlegbe beszámító számlák, pénznemenként. A dátum nélküli havi keretek nem szerepelnek a grafikonon.</small>
+        </section>
+        <section class="planner-panel">
+            <div class="planner-panel-header"><h2>Számlák várható egyenlege</h2><a asp-controller="Accounts" asp-action="Index">Részletek</a></div>
+            @foreach (var account in Model.Accounts)
+            {
+                <div class="planner-account"><div><strong>@account.Name</strong><small>Jelenleg: @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</small><small>Hó elején: @MoneyFormatter.Format(account.OpeningBalance, account.Currency)</small>@if (!account.IncludeInMainBalance) { <small>Főegyenlegen kívül</small> }</div>
+                <div><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong><div class="@(account.Change < 0 ? "planner-negative" : "planner-positive")">@(account.Change > 0 ? "+" : "")@MoneyFormatter.Format(account.Change, account.Currency)</div><small>@(account.ChangePercent is { } percentage ? $"{percentage:+0.#;-0.#;0}%" : "%: —")</small></div></div>
+            }
+            @if (Model.Accounts.Count == 0) { <p class="planner-muted">Hozz létre egy számlát a tervezéshez.</p> }
+            @foreach (var total in Model.Totals)
+            {
+                @if (total.Expenses > total.Income) { <div class="planner-notice negative"><strong>Negatív havi cash flow · @total.Currency</strong><p class="mb-0">Ebben a hónapban a kiadások meghaladják a bevételeket.</p></div> }
+                else if (total.Available > 0) { <div class="planner-notice positive"><strong>Jó úton haladsz!</strong><p class="mb-0">A havi keretek után @MoneyFormatter.Format(total.Available, total.Currency) marad szabadon felhasználható.</p></div> }
+            }
+            @foreach (var account in Model.Accounts.Where(account => account.ClosingBalance <= 0)) { <div class="planner-notice negative"><strong>Figyelem: @account.Name</strong><p class="mb-0">A várható hónap végi egyenleg nulla vagy negatív.</p></div> }
+            <div class="planner-notice"><strong>A terv becslés.</strong><p class="mb-0">A listákban a rendszeres, hitelhez kapcsolódó és kézzel felvett tervek szerepelnek. A tényleges tranzakciókat az egyenlegek számításához használjuk. A manuális tételek nem hoznak létre tranzakciót; ha megvalósultak, töröld őket a tervből a kettős számítás elkerüléséhez.</p></div>
+            <div class="planner-notice"><p class="mb-0">Szabadon felhasználható = a főegyenlegbe beszámító számlák várható záróegyenlege − dátum nélküli kiadási keretek. A dátum nélküli bevétel nem növeli az egyenleget; ehhez adj meg dátumot. Devizás bevétel és kiadás a számlán elszámolt összeggel szerepel az összesítésekben.</p></div>
+        </section>
+    </div>
+</div>

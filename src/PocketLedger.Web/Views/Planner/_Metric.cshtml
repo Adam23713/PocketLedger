@@ -1,0 +1,15 @@
+@model PocketLedger.Models.ViewModels.Planner.PlannerMetricViewModel
+<section class="planner-metric @Model.Tone">
+    <h2><partial name="_NavigationIcon" model="Model.Icon" /> @Model.Label</h2>
+    @foreach (var value in Model.Amounts)
+    {
+        var difference = value.Amount - value.Previous;
+        <strong>@MoneyFormatter.Format(value.Amount, value.Currency)</strong>
+        <small>@(difference > 0 ? "+" : "")@MoneyFormatter.Format(difference, value.Currency)
+            @if (value.Previous > 0) { <span> · @(difference > 0 ? "↑" : difference < 0 ? "↓" : "") @((Math.Abs(difference) / value.Previous * 100).ToString("0.#"))%</span> }
+            else { <span> · %: —</span> }
+            <br />az előző hónaphoz képest
+        </small>
+    }
+    @if (Model.Amounts.Count == 0) { <strong>—</strong><small>Még nincs számla.</small> }
+</section>

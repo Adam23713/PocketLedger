@@ -68,7 +68,8 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
         var hasTransactions = await dbContext.Transactions.AnyAsync(transaction => transaction.CategoryId == id, cancellationToken);
         var hasRecurringTransactions = await dbContext.RecurringTransactions.AnyAsync(template => template.CategoryId == id, cancellationToken);
         var hasSubcategories = await dbContext.Categories.AnyAsync(item => item.ParentCategoryId == id, cancellationToken);
-        CategoryRules.EnsureCanDelete(hasTransactions || hasRecurringTransactions, hasSubcategories);
+        var hasPlannerItems = await dbContext.PlannerItems.AnyAsync(item => item.CategoryId == id, cancellationToken);
+        CategoryRules.EnsureCanDelete(hasTransactions || hasRecurringTransactions || hasPlannerItems, hasSubcategories);
         dbContext.Categories.Remove(category);
         await dbContext.SaveChangesAsync(cancellationToken);
     }

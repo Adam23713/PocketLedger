@@ -250,6 +250,95 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.PlannerItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AccountAmount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("account_amount");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly>("Month")
+                        .HasColumnType("date")
+                        .HasColumnName("month");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<DateOnly?>("PlannedDate")
+                        .HasColumnType("date")
+                        .HasColumnName("planned_date");
+
+                    b.Property<Guid?>("TargetAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_account_id");
+
+                    b.Property<decimal?>("TargetAmount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("target_amount");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_planner_items");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_planner_items_account_id");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_planner_items_category_id");
+
+                    b.HasIndex("TargetAccountId")
+                        .HasDatabaseName("ix_planner_items_target_account_id");
+
+                    b.HasIndex("OwnerId", "Month")
+                        .HasDatabaseName("ix_planner_items_owner_id_month");
+
+                    b.ToTable("planner_items", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_planner_items_amounts", "amount > 0 AND account_amount > 0 AND (target_amount IS NULL OR target_amount > 0)");
+
+                            t.HasCheckConstraint("ck_planner_items_transfer", "(type = 'Transfer' AND target_account_id IS NOT NULL AND target_account_id <> account_id AND target_amount IS NOT NULL AND planned_date IS NOT NULL AND category_id IS NULL) OR (type <> 'Transfer' AND target_account_id IS NULL AND target_amount IS NULL AND category_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_planner_items_type", "type IN ('Income', 'Expense', 'Transfer')");
+                        });
+                });
+
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -633,6 +722,34 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasConstraintName("fk_debts_accounts_account_id");
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.PlannerItem", b =>
+                {
+                    b.HasOne("PocketLedger.Models.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_planner_items_accounts_account_id");
+
+                    b.HasOne("PocketLedger.Models.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planner_items_categories_category_id");
+
+                    b.HasOne("PocketLedger.Models.Entities.Account", "TargetAccount")
+                        .WithMany()
+                        .HasForeignKey("TargetAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_planner_items_accounts_target_account_id");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("TargetAccount");
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>

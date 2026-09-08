@@ -1,0 +1,11 @@
+@model PocketLedger.Services.Interfaces.PlannerItemInput
+@{ ViewData["Title"] = "Tervtétel törlése"; }
+<div class="planner-panel planner-form">
+    <h1 class="h3">Tervtétel törlése</h1>
+    <p>@(Model.Note ?? Model.Type.ToString()) · @MoneyFormatter.Format(Model.Amount, Model.Currency) · @(Model.PlannedDate?.ToString("yyyy. MM. dd.") ?? Model.Month.ToString("yyyy. MM."))</p>
+    <p>A törlés a tervet módosítja. A tényleges tranzakciókat nem érinti.</p>
+    <form asp-action="Delete" asp-route-id="@ViewData["Id"]" method="post">
+        <button type="submit" class="btn btn-danger">Tervtétel törlése</button>
+        <a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month">Mégse</a>
+    </form>
+</div>
