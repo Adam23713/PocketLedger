@@ -60,6 +60,7 @@ builder.Services.Configure<UserDateOptions>(builder.Configuration.GetSection(Use
 builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddDbContext<PocketLedgerDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ApiConnection")));
 builder.Services.AddRecurringTransactionProcessingDataAccess();
+builder.Services.AddFinancialCache(builder.Configuration);
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
