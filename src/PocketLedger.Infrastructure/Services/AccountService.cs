@@ -5,7 +5,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService userContext, IUserDateProvider userDates) : IAccountService
+public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timeProvider, IUserContextService userContext, IUserDateProvider userDates, FinancialCache? cache = null) : IAccountService
 {
     public async Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken)
     {
@@ -91,6 +91,12 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
 
     public async Task<decimal> GetCurrentBalanceAsync(Guid accountId, CancellationToken cancellationToken)
     {
+        if (cache is not null) return await cache.GetOrCreateAsync("GetCurrentBalanceAsync", new { accountId, period = "current", currency = "account" }, () => GetCurrentBalanceCoreAsync(accountId, cancellationToken), cancellationToken);
+        return await GetCurrentBalanceCoreAsync(accountId, cancellationToken);
+    }
+
+    private async Task<decimal> GetCurrentBalanceCoreAsync(Guid accountId, CancellationToken cancellationToken)
+    {
         var account = await dbContext.Accounts.AsNoTracking().SingleOrDefaultAsync(item => item.Id == accountId, cancellationToken)
             ?? throw new EntityNotFoundException("Account not found.");
         var transactions = await dbContext.Transactions.AsNoTracking().Where(transaction => transaction.AccountId == accountId || transaction.TargetAccountId == accountId).ToListAsync(cancellationToken);
@@ -98,6 +104,12 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
     }
 
     public async Task<IReadOnlyDictionary<Guid, decimal>> GetCurrentBalancesAsync(CancellationToken cancellationToken)
+    {
+        if (cache is not null) return await cache.GetOrCreateAsync("GetCurrentBalancesAsync", new { period = "current", currency = "all" }, () => GetCurrentBalancesCoreAsync(cancellationToken), cancellationToken);
+        return await GetCurrentBalancesCoreAsync(cancellationToken);
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, decimal>> GetCurrentBalancesCoreAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var transactions = await dbContext.Transactions.AsNoTracking().ToListAsync(cancellationToken);

@@ -22,3 +22,7 @@ services:
       POSTGRES_PASSWORD: pocketledger
     ports:
       - "127.0.0.1:5435:5432"
+
+  valkey:
+    ports:
+      - "127.0.0.1:6379:6379"

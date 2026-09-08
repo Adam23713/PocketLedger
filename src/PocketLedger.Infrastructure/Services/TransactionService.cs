@@ -7,9 +7,15 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class TransactionService(PocketLedgerDbContext dbContext, IUserContextService userContext) : ITransactionService
+public class TransactionService(PocketLedgerDbContext dbContext, IUserContextService userContext, FinancialCache? cache = null) : ITransactionService
 {
     public async Task<IReadOnlyList<Transaction>> GetForMonthAsync(int year, int month, CancellationToken cancellationToken)
+    {
+        if (cache is not null && await cache.IncludesMonthAsync(year, month, 2, cancellationToken)) return await cache.GetOrCreateAsync("GetForMonthAsync", new { year, month, currency = "all" }, () => GetForMonthCoreAsync(year, month, cancellationToken), cancellationToken);
+        return await GetForMonthCoreAsync(year, month, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<Transaction>> GetForMonthCoreAsync(int year, int month, CancellationToken cancellationToken)
     {
         if (year < 1 || month is < 1 or > 12)
         {
@@ -33,6 +39,12 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
 
     public async Task<PagedResult<Transaction>> GetFilteredAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
+        if (cache is not null && await cache.IncludesFilterAsync(filter, cancellationToken)) return await cache.GetOrCreateAsync("GetFilteredAsync", new { filter, currency = "all" }, () => GetFilteredCoreAsync(filter, cancellationToken), cancellationToken);
+        return await GetFilteredCoreAsync(filter, cancellationToken);
+    }
+
+    private async Task<PagedResult<Transaction>> GetFilteredCoreAsync(TransactionFilter filter, CancellationToken cancellationToken)
+    {
         TransactionFilterRules.Validate(filter);
         var query = ApplyFilter(BaseReadQuery(), filter);
         var totalCount = await query.CountAsync(cancellationToken);
@@ -48,6 +60,12 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
     }
 
     public async Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsAsync(TransactionFilter filter, CancellationToken cancellationToken)
+    {
+        if (cache is not null && await cache.IncludesFilterAsync(filter, cancellationToken)) return await cache.GetOrCreateAsync("GetDailyTotalsAsync", new { filter.DateFrom, filter.DateTo, filter.Year, filter.Month, filter.AccountId, filter.CategoryId, filter.Type, filter.AmountFrom, filter.AmountTo, filter.Search, currency = "all" }, () => GetDailyTotalsCoreAsync(filter, cancellationToken), cancellationToken);
+        return await GetDailyTotalsCoreAsync(filter, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsCoreAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
         var rows = await ApplyFilter(BaseReadQuery(), filter)
@@ -139,12 +157,24 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
 
     public async Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesAsync(CancellationToken cancellationToken)
     {
+        if (cache is not null) return await cache.GetOrCreateAsync("GetCurrentBalancesAsync", new { period = "current", currency = "all" }, () => CalculateAccountBalancesCoreAsync(cancellationToken), cancellationToken);
+        return await CalculateAccountBalancesCoreAsync(cancellationToken);
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, decimal>> CalculateAccountBalancesCoreAsync(CancellationToken cancellationToken)
+    {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var transactions = await dbContext.Transactions.AsNoTracking().ToListAsync(cancellationToken);
         return accounts.ToDictionary(account => account.Id, account => BalanceCalculator.Calculate(account.Id, account.InitialBalance, transactions));
     }
 
     public async Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceAsync(CancellationToken cancellationToken)
+    {
+        if (cache is not null) return await cache.GetOrCreateAsync("CalculateMainBalanceAsync", new { period = "current", currency = "all" }, () => CalculateMainBalanceCoreAsync(cancellationToken), cancellationToken);
+        return await CalculateMainBalanceCoreAsync(cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<CurrencyBalance>> CalculateMainBalanceCoreAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken);
         var balances = await CalculateAccountBalancesAsync(cancellationToken);

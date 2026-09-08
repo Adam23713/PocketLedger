@@ -6,9 +6,15 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService accountService) : IStatisticsService
+public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService accountService, FinancialCache? cache = null) : IStatisticsService
 {
     public async Task<IReadOnlyList<string>> GetAvailableCurrenciesAsync(int year, int month, CancellationToken cancellationToken)
+    {
+        if (cache is not null && await cache.IncludesMonthAsync(year, month, 12, cancellationToken)) return await cache.GetOrCreateAsync("GetAvailableCurrenciesAsync", new { year, month, currency = "all" }, () => GetAvailableCurrenciesCoreAsync(year, month, cancellationToken), cancellationToken);
+        return await GetAvailableCurrenciesCoreAsync(year, month, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<string>> GetAvailableCurrenciesCoreAsync(int year, int month, CancellationToken cancellationToken)
     {
         ValidatePeriod(year, month);
         var start = new DateOnly(year, month, 1);
@@ -23,6 +29,12 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
     }
 
     public async Task<StatisticsSummary> GetSummaryAsync(int year, int month, string currency, CancellationToken cancellationToken)
+    {
+        if (cache is not null && await cache.IncludesMonthAsync(year, month, 12, cancellationToken)) return await cache.GetOrCreateAsync("GetSummaryAsync", new { year, month, currency }, () => GetSummaryCoreAsync(year, month, currency, cancellationToken), cancellationToken);
+        return await GetSummaryCoreAsync(year, month, currency, cancellationToken);
+    }
+
+    private async Task<StatisticsSummary> GetSummaryCoreAsync(int year, int month, string currency, CancellationToken cancellationToken)
     {
         ValidatePeriod(year, month);
         var selectedStart = new DateOnly(year, month, 1);

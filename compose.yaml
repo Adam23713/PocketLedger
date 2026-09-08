@@ -41,6 +41,7 @@ services:
     build: { context: ., dockerfile: Dockerfile, target: api }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      FinancialCache__ConnectionString: valkey:6379
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
@@ -86,6 +87,11 @@ services:
     <<: *postgres-common
     environment: { POSTGRES_DB: pocketledger_web, POSTGRES_USER: "${POSTGRES_USER:-pocketledger}", POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-pocketledger}" }
     volumes: [web-postgres-data:/var/lib/postgresql/data]
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
 
   api-database:
     <<: *postgres-common
