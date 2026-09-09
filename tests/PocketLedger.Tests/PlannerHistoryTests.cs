@@ -12,6 +12,20 @@ namespace PocketLedger.Tests;
 
 public class PlannerHistoryTests
 {
+    [Theory]
+    [InlineData(TransactionType.Income)]
+    [InlineData(TransactionType.Expense)]
+    [InlineData(TransactionType.Transfer)]
+    public async Task CreatingItemsRequiresADateForEveryType(TransactionType type)
+    {
+        await using var fixture = new Fixture();
+        await fixture.SeedAsync();
+        var input = fixture.Input(new DateOnly(2026, 9, 1)) with { Type = type, PlannedDate = null };
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() => fixture.Service.CreateAsync(input, default));
+        Assert.Equal("A planned date is required.", error.Message);
+        Assert.Empty(await fixture.Db.PlannerItems.ToListAsync());
+    }
+
     [Fact]
     public async Task InclusionIsIndependentAndPersistsWithoutChangingOpeningBalance()
     {
@@ -208,7 +222,7 @@ public class PlannerHistoryTests
         public async Task SeedAsync() { Db.AddRange(Account, Category, Recurring); await Db.SaveChangesAsync(); }
         public Task<PlannerMonth> ReadAsync(int month) => Service.GetMonthAsync(2026, month, default);
         public PlannerMonth Saved(int month) => PlannerHistory.Deserialize<PlannerMonth>(Db.PlannerMonths.Single(item => item.Month == new DateOnly(2026, month, 1)).SnapshotJson);
-        public PlannerItemInput Input(DateOnly month) => new(month, null, TransactionType.Expense, Account.Id, null, Category.Id, 50, "HUF", 50, null, "Groceries");
+        public PlannerItemInput Input(DateOnly month) => new(month, month, TransactionType.Expense, Account.Id, null, Category.Id, 50, "HUF", 50, null, "Groceries");
         public ValueTask DisposeAsync() => Db.DisposeAsync();
     }
     private sealed class User(Guid id) : ICurrentUser { public Guid UserId => id; public bool IsAuthenticated => true; }

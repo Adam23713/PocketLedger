@@ -316,7 +316,7 @@ public class PlannerTests
     private static Transaction Transaction(Account account, decimal amount, DateOnly date) => new() { Id = Guid.NewGuid(), AccountId = account.Id, Type = TransactionType.Income, Amount = amount, SourceCurrency = account.Currency, TransactionDate = date };
     private static RecurringTransaction Recurring(Account account, decimal amount) => new() { Id = Guid.NewGuid(), AccountId = account.Id, Type = TransactionType.Income, Amount = amount, FirstOccurrence = Month.AddDays(4), AutomationStartsOn = Month, Enabled = true, Frequency = RecurringFrequency.Monthly };
     private static PlannerItem Plan(Account account, TransactionType type, decimal amount, DateOnly? date) => new() { Id = Guid.NewGuid(), Month = Month, PlannedDate = date, AccountId = account.Id, Type = type, Amount = amount, AccountAmount = amount, Currency = account.Currency };
-    private static PlannerItemInput Input(Account account, Category category) => new(Month, null, TransactionType.Expense, account.Id, null, category.Id, 100, account.Currency, 100, null, null);
+    private static PlannerItemInput Input(Account account, Category category) => new(Month, Month, TransactionType.Expense, account.Id, null, category.Id, 100, account.Currency, 100, null, null);
     private static PocketLedgerDbContext Db(Guid owner) => new(new DbContextOptionsBuilder<PocketLedgerDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options, new CurrentUser(owner), TestDates());
     private sealed class CurrentUser(Guid id) : ICurrentUser { public Guid UserId => id; public bool IsAuthenticated => true; }
 }
