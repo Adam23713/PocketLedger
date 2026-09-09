@@ -341,11 +341,35 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .planner-table .planner-money { white-space: nowrap; }
 .planner-tag { display: inline-block; border: 1px solid var(--border-color); border-radius: .3rem; padding: .1rem .35rem; font-size: .7rem; color: var(--text-secondary); }
 .planner-add { display: block; padding: .7rem; margin-top: .75rem; border-radius: var(--control-radius); background: var(--surface-background-hover); text-decoration: none; }
-.planner-account { display: flex; gap: .8rem; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
-.planner-opening { padding-top: 1rem; }
-.planner-opening .form-control { min-width: 0; }
-.planner-account small { display: block; color: var(--text-secondary); }
-.planner-account > :last-child { text-align: right; }
+.planner-table-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem; min-width: 0; }
+.planner-table-totals { display: flex; flex-wrap: wrap; gap: .35rem .85rem; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.planner-table-totals strong { white-space: nowrap; }
+.planner-accounts-table { width: 100%; table-layout: fixed; font-size: .85rem; margin-bottom: 0; }
+.planner-accounts-table th, .planner-accounts-table td { padding: .65rem .35rem; vertical-align: middle; overflow-wrap: anywhere; }
+.planner-accounts-table thead th { font-size: .75rem; font-weight: 600; }
+.planner-accounts-table th:first-child { width: 23%; }
+.planner-accounts-table th:last-child { width: 14%; }
+.planner-accounts-table td:last-child { text-align: center; }
+.planner-accounts-table small { display: block; color: var(--text-secondary); font-size: .75rem; font-weight: normal; }
+.planner-account-percent { display: flex; gap: .2rem; font-size: .8rem; }
+.planner-opening-edit { border: 0; border-bottom: 1px dashed var(--border-color); padding: .15rem 0; font: inherit; color: var(--text-primary); background: transparent; text-align: left; cursor: pointer; }
+.planner-opening-edit:hover, .planner-opening-edit:focus-visible { color: var(--accent-color); border-color: var(--accent-color); }
+.planner-opening .form-control { width: 100%; min-width: 0; padding: .25rem; font: inherit; background: var(--surface-background); border-color: var(--border-color); }
+.planner-opening .form-control:disabled { background: var(--surface-background-hover); color: var(--text-secondary); opacity: 1; }
+.planner-opening-actions { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.planner-opening .btn { font-size: .75rem; padding: .2rem .3rem; }
+.planner-accounts-table .form-switch { display: inline-block; padding-left: 2.5em; margin: 0; min-height: 0; }
+.planner-accounts-table .form-check-input { margin-top: 0; cursor: pointer; }
+@media (max-width: 550px) {
+    .planner-accounts-table, .planner-accounts-table tbody, .planner-accounts-table tr, .planner-accounts-table td, .planner-accounts-table th { display: block; width: 100%; }
+    .planner-accounts-table thead { display: none; }
+    .planner-accounts-table tr { padding: .5rem 0; border-bottom: 1px solid var(--border-color); }
+    .planner-accounts-table th:first-child { width: 100%; }
+    .planner-accounts-table td { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; border: 0; text-align: left; }
+    .planner-accounts-table td::before { content: attr(data-label); color: var(--text-secondary); }
+    .planner-accounts-table td:last-child { text-align: left; }
+    .planner-accounts-table td:last-child > div { justify-self: start; }
+}
 .planner-positive { color: var(--positive-color); }
 .planner-negative { color: var(--negative-color); }
 .planner-notice { padding: 1rem; background: var(--surface-background-hover); border-left: 3px solid var(--accent-color); border-radius: var(--control-radius); margin-top: 1rem; }

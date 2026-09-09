@@ -50,22 +50,38 @@
         </section>
         <section class="planner-panel">
             <div class="planner-panel-header"><h2>Expected account balances</h2><a asp-controller="Accounts" asp-action="Index">Details</a></div>
-            @foreach (var account in Model.Accounts)
-            {
-                @if (!Model.IsClosed)
+            <table class="table planner-accounts-table">
+                <thead><tr><th scope="col">Account</th><th scope="col">Opening balance</th><th scope="col">Expected closing balance</th><th scope="col">Change</th><th scope="col">Use current balance</th></tr></thead>
+                <tbody>
+                @foreach (var account in Model.Accounts)
                 {
-                    <form class="planner-opening" asp-action="OpeningBalance" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-accountId="@account.Id" method="post">
-                        <label for="opening-@account.Id" class="form-label">@account.Name · Expected opening balance (@account.Currency)</label>
-                        <div class="d-flex gap-2 align-items-center">
-                            <input id="opening-@account.Id" class="form-control" name="Amount" type="number" step="0.0001" value="@((account.UseCurrentBalance ? account.OpeningBalance : account.CustomOpeningBalance ?? account.OpeningBalance).ToString(CultureInfo.InvariantCulture))" data-current="@account.CurrentBalance.ToString(CultureInfo.InvariantCulture)" data-custom="@((account.CustomOpeningBalance ?? account.OpeningBalance).ToString(CultureInfo.InvariantCulture))" disabled="@account.UseCurrentBalance" />
-                            <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
-                        </div>
-                        <div class="form-check form-switch mt-2"><input class="form-check-input" type="checkbox" role="switch" name="UseCurrentBalance" value="true" id="follow-@account.Id" checked="@account.UseCurrentBalance" /><label class="form-check-label" for="follow-@account.Id">Use current balance</label></div>
-                    </form>
+                    <tr>
+                        <th scope="row" data-label="Account"><strong>@account.Name</strong><small title="Current account balance">@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</small>@if (!account.IncludeInMainBalance) { <span class="planner-tag">Excluded</span> }</th>
+                        <td data-label="Opening balance">
+                            @if (Model.IsClosed) { <span>@MoneyFormatter.Format(account.OpeningBalance, account.Currency)</span> }
+                            else
+                            {
+                                var format = MoneyFormatter.GetMoneyInputFormat(account.Currency);
+                                <form id="opening-form-@account.Id" class="planner-opening" asp-action="OpeningBalance" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-accountId="@account.Id" method="post">
+                                    <button class="planner-opening-edit" type="button" aria-label="Edit opening balance for @account.Name" aria-expanded="false">@MoneyFormatter.Format(account.OpeningBalance, account.Currency) <span aria-hidden="true">✎</span></button>
+                                    <div class="planner-opening-editor" hidden>
+                                        <input id="opening-value-@account.Id" name="Amount" type="hidden" value="@account.OpeningBalance.ToString(CultureInfo.InvariantCulture)" data-current="@account.CurrentBalance.ToString(CultureInfo.InvariantCulture)" data-custom="@((account.CustomOpeningBalance ?? account.OpeningBalance).ToString(CultureInfo.InvariantCulture))" disabled="@account.UseCurrentBalance" />
+                                        <input id="opening-@account.Id" class="form-control form-control-sm" type="text" inputmode="decimal" aria-label="@account.Name opening balance (@account.Currency)" data-money-value="opening-value-@account.Id" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-money-allow-negative="true" data-money-fixed-decimals="true" autocomplete="off" required disabled="@account.UseCurrentBalance" />
+                                        <div class="planner-opening-actions"><button class="btn btn-sm btn-outline-primary" type="submit">Save</button><button class="btn btn-sm btn-outline-secondary planner-opening-cancel" type="button">Cancel</button></div>
+                                    </div>
+                                </form>
+                            }
+                        </td>
+                        <td data-label="Expected closing balance"><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong></td>
+                        <td data-label="Change"><div class="@(account.Change < 0 ? "planner-negative" : account.Change > 0 ? "planner-positive" : "planner-muted")">
+                            <span>@(account.Change > 0 ? "+" : "")@MoneyFormatter.Format(account.Change, account.Currency)</span>
+                            <div class="planner-account-percent">@if (account.Change != 0) { <span aria-hidden="true">@(account.Change > 0 ? "↑" : "↓")</span> } @(account.ChangePercent is { } percentage ? $"{percentage:+0.#;-0.#;0}%" : "—")</div>
+                        </div></td>
+                        <td data-label="Use current balance"><div class="form-check form-switch" title="On: use the account’s current balance automatically. Off: enter your own opening balance. Your last custom value is kept. Click Save to apply."><input class="form-check-input" type="checkbox" role="switch" name="UseCurrentBalance" value="true" form="opening-form-@account.Id" id="follow-@account.Id" checked="@account.UseCurrentBalance" disabled="@Model.IsClosed" /><label class="visually-hidden" for="follow-@account.Id">Use current balance for @account.Name</label></div></td>
+                    </tr>
                 }
-                <div class="planner-account"><div><strong>@account.Name</strong><small>Current balance: @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</small><small>Opening balance: @MoneyFormatter.Format(account.OpeningBalance, account.Currency)</small>@if (!account.IncludeInMainBalance) { <small>Excluded from main balance</small> }</div>
-                <div><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong><div class="@(account.Change < 0 ? "planner-negative" : "planner-positive")">@(account.Change > 0 ? "+" : "")@MoneyFormatter.Format(account.Change, account.Currency)</div><small>@(account.ChangePercent is { } percentage ? $"{percentage:+0.#;-0.#;0}%" : "%: —")</small></div></div>
-            }
+                </tbody>
+            </table>
             @if (Model.Accounts.Count == 0) { <p class="planner-muted">Create an account to start planning.</p> }
             @foreach (var total in Model.Totals)
             {
@@ -80,5 +96,6 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/money-input.js" asp-append-version="true"></script>
     <script src="~/js/planner-opening.js" asp-append-version="true"></script>
 }
