@@ -1,6 +1,6 @@
 (() => {
     let closeActive = () => {};
-    for (const id of ["planner-type", "planner-account", "planner-target"]) {
+    for (const id of ["planner-account", "planner-target"]) {
         const select = document.getElementById(id);
         if (!select) continue;
         const wrapper = document.createElement("div");

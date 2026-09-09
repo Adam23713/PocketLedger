@@ -100,7 +100,7 @@
             }
             @foreach (var account in Model.Accounts.Where(account => account.ClosingBalance <= 0)) { <div class="planner-notice negative"><strong>Attention: @account.Name</strong><p class="mb-0">The expected closing balance is zero or negative.</p></div> }
             <div class="planner-notice"><p class="mb-0">This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates.</p></div>
-            <div class="planner-notice"><p class="mb-0">Available to spend = expected closing balance of accounts included in the planner balance − undated expense budgets. Undated income contributes to the closing balance. Currency conversions use the amount specified for the account.</p></div>
+            <div class="planner-notice"><p class="mb-0">Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner.</p></div>
             </div>
         </section>
     </div>

@@ -9,6 +9,7 @@ public class PlannerFormViewModel
 {
     public Guid Id { get; set; }
     public DateOnly Month { get; set; }
+    [Required(ErrorMessage = "A planned date is required.")]
     public DateOnly? PlannedDate { get; set; }
     public TransactionType Type { get; set; } = TransactionType.Expense;
     [Required] public Guid? AccountId { get; set; }

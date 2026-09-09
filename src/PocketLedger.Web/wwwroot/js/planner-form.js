@@ -20,8 +20,7 @@
             const disabled = !!option.value && option.value === account.value;
             if (option.disabled !== disabled) option.disabled = disabled;
         }
-        field("PlannedDate").required = transfer;
-        field("planner-date-help").hidden = transfer;
+        field("PlannedDate").required = true;
         field("planner-conversion-field").hidden = !conversion;
         accountDisplay.disabled = !conversion;
         accountDisplay.required = !!conversion;

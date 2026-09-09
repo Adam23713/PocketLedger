@@ -121,6 +121,7 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
 
     private async Task ValidateAsync(PlannerItemInput input, CancellationToken cancellationToken)
     {
+        if (input.PlannedDate is null) throw new BusinessRuleException("A planned date is required.");
         var account = await dbContext.Accounts.SingleOrDefaultAsync(item => item.Id == input.AccountId, cancellationToken);
         var target = input.TargetAccountId is { } targetId ? await dbContext.Accounts.SingleOrDefaultAsync(item => item.Id == targetId, cancellationToken) : null;
         var category = input.CategoryId is { } categoryId ? await dbContext.Categories.SingleOrDefaultAsync(item => item.Id == categoryId, cancellationToken) : null;
