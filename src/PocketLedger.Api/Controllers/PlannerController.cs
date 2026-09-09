@@ -12,5 +12,6 @@ public sealed class PlannerController(IPlannerService service) : ControllerBase
     [HttpGet("items/{id:guid}")] public async Task<IActionResult> Get(Guid id, CancellationToken token) => await service.GetByIdAsync(id, token) is { } item ? Ok(item) : NotFound();
     [HttpPost("items")] public async Task<IActionResult> Create(PlannerItemInput item, CancellationToken token) { var id = await service.CreateAsync(item, token); return CreatedAtAction(nameof(Get), new { id }, id); }
     [HttpPut("items/{id:guid}")] public async Task<IActionResult> Update(Guid id, PlannerItemInput item, CancellationToken token) { await service.UpdateAsync(id, item, token); return NoContent(); }
+    [HttpPut("items/{id:guid}/pause")] public async Task<IActionResult> Pause(Guid id, PlannerPauseInput input, CancellationToken token) { await service.SetPausedAsync(id, input.IsPaused, token); return NoContent(); }
     [HttpDelete("items/{id:guid}")] public async Task<IActionResult> Delete(Guid id, CancellationToken token) { await service.DeleteAsync(id, token); return NoContent(); }
 }

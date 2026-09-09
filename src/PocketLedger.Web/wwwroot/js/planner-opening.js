@@ -3,11 +3,13 @@
         const response = await fetch(form.action, { method: "POST", body: data, headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" });
         if (!response.ok) {
             const problem = response.headers.get("content-type")?.includes("application/json") ? await response.json() : null;
-            throw new Error(problem?.message ?? "Could not save the account settings. Please try again.");
+            throw new Error(problem?.message ?? "Could not save the planner changes. Please try again.");
         }
         const updated = new DOMParser().parseFromString(await response.text(), "text/html");
         const rowId = form.closest("tr").id;
-        const ids = [rowId, "planner-summary", "planner-chart", "planner-notices"];
+        const ids = form.classList.contains("planner-pause")
+            ? [form.closest("section").id, "planner-summary", "planner-chart", "planner-accounts"]
+            : [rowId, "planner-summary", "planner-chart", "planner-notices"];
         if (response.redirected || ids.some(id => !updated.getElementById(id))) throw new Error("Could not refresh the plan. Please reload the page to check the saved settings.");
         ids.forEach(id => document.getElementById(id)?.replaceWith(updated.getElementById(id)));
         document.dispatchEvent(new Event("money:initialize"));
@@ -15,6 +17,23 @@
         return rowId;
     }
     function initialize() {
+        document.querySelectorAll(".planner-pause").forEach(form => {
+            if (form.dataset.initialized) return;
+            form.dataset.initialized = "true";
+            const button = form.querySelector("button");
+            const error = form.querySelector('[role="alert"]');
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                if (button.disabled) return;
+                button.disabled = true;
+                error.hidden = true;
+                try {
+                    const rowId = await update(form, new FormData(form));
+                    document.getElementById(rowId)?.querySelector(".planner-pause button")?.focus({ preventScroll: true });
+                } catch (exception) { error.textContent = exception.message; error.hidden = false; }
+                finally { button.disabled = false; }
+            });
+        });
         document.querySelectorAll(".planner-inclusion").forEach(form => {
             if (form.dataset.initialized) return;
             form.dataset.initialized = "true";

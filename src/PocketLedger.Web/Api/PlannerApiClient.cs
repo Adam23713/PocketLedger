@@ -9,5 +9,6 @@ public sealed class PlannerApiClient(HttpClient client) : ApiClientBase(client),
     public Task<PlannerItemInput?> GetByIdAsync(Guid id, CancellationToken token) => GetOrDefaultAsync<PlannerItemInput>($"api/v1/planner/items/{id}", token);
     public Task<Guid> CreateAsync(PlannerItemInput input, CancellationToken token) => PostAsync<PlannerItemInput, Guid>("api/v1/planner/items", input, token);
     public Task UpdateAsync(Guid id, PlannerItemInput input, CancellationToken token) => PutAsync($"api/v1/planner/items/{id}", input, token);
+    public Task SetPausedAsync(Guid id, bool isPaused, CancellationToken token) => PutAsync($"api/v1/planner/items/{id}/pause", new PlannerPauseInput(isPaused), token);
     public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/planner/items/{id}", token);
 }

@@ -8,6 +8,7 @@ namespace PocketLedger.Models.ViewModels.Planner;
 public class PlannerFormViewModel
 {
     public Guid Id { get; set; }
+    public bool IsPaused { get; set; }
     public DateOnly Month { get; set; }
     [Required(ErrorMessage = "A planned date is required.")]
     public DateOnly? PlannedDate { get; set; }
@@ -22,7 +23,7 @@ public class PlannerFormViewModel
     [StringLength(500)] public string? Note { get; set; }
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
     public IReadOnlyList<CategoryOptionViewModel> Categories { get; set; } = [];
-    public PlannerItemInput ToInput() => new(Month, PlannedDate, Type, AccountId ?? Guid.Empty, TargetAccountId, CategoryId, Amount, Currency, AccountAmount, TargetAmount, Note);
+    public PlannerItemInput ToInput() => new(Month, PlannedDate, Type, AccountId ?? Guid.Empty, TargetAccountId, CategoryId, Amount, Currency, AccountAmount, TargetAmount, Note, IsPaused);
 }
 
 public record PlannerTableViewModel(string Title, TransactionType Type, DateOnly Month, IReadOnlyList<PlannerEvent> Items, bool ReadOnly = false);

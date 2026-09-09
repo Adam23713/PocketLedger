@@ -15,6 +15,36 @@ public class PlannerTests
     private static readonly DateOnly Today = new(2026, 9, 8);
 
     [Fact]
+    public void Projection_PausedItemsRemainVisibleButNeverAffectForecasts()
+    {
+        var huf = Account("HUF", 1000);
+        var eur = Account("EUR", 50);
+        var income = Plan(huf, TransactionType.Income, 500, Month);
+        var expense = Plan(huf, TransactionType.Expense, 200, Month);
+        var budget = Plan(huf, TransactionType.Expense, 100, null);
+        var undatedIncome = Plan(huf, TransactionType.Income, 100, null);
+        var transfer = Plan(huf, TransactionType.Transfer, 400, Month);
+        transfer.TargetAccountId = eur.Id;
+        transfer.TargetAmount = 1;
+        PlannerItem[] items = [income, expense, budget, undatedIncome, transfer];
+        foreach (var item in items) item.IsPaused = true;
+        var result = Calculate(Month, [huf, eur], items, []);
+        Assert.Equal(5, result.Events.Count);
+        Assert.All(result.Events, item => Assert.True(item.IsPaused));
+        Assert.All(result.Totals, total => {
+            Assert.Equal(0, total.Income);
+            Assert.Equal(0, total.Expenses);
+            Assert.Equal(total.Currency == "HUF" ? 1000 : 50, total.ClosingBalance);
+            Assert.Equal(total.ClosingBalance, total.Available);
+        });
+        Assert.All(result.Points, point => Assert.Equal(point.Currency == "HUF" ? 1000 : 50, point.Balance));
+        transfer.IsPaused = false;
+        var resumed = Calculate(Month, [huf, eur], items, []);
+        Assert.Equal(600, resumed.Accounts.Single(item => item.Id == huf.Id).ClosingBalance);
+        Assert.Equal(51, resumed.Accounts.Single(item => item.Id == eur.Id).ClosingBalance);
+    }
+
+    [Fact]
     public void Projection_UsesDisplayOrderAndIgnoresGlobalAccountInclusion()
     {
         var first = Account("EUR", 10, false);
@@ -208,6 +238,7 @@ public class PlannerTests
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.CreateAsync(input, default));
         await Assert.ThrowsAsync<EntityNotFoundException>(() => service.UpdateAsync(id, input, default));
         await Assert.ThrowsAsync<EntityNotFoundException>(() => service.DeleteAsync(id, default));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => service.SetPausedAsync(id, true, default));
         var forged = new PlannerItem { Id = id, OwnerId = owner, Month = Month, AccountId = account.Id };
         db.Update(forged);
         await Assert.ThrowsAsync<BusinessRuleException>(() => db.SaveChangesAsync());
@@ -287,10 +318,14 @@ public class PlannerTests
         await service.UpdateOpeningBalanceAsync(2026, 9, restored.AccountId, new(false, 2000), default);
         clock.Now = new(2026, 10, 1, 0, 1, 0, TimeSpan.Zero);
         await service.GetMonthAsync(2026, 10, default);
+        var octoberItem = await db.PlannerItems.SingleAsync(item => item.Month == Month.AddMonths(1));
+        await service.SetPausedAsync(octoberItem.Id, true, default);
         var historyBackup = await backupService.ExportBackupAsync(default);
         await backupService.RestoreAsync(historyBackup, default);
         var historical = await service.GetMonthAsync(2026, 9, default);
         Assert.True(historical.IsClosed);
+        Assert.True(Assert.Single((await service.GetMonthAsync(2026, 10, default)).Events).IsPaused);
+        Assert.Equal(0, Assert.Single((await service.GetMonthAsync(2026, 10, default)).Totals).Expenses);
         Assert.Equal(2000, Assert.Single(historical.Accounts).OpeningBalance);
         Assert.Equal(100, Assert.Single(historical.Totals).Expenses);
         Assert.Equal(2000, Assert.Single((await service.GetMonthAsync(2026, 10, default)).Accounts).OpeningBalance);

@@ -285,6 +285,12 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(3)")
                         .HasColumnName("currency");
 
+                    b.Property<bool>("IsPaused")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_paused");
+
                     b.Property<DateOnly>("Month")
                         .HasColumnType("date")
                         .HasColumnName("month");
