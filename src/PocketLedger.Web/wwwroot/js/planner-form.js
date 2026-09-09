@@ -9,12 +9,17 @@
     const targetCurrency = () => target.selectedOptions[0]?.dataset.currency ?? "";
     function update() {
         const transfer = type.value === "Transfer";
-        if (transfer && accountCurrency()) currency.value = accountCurrency();
+        if (accountCurrency() && currency.value !== accountCurrency()) currency.value = accountCurrency();
+        field("planner-currency-field").hidden = true;
+        field("planner-conversion-preview").hidden = !transfer;
         const conversion = !transfer && accountCurrency() && currency.value !== accountCurrency();
         field("planner-target-field").hidden = !transfer;
         target.disabled = !transfer;
         target.required = transfer;
-        for (const option of target.options) option.disabled = !!option.value && option.value === account.value;
+        for (const option of target.options) {
+            const disabled = !!option.value && option.value === account.value;
+            if (option.disabled !== disabled) option.disabled = disabled;
+        }
         field("PlannedDate").required = transfer;
         field("planner-date-help").hidden = transfer;
         field("planner-conversion-field").hidden = !conversion;
@@ -52,5 +57,9 @@
     for (const input of [type, account, target, currency]) input.addEventListener("change", update);
     for (const input of [amount, accountAmount, targetAmount]) input.addEventListener("change", sync);
     form.addEventListener("submit", sync);
+    if (type.value !== "Transfer" && accountCurrency() && currency.value !== accountCurrency()) {
+        amount.value = accountAmount.value;
+        field("planner-amount-display").dispatchEvent(new Event("money:refresh"));
+    }
     update();
 })();

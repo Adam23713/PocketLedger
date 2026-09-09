@@ -8,8 +8,10 @@ public static class PlannerProjection
 {
     public static PlannerMonth Calculate(DateOnly month, DateOnly today, IReadOnlyList<Account> accounts, IReadOnlyDictionary<Guid, decimal> currentBalances, IReadOnlyList<PlannerOpeningBalance> openingBalances, IReadOnlyList<PlannerItem> plans, IReadOnlyList<RecurringTransaction> templates, PlannerMonth? previous = null)
     {
+        accounts = accounts.OrderBy(account => account.DisplayOrder).ThenBy(account => account.Name).ThenBy(account => account.Id).ToList();
         var accountMap = accounts.ToDictionary(account => account.Id);
         var settings = openingBalances.ToDictionary(item => item.AccountId);
+        bool Included(Guid id) => settings.GetValueOrDefault(id)?.IncludeInBalance ?? true;
         var events = new List<PlannerEvent>();
         foreach (var plan in plans.Where(item => item.Month == month))
             events.Add(CreateEvent(plan.Id, PlannerEventSource.Planned, plan.Type, plan.PlannedDate, plan.AccountId, plan.TargetAccountId, plan.Category, plan.Note, plan.Amount, plan.Currency, plan.AccountAmount, plan.TargetAmount));
@@ -42,16 +44,16 @@ public static class PlannerProjection
         var balances = accounts.Select(account =>
         {
             var setting = settings.GetValueOrDefault(account.Id);
-            return new PlannerAccountBalance(account.Id, account.Name, account.Currency, account.IncludeInMainBalance, currentBalances.GetValueOrDefault(account.Id), opening[account.Id], closing[account.Id], setting?.UseCurrentBalance ?? true, setting?.Amount);
+            return new PlannerAccountBalance(account.Id, account.Name, account.Currency, Included(account.Id), currentBalances.GetValueOrDefault(account.Id), opening[account.Id], closing[account.Id], setting?.UseCurrentBalance ?? true, setting?.Amount, PocketLedger.Models.AccountIcons.Resolve(account.Icon, account.Type).Id);
         }).ToList();
-        var mainBalances = BalanceCalculator.CalculateMainBalance(accounts.Select(account => (account.Currency, closing[account.Id], account.IncludeInMainBalance)));
+        var mainBalances = BalanceCalculator.CalculateMainBalance(accounts.Select(account => (account.Currency, closing[account.Id], Included(account.Id))));
         var currencies = accounts.Select(account => account.Currency).Union(previous?.Totals.Select(item => item.Currency) ?? []).Order();
         var totals = currencies.Select(currency =>
         {
             var income = events.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Income).Sum(item => item.AccountAmount);
             var expenses = events.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Expense).Sum(item => item.AccountAmount);
             var closingBalance = mainBalances.SingleOrDefault(item => item.Currency == currency)?.Amount ?? 0;
-            var reserves = events.Where(item => item.Date is null && item.AccountCurrency == currency && item.Type == TransactionType.Expense && item.AccountId is { } id && accountMap[id].IncludeInMainBalance).Sum(item => item.AccountAmount);
+            var reserves = events.Where(item => item.Date is null && item.AccountCurrency == currency && item.Type == TransactionType.Expense && item.AccountId is { } id && Included(id)).Sum(item => item.AccountAmount);
             var before = previous?.Totals.SingleOrDefault(item => item.Currency == currency);
             return new PlannerCurrencySummary(currency, income, expenses, closingBalance, closingBalance - reserves, before?.Income ?? 0, before?.Expenses ?? 0, before?.ClosingBalance ?? 0, before?.Available ?? 0);
         }).ToList();
@@ -74,7 +76,7 @@ public static class PlannerProjection
 
         void AddPoints(DateOnly date)
         {
-            foreach (var balance in BalanceCalculator.CalculateMainBalance(accounts.Select(account => (account.Currency, closing[account.Id], account.IncludeInMainBalance))))
+            foreach (var balance in BalanceCalculator.CalculateMainBalance(accounts.Select(account => (account.Currency, closing[account.Id], Included(account.Id)))))
                 points.Add(new PlannerBalancePoint(date, balance.Currency, balance.Amount));
         }
     }
