@@ -50,7 +50,7 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    cp Caddyfile.example Caddyfile
    ```
 
-2. Set all four domain names and replace every secret. Generate the shared signing key from at least 32 random bytes, Base64 encoded. For example:
+2. Set all four domain names and replace every secret, including `CROWDSEC_API_KEY` (generate with `openssl rand -hex 32`). Review the [edge security deployment guide](docs/edge-security.md) for Cloudflare settings, validation, monitoring, key rotation and rollback. Generate the shared signing key from at least 32 random bytes, Base64 encoded. For example:
 
    ```bash
    openssl rand -base64 64
