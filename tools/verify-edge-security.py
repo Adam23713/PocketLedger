@@ -3,6 +3,7 @@
 import http.client
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -17,8 +18,8 @@ COMPOSE = ['docker', 'compose', '-p', PROJECT, '--env-file', str(ROOT / '.env.ex
 CONTAINERS = []
 
 
-def run(*args, capture=True):
-    result = subprocess.run(args, cwd=ROOT, env=ENV, text=True, stdout=subprocess.PIPE if capture else None, stderr=subprocess.PIPE if capture else None)
+def run(*args, merge_errors=False):
+    result = subprocess.run(args, cwd=ROOT, env=ENV, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merge_errors else subprocess.PIPE)
     if result.returncode:
         raise RuntimeError(f'{args}:\n{result.stdout}\n{result.stderr}')
     return result.stdout or ''
@@ -53,11 +54,15 @@ def container(name, *args):
 
 try:
     compose('config', '--quiet')
+    trust_line = next(line for line in (ROOT / 'Caddyfile.example').read_text().splitlines() if 'trusted_proxies static' in line)
+    trusted_ranges = set(trust_line.split('static ', 1)[1].split())
+    whitelist_ranges = set(re.findall(r'^    - (.+)$', (ROOT / 'crowdsec/parsers/cloudflare-whitelist.yaml').read_text(), re.MULTILINE))
+    assert trusted_ranges == whitelist_ranges, 'Cloudflare trust and detection exclusion ranges diverged'
     modules = run('docker', 'run', '--rm', IMAGE, 'caddy', 'list-modules').splitlines()
     assert {'crowdsec', 'http.handlers.crowdsec', 'http.handlers.rate_limit'} <= set(modules)
     assert run('docker', 'run', '--rm', IMAGE, 'caddy', 'version').startswith('v2.11.4 ')
     compose('up', '-d', 'crowdsec')
-    wait_for(lambda: 'successfully interact' in cs('lapi', 'status') or bool(cs('collections', 'list', '-o', 'json')))
+    wait_for(lambda: run('docker', 'inspect', '--format', '{{.State.Health.Status}}', compose('ps', '-q', 'crowdsec').strip()).strip() == 'healthy', 180)
     assert 'crowdsecurity/caddy' in cs('collections', 'list', '-o', 'json')
     assert 'pocketledger_caddy' in cs('bouncers', 'list', '-o', 'json')
     compose('exec', '-T', 'crowdsec', 'crowdsec', '-t')
@@ -78,19 +83,19 @@ try:
         for service, port in [('landing', 5053), ('web', 5050), ('api', 5051), ('identity', 5052)]:
             container(service, '--network-alias', service, IMAGE, 'caddy', 'respond', '--listen', ':' + str(port), '--body', service)
         site = '{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN}'
-        local = production.replace(site + ' {', ':8080 {').replace('{\n', '{\n\tauto_https off\n', 1)
+        local = production.replace(site + ' {', ':8080 {').replace('{\n', '{\n\tauto_https off\n', 1).replace('roll_size 100MiB', 'roll_size 1MiB')
         config.write_text(local)
         proxy = container('proxy', *env_args, '-p', '127.0.0.1::8080', '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy', IMAGE)
         port = int(run('docker', 'port', proxy, '8080/tcp').strip().rsplit(':', 1)[1])
 
-        def request(host='landing.test', method='GET', ip=None, xff=None):
+        def request(host='landing.test', method='GET', ip=None, xff=None, path='/'):
             headers = {'Host': host, 'User-Agent': 'PocketLedgerSecurityVerification/1.0'}
             if ip:
                 headers['CF-Connecting-IP'] = ip
             if xff:
                 headers['X-Forwarded-For'] = xff
             connection = http.client.HTTPConnection('127.0.0.1', port, timeout=5)
-            connection.request(method, '/', headers=headers)
+            connection.request(method, path, headers=headers)
             response = connection.getresponse()
             result = response.status, response.read().decode()
             connection.close()
@@ -103,7 +108,16 @@ try:
         entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
         assert entry['request']['client_ip'] == entry['request']['remote_ip']
         assert entry['request']['client_ip'] not in ['8.8.4.4', '1.1.1.1']
-        print('PASS all four routes and untrusted forwarded-header spoof rejection', flush=True)
+        request(path='/?code=private-code&state=private-state&id_token_hint=private-id-token&access_token=private-access-token&keep=visible')
+        redacted = run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log')
+        assert 'private-' not in redacted
+        assert 'keep=visible' in json.loads(redacted)['request']['uri']
+        run('docker', 'stop', PROJECT + '-api')
+        assert request('api.test', path='/?code=private-error-code')[0] == 502
+        assert 'private-error-code' not in run('docker', 'logs', proxy, merge_errors=True)
+        run('docker', 'start', PROJECT + '-api')
+        wait_for(lambda: request('api.test')[0] == 200)
+        print('PASS all four routes, untrusted spoof rejection and OIDC access/error log redaction', flush=True)
 
         # Only the disposable fixture trusts the container gateway to simulate a CDN.
         config.write_text(local.replace('trusted_proxies static ', 'trusted_proxies static ' + entry['request']['remote_ip'] + ' '))
@@ -113,7 +127,8 @@ try:
         assert entry['request']['client_ip'] == '8.8.4.4'
         for i in range(600):
             assert request(['landing.test', 'web.test'][i % 2], ip='11.12.13.14')[0] == 200, i
-        assert request('api.test', ip='11.12.13.14')[0] == 429
+        assert request('api.test', ip='11.12.13.14', path='/?code=private-rate-limit-code')[0] == 429
+        assert 'private-rate-limit-code' not in run('docker', 'logs', proxy, merge_errors=True)
         for _ in range(30):
             assert request('identity.test', 'POST', '11.12.13.15')[0] == 200
         assert request('identity.test', 'POST', '11.12.13.15')[0] == 429
@@ -131,6 +146,13 @@ try:
         wait_for(lambda: request(ip='11.12.13.16')[0] == 200, 35)
         print('PASS LAPI decision propagation, HTTP ban and removal', flush=True)
 
+        # Accelerate rotation in the fixture, then verify acquisition on the new file.
+        for i in range(350):
+            status, _ = request(ip='8.8.4.4', path='/?padding=' + 'x' * 4096)
+            assert status == 200, (i, status)
+        wait_for(lambda: 'access-' in run('docker', 'exec', proxy, 'ls', '/var/log/caddy'))
+        print('PASS access log rotation', flush=True)
+
         # Replay bounded synthetic access logs; no flood is sent to any HTTP server.
         now = time.time()
         records = []
@@ -146,7 +168,32 @@ try:
         serialized = json.dumps(decisions)
         assert 'pocketledger/http-flood' in serialized
         assert '173.245.48.1' not in serialized
-        print('PASS cold-start log acquisition, 429 flood alert/decision, Cloudflare edge exclusion', flush=True)
+        durations = re.findall(r'"duration": "([^"]+)"', serialized)
+        assert durations, serialized
+        for duration in durations:
+            seconds = sum(float(value) * {'h': 3600, 'm': 60, 's': 1}[unit] for value, unit in re.findall(r'([0-9.]+)([hms])', duration))
+            assert 3500 < seconds <= 3600, duration
+        print('PASS cold-start/rotated log acquisition, 429 flood one-hour decision, Cloudflare edge exclusion', flush=True)
+        probe_records = []
+        for i in range(30):
+            record = json.loads(records[0])
+            record['ts'] = time.time()
+            record['request']['client_ip'] = '11.12.13.19'
+            record['request']['uri'] = '/missing-' + str(i)
+            record['status'] = 404
+            probe_records.append(json.dumps(record))
+        fixture.write_text('\n'.join(probe_records) + '\n')
+        run('docker', 'cp', str(fixture), proxy + ':/tmp/probing.json')
+        run('docker', 'exec', proxy, 'sh', '-c', 'cat /tmp/probing.json >> /var/log/caddy/access.log')
+        wait_for(lambda: '11.12.13.19' in cs('decisions', 'list', '-o', 'json'), 45)
+        probe_decisions = cs('decisions', 'list', '--ip', '11.12.13.19', '-o', 'json')
+        assert 'crowdsecurity/http-probing' in probe_decisions
+        durations = re.findall(r'"duration": "([^"]+)"', probe_decisions)
+        assert durations, probe_decisions
+        for duration in durations:
+            seconds = sum(float(value) * {'h': 3600, 'm': 60, 's': 1}[unit] for value, unit in re.findall(r'([0-9.]+)([hms])', duration))
+            assert 14300 < seconds <= 14400, duration
+        print('PASS built-in HTTP probing creates four-hour ban', flush=True)
         print(cs('alerts', 'list'))
         print(cs('decisions', 'list'))
         print(cs('metrics'))
