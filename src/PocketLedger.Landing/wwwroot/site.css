@@ -1,14 +1,28 @@
 :root {
-    color-scheme:light dark;
-    --bg:#f7f9fc;
-    --surface:#fff;
-    --ink:#11263c;
-    --muted:#536477;
-    --line:#dce4ed;
-    --accent:#006e66;
-    --accent-ink:#fff;
-    --tint:#eaf5f2;
-    --dark:#102d37;
+    color-scheme:dark;
+    --background:#101519;
+    --surface:#182127;
+    --surface-muted:#1e2a31;
+    --text-primary:#f4f0e8;
+    --text-secondary:#c0c9cc;
+    --text-muted:#8e9ca3;
+    --accent-primary:#e3a24d;
+    --accent-primary-hover:#efb663;
+    --accent-primary-active:#c98435;
+    --accent-primary-text:#21170d;
+    --accent-secondary:#63b9ad;
+    --accent-secondary-hover:#86d3c5;
+    --button-secondary-border:#4b6567;
+    --button-secondary-text:#d9e5e3;
+    --focus-ring:#f2c170;
+    --line:#334249;
+    --bg:var(--background);
+    --ink:var(--text-primary);
+    --muted:var(--text-secondary);
+    --accent:var(--accent-primary);
+    --accent-ink:var(--accent-primary-text);
+    --tint:var(--surface-muted);
+    --dark:#0c1013;
     --radius:18px;
     font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     font-size:16px;
@@ -35,7 +49,7 @@ button,a {
 }
 
 a:focus-visible {
-    outline:3px solid #038ac7;
+    outline:3px solid var(--focus-ring);
     outline-offset:5px;
 }
 
@@ -63,7 +77,7 @@ img {
     padding:10px 20px;
     text-align:center;
     background:var(--dark);
-    color:#e5f3f5;
+    color:var(--text-secondary);
     font-size:.875rem;
 }
 
@@ -73,7 +87,7 @@ img {
     width:7px;
     height:7px;
     border-radius:50%;
-    background:#43c3a0;
+    background:var(--accent-secondary);
 }
 
 .header {
@@ -119,15 +133,31 @@ img {
     gap:28px;
     padding:15px 24px;
     border-radius:9px;
-    background:var(--accent);
-    color:var(--accent-ink);
+    border:1px solid transparent;
+    background:var(--accent-primary);
+    color:var(--accent-primary-text);
     font-weight:650;
     line-height:1.3;
 }
 
 .button:hover {
     text-decoration:none;
-    filter:brightness(1.12);
+    background:var(--accent-primary-hover);
+}
+
+.button:focus-visible {
+    outline:3px solid var(--focus-ring);
+    outline-offset:4px;
+}
+
+.button:active {
+    background:var(--accent-primary-active);
+}
+
+.button:disabled,.button[aria-disabled="true"] {
+    cursor:not-allowed;
+    opacity:.48;
+    pointer-events:none;
 }
 
 .button-small {
@@ -193,7 +223,8 @@ h1 span {
 
 .hero-note {
     font-size:.875rem;
-    color:var(--muted);
+    color:var(--accent-secondary);
+    font-weight:600;
     margin:18px 0 42px;
 }
 
@@ -324,11 +355,11 @@ h3 {
 
 .story {
     background:var(--dark);
-    color:#f0f6fa;
+    color:var(--text-primary);
 }
 
 .story .eyebrow {
-    color:#70d5bd;
+    color:var(--accent-secondary);
 }
 
 .story-grid {
@@ -339,7 +370,7 @@ h3 {
 
 .story-copy {
     font-size:1.125rem;
-    color:#d0dfe7;
+    color:var(--text-secondary);
 }
 
 .story-copy p:last-of-type {
@@ -347,7 +378,7 @@ h3 {
 }
 
 .story .text-link {
-    color:#83e4ce;
+    color:var(--accent-secondary);
 }
 
 .hosting-grid {
@@ -391,7 +422,7 @@ h3 {
 }
 
 .self-host {
-    background:var(--tint);
+    background:var(--surface-muted);
 }
 
 .license-link {
@@ -462,21 +493,8 @@ h3 {
     top:10px;
 }
 
-@media(prefers-color-scheme:dark) {
-    :root {
-        --bg:#0d1924;
-        --surface:#142331;
-        --ink:#ecf2f8;
-        --muted:#afbecd;
-        --line:#304252;
-        --accent:#73ddc4;
-        --accent-ink:#102c2c;
-        --tint:#152d32;
-        --dark:#09131d;
-    }
-    .hero-image {
-        box-shadow:none;
-    }
+.hero-image {
+    box-shadow:none;
 }
 
 @media(prefers-reduced-motion:no-preference) {
@@ -711,14 +729,14 @@ body.viewer-open {
 }
 
 .button-github {
-    background: var(--surface);
-    color: var(--ink);
-    border: 1px solid var(--line);
+    background: var(--surface-muted);
+    color: var(--button-secondary-text);
+    border: 1px solid var(--button-secondary-border);
     gap: 12px;
 }
 
 .button-github:hover {
-    background: var(--tint);
+    background: color-mix(in srgb, var(--surface-muted) 68%, var(--accent-secondary));
     filter: none;
 }
 
@@ -740,10 +758,10 @@ body.viewer-open {
     gap: 20px;
     padding: 10px 12px 10px 22px;
     min-height: 52px;
-    border: 1px solid color-mix(in srgb, var(--accent) 85%, var(--ink));
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 85%, var(--accent-primary-text));
     border-radius: 14px;
-    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 86%, var(--ink)));
-    box-shadow: inset 0 1px 0 #ffffff30, 0 4px 12px color-mix(in srgb, var(--accent) 18%, transparent);
+    background: linear-gradient(135deg, var(--accent-primary-hover), var(--accent-primary));
+    box-shadow: inset 0 1px 0 #ffffff4d, 0 4px 12px color-mix(in srgb, var(--accent-primary) 22%, transparent);
     letter-spacing: -.015em;
 }
 
@@ -755,7 +773,7 @@ body.viewer-open {
     height: 32px;
     flex-shrink: 0;
     border-radius: 9px;
-    background: color-mix(in srgb, var(--accent-ink) 12%, transparent);
+    background: color-mix(in srgb, var(--accent-primary-text) 12%, transparent);
 }
 
 .button-login.button-small {
@@ -773,11 +791,13 @@ body.viewer-open {
 
 .button-login:hover {
     filter: none;
-    box-shadow: inset 0 1px 0 #ffffff30, 0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent);
+    background: linear-gradient(135deg, #f4c475, var(--accent-primary-hover));
+    box-shadow: inset 0 1px 0 #ffffff5c, 0 6px 18px color-mix(in srgb, var(--accent-primary) 32%, transparent);
 }
 
 .button-login:active {
-    box-shadow: inset 0 2px 4px #0002;
+    background:var(--accent-primary-active);
+    box-shadow: inset 0 2px 4px #0005;
 }
 
 @media (prefers-reduced-motion: no-preference) {
