@@ -152,6 +152,8 @@ jobs:
         run: docker compose down -v
 
   edge-security:
+    permissions:
+      contents: read
     name: Caddy and CrowdSec verification
     runs-on: ubuntu-latest
     steps:

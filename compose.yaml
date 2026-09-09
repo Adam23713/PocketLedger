@@ -88,6 +88,9 @@ services:
       api: { condition: service_started }
       identity: { condition: service_started }
       crowdsec: { condition: service_healthy }
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
     restart: unless-stopped
 
   crowdsec:
@@ -110,6 +113,9 @@ services:
       timeout: 10s
       retries: 12
       start_period: 30s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
     restart: unless-stopped
 
   web-database:
