@@ -1,0 +1,7 @@
+@model PocketLedger.Services.Interfaces.PlannerMonth
+@{ ViewData["Title"] = "Monthly planner"; }
+<partial name="_Content" model="Model" />
+@section Scripts {
+    <script src="~/js/money-input.js" asp-append-version="true"></script>
+    <script src="~/js/planner-opening.js" asp-append-version="true"></script>
+}
