@@ -6,6 +6,7 @@ public class PlannerItem
 {
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
+    public bool IsPaused { get; set; }
     public DateOnly Month { get; set; }
     public int? CopyDay { get; set; }
     public DateOnly? PlannedDate { get; set; }

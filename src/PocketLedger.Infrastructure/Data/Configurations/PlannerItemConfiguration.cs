@@ -17,6 +17,7 @@ public class PlannerItemConfiguration : IEntityTypeConfiguration<PlannerItem>
         builder.HasKey(item => item.Id).HasName("pk_planner_items");
         builder.Property(item => item.Id).HasColumnName("id");
         builder.Property(item => item.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
+        builder.Property(item => item.IsPaused).HasColumnName("is_paused").HasDefaultValue(false);
         builder.Property(item => item.Month).HasColumnName("month").HasColumnType("date");
         builder.Property(item => item.CopyDay).HasColumnName("copy_day");
         builder.Property(item => item.PlannedDate).HasColumnName("planned_date").HasColumnType("date");

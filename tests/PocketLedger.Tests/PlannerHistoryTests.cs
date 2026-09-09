@@ -12,6 +12,28 @@ namespace PocketLedger.Tests;
 
 public class PlannerHistoryTests
 {
+    [Fact]
+    public async Task PausePersistsAcrossMonthsAndResumeDoesNotChangeClosedHistory()
+    {
+        await using var fixture = new Fixture();
+        await fixture.SeedAsync();
+        var id = await fixture.Service.CreateAsync(fixture.Input(new(2026, 9, 1)), default);
+        await fixture.Service.SetPausedAsync(id, true, default);
+        Assert.True((await fixture.Service.GetByIdAsync(id, default))!.IsPaused);
+        Assert.Equal(0, Assert.Single(fixture.Saved(9).Totals).Expenses);
+        fixture.Clock.Now = new(2026, 10, 1, 0, 1, 0, TimeSpan.Zero);
+        var october = await fixture.ReadAsync(10);
+        var copy = Assert.Single(october.Events.Where(item => item.Source == PlannerEventSource.Planned));
+        Assert.True(copy.IsPaused);
+        await fixture.Service.SetPausedAsync(copy.Id, false, default);
+        Assert.Equal(50, Assert.Single((await fixture.ReadAsync(10)).Totals).Expenses);
+        var september = await fixture.ReadAsync(9);
+        Assert.True(Assert.Single(september.Events.Where(item => item.Source == PlannerEventSource.Planned)).IsPaused);
+        Assert.Equal(0, Assert.Single(september.Totals).Expenses);
+        await Assert.ThrowsAsync<BusinessRuleException>(() => fixture.Service.SetPausedAsync(id, false, default));
+        await Assert.ThrowsAsync<EntityNotFoundException>(() => fixture.Service.SetPausedAsync(fixture.Recurring.Id, true, default));
+    }
+
     [Theory]
     [InlineData(TransactionType.Income)]
     [InlineData(TransactionType.Expense)]

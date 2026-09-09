@@ -392,3 +392,7 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .planner-select-options { position: absolute; top: calc(100% + .2rem); left: 0; right: 0; z-index: 20; max-height: 15rem; overflow-y: auto; padding: .25rem; background: var(--dropdown-background, var(--surface-background)); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--control-radius); box-shadow: var(--card-shadow); }
 .planner-select-options [role="option"] { padding: .45rem .6rem; border-radius: var(--control-radius); cursor: pointer; }
 .planner-select-options [role="option"]:hover, .planner-select-options .active { background: var(--surface-background-hover); outline: 1px solid var(--accent-color); }
+
+.planner-item-paused .planner-money { color: var(--text-secondary); text-decoration: line-through; }
+.planner-pause { margin-top: .35rem; }
+.planner-pause .btn { font-size: .75rem; padding: .2rem .4rem; }

@@ -7,7 +7,7 @@
     <div class="planner-panel-header"><h1 class="h3">@ViewData["Title"]</h1><span class="planner-muted">@Model.Month.ToString("yyyy. MM.")</span></div>
     <p class="planner-muted">Add an item to your monthly plan.</p>
     <form asp-action="@(Model.Id == Guid.Empty ? "Create" : "Edit")" asp-route-id="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)" method="post" id="planner-form">
-        <input asp-for="Id" type="hidden" /><input asp-for="Month" type="hidden" value="@Model.Month.ToString("yyyy-MM-dd")" />
+        <input asp-for="Id" type="hidden" /><input asp-for="IsPaused" type="hidden" /><input asp-for="Month" type="hidden" value="@Model.Month.ToString("yyyy-MM-dd")" />
         <div asp-validation-summary="All" class="text-danger" role="alert"></div>
         <div class="row">
             <input asp-for="Type" id="planner-type" type="hidden" value="@Model.Type" />

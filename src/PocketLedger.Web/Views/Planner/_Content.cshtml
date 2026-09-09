@@ -48,7 +48,7 @@
             @if (Model.Points.Count == 0) { <p class="planner-muted">Include an account in the planner balance to see the chart.</p> }
             <small class="planner-muted">Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart.</small>
         </section>
-        <section class="planner-panel">
+        <section class="planner-panel" id="planner-accounts">
             <div class="planner-panel-header"><h2>Expected account balances</h2><a asp-controller="Accounts" asp-action="Index">Details</a></div>
             <table class="table planner-accounts-table">
                 <thead><tr><th scope="col">Account</th><th scope="col">Opening balance</th><th scope="col">Expected closing balance</th><th scope="col">Change</th><th scope="col">Include</th></tr></thead>

@@ -1,8 +1,8 @@
 @model PocketLedger.Models.ViewModels.Planner.PlannerTableViewModel
 @using PocketLedger.Services.Interfaces
-<section class="planner-panel">
+<section class="planner-panel" id="planner-table-@Model.Type-@(Model.ReadOnly ? "readonly" : "editable")">
     <div class="planner-panel-header"><div class="planner-table-heading"><h2>@Model.Title</h2><div class="planner-table-totals" aria-label="Totals by currency">
-        @foreach (var total in Model.Items.GroupBy(item => item.Currency).OrderBy(group => group.Key)) { <strong>@MoneyFormatter.Format(total.Sum(item => item.Amount), total.Key)</strong> }
+        @foreach (var total in Model.Items.GroupBy(item => item.Currency).OrderBy(group => group.Key)) { <strong>@MoneyFormatter.Format(total.Where(item => !item.IsPaused).Sum(item => item.Amount), total.Key)</strong> }
     </div></div>@if (!Model.ReadOnly) { <a class="btn btn-sm btn-primary" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Add item</a> }</div>
     @if (Model.Items.Count == 0) { <p class="planner-muted">No items for this month yet.</p> }
     else
@@ -10,18 +10,25 @@
         <div class="table-responsive"><table class="table planner-table"><thead><tr><th>Name / category</th><th>Amount</th><th>Date</th><th>Account</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
         @foreach (var item in Model.Items)
         {
-            <tr>
-                <td>@(item.Note ?? item.CategoryName ?? "Transfer")<small>@item.CategoryName</small></td>
+            <tr id="@(item.Source == PlannerEventSource.Planned ? $"planner-item-{item.Id}" : null)" class="@(item.IsPaused ? "planner-item-paused" : "")">
+                <td>@(item.Note ?? item.CategoryName ?? "Transfer")<small>@item.CategoryName</small>@if (item.IsPaused) { <span class="planner-tag">Paused</span> }</td>
                 <td class="planner-money">@MoneyFormatter.Format(item.Amount, item.Currency)
                     @if (item.Currency != item.AccountCurrency) { <small>Account amount: @MoneyFormatter.Format(item.AccountAmount, item.AccountCurrency)</small> }
                     @if (item.TargetAmount is { } targetAmount) { <small>→ @MoneyFormatter.Format(targetAmount, item.TargetCurrency)</small> }
                 </td>
                 <td>@(item.Date?.ToString("MM. dd.") ?? "Undated")@if (item.Source == PlannerEventSource.Recurring && Model.Type != PocketLedger.Models.Enums.TransactionType.Expense) { <small><span class="planner-tag">Recurring · read-only</span></small> }</td>
                 <td>@item.AccountName @if (item.TargetAccountName is not null) { <small>→ @item.TargetAccountName</small> }</td>
-                <td>@if (!Model.ReadOnly && item.Source == PlannerEventSource.Planned) { <a asp-action="Edit" asp-route-id="@item.Id" aria-label="Edit item">Edit</a><small><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></small> }</td>
+                <td>@if (!Model.ReadOnly && item.Source == PlannerEventSource.Planned) { <a asp-action="Edit" asp-route-id="@item.Id" aria-label="Edit item">Edit</a><small><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></small>
+                    <form class="planner-pause" asp-action="Pause" asp-route-id="@item.Id" method="post">
+                        <input type="hidden" name="IsPaused" value="@((!item.IsPaused).ToString().ToLowerInvariant())" />
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" aria-label="@(item.IsPaused ? "Resume" : "Pause") @(item.Note ?? item.CategoryName ?? "transfer")">@(item.IsPaused ? "Resume" : "Pause")</button>
+                        <div class="text-danger" role="alert" hidden></div>
+                    </form>
+                }</td>
             </tr>
         }
         </tbody></table></div>
     }
+    @if (Model.Items.Any(item => item.IsPaused)) { <small class="planner-muted">Paused items are excluded from totals and forecasts.</small> }
     @if (!Model.ReadOnly) { <a class="planner-add" asp-action="Create" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-type="@Model.Type">+ Add item</a> }
 </section>

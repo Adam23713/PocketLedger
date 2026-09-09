@@ -38,7 +38,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         var item = await plannerService.GetByIdAsync(id, cancellationToken);
         if (item is null) return NotFound();
         if ((await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken)).IsClosed) return BadRequest("Closed months are read-only.");
-        var model = new PlannerFormViewModel { Id = id, Month = item.Month, PlannedDate = item.PlannedDate, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, CategoryId = item.CategoryId, Amount = item.Amount, Currency = item.Currency, AccountAmount = item.AccountAmount, TargetAmount = item.TargetAmount, Note = item.Note };
+        var model = new PlannerFormViewModel { Id = id, IsPaused = item.IsPaused, Month = item.Month, PlannedDate = item.PlannedDate, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, CategoryId = item.CategoryId, Amount = item.Amount, Currency = item.Currency, AccountAmount = item.AccountAmount, TargetAmount = item.TargetAmount, Note = item.Note };
         await PopulateAsync(model, cancellationToken);
         return View("Form", model);
     }
@@ -88,6 +88,27 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         }
         if (ajax) return PartialView("_Content", await plannerService.GetMonthAsync(year, month, cancellationToken));
         return RedirectToAction(nameof(Index), new { year, month });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Pause(Guid id, bool isPaused, CancellationToken cancellationToken)
+    {
+        var ajax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        var item = await plannerService.GetByIdAsync(id, cancellationToken);
+        if (item is null) return NotFound();
+        try
+        {
+            if (!ModelState.IsValid) throw new BusinessRuleException("Select a valid pause state.");
+            await plannerService.SetPausedAsync(id, isPaused, cancellationToken);
+        }
+        catch (EntityNotFoundException) { return NotFound(); }
+        catch (BusinessRuleException exception)
+        {
+            if (ajax) return BadRequest(new { message = exception.Message });
+            TempData["ErrorMessage"] = exception.Message;
+        }
+        if (ajax) return PartialView("_Content", await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken));
+        return RedirectToAction(nameof(Index), new { year = item.Month.Year, month = item.Month.Month });
     }
 
     private async Task<IActionResult> SaveAsync(PlannerFormViewModel model, bool editing, CancellationToken cancellationToken)

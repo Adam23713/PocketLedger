@@ -87,6 +87,17 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
         if (transaction is not null) await transaction.CommitAsync(cancellationToken);
     }
 
+    public async Task SetPausedAsync(Guid id, bool isPaused, CancellationToken cancellationToken)
+    {
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+        var item = await dbContext.PlannerItems.SingleOrDefaultAsync(item => item.Id == id, cancellationToken) ?? throw new EntityNotFoundException("Planner item not found.");
+        await RequireEditableAsync(item.Month, cancellationToken);
+        item.IsPaused = isPaused;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+    }
+
     private async Task RequireEditableAsync(DateOnly month, CancellationToken token)
     {
         ValidateMonth(month.Year, month.Month);
@@ -128,10 +139,11 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
         PlannerRules.Validate(input, account, target, category);
     }
 
-    internal static PlannerItemInput ToInput(PlannerItem item) => new(item.Month, item.PlannedDate, item.Type, item.AccountId, item.TargetAccountId, item.CategoryId, item.Amount, item.Currency, item.AccountAmount, item.TargetAmount, item.Note);
+    internal static PlannerItemInput ToInput(PlannerItem item) => new(item.Month, item.PlannedDate, item.Type, item.AccountId, item.TargetAccountId, item.CategoryId, item.Amount, item.Currency, item.AccountAmount, item.TargetAmount, item.Note, item.IsPaused);
 
     internal static void Apply(PlannerItem item, PlannerItemInput input)
     {
+        item.IsPaused = input.IsPaused;
         item.Month = input.Month;
         item.PlannedDate = input.PlannedDate;
         item.CopyDay = input.PlannedDate?.Day;

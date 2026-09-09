@@ -14,7 +14,7 @@ public static class PlannerProjection
         bool Included(Guid id) => settings.GetValueOrDefault(id)?.IncludeInBalance ?? true;
         var events = new List<PlannerEvent>();
         foreach (var plan in plans.Where(item => item.Month == month))
-            events.Add(CreateEvent(plan.Id, PlannerEventSource.Planned, plan.Type, plan.PlannedDate, plan.AccountId, plan.TargetAccountId, plan.Category, plan.Note, plan.Amount, plan.Currency, plan.AccountAmount, plan.TargetAmount));
+            events.Add(CreateEvent(plan.Id, PlannerEventSource.Planned, plan.Type, plan.PlannedDate, plan.AccountId, plan.TargetAccountId, plan.Category, plan.Note, plan.Amount, plan.Currency, plan.AccountAmount, plan.TargetAmount) with { IsPaused = plan.IsPaused });
 
         foreach (var template in templates.Where(item => item.Enabled && item.Type is TransactionType.Income or TransactionType.Expense && (item.DebtId == null || item.Debt?.Status == DebtStatus.Active)))
         {
@@ -25,6 +25,7 @@ public static class PlannerProjection
         }
 
         events = events.OrderBy(item => item.Date is null).ThenBy(item => item.Date).ThenBy(item => item.Source).ThenBy(item => item.Id).ToList();
+        var activeEvents = events.Where(item => !item.IsPaused).ToList();
         var opening = accounts.ToDictionary(account => account.Id, account =>
         {
             var setting = settings.GetValueOrDefault(account.Id);
@@ -33,14 +34,14 @@ public static class PlannerProjection
         var closing = new Dictionary<Guid, decimal>(opening);
         var points = new List<PlannerBalancePoint>();
         AddPoints(month);
-        var dated = events.Where(item => item.Date is not null).GroupBy(item => item.Date!.Value).ToDictionary(group => group.Key, group => group.ToList());
+        var dated = activeEvents.Where(item => item.Date is not null).GroupBy(item => item.Date!.Value).ToDictionary(group => group.Key, group => group.ToList());
         for (var date = month; date < month.AddMonths(1); date = date.AddDays(1))
         {
             if (dated.TryGetValue(date, out var movements)) foreach (var item in movements) Apply(item);
             AddPoints(date);
         }
         // Undated monthly items affect the final plan, but are never assigned an invented chart date.
-        foreach (var item in events.Where(item => item.Date is null && item.Type == TransactionType.Income)) Apply(item);
+        foreach (var item in activeEvents.Where(item => item.Date is null && item.Type == TransactionType.Income)) Apply(item);
         var balances = accounts.Select(account =>
         {
             var setting = settings.GetValueOrDefault(account.Id);
@@ -50,10 +51,10 @@ public static class PlannerProjection
         var currencies = accounts.Select(account => account.Currency).Union(previous?.Totals.Select(item => item.Currency) ?? []).Order();
         var totals = currencies.Select(currency =>
         {
-            var income = events.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Income).Sum(item => item.AccountAmount);
-            var expenses = events.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Expense).Sum(item => item.AccountAmount);
+            var income = activeEvents.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Income).Sum(item => item.AccountAmount);
+            var expenses = activeEvents.Where(item => item.AccountCurrency == currency && item.Classification == TransactionReportingClassification.Expense).Sum(item => item.AccountAmount);
             var closingBalance = mainBalances.SingleOrDefault(item => item.Currency == currency)?.Amount ?? 0;
-            var reserves = events.Where(item => item.Date is null && item.AccountCurrency == currency && item.Type == TransactionType.Expense && item.AccountId is { } id && Included(id)).Sum(item => item.AccountAmount);
+            var reserves = activeEvents.Where(item => item.Date is null && item.AccountCurrency == currency && item.Type == TransactionType.Expense && item.AccountId is { } id && Included(id)).Sum(item => item.AccountAmount);
             var before = previous?.Totals.SingleOrDefault(item => item.Currency == currency);
             return new PlannerCurrencySummary(currency, income, expenses, closingBalance, closingBalance - reserves, before?.Income ?? 0, before?.Expenses ?? 0, before?.ClosingBalance ?? 0, before?.Available ?? 0);
         }).ToList();
