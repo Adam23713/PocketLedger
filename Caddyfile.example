@@ -1,15 +1,98 @@
-{$POCKETLEDGER_LANDING_DOMAIN} {
-	reverse_proxy landing:5053
+{
+	log default {
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace code REDACTED
+					replace state REDACTED
+					replace id_token_hint REDACTED
+					replace access_token REDACTED
+				}
+				request>headers>Referer delete
+				resp_headers>Location delete
+			}
+		}
+	}
+
+	servers {
+		# Trust client IP headers ONLY when the direct peer is Cloudflare.
+		trusted_proxies static 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 104.16.0.0/13 104.24.0.0/14 108.162.192.0/18 131.0.72.0/22 141.101.64.0/18 162.158.0.0/15 172.64.0.0/13 173.245.48.0/20 188.114.96.0/20 190.93.240.0/20 197.234.240.0/22 198.41.128.0/17 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+
+		trusted_proxies_strict
+		client_ip_headers CF-Connecting-IP
+	}
+
+	crowdsec {
+		api_url http://crowdsec:8080
+		api_key {env.CROWDSEC_API_KEY}
+		ticker_interval 15s
+	}
 }
 
-{$POCKETLEDGER_WEB_DOMAIN} {
-	reverse_proxy web:5050
-}
+{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN} {
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 100MiB
+			roll_keep 5
+			roll_keep_for 168h
+		}
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace code REDACTED
+					replace state REDACTED
+					replace id_token_hint REDACTED
+					replace access_token REDACTED
+				}
+				request>headers>Referer delete
+				resp_headers>Location delete
+			}
+		}
+	}
 
-{$POCKETLEDGER_API_DOMAIN} {
-	reverse_proxy api:5051
-}
+	route {
+		# Enforce CrowdSec decisions before spending work on the request.
+		crowdsec
 
-{$POCKETLEDGER_IDENTITY_DOMAIN} {
-	reverse_proxy identity:5052
+		# One shared limiter across all PocketLedger public hostnames.
+		rate_limit {
+			zone pocketledger_global {
+				key {client_ip}
+				events 600
+				window 1m
+				ipv6_prefix 64
+			}
+
+			# Stricter protection for authentication-related writes without
+			# depending on the exact login endpoint path.
+			zone pocketledger_identity_post {
+				match {
+					host {$POCKETLEDGER_IDENTITY_DOMAIN}
+					method POST
+				}
+				key {client_ip}
+				events 30
+				window 1m
+				ipv6_prefix 64
+			}
+
+			log_key
+		}
+
+		@landing host {$POCKETLEDGER_LANDING_DOMAIN}
+		reverse_proxy @landing landing:5053
+
+		@web host {$POCKETLEDGER_WEB_DOMAIN}
+		reverse_proxy @web web:5050
+
+		@api host {$POCKETLEDGER_API_DOMAIN}
+		reverse_proxy @api api:5051
+
+		@identity host {$POCKETLEDGER_IDENTITY_DOMAIN}
+		reverse_proxy @identity identity:5052
+
+		respond 404
+	}
 }
