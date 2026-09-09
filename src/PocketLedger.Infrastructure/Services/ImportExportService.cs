@@ -73,7 +73,9 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         var debts = await dbContext.Debts.AsNoTracking().Select(debt => new DebtBackup(debt.Id, debt.Name, debt.Direction, debt.Type, debt.CounterpartyName, debt.OriginalAmount, debt.Currency, debt.StartDate, debt.DueDate, debt.Note, debt.Status, debt.ClosedAt, debt.AccountId, debt.Icon)).ToListAsync(cancellationToken);
         var transactions = await dbContext.Transactions.AsNoTracking().Select(transaction => new TransactionBackup(transaction.Id, transaction.Type, transaction.AccountId, transaction.TargetAccountId, transaction.Amount, transaction.TargetAmount, transaction.AdjustmentDirection, transaction.TransactionDate, transaction.CategoryId, transaction.Note, transaction.TransactionTime, transaction.DebtId, transaction.DebtOperationType, transaction.ExchangeRate, transaction.SourceCurrency, transaction.TargetCurrency, transaction.OccurredAtUtc)).ToListAsync(cancellationToken);
         var recurring = await dbContext.RecurringTransactions.AsNoTracking().Select(template => new RecurringTransactionBackup(template.Id, template.Type, template.AccountId, template.CategoryId, template.Amount, template.AdjustmentDirection, template.Note, template.FirstOccurrence, template.LastOccurrence, template.Frequency, template.Enabled, template.DebtId, template.DebtOperationType)).ToListAsync(cancellationToken);
-        return BackupJson.Serialize(new PocketLedgerBackup(2, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring, debts));
+        var plannerItems = (await dbContext.PlannerItems.AsNoTracking().ToListAsync(cancellationToken)).Select(item => new PlannerItemBackup(item.Id, PlannerService.ToInput(item), item.CopyDay)).ToList();
+        var plannerMonths = (await dbContext.PlannerMonths.AsNoTracking().ToListAsync(cancellationToken)).Select(item => new PlannerMonthBackup(item.Month, item.IsClosed, PlannerHistory.Deserialize<List<PocketLedger.Services.Interfaces.PlannerOpeningBalance>>(item.OpeningBalancesJson), PlannerHistory.Deserialize<PocketLedger.Services.Interfaces.PlannerMonth>(item.SnapshotJson))).ToList();
+        return BackupJson.Serialize(new PocketLedgerBackup(plannerMonths.Count > 0 ? 4 : plannerItems.Count > 0 ? 3 : 2, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring, debts, plannerItems, plannerMonths));
     }
 
     public RestorePreview PreviewRestore(string json)
@@ -99,8 +101,13 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         backup = RemapBackupIds(backup);
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+        var skipHistory = dbContext.SkipPlannerHistory;
+        dbContext.SkipPlannerHistory = true;
         try
         {
+            dbContext.PlannerMonths.RemoveRange(dbContext.PlannerMonths);
+            dbContext.PlannerItems.RemoveRange(dbContext.PlannerItems);
             dbContext.Transactions.RemoveRange(dbContext.Transactions);
             dbContext.RecurringTransactions.RemoveRange(dbContext.RecurringTransactions);
             dbContext.Debts.RemoveRange(dbContext.Debts);
@@ -113,6 +120,14 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             dbContext.Categories.AddRange(backup.Categories.Select(item => new Category { Id = item.Id, Name = item.Name, Type = item.Type, Icon = item.Icon, ParentCategoryId = item.ParentCategoryId, DisplayOrder = item.DisplayOrder }));
             dbContext.Debts.AddRange((backup.Debts ?? []).Select(item => new Debt { Id = item.Id, Name = item.Name, Icon = item.Icon is not null && CategoryIcons.Exists(item.Icon) ? item.Icon : CategoryIcons.DefaultFor(item.Direction == DebtDirection.Receivable ? CategoryType.Income : CategoryType.Expense).Id, Direction = item.Direction, Type = item.Type, CounterpartyName = item.CounterpartyName, OriginalAmount = item.OriginalAmount, Currency = item.Currency, StartDate = item.StartDate, DueDate = item.DueDate, Note = item.Note, Status = item.Status, ClosedAt = item.ClosedAt, AccountId = item.AccountId }));
             dbContext.Transactions.AddRange(backup.Transactions.Select(item => new Transaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, TargetAccountId = item.TargetAccountId, Amount = item.Amount, TargetAmount = item.TargetAmount, ExchangeRate = item.ExchangeRate, SourceCurrency = item.SourceCurrency, TargetCurrency = item.TargetCurrency, OccurredAtUtc = item.OccurredAtUtc, AdjustmentDirection = item.AdjustmentDirection, TransactionDate = item.TransactionDate, TransactionTime = item.TransactionTime, CategoryId = item.CategoryId, Note = item.Note, DebtId = item.DebtId, DebtOperationType = item.DebtOperationType }));
+            foreach (var saved in backup.PlannerItems ?? [])
+            {
+                var item = new PlannerItem { Id = saved.Id };
+                PlannerService.Apply(item, saved.Item);
+                item.CopyDay = saved.CopyDay ?? saved.Item.PlannedDate?.Day;
+                dbContext.PlannerItems.Add(item);
+            }
+            dbContext.PlannerMonths.AddRange((backup.PlannerMonths ?? []).Select(item => new PlannerMonthRecord { Id = Guid.NewGuid(), Month = item.Month, IsClosed = item.IsClosed, OpeningBalancesJson = PlannerHistory.Serialize(item.OpeningBalances), SnapshotJson = PlannerHistory.Serialize(item.Snapshot) }));
             var today = await userContext.TodayAsync(cancellationToken);
             dbContext.RecurringTransactions.AddRange(backup.RecurringTransactions.Select(item => new RecurringTransaction { Id = item.Id, Type = item.Type, AccountId = item.AccountId, CategoryId = item.CategoryId, Amount = item.Amount, AdjustmentDirection = item.AdjustmentDirection, Note = item.Note, FirstOccurrence = item.FirstOccurrence, LastOccurrence = item.LastOccurrence, AutomationStartsOn = today, Frequency = item.Frequency, Enabled = item.Enabled, DebtId = item.DebtId, DebtOperationType = item.DebtOperationType }));
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -123,6 +138,7 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+        finally { dbContext.SkipPlannerHistory = skipHistory; }
     }
 
     private static PocketLedgerBackup RemapBackupIds(PocketLedgerBackup backup)
@@ -137,6 +153,8 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         return backup with
         {
             Accounts = backup.Accounts.Select(item => item with { Id = accountIds[item.Id] }).ToArray(),
+            PlannerItems = backup.PlannerItems?.Select(saved => new PlannerItemBackup(Guid.NewGuid(), saved.Item with { AccountId = accountIds[saved.Item.AccountId], TargetAccountId = Remap(accountIds, saved.Item.TargetAccountId), CategoryId = Remap(categoryIds, saved.Item.CategoryId) }, saved.CopyDay)).ToArray(),
+            PlannerMonths = backup.PlannerMonths?.Select(RemapMonth).ToArray(),
             Categories = backup.Categories.Select(item => item with { Id = categoryIds[item.Id], ParentCategoryId = Remap(categoryIds, item.ParentCategoryId) }).ToArray(),
             Debts = backup.Debts?.Select(item => item with { Id = debtIds[item.Id], AccountId = Remap(accountIds, item.AccountId) }).ToArray(),
             Transactions = backup.Transactions.Select(item => item with
@@ -148,6 +166,20 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             {
                 Id = Guid.NewGuid(), AccountId = accountIds[item.AccountId], CategoryId = Remap(categoryIds, item.CategoryId), DebtId = Remap(debtIds, item.DebtId)
             }).ToArray()
+        };
+
+        PlannerMonthBackup RemapMonth(PlannerMonthBackup saved) => saved with
+        {
+            OpeningBalances = saved.OpeningBalances.Select(setting => setting with { AccountId = accountIds.GetValueOrDefault(setting.AccountId, setting.AccountId) }).ToArray(),
+            Snapshot = saved.Snapshot with
+            {
+                Accounts = saved.Snapshot.Accounts.Select(account => account with { Id = accountIds.GetValueOrDefault(account.Id, account.Id) }).ToArray(),
+                Events = saved.Snapshot.Events.Select(item => item with
+                {
+                    AccountId = item.AccountId is { } source ? accountIds.GetValueOrDefault(source, source) : null,
+                    TargetAccountId = item.TargetAccountId is { } target ? accountIds.GetValueOrDefault(target, target) : null
+                }).ToArray()
+            }
         };
 
         static Guid? Remap(IReadOnlyDictionary<Guid, Guid> ids, Guid? id) => id is { } value ? ids[value] : null;

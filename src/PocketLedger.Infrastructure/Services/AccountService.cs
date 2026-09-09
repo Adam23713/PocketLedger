@@ -63,6 +63,8 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
     {
         var account = await dbContext.Accounts.SingleOrDefaultAsync(item => item.Id == id, cancellationToken)
             ?? throw new EntityNotFoundException("Account not found.");
+        if (await dbContext.PlannerItems.AnyAsync(item => item.AccountId == id || item.TargetAccountId == id, cancellationToken))
+            throw new BusinessRuleException("Delete the planner items referencing this account before deleting the account.");
         await using var databaseTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var debts = await dbContext.Debts.Where(debt => debt.AccountId == id).ToListAsync(cancellationToken);
         var debtIds = debts.Select(debt => debt.Id).ToList();

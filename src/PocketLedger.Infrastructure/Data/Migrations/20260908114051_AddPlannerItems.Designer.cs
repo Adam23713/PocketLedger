@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PocketLedger.Data;
@@ -11,9 +12,11 @@ using PocketLedger.Data;
 namespace PocketLedger.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PocketLedgerDbContext))]
-    partial class PocketLedgerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908114051_AddPlannerItems")]
+    partial class AddPlannerItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -275,21 +278,11 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("category_id");
 
-                    b.Property<int?>("CopyDay")
-                        .HasColumnType("integer")
-                        .HasColumnName("copy_day");
-
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)")
                         .HasColumnName("currency");
-
-                    b.Property<bool>("IsPaused")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_paused");
 
                     b.Property<DateOnly>("Month")
                         .HasColumnType("date")
@@ -347,46 +340,6 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                             t.HasCheckConstraint("ck_planner_items_type", "type IN ('Income', 'Expense', 'Transfer')");
                         });
-                });
-
-            modelBuilder.Entity("PocketLedger.Models.Entities.PlannerMonthRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<bool>("IsClosed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_closed");
-
-                    b.Property<DateOnly>("Month")
-                        .HasColumnType("date")
-                        .HasColumnName("month");
-
-                    b.Property<string>("OpeningBalancesJson")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("opening_balances_json");
-
-                    b.Property<Guid>("OwnerId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid")
-                        .HasColumnName("owner_id");
-
-                    b.Property<string>("SnapshotJson")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("snapshot_json");
-
-                    b.HasKey("Id")
-                        .HasName("pk_planner_months");
-
-                    b.HasIndex("OwnerId", "Month")
-                        .IsUnique()
-                        .HasDatabaseName("ix_planner_months_owner_id_month");
-
-                    b.ToTable("planner_months", (string)null);
                 });
 
             modelBuilder.Entity("PocketLedger.Models.Entities.RecurringTransaction", b =>
