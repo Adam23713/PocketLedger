@@ -23,10 +23,10 @@
             </select></div>
         </div>
         <div class="row">
-            <div class="col-md-6 mb-3"><label for="planner-currency" class="form-label">Original currency</label><select asp-for="Currency" class="form-select" id="planner-currency">
+            <div class="col-md-6 mb-3" id="planner-currency-field"><label for="planner-currency" class="form-label">Original currency</label><select asp-for="Currency" class="form-select" id="planner-currency">
                 @foreach (var currency in Currencies.All) { var format = MoneyFormatter.GetMoneyInputFormat(currency.Code); <option value="@currency.Code" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@currency.Code</option> }
             </select></div>
-            <div class="col-md-6 mb-3"><label for="planner-amount-display" class="form-label">Original / source amount</label><input asp-for="Amount" type="hidden" id="planner-amount" /><input id="planner-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-amount" data-money-currency="planner-currency" required autocomplete="off" /></div>
+            <div class="col-md-6 mb-3"><label for="planner-amount-display" class="form-label">Amount</label><input asp-for="Amount" type="hidden" id="planner-amount" /><input id="planner-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-amount" data-money-account="planner-account" required autocomplete="off" /></div>
         </div>
         <div class="row">
             <div class="col-md-6 mb-3" id="planner-conversion-field"><label for="planner-account-amount-display" class="form-label">Amount in account currency · <span id="planner-account-currency"></span></label><input asp-for="AccountAmount" type="hidden" id="planner-account-amount" /><input id="planner-account-amount-display" type="text" inputmode="decimal" class="form-control" data-money-value="planner-account-amount" data-money-account="planner-account" autocomplete="off" /><small class="planner-muted">The amount expected to be credited or debited in the account currency.</small></div>
@@ -42,4 +42,5 @@
 @section Scripts {
     <script src="~/js/money-input.js" asp-append-version="true"></script>
     <script src="~/js/planner-form.js" asp-append-version="true"></script>
+    <script src="~/js/planner-select.js" asp-append-version="true"></script>
 }

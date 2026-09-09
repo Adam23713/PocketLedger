@@ -15,6 +15,20 @@ public class PlannerTests
     private static readonly DateOnly Today = new(2026, 9, 8);
 
     [Fact]
+    public void Projection_UsesDisplayOrderAndIgnoresGlobalAccountInclusion()
+    {
+        var first = Account("EUR", 10, false);
+        var last = Account("HUF", 20, false);
+        first.DisplayOrder = 1;
+        last.DisplayOrder = 10;
+        var result = Calculate(Month, [last, first], [], []);
+        Assert.Equal(new[] { first.Id, last.Id }, result.Accounts.Select(item => item.Id));
+        Assert.All(result.Accounts, item => Assert.True(item.IncludeInMainBalance));
+        Assert.Equal(10, result.Totals.Single(item => item.Currency == "EUR").ClosingBalance);
+        Assert.Equal(20, result.Totals.Single(item => item.Currency == "HUF").ClosingBalance);
+    }
+
+    [Fact]
     public void Projection_UsesActiveSchedulesRegardlessOfAutomationProcessing()
     {
         var account = Account("HUF", 1000);
@@ -64,13 +78,13 @@ public class PlannerTests
     }
 
     [Fact]
-    public void Projection_UndatedBudgetOnlyReducesAvailableAndHonorsMainBalanceFlag()
+    public void Projection_UndatedBudgetOnlyReducesAvailableAndHonorsPlannerInclusion()
     {
         var main = Account("HUF", 1000);
         var savings = Account("HUF", 5000, false);
         var budget = Plan(main, TransactionType.Expense, 300, null);
         var savingsBudget = Plan(savings, TransactionType.Expense, 200, null);
-        var result = Calculate(Month, [main, savings], [budget, savingsBudget], []);
+        var result = PlannerProjection.Calculate(Month, Today, [main, savings], new Dictionary<Guid, decimal> { [main.Id] = 1000, [savings.Id] = 5000 }, [new(savings.Id, true, null, false)], [budget, savingsBudget], []);
         var total = Assert.Single(result.Totals);
         Assert.Equal(1000, total.ClosingBalance);
         Assert.Equal(700, total.Available);
@@ -87,7 +101,7 @@ public class PlannerTests
         var transfer = Plan(main, TransactionType.Transfer, 300, Month);
         transfer.TargetAccountId = savings.Id;
         transfer.TargetAmount = 300;
-        var result = Calculate(Month, [main, savings], [transfer], []);
+        var result = PlannerProjection.Calculate(Month, Today, [main, savings], new Dictionary<Guid, decimal> { [main.Id] = 1000, [savings.Id] = 0 }, [new(savings.Id, true, null, false)], [transfer], []);
         Assert.Equal(700, Assert.Single(result.Totals).Available);
         Assert.Equal(0, Assert.Single(result.Totals).Expenses);
         Assert.Equal(300, result.Accounts.Single(item => item.Id == savings.Id).ClosingBalance);

@@ -1,4 +1,7 @@
+function initializeMoneyInputs() {
 document.querySelectorAll("[data-money-value]").forEach(display => {
+    if (display.dataset.moneyInitialized) return;
+    display.dataset.moneyInitialized = "true";
     const canonical = document.getElementById(display.dataset.moneyValue);
     const account = document.getElementById(display.dataset.moneyAccount);
     const currency = document.getElementById(display.dataset.moneyCurrency);
@@ -63,3 +66,7 @@ document.querySelectorAll("[data-money-value]").forEach(display => {
     display.closest("form")?.addEventListener("submit", formatInput, { capture: true });
     renderCanonical();
 });
+
+}
+document.addEventListener("money:initialize", initializeMoneyInputs);
+initializeMoneyInputs();

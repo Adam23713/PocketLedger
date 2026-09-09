@@ -31,9 +31,10 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
         var settings = PlannerHistory.Deserialize<List<PlannerOpeningBalance>>(record.OpeningBalancesJson);
         var previous = settings.SingleOrDefault(item => item.AccountId == accountId);
         var snapshot = PlannerHistory.Deserialize<PlannerMonth>(record.SnapshotJson);
-        var value = input.UseCurrentBalance ? previous?.Amount : input.Amount ?? previous?.Amount ?? snapshot.Accounts.Single(item => item.Id == accountId).OpeningBalance;
+        var follow = input.UseCurrentBalance ?? previous?.UseCurrentBalance ?? true;
+        var value = follow ? previous?.Amount : input.Amount ?? previous?.Amount ?? snapshot.Accounts.Single(item => item.Id == accountId).OpeningBalance;
         settings.RemoveAll(item => item.AccountId == accountId);
-        settings.Add(new PlannerOpeningBalance(accountId, input.UseCurrentBalance, value));
+        settings.Add(new PlannerOpeningBalance(accountId, follow, value, input.IncludeInBalance ?? previous?.IncludeInBalance ?? true));
         record.OpeningBalancesJson = PlannerHistory.Serialize(settings);
         await dbContext.SaveChangesAsync(cancellationToken);
         if (transaction is not null) await transaction.CommitAsync(cancellationToken);

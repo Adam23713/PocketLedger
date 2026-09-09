@@ -13,6 +13,25 @@ namespace PocketLedger.Tests;
 public class PlannerHistoryTests
 {
     [Fact]
+    public async Task InclusionIsIndependentAndPersistsWithoutChangingOpeningBalance()
+    {
+        await using var fixture = new Fixture();
+        await fixture.SeedAsync();
+        fixture.Account.IncludeInMainBalance = false;
+        await fixture.Db.SaveChangesAsync();
+        Assert.True(Assert.Single((await fixture.ReadAsync(9)).Accounts).IncludeInMainBalance);
+        await fixture.Service.UpdateOpeningBalanceAsync(2026, 9, fixture.Account.Id, new(false, 2000), default);
+        await fixture.Service.UpdateOpeningBalanceAsync(2026, 9, fixture.Account.Id, new(null, null, false), default);
+        var result = await fixture.ReadAsync(9);
+        Assert.False(Assert.Single(result.Accounts).IncludeInMainBalance);
+        Assert.Equal(2000, Assert.Single(result.Accounts).OpeningBalance);
+        Assert.Equal(0, Assert.Single(result.Totals).ClosingBalance);
+        Assert.Empty(result.Points);
+        Assert.False(Assert.Single((await fixture.ReadAsync(10)).Accounts).IncludeInMainBalance);
+        Assert.False(fixture.Account.IncludeInMainBalance);
+    }
+
+    [Fact]
     public async Task CurrentScheduleChangesRefreshSavedPlanAndClosedMonthsStayFrozen()
     {
         await using var fixture = new Fixture();

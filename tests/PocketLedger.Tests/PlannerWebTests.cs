@@ -55,7 +55,8 @@ public class PlannerWebTests
         var categories = html.IndexOf("href=\"/Categories/Index\"", StringComparison.Ordinal);
         Assert.True(profile >= 0 && accounts > profile && categories > accounts);
         Assert.Contains("Fixed expenses", decoded);
-        Assert.Contains("Use current balance", decoded);
+        Assert.Contains("Follow current balance", decoded);
+        Assert.Contains("name=\"IncludeInBalance\"", html);
         Assert.DoesNotContain("Manuális", decoded);
         var closed = await RenderAsync("/Views/Planner/Index.cshtml", model with { IsClosed = true });
         Assert.DoesNotContain("/Planner/Edit", closed);

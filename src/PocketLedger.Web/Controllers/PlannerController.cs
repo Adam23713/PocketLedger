@@ -72,15 +72,21 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> OpeningBalance(int year, int month, Guid accountId, bool useCurrentBalance, decimal? amount, CancellationToken cancellationToken)
+    public async Task<IActionResult> OpeningBalance(int year, int month, Guid accountId, bool? useCurrentBalance, decimal? amount, CancellationToken cancellationToken, bool? includeInBalance = null)
     {
+        var ajax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
         try
         {
             if (!ModelState.IsValid) throw new BusinessRuleException("Enter a valid opening balance.");
-            await plannerService.UpdateOpeningBalanceAsync(year, month, accountId, new(useCurrentBalance, amount), cancellationToken);
+            await plannerService.UpdateOpeningBalanceAsync(year, month, accountId, new(useCurrentBalance, amount, includeInBalance), cancellationToken);
         }
         catch (EntityNotFoundException) { return NotFound(); }
-        catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; }
+        catch (BusinessRuleException exception)
+        {
+            if (ajax) return BadRequest(new { message = exception.Message });
+            TempData["ErrorMessage"] = exception.Message;
+        }
+        if (ajax) return PartialView("_Content", await plannerService.GetMonthAsync(year, month, cancellationToken));
         return RedirectToAction(nameof(Index), new { year, month });
     }
 
