@@ -80,7 +80,11 @@ jobs:
           POSTGRES_PASSWORD=ci-postgres-password
           POCKETLEDGER_INITIAL_USERNAME=ci-admin
           POCKETLEDGER_INITIAL_PASSWORD=Ci-Admin-Password-123!
+          POCKETLEDGER_SECURITY_DIRECTORY=${RUNNER_TEMP}/pocketledger-security
           EOF
+
+      - name: Prepare encryption keys for CI
+        run: sudo bash tools/initialize-encryption-keys.sh "$RUNNER_TEMP/pocketledger-security"
 
       - name: Build images (web, api, identity, landing)
         run: docker compose build web api identity landing
