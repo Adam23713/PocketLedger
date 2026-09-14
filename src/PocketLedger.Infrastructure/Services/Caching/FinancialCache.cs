@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -54,13 +55,14 @@ public sealed class FinancialCache(PocketLedgerDbContext dbContext, ICurrentUser
         // A fill racing a commit stays under the old revision and cannot poison subsequent reads.
         var revision = await dbContext.Database.SqlQuery<Guid>($"SELECT revision AS \"Value\" FROM financial_cache_revisions WHERE owner_id = {currentUser.UserId}").SingleOrDefaultAsync(cancellationToken);
         var dimensionHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dimensions))));
-        var key = $"pocketledger:finance:v1:{currentUser.UserId:N}:{revision:N}:{operation}:{dimensionHash}";
+        var key = $"pocketledger:finance:v2:{currentUser.UserId:N}:{revision:N}:{operation}:{dimensionHash}";
+        var protector = dbContext.Encryption?.CreateProtector($"FinancialCache.{currentUser.UserId:N}.{operation}");
         try
         {
             var bytes = await store.GetAsync(key, cancellationToken);
-            if (bytes is not null && JsonSerializer.Deserialize<T>(bytes, JsonOptions) is { } cached) return cached;
+            if (bytes is not null && JsonSerializer.Deserialize<T>(protector is null ? bytes : protector.Unprotect(bytes), JsonOptions) is { } cached) return cached;
         }
-        catch (Exception exception) when (exception is RedisException or JsonException)
+        catch (Exception exception) when (exception is RedisException or JsonException or CryptographicException)
         {
             logger.LogWarning(exception, "Financial cache read failed for {Operation}; reading from the database.", operation);
             return await read();
@@ -69,9 +71,10 @@ public sealed class FinancialCache(PocketLedgerDbContext dbContext, ICurrentUser
         var result = await read();
         try
         {
-            await store.SetAsync(key, JsonSerializer.SerializeToUtf8Bytes(result, JsonOptions), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(options.Value.LifetimeMinutes) }, cancellationToken);
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(result, JsonOptions);
+            await store.SetAsync(key, protector is null ? bytes : protector.Protect(bytes), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(options.Value.LifetimeMinutes) }, cancellationToken);
         }
-        catch (Exception exception) when (exception is RedisException or JsonException)
+        catch (Exception exception) when (exception is RedisException or JsonException or CryptographicException)
         {
             logger.LogWarning(exception, "Financial cache write failed for {Operation}; returning the database result.", operation);
         }

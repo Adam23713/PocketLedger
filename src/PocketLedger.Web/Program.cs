@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using PocketLedger.Services;
+using PocketLedger.Security;
 using PocketLedger.Services.Interfaces;
 using PocketLedger.Web.Api;
 using PocketLedger.Web.Authentication;
@@ -16,9 +17,9 @@ using PocketLedger.Web.Data;
 using PocketLedger.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Web");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebConnection")));
-builder.Services.AddDataProtection().SetApplicationName("PocketLedger.Web").PersistKeysToDbContext<WebDbContext>();
 builder.Services.AddSingleton<DatabaseTicketStore>();
 builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
 builder.Services.AddSingleton<SessionRefreshCoordinator>();

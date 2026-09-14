@@ -457,8 +457,7 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("character varying(80)");
 
                     b.Property<string>("ForwardedClientIpAddress")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("text");
 
                     b.Property<string>("HttpMethod")
                         .IsRequired()
@@ -466,8 +465,7 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("character varying(16)");
 
                     b.Property<string>("Metadata")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedUsername")
                         .HasMaxLength(256)
@@ -479,8 +477,7 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("character varying(30)");
 
                     b.Property<string>("RemoteIpAddress")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("text");
 
                     b.Property<string>("RequestPath")
                         .IsRequired()
@@ -495,8 +492,7 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserAgent")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");

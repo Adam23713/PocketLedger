@@ -1,0 +1,30 @@
+# Use only after manually unlocking and mounting /srv/pocketledger.
+# Start through tools/compose-encrypted-storage.sh; see docs/database-encryption.md.
+services:
+  web:
+    restart: "no"
+  api:
+    restart: "no"
+  identity:
+    restart: "no"
+  web-database:
+    restart: "no"
+    volumes:
+      - type: bind
+        source: /srv/pocketledger/databases/web
+        target: /var/lib/postgresql/data
+        bind: { create_host_path: false }
+  api-database:
+    restart: "no"
+    volumes:
+      - type: bind
+        source: /srv/pocketledger/databases/api
+        target: /var/lib/postgresql/data
+        bind: { create_host_path: false }
+  identity-database:
+    restart: "no"
+    volumes:
+      - type: bind
+        source: /srv/pocketledger/databases/identity
+        target: /var/lib/postgresql/data
+        bind: { create_host_path: false }

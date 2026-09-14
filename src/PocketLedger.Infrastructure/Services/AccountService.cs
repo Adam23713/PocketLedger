@@ -9,7 +9,7 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
 {
     public async Task<IReadOnlyList<Account>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.Accounts.AsNoTracking().OrderBy(account => account.DisplayOrder).ThenBy(account => account.Name).ToListAsync(cancellationToken);
+        return (await dbContext.Accounts.AsNoTracking().ToListAsync(cancellationToken)).OrderBy(account => account.DisplayOrder).ThenBy(account => account.Name).ToList();
     }
 
     public Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -120,11 +120,7 @@ public class AccountService(PocketLedgerDbContext dbContext, TimeProvider timePr
 
     public async Task<IReadOnlyList<AccountChoice>> GetChoicesAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.Accounts.AsNoTracking()
-            .OrderBy(account => account.DisplayOrder)
-            .ThenBy(account => account.Name)
-            .Select(account => new AccountChoice(account.Id, account.Name, account.Currency))
-            .ToListAsync(cancellationToken);
+        return (await GetAllAsync(cancellationToken)).Select(account => new AccountChoice(account.Id, account.Name, account.Currency)).ToList();
     }
 
     public async Task<IReadOnlyList<Transaction>> GetRecentTransactionsAsync(Guid accountId, int count, CancellationToken cancellationToken)

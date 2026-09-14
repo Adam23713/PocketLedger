@@ -39,6 +39,10 @@ https://identity.pocketledger.dev  Identity/OIDC
 
 The browser uses the Web/BFF for finance operations. The public API hostname remains available for future first-party clients. Caddy is the only published entry point in the supplied Compose topology; the application containers trust forwarded headers because they are reachable only on the private Compose network.
 
+## Database encryption
+
+Selected financial text and Identity secret fields are encrypted before persistence. Production now requires separate certificate-protected key directories for API, Web and Identity. Follow the [database encryption and recovery guide](docs/database-encryption.md) before upgrading: populated legacy databases are intentionally rejected; the agreed transition uses fresh databases and the existing finance JSON restore. JSON/CSV export formats are unchanged and remain plaintext. Full PostgreSQL storage encryption additionally requires the documented VPS/LUKS setup.
+
 ## Docker Compose deployment
 
 Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflare, and an authenticator app supporting TOTP.
@@ -56,7 +60,7 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    openssl rand -base64 64
    ```
 
-3. Build the images and initialize the Identity database and first user:
+3. Prepare the encryption directories as described in the [encryption guide](docs/database-encryption.md), set `POCKETLEDGER_SECURITY_DIRECTORY`, then build the images and initialize the Identity database and first user:
 
    ```bash
    docker compose build
