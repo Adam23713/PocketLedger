@@ -26,6 +26,27 @@ namespace PocketLedger.Tests;
 
 public class PlannerWebTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Notes_EncodesTextareaBreakoutAndScriptInOpenAndClosedMonths(bool closed)
+    {
+        const string payload = "</textarea><script>alert('notes-xss')</script><img src=x onerror=alert(1)>";
+        var month = new DateOnly(2026, 9, 1);
+        var model = new PlannerMonth(month, month, [], [], [], [], IsClosed: closed, Notes: payload);
+        var html = await RenderAsync("/Views/Planner/Index.cshtml", model);
+        var start = html.IndexOf("<textarea", StringComparison.Ordinal);
+        Assert.True(start >= 0);
+        var contentStart = html.IndexOf('>', start) + 1;
+        var end = html.IndexOf("</textarea>", contentStart, StringComparison.Ordinal);
+        Assert.True(end > contentStart);
+        var encodedNotes = html[contentStart..end];
+        Assert.Equal(payload, WebUtility.HtmlDecode(encodedNotes));
+        Assert.DoesNotContain("<", encodedNotes);
+        Assert.DoesNotContain(payload, html);
+        Assert.Equal(closed, html[start..contentStart].Contains("readonly", StringComparison.Ordinal));
+    }
+
     [Fact]
     public async Task Index_RendersCurrenciesChartManualActionsAndUpdatedNavigation()
     {
