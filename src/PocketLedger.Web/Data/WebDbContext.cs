@@ -1,12 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace PocketLedger.Web.Data;
 
-public sealed class WebDbContext(DbContextOptions<WebDbContext> options) : DbContext(options), IDataProtectionKeyContext
+public sealed class WebDbContext(DbContextOptions<WebDbContext> options) : DbContext(options)
 {
     public DbSet<BffSession> Sessions => Set<BffSession>();
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -28,7 +28,7 @@
             "problemMatcher": []
         },
         {
-            "label": "start PocketLedger development databases",
+            "label": "stop legacy PocketLedger development databases",
             "type": "process",
             "command": "docker",
             "dependsOrder": "sequence",
@@ -39,6 +39,39 @@
                 "compose",
                 "--project-name",
                 "pocketledger-dev",
+                "--env-file",
+                "${workspaceFolder}/.env.development",
+                "-f",
+                "${workspaceFolder}/compose.yaml",
+                "-f",
+                "${workspaceFolder}/compose.development.yaml",
+                "stop",
+                "web-database",
+                "api-database",
+                "identity-database"
+            ],
+            "problemMatcher": [],
+            "options": {
+                "env": {
+                    "POCKETLEDGER_LANDING_DOMAIN": "localhost:5053",
+                    "POCKETLEDGER_SECURITY_DIRECTORY": "${workspaceFolder}/.local/compose-security"
+                },
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Stops the old pocketledger-dev database containers to release ports 5433–5435; preserves all volumes."
+        },
+        {
+            "label": "start PocketLedger development databases",
+            "type": "process",
+            "command": "docker",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "start Podman socket"
+            ],
+            "args": [
+                "compose",
+                "--project-name",
+                "pocketledger-dev-encrypted",
                 "--env-file",
                 "${workspaceFolder}/.env.development",
                 "-f",
@@ -56,9 +89,12 @@
             "problemMatcher": [],
             "options": {
                 "env": {
-                    "POCKETLEDGER_LANDING_DOMAIN": "localhost:5053"
-                }
-            }
+                    "POCKETLEDGER_LANDING_DOMAIN": "localhost:5053",
+                    "POCKETLEDGER_SECURITY_DIRECTORY": "${workspaceFolder}/.local/compose-security"
+                },
+                "cwd": "${workspaceFolder}"
+            },
+            "detail": "Starts separate databases for encrypted local development. Stop the legacy databases once before the first start."
         },
         {
             "label": "prepare PocketLedger development",
@@ -91,8 +127,10 @@
                     "ASPNETCORE_ENVIRONMENT": "Development",
                     "ConnectionStrings__IdentityConnection": "Host=localhost;Port=5435;Database=pocketledger_identity;Username=pocketledger;Password=pocketledger",
                     "POCKETLEDGER_INITIAL_USERNAME": "${input:identityUsername}",
-                    "POCKETLEDGER_INITIAL_PASSWORD": "${input:identityPassword}"
-                }
+                    "POCKETLEDGER_INITIAL_PASSWORD": "${input:identityPassword}",
+                    "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption"
+                },
+                "cwd": "${workspaceFolder}/src/PocketLedger.Identity"
             },
             "problemMatcher": "$msCompile"
         }

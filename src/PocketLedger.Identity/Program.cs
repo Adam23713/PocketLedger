@@ -12,8 +12,10 @@ using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Middleware;
 using PocketLedger.Services;
+using PocketLedger.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
 builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");

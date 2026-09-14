@@ -46,7 +46,7 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
     private async Task<PagedResult<Transaction>> GetFilteredCoreAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
-        var query = ApplyFilter(BaseReadQuery(), filter);
+        var query = await ApplySearchAsync(ApplyFilter(BaseReadQuery(), filter), filter.Search, cancellationToken);
         var totalCount = await query.CountAsync(cancellationToken);
         var pageSize = Math.Clamp(filter.PageSize, 1, 100);
         var page = Math.Max(filter.Page, 1);
@@ -68,7 +68,8 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
     private async Task<IReadOnlyList<TransactionDailyTotal>> GetDailyTotalsCoreAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
-        var rows = await ApplyFilter(BaseReadQuery(), filter)
+        var query = await ApplySearchAsync(ApplyFilter(BaseReadQuery(), filter), filter.Search, cancellationToken);
+        var rows = await query
             .Where(transaction => transaction.Type != TransactionType.Transfer && transaction.Type != TransactionType.DebtEntry)
             .Select(transaction => new
             {
@@ -100,7 +101,8 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
     public async Task<IReadOnlyList<Transaction>> GetForExportAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
         TransactionFilterRules.Validate(filter);
-        return await ApplyFilter(BaseReadQuery(), filter).OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.TransactionTime).ThenByDescending(transaction => transaction.Id).ToListAsync(cancellationToken);
+        var query = await ApplySearchAsync(ApplyFilter(BaseReadQuery(), filter), filter.Search, cancellationToken);
+        return await query.OrderByDescending(transaction => transaction.TransactionDate).ThenByDescending(transaction => transaction.TransactionTime).ThenByDescending(transaction => transaction.Id).ToListAsync(cancellationToken);
     }
 
     public Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -234,6 +236,16 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
         transaction.Note = string.IsNullOrWhiteSpace(transaction.Note) ? null : transaction.Note.Trim();
     }
 
+    private static async Task<IQueryable<Transaction>> ApplySearchAsync(IQueryable<Transaction> query, string? search, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(search)) return query;
+        // Apply indexed financial filters before decrypting notes; only matching IDs are used for paging and totals.
+        var matches = new List<Guid>();
+        await foreach (var row in query.Select(transaction => new { transaction.Id, transaction.Note }).AsAsyncEnumerable().WithCancellation(cancellationToken))
+            if (row.Note?.Contains(search, StringComparison.OrdinalIgnoreCase) == true) matches.Add(row.Id);
+        return query.Where(transaction => matches.Contains(transaction.Id));
+    }
+
     private static IQueryable<Transaction> ApplyFilter(IQueryable<Transaction> query, TransactionFilter filter)
     {
         if (filter.DateFrom is not null) query = query.Where(transaction => transaction.TransactionDate >= filter.DateFrom);
@@ -245,11 +257,6 @@ public class TransactionService(PocketLedgerDbContext dbContext, IUserContextSer
         if (filter.Type is not null) query = query.Where(transaction => transaction.Type == filter.Type);
         if (filter.AmountFrom is not null) query = query.Where(transaction => transaction.Amount >= filter.AmountFrom);
         if (filter.AmountTo is not null) query = query.Where(transaction => transaction.Amount <= filter.AmountTo);
-        if (!string.IsNullOrWhiteSpace(filter.Search))
-        {
-            var search = TransactionFilterRules.EscapeLikePattern(filter.Search);
-            query = query.Where(transaction => transaction.Note != null && EF.Functions.ILike(transaction.Note, $"%{search}%", "\\"));
-        }
 
         return query;
     }

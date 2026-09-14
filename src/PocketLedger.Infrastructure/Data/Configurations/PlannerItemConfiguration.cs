@@ -29,7 +29,7 @@ public class PlannerItemConfiguration : IEntityTypeConfiguration<PlannerItem>
         builder.Property(item => item.Currency).HasColumnName("currency").HasMaxLength(3);
         builder.Property(item => item.AccountAmount).HasColumnName("account_amount").HasPrecision(19, 4);
         builder.Property(item => item.TargetAmount).HasColumnName("target_amount").HasPrecision(19, 4);
-        builder.Property(item => item.Note).HasColumnName("note").HasMaxLength(500);
+        builder.Property(item => item.Note).HasColumnName("note").HasColumnType("text");
         builder.HasOne(item => item.Account).WithMany().HasForeignKey(item => item.AccountId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_planner_items_accounts_account_id");
         builder.HasOne(item => item.TargetAccount).WithMany().HasForeignKey(item => item.TargetAccountId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_planner_items_accounts_target_account_id");
         builder.HasOne(item => item.Category).WithMany().HasForeignKey(item => item.CategoryId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_planner_items_categories_category_id");

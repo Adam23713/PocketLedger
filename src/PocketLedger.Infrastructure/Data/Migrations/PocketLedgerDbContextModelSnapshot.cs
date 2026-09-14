@@ -70,8 +70,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<Guid>("OwnerId")
@@ -112,8 +111,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<Guid>("OwnerId")
@@ -168,8 +166,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                     b.Property<string>("CounterpartyName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("text")
                         .HasColumnName("counterparty_name");
 
                     b.Property<string>("Currency")
@@ -196,13 +193,11 @@ namespace PocketLedger.Infrastructure.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
+                        .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<decimal>("OriginalAmount")
@@ -296,8 +291,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("month");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<Guid>("OwnerId")
@@ -446,8 +440,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("last_occurrence");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<Guid>("OwnerId")
@@ -572,8 +565,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnName("exchange_rate");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
+                        .HasColumnType("text")
                         .HasColumnName("note");
 
                     b.Property<DateTimeOffset>("OccurredAtUtc")
@@ -737,8 +729,7 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .IsFixedLength();
 
                     b.Property<string>("DisplayName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("text")
                         .HasColumnName("display_name");
 
                     b.Property<string>("TimeZoneId")

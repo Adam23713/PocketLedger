@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
 
+COPY src/PocketLedger.Security/PocketLedger.Security.csproj src/PocketLedger.Security/
 COPY src/PocketLedger.Landing/PocketLedger.Landing.csproj src/PocketLedger.Landing/
 COPY src/PocketLedger.Domain/PocketLedger.Domain.csproj src/PocketLedger.Domain/
 COPY src/PocketLedger.Application/PocketLedger.Application.csproj src/PocketLedger.Application/

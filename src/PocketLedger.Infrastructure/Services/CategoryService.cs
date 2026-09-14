@@ -10,13 +10,10 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
 {
     public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await dbContext.Categories.AsNoTracking()
-            .Include(category => category.Subcategories.OrderBy(subcategory => subcategory.DisplayOrder).ThenBy(subcategory => subcategory.Name))
-            .Where(category => category.ParentCategoryId == null)
-            .OrderBy(category => category.Type)
-            .ThenBy(category => category.DisplayOrder)
-            .ThenBy(category => category.Name)
-            .ToListAsync(cancellationToken);
+        var categories = await dbContext.Categories.AsNoTracking().Include(category => category.Subcategories).Where(category => category.ParentCategoryId == null).ToListAsync(cancellationToken);
+        foreach (var category in categories)
+            category.Subcategories = category.Subcategories.OrderBy(item => item.DisplayOrder).ThenBy(item => item.Name).ToList();
+        return categories.OrderBy(category => category.Type).ThenBy(category => category.DisplayOrder).ThenBy(category => category.Name).ToList();
     }
 
     public Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -87,12 +84,9 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
             query = query.Where(category => category.Id != excludeId);
         }
 
-        var choices = await query.OrderBy(category => category.Type)
-            .ThenBy(category => category.ParentCategoryId)
-            .ThenBy(category => category.DisplayOrder)
-            .ThenBy(category => category.Name)
-            .Select(category => new CategoryChoice(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.ParentCategory != null ? category.ParentCategory.Name : null, category.ParentCategory != null ? category.ParentCategory.Icon : null))
-            .ToListAsync(cancellationToken);
+        var categories = await query.Include(category => category.ParentCategory).ToListAsync(cancellationToken);
+        var choices = categories.OrderBy(category => category.Type).ThenBy(category => category.ParentCategoryId).ThenBy(category => category.DisplayOrder).ThenBy(category => category.Name)
+            .Select(category => new CategoryChoice(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.ParentCategory?.Name, category.ParentCategory?.Icon)).ToList();
 
         var ordered = new List<CategoryChoice>();
         foreach (var parent in choices.Where(choice => !choice.IsSubcategory))
