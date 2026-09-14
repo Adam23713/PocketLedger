@@ -20,6 +20,8 @@ services:
     build: { context: ., dockerfile: Dockerfile, target: web }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      Encryption__KeyDirectory: /var/lib/pocketledger/keys
+      Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
@@ -31,6 +33,16 @@ services:
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       Api__BaseUrl: http://api:5051/
       ForwardedHeaders__TrustAll: "true"
+    volumes:
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/certificates
+        target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
     depends_on:
       web-database: { condition: service_healthy }
       api: { condition: service_started }
@@ -41,12 +53,24 @@ services:
     build: { context: ., dockerfile: Dockerfile, target: api }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      Encryption__KeyDirectory: /var/lib/pocketledger/keys
+      Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       ForwardedHeaders__TrustAll: "true"
+    volumes:
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/certificates
+        target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
     depends_on:
       api-database: { condition: service_healthy }
     restart: unless-stopped
@@ -55,6 +79,8 @@ services:
     build: { context: ., dockerfile: Dockerfile, target: identity }
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      Encryption__KeyDirectory: /var/lib/pocketledger/keys
+      Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
@@ -64,6 +90,16 @@ services:
       ForwardedHeaders__TrustAll: "true"
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
+    volumes:
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/certificates
+        target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
     restart: unless-stopped

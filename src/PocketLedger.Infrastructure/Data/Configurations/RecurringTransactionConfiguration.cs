@@ -24,7 +24,7 @@ public class RecurringTransactionConfiguration : IEntityTypeConfiguration<Recurr
         builder.Property(template => template.CategoryId).HasColumnName("category_id");
         builder.Property(template => template.Amount).HasColumnName("amount").HasPrecision(19, 4);
         builder.Property(template => template.AdjustmentDirection).HasColumnName("adjustment_direction").HasConversion<string>().HasMaxLength(10);
-        builder.Property(template => template.Note).HasColumnName("note").HasMaxLength(500);
+        builder.Property(template => template.Note).HasColumnName("note").HasColumnType("text");
         builder.Property(template => template.FirstOccurrence).HasColumnName("first_occurrence").HasColumnType("date");
         builder.Property(template => template.LastOccurrence).HasColumnName("last_occurrence").HasColumnType("date");
         builder.Property(template => template.AutomationStartsOn).HasColumnName("automation_starts_on").HasColumnType("date");

@@ -17,7 +17,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.HasKey(category => category.Id).HasName("pk_categories");
         builder.Property(category => category.Id).HasColumnName("id");
         builder.Property(category => category.OwnerId).HasColumnName("owner_id").IsConcurrencyToken();
-        builder.Property(category => category.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
+        builder.Property(category => category.Name).HasColumnName("name").HasColumnType("text").IsRequired();
         builder.Property(category => category.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(10).IsRequired();
         builder.Property(category => category.Icon).HasColumnName("icon").HasMaxLength(100);
         builder.Property(category => category.ParentCategoryId).HasColumnName("parent_category_id");

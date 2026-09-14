@@ -9,10 +9,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using PocketLedger.Contracts;
 using PocketLedger.Data;
+using PocketLedger.Security;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Api");
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddOpenApi(options =>
 {

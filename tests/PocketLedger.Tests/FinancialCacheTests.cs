@@ -33,7 +33,9 @@ public sealed class FinancialCacheFixture : IAsyncLifetime
     public string ConnectionString { get; private set; } = "";
     public IDistributedCache Store => services!.GetRequiredService<IDistributedCache>();
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync() => InitializeAsync(null);
+
+    public async Task InitializeAsync(string? targetMigration)
     {
         var postgres = Environment.GetEnvironmentVariable("PL_TEST_POSTGRES");
         var valkey = Environment.GetEnvironmentVariable("PL_TEST_VALKEY");
@@ -44,7 +46,7 @@ public sealed class FinancialCacheFixture : IAsyncLifetime
         await create.ExecuteNonQueryAsync();
         ConnectionString = new NpgsqlConnectionStringBuilder(postgres) { Database = databaseName }.ConnectionString;
         await using var db = new PocketLedgerDbContext(new DbContextOptionsBuilder<PocketLedgerDbContext>().UseNpgsql(ConnectionString).Options);
-        await db.Database.MigrateAsync();
+        await db.GetService<IMigrator>().MigrateAsync(targetMigration);
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["FinancialCache:ConnectionString"] = valkey }).Build();
         services = new ServiceCollection().AddLogging().AddFinancialCache(configuration).BuildServiceProvider();
     }
@@ -339,20 +341,80 @@ public sealed class FinancialCacheTests(FinancialCacheFixture fixture) : IClassF
     [FinancialCacheFact]
     public async Task Migration_CanBeRolledBackAndReappliedWithoutChangingTheEfModel()
     {
-        await using var h = await CreateAsync();
-        Assert.False(h.Db.Database.HasPendingModelChanges());
-        await h.Db.GetService<IMigrator>().MigrateAsync("20260903085115_RemoveBudapestRecurringDateDefault");
-        await h.Db.Database.MigrateAsync();
-        await h.AddAsync(100);
-        await h.Transactions.GetForMonthAsync(2026, 9, Token);
-        h.Counter.Reads = 0;
-        Assert.Single(await h.Transactions.GetForMonthAsync(2026, 9, Token));
-        Assert.Equal(0, h.Counter.Reads);
+        var isolated = new FinancialCacheFixture();
+        try
+        {
+            await isolated.InitializeAsync();
+            await using (var db = new PocketLedgerDbContext(new DbContextOptionsBuilder<PocketLedgerDbContext>().UseNpgsql(isolated.ConnectionString).Options))
+            {
+                Assert.False(db.Database.HasPendingModelChanges());
+                await db.GetService<IMigrator>().MigrateAsync("20260903085115_RemoveBudapestRecurringDateDefault");
+                await db.Database.MigrateAsync();
+                Assert.False(db.Database.HasPendingModelChanges());
+                Assert.Empty(await db.Database.GetPendingMigrationsAsync());
+            }
+            await using var h = await CreateAsync(isolated);
+            await h.AddAsync(100);
+            await h.Transactions.GetForMonthAsync(2026, 9, Token);
+            h.Counter.Reads = 0;
+            Assert.Single(await h.Transactions.GetForMonthAsync(2026, 9, Token));
+            Assert.Equal(0, h.Counter.Reads);
+        }
+        finally
+        {
+            await isolated.DisposeAsync();
+        }
     }
 
-    private async Task<Harness> CreateAsync()
+    [FinancialCacheFact]
+    public async Task CacheMigration_PreservesExistingDataAcrossRollbackAndReapply()
     {
-        var h = new Harness(fixture, Guid.NewGuid());
+        const string beforeCache = "20260903085115_RemoveBudapestRecurringDateDefault";
+        const string withCache = "20260908100000_AddFinancialCacheRevisions";
+        var isolated = new FinancialCacheFixture();
+        try
+        {
+            await isolated.InitializeAsync(beforeCache);
+            await using var db = new PocketLedgerDbContext(new DbContextOptionsBuilder<PocketLedgerDbContext>().UseNpgsql(isolated.ConnectionString).Options);
+            var accountId = Guid.NewGuid();
+            var ownerId = Guid.NewGuid();
+            // Seed the historical schema directly: current SaveChanges also maintains newer planner tables.
+            await db.Database.ExecuteSqlInterpolatedAsync($"""
+                INSERT INTO accounts (id, owner_id, name, type, currency, initial_balance, color, display_order, include_in_main_balance, include_in_net_worth, include_in_statistics)
+                VALUES ({accountId}, {ownerId}, 'Migration cash', 'Cash', 'HUF', 123, '#ffffff', 0, true, true, true)
+                """);
+            var migrator = db.GetService<IMigrator>();
+            await migrator.MigrateAsync(withCache);
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE accounts SET name = name WHERE id = {accountId}");
+            var firstRevision = await db.Database.SqlQuery<Guid>($"SELECT revision AS \"Value\" FROM financial_cache_revisions WHERE owner_id = {ownerId}").SingleAsync();
+            Assert.NotEqual(Guid.Empty, firstRevision);
+
+            await migrator.MigrateAsync(beforeCache);
+            Assert.True(await db.Database.SqlQuery<bool>($"SELECT to_regclass('financial_cache_revisions') IS NULL AS \"Value\"").SingleAsync());
+            var preserved = await db.Accounts.IgnoreQueryFilters().AsNoTracking().SingleAsync(item => item.Id == accountId);
+            Assert.Equal("Migration cash", preserved.Name);
+            Assert.Equal(123m, preserved.InitialBalance);
+            Assert.Equal(ownerId, preserved.OwnerId);
+
+            await migrator.MigrateAsync(withCache);
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE accounts SET name = name WHERE id = {accountId}");
+            var reappliedRevision = await db.Database.SqlQuery<Guid>($"SELECT revision AS \"Value\" FROM financial_cache_revisions WHERE owner_id = {ownerId}").SingleAsync();
+            Assert.NotEqual(Guid.Empty, reappliedRevision);
+            Assert.NotEqual(firstRevision, reappliedRevision);
+            var reloaded = await db.Accounts.IgnoreQueryFilters().AsNoTracking().SingleAsync(item => item.Id == accountId);
+            Assert.Equal(preserved.Name, reloaded.Name);
+            Assert.Equal(preserved.InitialBalance, reloaded.InitialBalance);
+            Assert.Equal(preserved.OwnerId, reloaded.OwnerId);
+        }
+        finally
+        {
+            await isolated.DisposeAsync();
+        }
+    }
+
+    private async Task<Harness> CreateAsync(FinancialCacheFixture? database = null)
+    {
+        var h = new Harness(database ?? fixture, Guid.NewGuid());
         h.Db.UserPreferences.Add(new UserPreference { UserId = h.OwnerId, TimeZoneId = "Europe/Budapest" });
         h.Db.Accounts.Add(h.Account);
         h.Db.Categories.Add(h.Category);
