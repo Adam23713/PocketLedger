@@ -21,7 +21,7 @@ public static class PlannerProjection
             if (!accountMap.TryGetValue(template.AccountId, out var account)) continue;
             // A schedule is a planning input regardless of whether any actual occurrence was paid.
             foreach (var date in RecurringSchedule.GetOccurrences(template, month, month.AddMonths(1).AddDays(-1)))
-                events.Add(CreateEvent(template.Id, PlannerEventSource.Recurring, template.Type, date, template.AccountId, null, template.Category, template.Note ?? template.Debt?.Name, template.Amount, account.Currency, template.Amount, null, template.DebtOperationType));
+                events.Add(CreateEvent(template.Id, PlannerEventSource.Recurring, template.Type, date, template.AccountId, null, template.Category, template.Note ?? template.Debt?.Name, template.Amount, account.Currency, template.Amount, null, template.DebtOperationType, template.Debt?.Icon));
         }
 
         events = events.OrderBy(item => item.Date is null).ThenBy(item => item.Date).ThenBy(item => item.Source).ThenBy(item => item.Id).ToList();
@@ -60,13 +60,16 @@ public static class PlannerProjection
         }).ToList();
         return new PlannerMonth(month, today, events, balances, totals, points);
 
-        PlannerEvent CreateEvent(Guid id, PlannerEventSource source, TransactionType type, DateOnly? date, Guid accountId, Guid? targetId, Category? category, string? note, decimal amount, string currency, decimal accountAmount, decimal? targetAmount, DebtOperationType? debtOperation = null)
+        PlannerEvent CreateEvent(Guid id, PlannerEventSource source, TransactionType type, DateOnly? date, Guid accountId, Guid? targetId, Category? category, string? note, decimal amount, string currency, decimal accountAmount, decimal? targetAmount, DebtOperationType? debtOperation = null, string? iconId = null)
         {
             var account = accountMap[accountId];
             var target = targetId is { } targetAccountId ? accountMap[targetAccountId] : null;
             var semantics = TransactionSemantics.Resolve(type, accountAmount, targetAmount, debtOperationType: debtOperation);
             var categoryName = category?.ParentCategory is { } parent ? $"{parent.Name} / {category.Name}" : category?.Name;
-            return new PlannerEvent(id, source, type, date, accountId, account.Name, targetId, target?.Name, categoryName, note, amount, currency, accountAmount, account.Currency, targetAmount, target?.Currency, semantics.SourceAccountChange, semantics.TargetAccountChange, semantics.ReportingClassification);
+            var categoryIcon = category is null ? iconId is null ? null : PocketLedger.Models.CategoryIcons.Resolve(iconId) : PocketLedger.Models.CategoryIcons.Resolve(category);
+            var sourceAccountIcon = PocketLedger.Models.AccountIcons.Resolve(account.Icon, account.Type);
+            var targetAccountIcon = target is null ? null : PocketLedger.Models.AccountIcons.Resolve(target.Icon, target.Type);
+            return new PlannerEvent(id, source, type, date, accountId, account.Name, targetId, target?.Name, categoryName, note, amount, currency, accountAmount, account.Currency, targetAmount, target?.Currency, semantics.SourceAccountChange, semantics.TargetAccountChange, semantics.ReportingClassification, CategoryIconPath: categoryIcon?.WebPath, CategoryIconAlt: categoryIcon?.DisplayName, AccountIconPath: sourceAccountIcon.WebPath, AccountIconAlt: sourceAccountIcon.DisplayName, TargetAccountIconPath: targetAccountIcon?.WebPath, TargetAccountIconAlt: targetAccountIcon?.DisplayName);
         }
 
         void Apply(PlannerEvent item)

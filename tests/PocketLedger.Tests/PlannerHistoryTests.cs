@@ -13,6 +13,18 @@ namespace PocketLedger.Tests;
 public class PlannerHistoryTests
 {
     [Fact]
+    public async Task Notes_RemainInTheirMonthAndClosedMonthRejectsUpdates()
+    {
+        await using var fixture = new Fixture();
+        await fixture.SeedAsync();
+        await fixture.Service.UpdateNotesAsync(2026, 9, new("September plans"), default);
+        fixture.Clock.Now = new(2026, 10, 1, 0, 1, 0, TimeSpan.Zero);
+        Assert.Null((await fixture.ReadAsync(10)).Notes);
+        await Assert.ThrowsAsync<BusinessRuleException>(() => fixture.Service.UpdateNotesAsync(2026, 9, new("Overwrite"), default));
+        Assert.Equal("September plans", (await fixture.ReadAsync(9)).Notes);
+    }
+
+    [Fact]
     public async Task PausePersistsAcrossMonthsAndResumeDoesNotChangeClosedHistory()
     {
         await using var fixture = new Fixture();
