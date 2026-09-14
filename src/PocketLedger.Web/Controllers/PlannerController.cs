@@ -111,6 +111,26 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         return RedirectToAction(nameof(Index), new { year = item.Month.Year, month = item.Month.Month });
     }
 
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Notes(int year, int month, string? notes, CancellationToken cancellationToken)
+    {
+        var ajax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        try
+        {
+            if (!ModelState.IsValid) throw new BusinessRuleException("Enter valid notes.");
+            await plannerService.UpdateNotesAsync(year, month, new(notes), cancellationToken);
+        }
+        catch (BusinessRuleException exception)
+        {
+            if (ajax) return BadRequest(new { message = exception.Message });
+            TempData["ErrorMessage"] = exception.Message;
+            return RedirectToAction(nameof(Index), new { year, month });
+        }
+        if (ajax) return Ok(new { message = "Notes saved." });
+        TempData["SuccessMessage"] = "Notes saved.";
+        return RedirectToAction(nameof(Index), new { year, month });
+    }
+
     private async Task<IActionResult> SaveAsync(PlannerFormViewModel model, bool editing, CancellationToken cancellationToken)
     {
         if (ModelState.IsValid)

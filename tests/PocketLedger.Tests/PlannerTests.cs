@@ -11,6 +11,47 @@ namespace PocketLedger.Tests;
 
 public class PlannerTests
 {
+    [Theory]
+    [InlineData("'; DROP TABLE planner_months; --")]
+    [InlineData("' OR 1=1; UPDATE planner_months SET snapshot_json = '{}'; --")]
+    public async Task Notes_SqlLikeTextIsStoredLiterallyAndOtherOwnersRemainIsolated(string payload)
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<PocketLedgerDbContext>().UseSqlite(connection).Options;
+        var owner = Guid.NewGuid();
+        var otherOwner = Guid.NewGuid();
+        await using var first = new PocketLedgerDbContext(options, new CurrentUser(owner), TestDates());
+        await first.Database.EnsureCreatedAsync();
+        var firstService = new PlannerService(first, new PlannerTestUserContext());
+        await firstService.UpdateNotesAsync(2026, 9, new("Private first-owner notes"), default);
+        await using (var second = new PocketLedgerDbContext(options, new CurrentUser(otherOwner), TestDates()))
+        {
+            var secondService = new PlannerService(second, new PlannerTestUserContext());
+            Assert.Null((await secondService.GetMonthAsync(2026, 9, default)).Notes);
+            await secondService.UpdateNotesAsync(2026, 9, new(payload), default);
+        }
+        await using var reloaded = new PocketLedgerDbContext(options, new CurrentUser(otherOwner), TestDates());
+        Assert.Equal(payload, (await new PlannerService(reloaded, new PlannerTestUserContext()).GetMonthAsync(2026, 9, default)).Notes);
+        first.ChangeTracker.Clear();
+        Assert.Equal("Private first-owner notes", (await firstService.GetMonthAsync(2026, 9, default)).Notes);
+        Assert.Equal(2, await first.PlannerMonths.IgnoreQueryFilters().CountAsync());
+        Assert.Empty(await first.Accounts.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Notes_LengthLimitIsEnforcedOnServerWithoutReplacingSavedText()
+    {
+        await using var db = Db(Guid.NewGuid());
+        var service = new PlannerService(db, new PlannerTestUserContext());
+        var maximum = new string('x', 10000);
+        await service.UpdateNotesAsync(2026, 9, new(maximum), default);
+        Assert.Equal(maximum, (await service.GetMonthAsync(2026, 9, default)).Notes);
+        await Assert.ThrowsAsync<BusinessRuleException>(() => service.UpdateNotesAsync(2026, 9, new(maximum + "x"), default));
+        db.ChangeTracker.Clear();
+        Assert.Equal(maximum, (await service.GetMonthAsync(2026, 9, default)).Notes);
+    }
+
     private static readonly DateOnly Month = new(2026, 9, 1);
     private static readonly DateOnly Today = new(2026, 9, 8);
 

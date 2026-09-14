@@ -6,7 +6,7 @@
 @if (Model.Items.Count == 0) { <div class="alert alert-info">No regular recurring templates.</div> }
 else
 {
-    <div class="list-group">
+    <div class="list-group recurring-transaction-list">
     @foreach (var item in Model.Items)
     {
         var negative = item.Type == TransactionType.Expense || item.Type == TransactionType.Adjustment && item.AdjustmentDirection == AdjustmentDirection.Decrease;
@@ -39,7 +39,7 @@ else
 @if (Model.LoanItems.Count == 0) { <p class="text-muted">No loan recurring transactions.</p> }
 else
 {
-    <div class="list-group">
+    <div class="list-group recurring-transaction-list">
     @foreach (var item in Model.LoanItems)
     {
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">

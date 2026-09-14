@@ -20,7 +20,7 @@ internal static class PlannerHistory
         records = Merge(db, records, ownerId);
         if (records.Count == 0 && requestedMonth is null) return;
         var accounts = Working(await db.Accounts.AsNoTracking().Where(item => item.OwnerId == ownerId).ToListAsync(token));
-        var categories = Working(await db.Categories.AsNoTracking().Where(item => item.OwnerId == ownerId).ToListAsync(token)).Select(item => new Category { Id = item.Id, Name = item.Name, Type = item.Type, ParentCategoryId = item.ParentCategoryId }).ToDictionary(item => item.Id);
+        var categories = Working(await db.Categories.AsNoTracking().Where(item => item.OwnerId == ownerId).ToListAsync(token)).Select(item => new Category { Id = item.Id, Name = item.Name, Type = item.Type, Icon = item.Icon, ParentCategoryId = item.ParentCategoryId }).ToDictionary(item => item.Id);
         foreach (var category in categories.Values) category.ParentCategory = category.ParentCategoryId is { } parentId ? categories.GetValueOrDefault(parentId) : null;
         var debts = Working(await db.Debts.AsNoTracking().Where(item => item.OwnerId == ownerId).ToListAsync(token)).ToDictionary(item => item.Id);
         var templates = Working(await db.RecurringTransactions.AsNoTracking().Where(item => item.OwnerId == ownerId).ToListAsync(token)).Select(item => new RecurringTransaction { Id = item.Id, AccountId = item.AccountId, CategoryId = item.CategoryId, DebtId = item.DebtId, Type = item.Type, Amount = item.Amount, Note = item.Note, Enabled = item.Enabled, FirstOccurrence = item.FirstOccurrence, LastOccurrence = item.LastOccurrence, Frequency = item.Frequency, DebtOperationType = item.DebtOperationType }).ToList();
@@ -80,7 +80,8 @@ internal static class PlannerHistory
             var settings = Deserialize<List<PlannerOpeningBalance>>(record.OpeningBalancesJson);
             var projection = PlannerProjection.Calculate(record.Month, today, accounts, currentBalances, settings, plans, templates, previous);
             record.IsClosed = record.Month < current;
-            record.SnapshotJson = Serialize(projection with { IsClosed = record.IsClosed });
+            var notes = record.SnapshotJson.Length > 0 ? Deserialize<PlannerMonth>(record.SnapshotJson).Notes : null;
+            record.SnapshotJson = Serialize(projection with { IsClosed = record.IsClosed, Notes = notes });
         }
     }
 

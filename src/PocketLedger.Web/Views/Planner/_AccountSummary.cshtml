@@ -1,0 +1,43 @@
+@model PocketLedger.Services.Interfaces.PlannerMonth
+@using PocketLedger.Models
+@using PocketLedger.Models.Enums
+@using PocketLedger.Services
+@{
+    var activeEvents = Model.Events.Where(item => !item.IsPaused).ToList();
+    var sourceEvents = activeEvents.Where(item => item.AccountId is not null).ToLookup(item => item.AccountId!.Value);
+    var incomingTransfers = activeEvents.Where(item => item.Type == TransactionType.Transfer && item.TargetAccountId is not null).ToLookup(item => item.TargetAccountId!.Value);
+    var accounts = Model.Accounts.Where(account => incomingTransfers.Contains(account.Id) || sourceEvents[account.Id].Any(item => item.Type == TransactionType.Transfer || item.Classification is TransactionReportingClassification.Income or TransactionReportingClassification.Expense)).ToList();
+}
+<section class="planner-panel planner-account-summary" id="planner-account-summary">
+    <div class="planner-panel-header"><h2>Account summary</h2></div>
+    @if (accounts.Count == 0)
+    {
+        <p class="planner-muted">No active income, expenses or transfers for this month.</p>
+    }
+    else
+    {
+        <div class="table-responsive"><table class="table planner-table">
+            <thead><tr><th scope="col">Account</th><th scope="col">Incoming</th><th scope="col">Incoming transfers</th><th scope="col">Outgoing transfers</th><th scope="col">Outgoing expense</th><th scope="col">Expected closing balance</th></tr></thead>
+            <tbody>
+            @foreach (var account in accounts)
+            {
+                var icon = AccountIcons.Resolve(account.Icon, AccountType.Other);
+                var movements = sourceEvents[account.Id].ToList();
+                var income = movements.Where(item => item.Classification == TransactionReportingClassification.Income).Sum(item => item.AccountAmount);
+                var expenses = movements.Where(item => item.Classification == TransactionReportingClassification.Expense).Sum(item => item.AccountAmount);
+                var transferredIn = incomingTransfers[account.Id].Sum(item => item.TargetAmount ?? 0m);
+                var transferredOut = movements.Where(item => item.Type == TransactionType.Transfer).Sum(item => item.AccountAmount);
+                <tr>
+                    <th scope="row"><span class="planner-summary-account"><img class="account-icon planner-summary-account-icon" src="@icon.WebPath" alt="@icon.DisplayName" /><span>@account.Name</span></span></th>
+                    <td class="planner-money planner-positive">@MoneyFormatter.Format(income, account.Currency)</td>
+                    <td class="planner-money planner-positive">@MoneyFormatter.Format(transferredIn, account.Currency)</td>
+                    <td class="planner-money planner-negative">@MoneyFormatter.Format(transferredOut, account.Currency)</td>
+                    <td class="planner-money planner-negative">@MoneyFormatter.Format(expenses, account.Currency)</td>
+                    <td class="planner-money"><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong></td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+        <small class="planner-muted">Amounts are shown in each account's currency. Paused items are excluded.</small>
+    }
+</section>

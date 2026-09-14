@@ -30,7 +30,7 @@
         <partial name="_Table" model='new PlannerTableViewModel("Expected income", TransactionType.Income, Model.Month, plannedEvents.Where(item => item.Classification == TransactionReportingClassification.Income).ToList(), Model.IsClosed)' />
         <partial name="_Table" model='new PlannerTableViewModel("Expected expenses", TransactionType.Expense, Model.Month, plannedEvents.Where(item => item.Classification == TransactionReportingClassification.Expense && item.Source == PlannerEventSource.Planned).ToList(), Model.IsClosed)' />
         <partial name="_Table" model='new PlannerTableViewModel("Fixed expenses", TransactionType.Expense, Model.Month, plannedEvents.Where(item => item.Classification == TransactionReportingClassification.Expense && item.Source == PlannerEventSource.Recurring).ToList(), true)' />
-        <partial name="_Table" model='new PlannerTableViewModel("Transfers", TransactionType.Transfer, Model.Month, plannedEvents.Where(item => item.Type == TransactionType.Transfer).ToList(), Model.IsClosed)' />
+        <div class="planner-transfer-stack" id="planner-transfers"><partial name="_Table" model='new PlannerTableViewModel("Transfers", TransactionType.Transfer, Model.Month, plannedEvents.Where(item => item.Type == TransactionType.Transfer).ToList(), Model.IsClosed)' /></div>
         @if (plannedEvents.Any(item => item.Type == TransactionType.Adjustment))
         {
             <section class="planner-panel"><h2>Balance adjustments</h2><p class="planner-muted">These adjustments affect balances without counting as income or expenses.</p>
@@ -104,5 +104,16 @@
             </div>
         </section>
     </div>
+    <partial name="_AccountSummary" model="Model" />
+    <section class="planner-panel planner-account-summary" id="planner-notes">
+        <form asp-action="Notes" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" method="post">
+            <div class="planner-panel-header"><h2><label for="planner-notes-text">Notes</label></h2></div>
+            <textarea id="planner-notes-text" name="notes" class="form-control" rows="6" maxlength="10000" readonly="@Model.IsClosed">@Model.Notes</textarea>
+            @if (!Model.IsClosed)
+            {
+                <button class="btn btn-primary mt-3" type="submit">Save</button>
+                <span class="ms-2" role="status" aria-live="polite"></span>
+            }
+        </form>
+    </section>
 </div>
-
