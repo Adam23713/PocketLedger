@@ -8,8 +8,8 @@
         const updated = new DOMParser().parseFromString(await response.text(), "text/html");
         const rowId = form.closest("tr").id;
         const ids = form.classList.contains("planner-pause")
-            ? [form.closest("section").id, "planner-summary", "planner-chart", "planner-accounts"]
-            : [rowId, "planner-summary", "planner-chart", "planner-notices"];
+            ? [form.closest("#planner-transfers")?.id ?? form.closest("section").id, "planner-summary", "planner-chart", "planner-accounts", "planner-account-summary"]
+            : [rowId, "planner-summary", "planner-chart", "planner-notices", "planner-account-summary"];
         if (response.redirected || ids.some(id => !updated.getElementById(id))) throw new Error("Could not refresh the plan. Please reload the page to check the saved settings.");
         ids.forEach(id => document.getElementById(id)?.replaceWith(updated.getElementById(id)));
         document.dispatchEvent(new Event("money:initialize"));
@@ -17,6 +17,28 @@
         return rowId;
     }
     function initialize() {
+        document.querySelectorAll("#planner-notes form").forEach(form => {
+            const button = form.querySelector('button[type="submit"]');
+            if (form.dataset.initialized || !button) return;
+            form.dataset.initialized = "true";
+            const status = form.querySelector('[role="status"]');
+            const notes = form.querySelector("textarea");
+            notes.addEventListener("input", () => { status.textContent = "Unsaved changes"; });
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                if (button.disabled) return;
+                button.disabled = true;
+                const savedText = notes.value;
+                status.textContent = "Saving…";
+                try {
+                    const response = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" });
+                    const result = response.headers.get("content-type")?.includes("application/json") ? await response.json() : null;
+                    if (!response.ok || response.redirected || !result) throw new Error(result?.message ?? "Could not save notes. Please try again.");
+                    status.textContent = notes.value === savedText ? result.message : "Unsaved changes";
+                } catch (exception) { status.textContent = exception.message; }
+                finally { button.disabled = false; }
+            });
+        });
         document.querySelectorAll(".planner-pause").forEach(form => {
             if (form.dataset.initialized) return;
             form.dataset.initialized = "true";

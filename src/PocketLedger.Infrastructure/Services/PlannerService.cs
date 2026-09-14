@@ -17,6 +17,20 @@ public class PlannerService(PocketLedgerDbContext dbContext, IUserContextService
         return record is null ? new PlannerMonth(selected, today, [], [], [], [], true, false) : PlannerHistory.Deserialize<PlannerMonth>(record.SnapshotJson) with { Today = today };
     }
 
+    public async Task UpdateNotesAsync(int year, int month, PlannerNotesInput input, CancellationToken cancellationToken)
+    {
+        if (input.Notes?.Length > 10000) throw new BusinessRuleException("Notes cannot exceed 10000 characters.");
+        await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await dbContext.LockPlannerOwnerAsync(dbContext.PlannerOwnerId, cancellationToken);
+        var selected = ValidateMonth(year, month);
+        await RequireEditableAsync(selected, cancellationToken);
+        var record = await dbContext.PlannerMonths.SingleAsync(item => item.Month == selected, cancellationToken);
+        var snapshot = PlannerHistory.Deserialize<PlannerMonth>(record.SnapshotJson);
+        record.SnapshotJson = PlannerHistory.Serialize(snapshot with { Notes = input.Notes });
+        await dbContext.SaveChangesAsync(cancellationToken);
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+    }
+
     public async Task UpdateOpeningBalanceAsync(int year, int month, Guid accountId, PlannerOpeningBalanceInput input, CancellationToken cancellationToken)
     {
         await using var transaction = dbContext.Database.IsRelational() && dbContext.Database.CurrentTransaction is null ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
