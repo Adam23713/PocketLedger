@@ -3,3 +3,6 @@
 **/obj/
 Caddyfile
 caddy/logs/
+**/.local/
+*.pfx
+*.p12

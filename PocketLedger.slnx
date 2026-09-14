@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/PocketLedger.Security/PocketLedger.Security.csproj" />
     <Project Path="src/PocketLedger.Api/PocketLedger.Api.csproj" />
     <Project Path="src/PocketLedger.Application/PocketLedger.Application.csproj" />
     <Project Path="src/PocketLedger.Contracts/PocketLedger.Contracts.csproj" />

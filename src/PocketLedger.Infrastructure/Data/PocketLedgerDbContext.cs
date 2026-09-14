@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using PocketLedger.Models.Entities;
+using PocketLedger.Security;
 using PocketLedger.Services;
 
 namespace PocketLedger.Data;
 
-public class PocketLedgerDbContext : DbContext
+public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
 {
+    public DatabaseEncryption? Encryption { get; private protected init; }
     private readonly ICurrentUser? currentUser;
     private readonly bool crossTenantAccess;
     private readonly bool hasTenantContext;
@@ -15,8 +18,9 @@ public class PocketLedgerDbContext : DbContext
     internal bool SkipPlannerHistory { get; set; }
     internal Guid PlannerOwnerId => hasTenantContext ? tenantId : throw new InvalidOperationException("An authenticated tenant context is required.");
 
-    public PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, ICurrentUser? currentUser = null, IUserDateProvider? plannerDates = null, Microsoft.Extensions.Options.IOptions<UserDateOptions>? dateOptions = null) : base(options)
+    public PocketLedgerDbContext(DbContextOptions<PocketLedgerDbContext> options, ICurrentUser? currentUser = null, IUserDateProvider? plannerDates = null, Microsoft.Extensions.Options.IOptions<UserDateOptions>? dateOptions = null, DatabaseEncryption? encryption = null) : base(options)
     {
+        Encryption = encryption;
         this.currentUser = currentUser;
         this.plannerDates = plannerDates ?? new UserDateProvider(TimeProvider.System);
         defaultTimeZone = dateOptions?.Value.DefaultTimeZoneId ?? "UTC";
@@ -40,10 +44,28 @@ public class PocketLedgerDbContext : DbContext
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<UserCurrencyFormat> UserCurrencyFormats => Set<UserCurrencyFormat>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.ReplaceService<IModelCacheKeyFactory, EncryptionModelCacheKeyFactory>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PocketLedgerDbContext).Assembly);
+
+        if (Encryption is not null)
+        {
+            Encryption.Configure(modelBuilder.Entity<Transaction>().Property(item => item.Note), "Transaction.Note", 500);
+            Encryption.Configure(modelBuilder.Entity<RecurringTransaction>().Property(item => item.Note), "RecurringTransaction.Note", 500);
+            Encryption.Configure(modelBuilder.Entity<PlannerItem>().Property(item => item.Note), "PlannerItem.Note", 500);
+            Encryption.Configure(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.SnapshotJson), "PlannerMonthRecord.SnapshotJson");
+            Encryption.Configure(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.OpeningBalancesJson), "PlannerMonthRecord.OpeningBalancesJson");
+            Encryption.Configure(modelBuilder.Entity<Account>().Property(item => item.Name), "Account.Name", 100);
+            Encryption.Configure(modelBuilder.Entity<Category>().Property(item => item.Name), "Category.Name", 100);
+            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.Name), "Debt.Name", 200);
+            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.CounterpartyName), "Debt.CounterpartyName", 200);
+            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.Note), "Debt.Note", 500);
+            Encryption.Configure(modelBuilder.Entity<UserPreference>().Property(item => item.DisplayName), "UserPreference.DisplayName", 100);
+        }
 
         modelBuilder.Entity<PlannerMonthRecord>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<PlannerItem>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);

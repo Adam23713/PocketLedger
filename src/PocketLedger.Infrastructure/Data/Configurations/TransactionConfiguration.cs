@@ -37,7 +37,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.Property(transaction => transaction.TransactionTime).HasColumnName("transaction_time").HasColumnType("time without time zone");
         builder.Property(transaction => transaction.OccurredAtUtc).HasColumnName("occurred_at_utc").HasColumnType("timestamp with time zone");
         builder.Property(transaction => transaction.CategoryId).HasColumnName("category_id");
-        builder.Property(transaction => transaction.Note).HasColumnName("note").HasMaxLength(500);
+        builder.Property(transaction => transaction.Note).HasColumnName("note").HasColumnType("text");
         builder.Property(transaction => transaction.DebtId).HasColumnName("debt_id");
         builder.Property(transaction => transaction.DebtOperationType).HasColumnName("debt_operation_type").HasConversion<string>().HasMaxLength(40);
 

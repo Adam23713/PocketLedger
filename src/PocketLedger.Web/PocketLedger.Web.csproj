@@ -24,4 +24,7 @@
     <ProjectReference Include="../PocketLedger.Domain/PocketLedger.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../PocketLedger.Security/PocketLedger.Security.csproj" />
+  </ItemGroup>
 </Project>

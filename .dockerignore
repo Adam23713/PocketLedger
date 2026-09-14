@@ -6,3 +6,8 @@ tests/
 tools/
 *.user
 *.suo
+
+.env
+**/.local/
+**/*.pfx
+**/*.p12
