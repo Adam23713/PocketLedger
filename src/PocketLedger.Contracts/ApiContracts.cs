@@ -1,4 +1,5 @@
 using PocketLedger.Models.Enums;
+using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Contracts;
@@ -8,6 +9,7 @@ public sealed record AccountUpdateRequest(AccountDto Account, bool CreateInitial
 public sealed record DebtWriteRequest(DebtDto Debt, RecurringPaymentInput? RecurringPayment);
 public sealed record DebtOperationWriteRequest(DebtOperationInput Operation);
 public sealed record TextPayload(string Content);
+public sealed record ExcelExportRequest(TransactionFilter Filter, string Password);
 public sealed record PagedResponse<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);
 public sealed record CurrencyBalanceDto(string Currency, decimal Amount);
 public sealed record TransactionCreateRequest(TransactionType Type, Guid? AccountId, Guid? TargetAccountId, decimal Amount, decimal? TargetAmount, decimal? ExchangeRate, AdjustmentDirection? AdjustmentDirection, DateOnly TransactionDate, TimeOnly TransactionTime, Guid? CategoryId, string? Note);

@@ -85,6 +85,7 @@ AddApiClient<ICalendarService, CalendarApiClient>();
 AddApiClient<IPlannerService, PlannerApiClient>();
 AddApiClient<IStatisticsService, StatisticsApiClient>();
 AddApiClient<IImportExportService, ImportExportApiClient>();
+AddApiClient<IEncryptedBackupService, ImportExportApiClient>();
 AddApiClient<IDebtService, DebtsApiClient>();
 AddApiClient<IPreferencesApiClient, PreferencesApiClient>();
 

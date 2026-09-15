@@ -27,12 +27,12 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
         ["/api/v1/debts/{id}/reopen"] = ["post"],
         ["/api/v1/debts/funding-warnings"] = ["get"],
         ["/api/v1/debts/operations/{transactionId}"] = ["get", "put", "delete"],
-        ["/api/v1/import-export/backup"] = ["get"],
-        ["/api/v1/import-export/csv/export"] = ["post"],
+        ["/api/v1/import-export/backup/encrypted"] = ["post"],
+        ["/api/v1/import-export/excel/export"] = ["post"],
         ["/api/v1/import-export/csv/import"] = ["post"],
         ["/api/v1/import-export/csv/preview"] = ["post"],
-        ["/api/v1/import-export/restore"] = ["post"],
-        ["/api/v1/import-export/restore/preview"] = ["post"],
+        ["/api/v1/import-export/restore/encrypted"] = ["post"],
+        ["/api/v1/import-export/restore/encrypted/preview"] = ["post"],
         ["/api/v1/preferences"] = ["get", "put"],
         ["/api/v1/recurring-transactions"] = ["get", "post"],
         ["/api/v1/recurring-transactions/{id}"] = ["get", "put", "delete"],
@@ -77,6 +77,19 @@ public sealed class OpenApiContractTests : IClassFixture<WebApplicationFactory<P
             Assert.True(paths.TryGetProperty(path, out var pathItem), $"OpenAPI path is missing: {path}");
             foreach (var method in methods) Assert.True(pathItem.TryGetProperty(method, out _), $"OpenAPI operation is missing: {method.ToUpperInvariant()} {path}");
         }
+    }
+
+    [Theory]
+    [InlineData("/api/v1/import-export/backup")]
+    [InlineData("/api/v1/import-export/restore")]
+    [InlineData("/api/v1/import-export/restore/preview")]
+    [InlineData("/api/v1/import-export/csv/export")]
+    public async Task Document_DoesNotExposePlaintextExportOrBackupOperations(string path)
+    {
+        using var document = await GetDocumentAsync();
+        var paths = document.RootElement.GetProperty("paths");
+
+        Assert.False(paths.TryGetProperty(path, out _), $"Plaintext backup operation is still exposed: {path}");
     }
 
     [Fact]
