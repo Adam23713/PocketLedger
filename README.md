@@ -1,6 +1,6 @@
 # PocketLedger
 
-PocketLedger is a self-hosted personal finance manager built with ASP.NET Core and PostgreSQL. It provides accounts, categorized transactions, recurring entries, loans and debts, calendar views, statistics, CSV import/export, and JSON backup/restore.
+PocketLedger is a self-hosted personal finance manager built with ASP.NET Core and PostgreSQL. It provides accounts, categorized transactions, recurring entries, loans and debts, calendar views, statistics, CSV import, encrypted Excel export, and encrypted backup/restore.
 
 ## Architecture
 
@@ -41,7 +41,7 @@ The browser uses the Web/BFF for finance operations. The public API hostname rem
 
 ## Database encryption
 
-Selected financial text and Identity secret fields are encrypted before persistence. Production now requires separate certificate-protected key directories for API, Web and Identity. Follow the [database encryption and recovery guide](docs/database-encryption.md) before upgrading: populated legacy databases are intentionally rejected; the agreed transition uses fresh databases and the existing finance JSON restore. JSON/CSV export formats are unchanged and remain plaintext. Full PostgreSQL storage encryption additionally requires the documented VPS/LUKS setup.
+Selected financial text and Identity secret fields are encrypted before persistence. Production now requires separate certificate-protected key directories for API, Web and Identity. Follow the [database encryption and recovery guide](docs/database-encryption.md) before upgrading: populated legacy databases are intentionally rejected; the agreed transition uses fresh databases and an encrypted PocketLedger backup. Transaction exports are password-protected Excel workbooks. Full PostgreSQL storage encryption additionally requires the documented VPS/LUKS setup.
 
 ## Docker Compose deployment
 
@@ -74,7 +74,7 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    docker compose up -d
    ```
 
-On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as JSON can then be restored from **Import / Export**.
+On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as an encrypted `.plbackup` file can then be restored from **Import / Export**.
 
 The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
 
@@ -130,7 +130,7 @@ Development uses one checked-in signing key for interoperability. It is not a pr
 
 All finance endpoints start with `/api/v1`. OpenAPI metadata is served by the API host at `/openapi/v1.json`. The current API is designed for PocketLedger-owned clients; compatibility is versioned at the URL boundary, while generated clients are intentionally deferred.
 
-JSON backups contain the complete signed-in user's finance dataset but no passwords, TOTP secrets, recovery codes, authentication audit events, or BFF tokens. A fictional importable dataset is available at [`examples/pocketledger-demo.json`](examples/pocketledger-demo.json).
+Encrypted `.plbackup` files contain the complete signed-in user's finance dataset but no account passwords, TOTP secrets, recovery codes, authentication audit events, or BFF tokens.
 
 ## Validation
 
@@ -144,6 +144,8 @@ dotnet test PocketLedger.slnx
 ## License
 
 PocketLedger is free and open-source software licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).
+
+Password-protected Excel export uses [EPPlus](https://github.com/EPPlusSoftware/EPPlus) under its Polyform Noncommercial license, and PocketLedger configures the library for noncommercial use. Anyone using a modified PocketLedger distribution commercially, including offering it as a paid product or service, must obtain an appropriate commercial EPPlus license, replace EPPlus with a suitably licensed component, or remove the Excel export feature. This requirement is separate from PocketLedger's AGPL license.
 
 ## Financial cache
 

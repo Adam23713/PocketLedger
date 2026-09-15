@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Controllers;
 using PocketLedger.Models.Entities;
@@ -12,32 +11,17 @@ namespace PocketLedger.Tests;
 public class ImportExportControllerTests
 {
     [Fact]
-    public async Task Backup_UsesUniqueSortableUtcPocketLedgerFileNames()
-    {
-        var controller = new ImportExportController(new StubImportExportService(), new FixedUserContext(new DateOnly(2026, 1, 1)));
-
-        var first = Assert.IsType<FileContentResult>(await controller.Backup(CancellationToken.None));
-        var second = Assert.IsType<FileContentResult>(await controller.Backup(CancellationToken.None));
-
-        Assert.NotEqual(first.FileDownloadName, second.FileDownloadName);
-        Assert.Equal("application/json; charset=utf-8", first.ContentType);
-        Assert.Matches("^pocketledger-backup-[0-9]{8}T[0-9]{9}Z-[0-9a-f]{32}\\.json$", first.FileDownloadName);
-
-        var timestamp = first.FileDownloadName!["pocketledger-backup-".Length..("pocketledger-backup-".Length + 19)];
-        Assert.True(DateTimeOffset.TryParseExact(timestamp, "yyyyMMdd'T'HHmmssfff'Z'", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var generatedAt));
-        Assert.InRange(generatedAt, DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddMinutes(1));
-    }
-
-    [Fact]
-    public async Task ExportCsv_UsesUsersLocalDateInFileNameWhenUtcDateDiffers()
+    public async Task ExportExcel_UsesUsersLocalDateInFileNameWhenUtcDateDiffers()
     {
         var clock = new FixedTimeProvider(new DateTimeOffset(2026, 8, 14, 12, 30, 0, TimeSpan.Zero));
         var userDates = new UserDateProvider(clock);
         var controller = new ImportExportController(new StubImportExportService(), new FixedUserContext(userDates.Today("Pacific/Kiritimati")));
+        var model = new ExcelExportViewModel { Password = "0123456789", ConfirmPassword = "0123456789" };
 
-        var result = Assert.IsType<FileContentResult>(await controller.ExportCsv(null, null, null, null, null, null, null, null, null, null, CancellationToken.None));
+        var result = Assert.IsType<FileContentResult>(await controller.ExportExcel(model, CancellationToken.None));
 
-        Assert.Equal("transactions-20260815.csv", result.FileDownloadName);
+        Assert.Equal("transactions-20260815.xlsx", result.FileDownloadName);
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", result.ContentType);
     }
 
     [Fact]
@@ -66,14 +50,22 @@ public class ImportExportControllerTests
         Assert.False(Validator.TryValidateObject(model, new ValidationContext(model), errors, true));
     }
 
+    [Theory]
+    [InlineData("123456789", "123456789")]
+    [InlineData("0123456789", "different-password")]
+    public void ExcelExportModel_RejectsShortOrMismatchedPasswords(string password, string confirmation)
+    {
+        var model = new ExcelExportViewModel { Password = password, ConfirmPassword = confirmation };
+        var errors = new List<ValidationResult>();
+
+        Assert.False(Validator.TryValidateObject(model, new ValidationContext(model), errors, true));
+    }
+
     private sealed class StubImportExportService : IImportExportService
     {
-        public Task<string> ExportCsvAsync(TransactionFilter filter, CancellationToken cancellationToken) => Task.FromResult("date,account,type,category,amount,currency,note\n");
+        public Task<byte[]> ExportExcelAsync(TransactionFilter filter, string password, CancellationToken cancellationToken) => Task.FromResult(new byte[] { 1, 2, 3 });
         public Task<CsvImportPreview> PreviewCsvAsync(string csv, CancellationToken cancellationToken) => throw new NotSupportedException();
         public Task<CsvImportResult> ImportCsvAsync(string csv, CancellationToken cancellationToken) => throw new NotSupportedException();
-        public Task<string> ExportBackupAsync(CancellationToken cancellationToken) => Task.FromResult("{}");
-        public RestorePreview PreviewRestore(string json) => throw new NotSupportedException();
-        public Task RestoreAsync(string json, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class StubEncryptedBackupService : IEncryptedBackupService

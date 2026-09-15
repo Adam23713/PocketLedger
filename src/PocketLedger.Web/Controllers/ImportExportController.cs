@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.ImportExport;
@@ -12,10 +11,26 @@ public class ImportExportController(IImportExportService importExportService, IU
     public IActionResult Index() => View(new ImportExportIndexViewModel());
 
     [HttpGet]
-    public async Task<IActionResult> ExportCsv(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search, CancellationToken cancellationToken)
+    public IActionResult ExportExcel(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search)
     {
-        var csv = await importExportService.ExportCsvAsync(new TransactionFilter { DateFrom = dateFrom, DateTo = dateTo, Year = year, Month = month, AccountId = accountId, CategoryId = categoryId, Type = type, AmountFrom = amountFrom, AmountTo = amountTo, Search = search }, cancellationToken);
-        return File(Encoding.UTF8.GetBytes(csv), "text/csv; charset=utf-8", $"transactions-{await userContext.TodayAsync(cancellationToken):yyyyMMdd}.csv");
+        return View(new ExcelExportViewModel { Filter = new TransactionFilter { DateFrom = dateFrom, DateTo = dateTo, Year = year, Month = month, AccountId = accountId, CategoryId = categoryId, Type = type, AmountFrom = amountFrom, AmountTo = amountTo, Search = search } });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(BackupProtectionFormat.MaximumPasswordRequestBytes)]
+    [RequestFormLimits(ValueLengthLimit = BackupProtectionFormat.MaximumPasswordFormValueBytes)]
+    public async Task<IActionResult> ExportExcel(ExcelExportViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return View(model);
+        try
+        {
+            var content = await importExportService.ExportExcelAsync(model.Filter, model.Password, cancellationToken);
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"transactions-{await userContext.TodayAsync(cancellationToken):yyyyMMdd}.xlsx");
+        }
+        catch (BusinessRuleException exception)
+        {
+            ModelState.AddModelError(string.Empty, exception.Message);
+            return View(model);
+        }
     }
 
     [HttpGet]
@@ -42,14 +57,6 @@ public class ImportExportController(IImportExportService importExportService, IU
         var result = await importExportService.ImportCsvAsync(model.Csv, cancellationToken);
         TempData["SuccessMessage"] = $"Imported {result.ImportedCount} rows; skipped {result.DuplicateCount} duplicates and {result.InvalidCount} invalid rows.";
         return RedirectToAction(nameof(Import));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Backup(CancellationToken cancellationToken)
-    {
-        var json = await importExportService.ExportBackupAsync(cancellationToken);
-        var fileName = $"pocketledger-backup-{DateTimeOffset.UtcNow:yyyyMMdd'T'HHmmssfff'Z'}-{Guid.NewGuid():N}.json";
-        return File(Encoding.UTF8.GetBytes(json), "application/json; charset=utf-8", fileName);
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(BackupProtectionFormat.MaximumPasswordRequestBytes)]
@@ -79,7 +86,7 @@ public class ImportExportController(IImportExportService importExportService, IU
     {
         if (file is null || file.Length == 0)
         {
-            ModelState.AddModelError(string.Empty, "Select a .plbackup or JSON backup file.");
+            ModelState.AddModelError(string.Empty, "Select a .plbackup file.");
             return View("Restore", new RestoreViewModel());
         }
 
@@ -93,29 +100,22 @@ public class ImportExportController(IImportExportService importExportService, IU
         using var buffer = new MemoryStream((int)file.Length);
         await stream.CopyToAsync(buffer, cancellationToken);
         var content = buffer.ToArray();
-        var encrypted = BackupProtectionFormat.HasMagic(content) || string.Equals(Path.GetExtension(file.FileName), ".plbackup", StringComparison.OrdinalIgnoreCase);
-        if (encrypted)
+        if (!BackupProtectionFormat.HasMagic(content))
         {
-            var password = Request.Form["Password"].ToString();
-            if (string.IsNullOrEmpty(password))
-            {
-                ModelState.AddModelError(nameof(RestoreViewModel.Password), "Backup password is required.");
-                return View("Restore", new RestoreViewModel { IsEncrypted = true });
-            }
-
-            var preview = EncryptedBackups().PreviewEncryptedRestore(content, password);
-            ModelState.Remove(nameof(RestoreViewModel.Password));
-            return View("Restore", new RestoreViewModel { IsEncrypted = true, EncryptedContent = preview.IsValid ? Convert.ToBase64String(content) : string.Empty, Preview = preview });
-        }
-
-        string json;
-        try { json = new UTF8Encoding(false, true).GetString(content); }
-        catch (DecoderFallbackException)
-        {
-            ModelState.AddModelError(string.Empty, "The JSON backup is not valid UTF-8.");
+            ModelState.AddModelError(string.Empty, "The selected file is not a PocketLedger encrypted backup.");
             return View("Restore", new RestoreViewModel());
         }
-        return View("Restore", new RestoreViewModel { Json = json, Preview = importExportService.PreviewRestore(json) });
+
+        var password = Request.Form["Password"].ToString();
+        if (string.IsNullOrEmpty(password))
+        {
+            ModelState.AddModelError(nameof(RestoreViewModel.Password), "Backup password is required.");
+            return View("Restore", new RestoreViewModel());
+        }
+
+        var preview = EncryptedBackups().PreviewEncryptedRestore(content, password);
+        ModelState.Remove(nameof(RestoreViewModel.Password));
+        return View("Restore", new RestoreViewModel { EncryptedContent = preview.IsValid ? Convert.ToBase64String(content) : string.Empty, Preview = preview });
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(BackupProtectionFormat.MaximumFormBytes)]
@@ -131,15 +131,8 @@ public class ImportExportController(IImportExportService importExportService, IU
 
         try
         {
-            if (model.IsEncrypted)
-            {
-                if (string.IsNullOrEmpty(model.Password)) throw new BusinessRuleException("Backup password is required.");
-                await EncryptedBackups().RestoreEncryptedAsync(Convert.FromBase64String(model.EncryptedContent), model.Password, cancellationToken);
-            }
-            else
-            {
-                await importExportService.RestoreAsync(model.Json, cancellationToken);
-            }
+            if (string.IsNullOrEmpty(model.Password)) throw new BusinessRuleException("Backup password is required.");
+            await EncryptedBackups().RestoreEncryptedAsync(Convert.FromBase64String(model.EncryptedContent), model.Password, cancellationToken);
             TempData["SuccessMessage"] = "Backup restored successfully.";
             return RedirectToAction(nameof(Index));
         }
@@ -155,7 +148,6 @@ public class ImportExportController(IImportExportService importExportService, IU
 
     private RestorePreview Preview(RestoreViewModel model)
     {
-        if (!model.IsEncrypted) return importExportService.PreviewRestore(model.Json);
         if (string.IsNullOrEmpty(model.Password)) return model.Preview ?? new RestorePreview(false, 0, 0, 0, 0, ["Backup password is required."]);
         try { return EncryptedBackups().PreviewEncryptedRestore(Convert.FromBase64String(model.EncryptedContent), model.Password); }
         catch (FormatException) { return new RestorePreview(false, 0, 0, 0, 0, ["The encrypted backup data is invalid."]); }

@@ -7,9 +7,9 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Transactions <small class="text-muted fs-6">(@Model.TotalCount)</small></h1>
     <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-controller="ImportExport" asp-action="ExportCsv"
+        <a class="btn btn-outline-secondary" asp-controller="ImportExport" asp-action="ExportExcel"
            asp-route-dateFrom="@Model.DateFrom" asp-route-dateTo="@Model.DateTo" asp-route-year="@(Model.Year == 0 ? null : Model.Year)" asp-route-month="@(Model.Month == 0 ? null : Model.Month)"
-           asp-route-accountId="@Model.AccountId" asp-route-categoryId="@Model.CategoryId" asp-route-type="@Model.Type" asp-route-amountFrom="@Model.AmountFrom" asp-route-amountTo="@Model.AmountTo" asp-route-search="@Model.Search">Export CSV</a>
+           asp-route-accountId="@Model.AccountId" asp-route-categoryId="@Model.CategoryId" asp-route-type="@Model.Type" asp-route-amountFrom="@Model.AmountFrom" asp-route-amountTo="@Model.AmountTo" asp-route-search="@Model.Search">Export Excel</a>
         <a class="btn btn-primary" asp-action="Create">New transaction</a>
     </div>
 </div>

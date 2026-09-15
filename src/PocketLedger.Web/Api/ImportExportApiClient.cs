@@ -7,10 +7,14 @@ namespace PocketLedger.Web.Api;
 
 public sealed class ImportExportApiClient(HttpClient client) : ApiClientBase(client), IImportExportService, IEncryptedBackupService
 {
-    public async Task<string> ExportCsvAsync(TransactionFilter filter, CancellationToken token) => (await PostAsync<TransactionFilter, TextPayload>("api/v1/import-export/csv/export", filter, token)).Content;
+    public async Task<byte[]> ExportExcelAsync(TransactionFilter filter, string password, CancellationToken token)
+    {
+        using var response = await HttpClient.PostAsJsonAsync("api/v1/import-export/excel/export", new ExcelExportRequest(filter, password), JsonOptions, token);
+        await EnsureSuccessAsync(response, token);
+        return await response.Content.ReadAsByteArrayAsync(token);
+    }
     public Task<CsvImportPreview> PreviewCsvAsync(string csv, CancellationToken token) => PostAsync<TextPayload, CsvImportPreview>("api/v1/import-export/csv/preview", new TextPayload(csv), token);
     public Task<CsvImportResult> ImportCsvAsync(string csv, CancellationToken token) => PostAsync<TextPayload, CsvImportResult>("api/v1/import-export/csv/import", new TextPayload(csv), token);
-    public async Task<string> ExportBackupAsync(CancellationToken token) => (await GetAsync<TextPayload>("api/v1/import-export/backup", token)).Content;
     public async Task<byte[]> ExportEncryptedBackupAsync(string password, CancellationToken token)
     {
         using var content = PasswordContent(password);
@@ -18,9 +22,7 @@ public sealed class ImportExportApiClient(HttpClient client) : ApiClientBase(cli
         await EnsureSuccessAsync(response, token);
         return await response.Content.ReadAsByteArrayAsync(token);
     }
-    public RestorePreview PreviewRestore(string json) => PostAsync<TextPayload, RestorePreview>("api/v1/import-export/restore/preview", new TextPayload(json), CancellationToken.None).GetAwaiter().GetResult();
     public RestorePreview PreviewEncryptedRestore(byte[] encryptedBackup, string password) => PostEncryptedAsync<RestorePreview>("api/v1/import-export/restore/encrypted/preview", encryptedBackup, password, CancellationToken.None).GetAwaiter().GetResult();
-    public Task RestoreAsync(string json, CancellationToken token) => PostAsync("api/v1/import-export/restore", new TextPayload(json), token);
     public Task RestoreEncryptedAsync(byte[] encryptedBackup, string password, CancellationToken token) => PostEncryptedAsync("api/v1/import-export/restore/encrypted", encryptedBackup, password, token);
 
     private async Task<T> PostEncryptedAsync<T>(string uri, byte[] encryptedBackup, string password, CancellationToken token)
