@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Controllers;
 using PocketLedger.Models.Entities;
+using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.ImportExport;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
@@ -10,6 +11,21 @@ namespace PocketLedger.Tests;
 
 public class ImportExportControllerTests
 {
+    [Fact]
+    public void Index_PreservesTransactionFiltersForExcelExport()
+    {
+        var accountId = Guid.NewGuid();
+        var controller = new ImportExportController(new StubImportExportService(), new FixedUserContext(default));
+
+        var result = Assert.IsType<ViewResult>(controller.Index(new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 30), 2026, 9, accountId, null, TransactionType.Expense, 10, 200, "food"));
+        var model = Assert.IsType<ImportExportIndexViewModel>(result.Model);
+
+        Assert.Equal(new DateOnly(2026, 9, 1), model.ExcelExport.Filter.DateFrom);
+        Assert.Equal(accountId, model.ExcelExport.Filter.AccountId);
+        Assert.Equal(TransactionType.Expense, model.ExcelExport.Filter.Type);
+        Assert.Equal("food", model.ExcelExport.Filter.Search);
+    }
+
     [Fact]
     public async Task ExportExcel_UsesUsersLocalDateInFileNameWhenUtcDateDiffers()
     {
@@ -29,14 +45,14 @@ public class ImportExportControllerTests
     {
         var encrypted = new StubEncryptedBackupService();
         var controller = new ImportExportController(new StubImportExportService(), new FixedUserContext(default), encrypted);
-        var model = new ImportExportIndexViewModel { EncryptedBackup = new EncryptedBackupExportViewModel { Password = "0123456789", ConfirmPassword = "0123456789" } };
+        var model = new EncryptedBackupExportViewModel { Password = "0123456789", ConfirmPassword = "0123456789" };
 
         var result = Assert.IsType<FileContentResult>(await controller.EncryptedBackup(model, CancellationToken.None));
 
         Assert.Equal("0123456789", encrypted.Password);
         Assert.Equal("application/vnd.pocketledger.backup", result.ContentType);
         Assert.Equal("PLBACKUP"u8.ToArray(), result.FileContents);
-        Assert.Matches("^pocketledger-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.plbackup$", result.FileDownloadName);
+        Assert.Matches("^pocketledger-[0-9]{8}T[0-9]{9}Z\\.plbackup$", result.FileDownloadName);
     }
 
     [Theory]

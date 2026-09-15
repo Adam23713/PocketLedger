@@ -8,19 +8,17 @@ namespace PocketLedger.Controllers;
 
 public class ImportExportController(IImportExportService importExportService, IUserContextService userContext, IEncryptedBackupService? encryptedBackupService = null) : Controller
 {
-    public IActionResult Index() => View(new ImportExportIndexViewModel());
-
     [HttpGet]
-    public IActionResult ExportExcel(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search)
+    public IActionResult Index(DateOnly? dateFrom, DateOnly? dateTo, int? year, int? month, Guid? accountId, Guid? categoryId, TransactionType? type, decimal? amountFrom, decimal? amountTo, string? search)
     {
-        return View(new ExcelExportViewModel { Filter = new TransactionFilter { DateFrom = dateFrom, DateTo = dateTo, Year = year, Month = month, AccountId = accountId, CategoryId = categoryId, Type = type, AmountFrom = amountFrom, AmountTo = amountTo, Search = search } });
+        return View(new ImportExportIndexViewModel { ExcelExport = new ExcelExportViewModel { Filter = new TransactionFilter { DateFrom = dateFrom, DateTo = dateTo, Year = year, Month = month, AccountId = accountId, CategoryId = categoryId, Type = type, AmountFrom = amountFrom, AmountTo = amountTo, Search = search } } });
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(BackupProtectionFormat.MaximumPasswordRequestBytes)]
     [RequestFormLimits(ValueLengthLimit = BackupProtectionFormat.MaximumPasswordFormValueBytes)]
-    public async Task<IActionResult> ExportExcel(ExcelExportViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> ExportExcel([Bind(Prefix = nameof(ImportExportIndexViewModel.ExcelExport))] ExcelExportViewModel model, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid) return View("Index", new ImportExportIndexViewModel { ExcelExport = model });
         try
         {
             var content = await importExportService.ExportExcelAsync(model.Filter, model.Password, cancellationToken);
@@ -28,8 +26,8 @@ public class ImportExportController(IImportExportService importExportService, IU
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
-            return View(model);
+            ModelState.AddModelError(nameof(ImportExportIndexViewModel.ExcelExport), exception.Message);
+            return View("Index", new ImportExportIndexViewModel { ExcelExport = model });
         }
     }
 
@@ -61,19 +59,19 @@ public class ImportExportController(IImportExportService importExportService, IU
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(BackupProtectionFormat.MaximumPasswordRequestBytes)]
     [RequestFormLimits(ValueLengthLimit = BackupProtectionFormat.MaximumPasswordFormValueBytes)]
-    public async Task<IActionResult> EncryptedBackup(ImportExportIndexViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> EncryptedBackup([Bind(Prefix = nameof(ImportExportIndexViewModel.EncryptedBackup))] EncryptedBackupExportViewModel model, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View("Index", model);
+        if (!ModelState.IsValid) return View("Index", new ImportExportIndexViewModel { EncryptedBackup = model });
         try
         {
-            var content = await EncryptedBackups().ExportEncryptedBackupAsync(model.EncryptedBackup.Password, cancellationToken);
-            var fileName = $"pocketledger-{DateTimeOffset.UtcNow:yyyy-MM-dd}.plbackup";
+            var content = await EncryptedBackups().ExportEncryptedBackupAsync(model.Password, cancellationToken);
+            var fileName = $"pocketledger-{DateTimeOffset.UtcNow:yyyyMMdd'T'HHmmssfff'Z'}.plbackup";
             return File(content, "application/vnd.pocketledger.backup", fileName);
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
-            return View("Index", model);
+            ModelState.AddModelError(nameof(ImportExportIndexViewModel.EncryptedBackup), exception.Message);
+            return View("Index", new ImportExportIndexViewModel { EncryptedBackup = model });
         }
     }
 

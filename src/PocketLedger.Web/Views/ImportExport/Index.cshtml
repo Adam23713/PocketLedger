@@ -2,13 +2,34 @@
 @{ ViewData["Title"] = "Import / Export"; }
 <h1>Import / Export</h1>
 <div class="row g-3">
-    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h4">Transactions</h2><p>Export transactions to a password-protected Excel workbook, or preview and import a CSV file.</p><a class="btn btn-outline-primary" asp-action="ExportExcel">Export all to Excel</a> <a class="btn btn-primary" asp-action="Import">Import CSV</a></div></div></div>
+    <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h4">Transactions</h2>
+            <p>Export transactions to a password-protected Excel workbook, or preview and import a CSV file.</p>
+            <form asp-action="ExportExcel" method="post">
+                <span asp-validation-for="ExcelExport" class="text-danger"></span>
+                <input asp-for="ExcelExport.Filter.DateFrom" type="hidden" />
+                <input asp-for="ExcelExport.Filter.DateTo" type="hidden" />
+                <input asp-for="ExcelExport.Filter.Year" type="hidden" />
+                <input asp-for="ExcelExport.Filter.Month" type="hidden" />
+                <input asp-for="ExcelExport.Filter.AccountId" type="hidden" />
+                <input asp-for="ExcelExport.Filter.CategoryId" type="hidden" />
+                <input asp-for="ExcelExport.Filter.Type" type="hidden" />
+                <input asp-for="ExcelExport.Filter.AmountFrom" type="hidden" />
+                <input asp-for="ExcelExport.Filter.AmountTo" type="hidden" />
+                <input asp-for="ExcelExport.Filter.Search" type="hidden" />
+                <div class="mb-3"><label asp-for="ExcelExport.Password" class="form-label">Excel password</label><input asp-for="ExcelExport.Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="ExcelExport.Password" class="text-danger"></span><div class="form-text">Use between 10 and 128 characters. A forgotten password cannot be recovered.</div></div>
+                <div class="mb-3"><label asp-for="ExcelExport.ConfirmPassword" class="form-label">Confirm Excel password</label><input asp-for="ExcelExport.ConfirmPassword" class="form-control" autocomplete="new-password" /><span asp-validation-for="ExcelExport.ConfirmPassword" class="text-danger"></span></div>
+                <button class="btn btn-primary">Download encrypted Excel</button> <a class="btn btn-outline-primary" asp-action="Import">Import CSV</a>
+            </form>
+        </div></div>
+    </div>
     <div class="col-md-6">
         <div class="card h-100"><div class="card-body">
             <h2 class="h4">Encrypted PocketLedger backup</h2>
             <p>Download a password-protected backup of the complete PocketLedger database.</p>
             <form asp-action="EncryptedBackup" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <span asp-validation-for="EncryptedBackup" class="text-danger"></span>
                 <div class="mb-3"><label asp-for="EncryptedBackup.Password" class="form-label">Backup password</label><input asp-for="EncryptedBackup.Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="EncryptedBackup.Password" class="text-danger"></span><div class="form-text">Use between 10 and 128 characters. A forgotten password cannot be recovered.</div></div>
                 <div class="mb-3"><label asp-for="EncryptedBackup.ConfirmPassword" class="form-label">Confirm backup password</label><input asp-for="EncryptedBackup.ConfirmPassword" class="form-control" autocomplete="new-password" /><span asp-validation-for="EncryptedBackup.ConfirmPassword" class="text-danger"></span></div>
                 <button class="btn btn-primary">Download encrypted backup</button> <a class="btn btn-danger" asp-action="Restore">Restore</a>
