@@ -1,3 +1,4 @@
+using System.Text;
 using PocketLedger.Models.Enums;
 
 namespace PocketLedger.Services;
@@ -17,6 +18,25 @@ public record CsvImportPreview(IReadOnlyList<CsvImportRow> Rows)
     public int DuplicateCount => Rows.Count(row => row.IsDuplicate);
 }
 public record CsvImportResult(int ImportedCount, int InvalidCount, int DuplicateCount);
+
+public static class BackupProtectionFormat
+{
+    public const string Magic = "PLBACKUP";
+    public const int MaximumPayloadBytes = 64 * 1024 * 1024;
+    public const int MaximumHeaderBytes = 4 * 1024;
+    public const int MaximumFileBytes = MaximumPayloadBytes + MaximumHeaderBytes;
+    public const int MaximumUploadBytes = MaximumFileBytes + 1024 * 1024;
+    public const int MaximumFormBytes = 90 * 1024 * 1024;
+    public const int MaximumPasswordRequestBytes = 16 * 1024;
+    public const int MaximumPasswordFormValueBytes = 1024;
+    public const int MinimumPasswordLength = 10;
+    public const int MaximumPasswordLength = 128;
+    public const int Pbkdf2Iterations = 600_000;
+    public const int MaximumAcceptedPbkdf2Iterations = 1_200_000;
+
+    public static bool HasMagic(ReadOnlySpan<byte> content) => content.StartsWith(Encoding.ASCII.GetBytes(Magic));
+    public static int PasswordLength(string password) => password.Normalize(NormalizationForm.FormC).EnumerateRunes().Count();
+}
 
 public record PlannerItemBackup(Guid Id, PocketLedger.Services.Interfaces.PlannerItemInput Item, int? CopyDay = null);
 
