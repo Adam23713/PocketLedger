@@ -52,7 +52,7 @@ public abstract class ApiClientBase(HttpClient httpClient)
         await EnsureSuccessAsync(response, token);
     }
 
-    private static async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken token)
+    protected static async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken token)
     {
         if (response.IsSuccessStatusCode) return;
         var error = await response.Content.ReadFromJsonAsync<ApiError>(JsonOptions, token);

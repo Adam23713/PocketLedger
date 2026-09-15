@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Controllers;
 using PocketLedger.Models.Entities;
+using PocketLedger.Models.ViewModels.ImportExport;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
 
@@ -38,6 +40,32 @@ public class ImportExportControllerTests
         Assert.Equal("transactions-20260815.csv", result.FileDownloadName);
     }
 
+    [Fact]
+    public async Task EncryptedBackup_ReturnsDedicatedBinaryFormatAndFileName()
+    {
+        var encrypted = new StubEncryptedBackupService();
+        var controller = new ImportExportController(new StubImportExportService(), new FixedUserContext(default), encrypted);
+        var model = new ImportExportIndexViewModel { EncryptedBackup = new EncryptedBackupExportViewModel { Password = "0123456789", ConfirmPassword = "0123456789" } };
+
+        var result = Assert.IsType<FileContentResult>(await controller.EncryptedBackup(model, CancellationToken.None));
+
+        Assert.Equal("0123456789", encrypted.Password);
+        Assert.Equal("application/vnd.pocketledger.backup", result.ContentType);
+        Assert.Equal("PLBACKUP"u8.ToArray(), result.FileContents);
+        Assert.Matches("^pocketledger-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.plbackup$", result.FileDownloadName);
+    }
+
+    [Theory]
+    [InlineData("123456789", "123456789")]
+    [InlineData("0123456789", "different-password")]
+    public void EncryptedBackupModel_RejectsShortOrMismatchedPasswords(string password, string confirmation)
+    {
+        var model = new EncryptedBackupExportViewModel { Password = password, ConfirmPassword = confirmation };
+        var errors = new List<ValidationResult>();
+
+        Assert.False(Validator.TryValidateObject(model, new ValidationContext(model), errors, true));
+    }
+
     private sealed class StubImportExportService : IImportExportService
     {
         public Task<string> ExportCsvAsync(TransactionFilter filter, CancellationToken cancellationToken) => Task.FromResult("date,account,type,category,amount,currency,note\n");
@@ -46,6 +74,14 @@ public class ImportExportControllerTests
         public Task<string> ExportBackupAsync(CancellationToken cancellationToken) => Task.FromResult("{}");
         public RestorePreview PreviewRestore(string json) => throw new NotSupportedException();
         public Task RestoreAsync(string json, CancellationToken cancellationToken) => throw new NotSupportedException();
+    }
+
+    private sealed class StubEncryptedBackupService : IEncryptedBackupService
+    {
+        public string? Password { get; private set; }
+        public Task<byte[]> ExportEncryptedBackupAsync(string password, CancellationToken cancellationToken) { Password = password; return Task.FromResult("PLBACKUP"u8.ToArray()); }
+        public RestorePreview PreviewEncryptedRestore(byte[] encryptedBackup, string password) => throw new NotSupportedException();
+        public Task RestoreEncryptedAsync(byte[] encryptedBackup, string password, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class FixedUserContext(DateOnly today) : IUserContextService

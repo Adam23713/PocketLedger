@@ -1,6 +1,22 @@
+@model PocketLedger.Models.ViewModels.ImportExport.ImportExportIndexViewModel
 @{ ViewData["Title"] = "Import / Export"; }
 <h1>Import / Export</h1>
 <div class="row g-3">
     <div class="col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h4">CSV</h2><p>Export transactions or preview and import a CSV file.</p><a class="btn btn-outline-primary" asp-action="ExportCsv">Export all</a> <a class="btn btn-primary" asp-action="Import">Import</a></div></div></div>
-    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h2 class="h4">JSON backup</h2><p>Download or restore the complete PocketLedger database.</p><a class="btn btn-outline-primary" asp-action="Backup">Download backup</a> <a class="btn btn-danger" asp-action="Restore">Restore</a></div></div></div>
+    <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h4">Encrypted PocketLedger backup</h2>
+            <p>Download a password-protected backup of the complete PocketLedger database.</p>
+            <form asp-action="EncryptedBackup" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3"><label asp-for="EncryptedBackup.Password" class="form-label">Backup password</label><input asp-for="EncryptedBackup.Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="EncryptedBackup.Password" class="text-danger"></span><div class="form-text">Use between 10 and 128 characters. A forgotten password cannot be recovered.</div></div>
+                <div class="mb-3"><label asp-for="EncryptedBackup.ConfirmPassword" class="form-label">Confirm backup password</label><input asp-for="EncryptedBackup.ConfirmPassword" class="form-control" autocomplete="new-password" /><span asp-validation-for="EncryptedBackup.ConfirmPassword" class="text-danger"></span></div>
+                <button class="btn btn-primary">Download encrypted backup</button> <a class="btn btn-danger" asp-action="Restore">Restore</a>
+            </form>
+            <hr />
+            <h3 class="h6">Unencrypted JSON backup (deprecated)</h3>
+            <div class="alert alert-warning">This format is not encrypted and may expose sensitive financial data. Use it only when interoperability is required.</div>
+            <a class="btn btn-outline-secondary" asp-action="Backup">Download unencrypted JSON</a>
+        </div></div>
+    </div>
 </div>

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
@@ -9,7 +10,7 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionService transactionService, IUserContextService userContext) : IImportExportService
+public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionService transactionService, IUserContextService userContext) : IImportExportService, IEncryptedBackupService
 {
     public async Task<string> ExportCsvAsync(TransactionFilter filter, CancellationToken cancellationToken)
     {
@@ -78,6 +79,12 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         return BackupJson.Serialize(new PocketLedgerBackup(plannerMonths.Count > 0 ? 4 : plannerItems.Count > 0 ? 3 : 2, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring, debts, plannerItems, plannerMonths));
     }
 
+    public async Task<byte[]> ExportEncryptedBackupAsync(string password, CancellationToken cancellationToken)
+    {
+        var json = await ExportBackupAsync(cancellationToken);
+        return BackupEncryption.Encrypt(json, password);
+    }
+
     public RestorePreview PreviewRestore(string json)
     {
         try
@@ -89,6 +96,24 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         catch (Exception exception) when (exception is System.Text.Json.JsonException or BusinessRuleException)
         {
             return new RestorePreview(false, 0, 0, 0, 0, [exception.Message]);
+        }
+    }
+
+    public RestorePreview PreviewEncryptedRestore(byte[] encryptedBackup, string password)
+    {
+        byte[]? plaintext = null;
+        try
+        {
+            plaintext = BackupEncryption.Decrypt(encryptedBackup, password);
+            return PreviewRestore(BackupEncryption.DecodeJson(plaintext));
+        }
+        catch (BusinessRuleException exception)
+        {
+            return new RestorePreview(false, 0, 0, 0, 0, [exception.Message]);
+        }
+        finally
+        {
+            if (plaintext is not null) CryptographicOperations.ZeroMemory(plaintext);
         }
     }
 
@@ -139,6 +164,19 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             throw;
         }
         finally { dbContext.SkipPlannerHistory = skipHistory; }
+    }
+
+    public async Task RestoreEncryptedAsync(byte[] encryptedBackup, string password, CancellationToken cancellationToken)
+    {
+        var plaintext = BackupEncryption.Decrypt(encryptedBackup, password);
+        try
+        {
+            await RestoreAsync(BackupEncryption.DecodeJson(plaintext), cancellationToken);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 
     private static PocketLedgerBackup RemapBackupIds(PocketLedgerBackup backup)
