@@ -19,6 +19,7 @@ public class RestoreViewModel
 
 public class ImportExportIndexViewModel
 {
+    public ExcelExportViewModel ExcelExport { get; set; } = new();
     public EncryptedBackupExportViewModel EncryptedBackup { get; set; } = new();
 }
 
