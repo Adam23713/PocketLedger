@@ -71,6 +71,7 @@ builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IPlannerService, PlannerService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IImportExportService, ImportExportService>();
+builder.Services.AddScoped<IEncryptedBackupService, ImportExportService>();
 builder.Services.AddScoped<IDebtService, DebtService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHostedService<RecurringTransactionWorker>();

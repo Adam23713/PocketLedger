@@ -1,5 +1,5 @@
 using System.Globalization;
-using System.Text;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
@@ -9,24 +9,12 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Services;
 
-public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionService transactionService, IUserContextService userContext) : IImportExportService
+public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionService transactionService, IUserContextService userContext) : IImportExportService, IEncryptedBackupService
 {
-    public async Task<string> ExportCsvAsync(TransactionFilter filter, CancellationToken cancellationToken)
+    public async Task<byte[]> ExportExcelAsync(TransactionFilter filter, string password, CancellationToken cancellationToken)
     {
         var transactions = await transactionService.GetForExportAsync(filter, cancellationToken);
-        var builder = new StringBuilder("date,account,type,category,amount,currency,note\n");
-        foreach (var transaction in transactions)
-        {
-            builder.Append(transaction.TransactionDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)).Append(',')
-                .Append(CsvParser.Escape(transaction.Account?.Name)).Append(',')
-                .Append(transaction.Type).Append(',')
-                .Append(CsvParser.Escape(transaction.Category?.Name)).Append(',')
-                .Append(transaction.Amount.ToString(CultureInfo.InvariantCulture)).Append(',')
-                .Append(CsvParser.Escape(transaction.Account?.Currency ?? transaction.Debt?.Currency)).Append(',')
-                .Append(CsvParser.Escape(transaction.Note)).Append('\n');
-        }
-
-        return builder.ToString();
+        return ExcelExporter.Create(transactions, password);
     }
 
     public async Task<CsvImportPreview> PreviewCsvAsync(string csv, CancellationToken cancellationToken)
@@ -66,7 +54,7 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         return new CsvImportResult(preview.ValidCount, preview.InvalidCount, preview.DuplicateCount);
     }
 
-    public async Task<string> ExportBackupAsync(CancellationToken cancellationToken)
+    internal async Task<string> ExportBackupAsync(CancellationToken cancellationToken)
     {
         var accounts = await dbContext.Accounts.AsNoTracking().Select(account => new AccountBackup(account.Id, account.Name, account.Type, account.Currency, account.InitialBalance, account.Icon, account.DisplayOrder, account.IncludeInMainBalance, account.IncludeInNetWorth, account.IncludeInStatistics, account.Color)).ToListAsync(cancellationToken);
         var categories = await dbContext.Categories.AsNoTracking().Select(category => new CategoryBackup(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.DisplayOrder)).ToListAsync(cancellationToken);
@@ -78,7 +66,13 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         return BackupJson.Serialize(new PocketLedgerBackup(plannerMonths.Count > 0 ? 4 : plannerItems.Count > 0 ? 3 : 2, DateTimeOffset.UtcNow, accounts, categories, transactions, recurring, debts, plannerItems, plannerMonths));
     }
 
-    public RestorePreview PreviewRestore(string json)
+    public async Task<byte[]> ExportEncryptedBackupAsync(string password, CancellationToken cancellationToken)
+    {
+        var json = await ExportBackupAsync(cancellationToken);
+        return BackupEncryption.Encrypt(json, password);
+    }
+
+    internal RestorePreview PreviewRestore(string json)
     {
         try
         {
@@ -92,7 +86,25 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
         }
     }
 
-    public async Task RestoreAsync(string json, CancellationToken cancellationToken)
+    public RestorePreview PreviewEncryptedRestore(byte[] encryptedBackup, string password)
+    {
+        byte[]? plaintext = null;
+        try
+        {
+            plaintext = BackupEncryption.Decrypt(encryptedBackup, password);
+            return PreviewRestore(BackupEncryption.DecodeJson(plaintext));
+        }
+        catch (BusinessRuleException exception)
+        {
+            return new RestorePreview(false, 0, 0, 0, 0, [exception.Message]);
+        }
+        finally
+        {
+            if (plaintext is not null) CryptographicOperations.ZeroMemory(plaintext);
+        }
+    }
+
+    internal async Task RestoreAsync(string json, CancellationToken cancellationToken)
     {
         var backup = DeserializeBackup(json);
         var errors = BackupValidator.Validate(backup);
@@ -139,6 +151,19 @@ public class ImportExportService(PocketLedgerDbContext dbContext, ITransactionSe
             throw;
         }
         finally { dbContext.SkipPlannerHistory = skipHistory; }
+    }
+
+    public async Task RestoreEncryptedAsync(byte[] encryptedBackup, string password, CancellationToken cancellationToken)
+    {
+        var plaintext = BackupEncryption.Decrypt(encryptedBackup, password);
+        try
+        {
+            await RestoreAsync(BackupEncryption.DecodeJson(plaintext), cancellationToken);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 
     private static PocketLedgerBackup RemapBackupIds(PocketLedgerBackup backup)
