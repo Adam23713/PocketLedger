@@ -81,6 +81,11 @@ builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditServi
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 
 var app = builder.Build();
+if (args is [KeyRingMigrationCommand.Name])
+{
+    Environment.ExitCode = KeyRingMigrationCommand.Run(app.Services);
+    return;
+}
 if (args.Length > 0 && (args[0] == "bootstrap-identity" || args[0] == "account"))
 {
     Environment.ExitCode = await CommandRunner.RunAsync(args, app.Services);

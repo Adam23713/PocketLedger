@@ -1,0 +1,65 @@
+# Long-term OCI KMS override. Certificate mounts are removed after successful key-ring migration.
+x-oci-kms-environment: &oci-kms-environment
+  Encryption__KeyProvider: OciVault
+  Encryption__CertificatePath: ""
+  Encryption__OciVault__CryptoEndpoint: ${POCKETLEDGER_OCI_CRYPTO_ENDPOINT:?Set POCKETLEDGER_OCI_CRYPTO_ENDPOINT}
+  Encryption__OciVault__ConfigFilePath: /run/pocketledger-oci/config
+  Encryption__OciVault__Profile: ${POCKETLEDGER_OCI_PROFILE:-DEFAULT}
+  Encryption__OciVault__TimeoutSeconds: ${POCKETLEDGER_OCI_TIMEOUT_SECONDS:-10}
+  Encryption__OciVault__MaxAttempts: ${POCKETLEDGER_OCI_MAX_ATTEMPTS:-3}
+
+services:
+  web:
+    environment:
+      <<: *oci-kms-environment
+      Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_WEB_KEY_ID:?Set POCKETLEDGER_OCI_WEB_KEY_ID}
+    volumes: !override
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/oci
+        target: /run/pocketledger-oci
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
+        read_only: true
+        bind: { create_host_path: false }
+
+  api:
+    environment:
+      <<: *oci-kms-environment
+      Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_API_KEY_ID:?Set POCKETLEDGER_OCI_API_KEY_ID}
+    volumes: !override
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/oci
+        target: /run/pocketledger-oci
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/api.pfx
+        target: /run/pocketledger-internal-tls/api.pfx
+        read_only: true
+        bind: { create_host_path: false }
+
+  identity:
+    environment:
+      <<: *oci-kms-environment
+      Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_IDENTITY_KEY_ID:?Set POCKETLEDGER_OCI_IDENTITY_KEY_ID}
+    volumes: !override
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/keys
+        target: /var/lib/pocketledger/keys
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/oci
+        target: /run/pocketledger-oci
+        read_only: true
+        bind: { create_host_path: false }
