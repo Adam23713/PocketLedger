@@ -84,12 +84,14 @@ jobs:
           EOF
 
       - name: Prepare encryption keys for CI
-        run: sudo bash tools/initialize-encryption-keys.sh "$RUNNER_TEMP/pocketledger-security"
+        run: |
+          sudo bash tools/initialize-encryption-keys.sh "$RUNNER_TEMP/pocketledger-security"
+          sudo bash tools/initialize-internal-tls.sh "$RUNNER_TEMP/pocketledger-security"
 
       - name: Build images (web, api, identity, landing)
         run: docker compose build web api identity landing
 
-      - name: Start stack (without Caddy, no real domains/TLS in CI)
+      - name: Start stack (without Caddy or public domains in CI)
         run: docker compose up -d valkey web api identity landing
 
       - name: Wait for services to actually start
