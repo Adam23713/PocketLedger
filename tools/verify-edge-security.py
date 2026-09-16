@@ -70,13 +70,16 @@ try:
 
     with tempfile.TemporaryDirectory(prefix='pl-edge-') as directory:
         config = Path(directory) / 'Caddyfile'
+        internal_ca = Path(directory) / 'ca.crt'
+        internal_key = Path(directory) / 'ca.key'
+        run('openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-sha256', '-days', '1', '-nodes', '-subj', '/CN=PocketLedger edge test CA/', '-keyout', str(internal_key), '-out', str(internal_ca))
         production = (ROOT / 'Caddyfile.example').read_text()
         domains = {'LANDING': 'landing.test', 'WEB': 'web.test', 'API': 'api.test', 'IDENTITY': 'identity.test'}
         env_args = ['-e', 'CROWDSEC_API_KEY=' + ENV['CROWDSEC_API_KEY']]
         for key, value in domains.items():
             env_args += ['-e', 'POCKETLEDGER_' + key + '_DOMAIN=' + value]
         config.write_text(production)
-        common = ['--network', PROJECT + '_default', *env_args, '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy']
+        common = ['--network', PROJECT + '_default', *env_args, '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', str(internal_ca) + ':/run/pocketledger-internal-tls/ca.crt:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy']
         run('docker', 'run', '--rm', *common, IMAGE, 'caddy', 'validate', '--config', '/etc/caddy/Caddyfile')
         print('PASS production Caddyfile validation with actual custom image', flush=True)
 
@@ -84,6 +87,13 @@ try:
             container(service, '--network-alias', service, IMAGE, 'caddy', 'respond', '--listen', ':' + str(port), '--body', service)
         site = '{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN}'
         local = production.replace(site + ' {', ':8080 {').replace('{\n', '{\n\tauto_https off\n', 1).replace('roll_size 100MiB', 'roll_size 1MiB')
+        api_tls_proxy = '''\t\treverse_proxy @api https://api:5051 {
+\t\t\ttransport http {
+\t\t\t\ttls_trust_pool file /run/pocketledger-internal-tls/ca.crt
+\t\t\t}
+\t\t}'''
+        assert api_tls_proxy in local, 'Production API TLS proxy block changed; update the isolated fixture explicitly'
+        local = local.replace(api_tls_proxy, '\t\treverse_proxy @api api:5051')
         config.write_text(local)
         proxy = container('proxy', *env_args, '-p', '127.0.0.1::8080', '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy', IMAGE)
         port = int(run('docker', 'port', proxy, '8080/tcp').strip().rsplit(':', 1)[1])

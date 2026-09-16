@@ -31,7 +31,7 @@ ENTRYPOINT ["dotnet", "PocketLedger.Web.dll"]
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS api
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=http://+:5051
+ENV ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_URLS=https://+:5051
 EXPOSE 5051
 COPY --from=build /app/api .
 USER $APP_UID

@@ -88,7 +88,11 @@
 		reverse_proxy @web web:5050
 
 		@api host {$POCKETLEDGER_API_DOMAIN}
-		reverse_proxy @api api:5051
+		reverse_proxy @api https://api:5051 {
+			transport http {
+				tls_trust_pool file /run/pocketledger-internal-tls/ca.crt
+			}
+		}
 
 		@identity host {$POCKETLEDGER_IDENTITY_DOMAIN}
 		reverse_proxy @identity identity:5052
