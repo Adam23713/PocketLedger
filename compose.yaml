@@ -31,7 +31,8 @@ services:
       Identity__RequireHttpsMetadata: "true"
       Identity__ClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
-      Api__BaseUrl: http://api:5051/
+      Api__BaseUrl: https://api:5051/
+      Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
       ForwardedHeaders__TrustAll: "true"
     volumes:
       - type: bind
@@ -41,6 +42,11 @@ services:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/certificates
         target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
         read_only: true
         bind: { create_host_path: false }
     depends_on:
@@ -60,6 +66,7 @@ services:
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /run/pocketledger-internal-tls/api.pfx
       ForwardedHeaders__TrustAll: "true"
     volumes:
       - type: bind
@@ -69,6 +76,11 @@ services:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/certificates
         target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/api.pfx
+        target: /run/pocketledger-internal-tls/api.pfx
         read_only: true
         bind: { create_host_path: false }
     depends_on:
@@ -115,6 +127,11 @@ services:
       CROWDSEC_API_KEY: ${CROWDSEC_API_KEY:?Set CROWDSEC_API_KEY in .env}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
+        read_only: true
+        bind: { create_host_path: false }
       - caddy-logs:/var/log/caddy
       - caddy-data:/data
       - caddy-config:/config

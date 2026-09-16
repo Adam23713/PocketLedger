@@ -77,6 +77,8 @@ builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddScoped<IUserContextService, WebUserContextService>();
 builder.Services.AddTransient<AccessTokenHandler>();
 builder.Services.AddHttpClient("IdentityToken", client => client.BaseAddress = new Uri(builder.Configuration["Identity:BackchannelBaseUrl"] ?? "https://identity.localhost/"));
+var apiBaseUrl = new Uri(builder.Configuration["Api:BaseUrl"] ?? "https://api.localhost/");
+InternalApiTls.ValidateConfiguration(apiBaseUrl, builder.Configuration, builder.Environment);
 AddApiClient<IAccountService, AccountsApiClient>();
 AddApiClient<ICategoryService, CategoriesApiClient>();
 AddApiClient<ITransactionService, TransactionsApiClient>();
@@ -112,7 +114,9 @@ app.Run();
 
 void AddApiClient<TService, TImplementation>() where TService : class where TImplementation : class, TService
 {
-    builder.Services.AddHttpClient<TService, TImplementation>(client => client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "https://api.localhost/")).AddHttpMessageHandler<AccessTokenHandler>();
+    builder.Services.AddHttpClient<TService, TImplementation>(client => client.BaseAddress = apiBaseUrl)
+        .ConfigurePrimaryHttpMessageHandler(() => InternalApiTls.CreateHandler(builder.Configuration, builder.Environment))
+        .AddHttpMessageHandler<AccessTokenHandler>();
 }
 
 public partial class Program;
