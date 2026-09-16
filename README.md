@@ -60,9 +60,11 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    openssl rand -base64 64
    ```
 
-3. Prepare the encryption directories as described in the [encryption guide](docs/database-encryption.md), set `POCKETLEDGER_SECURITY_DIRECTORY`, then build the images and initialize the Identity database and first user:
+3. Prepare the encryption directories as described in the [encryption guide](docs/database-encryption.md), then create the internal TLS CA and API certificate in the same security directory. Set `POCKETLEDGER_SECURITY_DIRECTORY`, build the images and initialize the Identity database and first user:
 
    ```bash
+   sudo bash tools/initialize-encryption-keys.sh /opt/pocketledger-security
+   sudo bash tools/initialize-internal-tls.sh /opt/pocketledger-security
    docker compose build
    docker compose up -d identity-database
    docker compose run --rm identity bootstrap-identity
@@ -77,6 +79,14 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
 On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as an encrypted `.plbackup` file can then be restored from **Import / Export**.
 
 The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
+
+## Internal API TLS
+
+Production uses a private CA to encrypt every hop to the API. Kestrel serves the API only on `https://api:5051`; the Web/BFF and Caddy validate the API certificate against the mounted CA certificate and its `api` DNS name. The CA private key is never mounted into a container. Development keeps its existing loopback HTTP endpoints.
+
+For an existing deployment that already has encryption keys, stop the application containers, run `sudo bash tools/initialize-internal-tls.sh "$POCKETLEDGER_SECURITY_DIRECTORY"`, deploy the updated Compose and Caddy configuration together, then recreate `api`, `web`, and `caddy`. The script refuses to overwrite existing TLS material. Back up `internal-tls/ca.key`; it is required to renew the API certificate. Treat `internal-tls/api.pfx` as a private key, and never commit either file.
+
+Before completing the rollout, verify that `docker compose config --quiet` succeeds, all three containers remain running, the Web can load authenticated financial pages, an encrypted export succeeds, and the public API health endpoint works through Caddy. A missing CA, an HTTP production API URL, an untrusted certificate, or a certificate whose DNS name is not `api` fails closed.
 
 ## Moving an existing deployment to the app subdomain
 
