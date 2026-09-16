@@ -43,6 +43,8 @@ The browser uses the Web/BFF for finance operations. The public API hostname rem
 
 Selected financial text and Identity secret fields are encrypted before persistence. Production now requires separate certificate-protected key directories for API, Web and Identity. Follow the [database encryption and recovery guide](docs/database-encryption.md) before upgrading: populated legacy databases are intentionally rejected; the agreed transition uses fresh databases and an encrypted PocketLedger backup. Transaction exports are password-protected Excel workbooks. Full PostgreSQL storage encryption additionally requires the documented VPS/LUKS setup.
 
+The certificate-backed local key provider remains supported for self-hosted deployments. An optional OCI Vault/KMS provider can protect the API, Web and Identity Data Protection key rings with three isolated KMS keys; see the [OCI KMS setup, migration and rotation guide](docs/oci-kms.md).
+
 ## Docker Compose deployment
 
 Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflare, and an authenticator app supporting TOTP.

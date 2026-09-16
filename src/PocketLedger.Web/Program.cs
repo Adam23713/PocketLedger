@@ -92,6 +92,11 @@ AddApiClient<IDebtService, DebtsApiClient>();
 AddApiClient<IPreferencesApiClient, PreferencesApiClient>();
 
 var app = builder.Build();
+if (args is [KeyRingMigrationCommand.Name])
+{
+    Environment.ExitCode = KeyRingMigrationCommand.Run(app.Services);
+    return;
+}
 if (builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
 {
     await using var scope = app.Services.CreateAsyncScope();

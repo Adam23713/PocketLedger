@@ -95,6 +95,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+if (args is [KeyRingMigrationCommand.Name])
+{
+    Environment.ExitCode = KeyRingMigrationCommand.Run(app.Services);
+    return;
+}
 if (builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
 {
     await using var scope = app.Services.CreateAsyncScope();
