@@ -3,7 +3,9 @@
 .git/
 .vscode/
 tests/
-tools/
+tools/**
+!tools/PocketLedger.Security.Cli/
+!tools/PocketLedger.Security.Cli/**
 *.user
 *.suo
 
