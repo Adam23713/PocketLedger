@@ -1,104 +1,129 @@
-# OCI Vault/KMS key provider (PL-96)
+# OCI Vault/KMS encrypted credentials and manual unlock (PL-96, PL-99)
 
-PocketLedger can protect its three independent ASP.NET Core Data Protection key rings with three OCI Vault/KMS keys. Application data remains encrypted locally by Data Protection. OCI receives only the small Data Protection master-key elements for wrap and unwrap operations; it never receives transaction, Identity or session payloads.
+PocketLedger has three independent ASP.NET Core Data Protection key rings: API, Web and Identity. Each ring may contain many automatically rotated Data Protection master keys. Each service uses its own non-exportable OCI HSM AES-256 KEK, dedicated OCI IAM user and encrypted API signing credential. Automatic Data Protection key generation and rotation remain enabled.
 
-## Architecture and boundaries
+There is no provider fallback. `Encryption:KeyProvider=OciVault` never falls back to `Local`. OCI receives only Data Protection key XML for wrap/unwrap; application records remain encrypted locally.
 
-`Encryption:KeyProvider` explicitly selects `Local` or `OciVault`. There is no fallback between providers. `Local` retains the certificate-backed behavior for self-hosted installations. `OciVault` uses the vault cryptographic endpoint with `AES_256_GCM` and stores the key OCID and key-version OCID beside each wrapped key-ring secret. Existing database ciphertext and purpose strings remain unchanged.
+## Security boundary
 
-API, Web and Identity must use separate OCI keys and separate API credentials. A credential can call only `KEY_ENCRYPT` and `KEY_DECRYPT` for its own key. The OCI API signing private key is a revocable credential, not the KMS key. The non-exportable KMS key remains in OCI. A fully compromised running application can still use its credential while that credential remains valid; KMS primarily removes the wrapping key from VPS storage and adds centralized policy, revocation and audit controls.
+Persistent VPS storage contains Data Protection key rings, normal configuration and three `*.enc` credential files, but not a plaintext OCI config, signing PEM or passphrase. A powered-off disk, VM snapshot, filesystem copy, database backup and these files are insufficient without the administrator's unlock passphrase.
 
-## OCI resources and least-privilege policies
+After unlock, the OCI signing key representation and Data Protection keys can remain in process memory because later key rotation or historical-key loading may require OCI. Temporary byte/character buffers are cleared where practical, but .NET, Bouncy Castle and the OCI SDK can create managed copies that cannot be guaranteed to be zeroized. Root/kernel compromise of an already-unlocked process can expose runtime secrets and is outside PL-99's complete protection boundary.
 
-Create one vault, three symmetric AES keys and three dedicated non-interactive OCI users/groups:
+## Encrypted credential format
 
-- `PocketLedgerApiKmsClients` → API key;
-- `PocketLedgerWebKmsClients` → Web key;
-- `PocketLedgerIdentityKmsClients` → Identity key.
+The binary `PLOCKMS1` format contains an explicit format version, KDF/cipher identifiers, Argon2id parameters, ciphertext length, a random 16-byte salt, random 12-byte nonce, AES-256-GCM ciphertext and 16-byte authentication tag. The authenticated header makes parameter manipulation fail closed. Current Argon2id parameters are 64 MiB, three iterations and one lane; accepted bounds prevent attacker-controlled resource exhaustion during parsing.
 
-Grant exactly two permissions to each group. Substitute the compartment and key OCIDs:
+The encrypted payload contains tenancy OCID, user OCID, fingerprint, region and a PKCS#8 signing key. The entire payload is protected by AES-256-GCM. Passwords are never used directly as AES keys. `Konscious.Security.Cryptography.Argon2` is used because it is a focused, established .NET Argon2id implementation; framework `AesGcm` provides authenticated encryption.
+
+## OCI resources and least privilege
+
+Create `pocketledger-api-kek`, `pocketledger-web-kek` and `pocketledger-identity-kek`, plus three dedicated IAM users/groups. Grant each group only `KEY_ENCRYPT` and `KEY_DECRYPT` for its own Key OCID:
 
 ```text
 Allow group PocketLedgerApiKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<API_KEY_OCID>', request.permission = 'KEY_ENCRYPT'}
 Allow group PocketLedgerApiKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<API_KEY_OCID>', request.permission = 'KEY_DECRYPT'}
-
-Allow group PocketLedgerWebKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<WEB_KEY_OCID>', request.permission = 'KEY_ENCRYPT'}
-Allow group PocketLedgerWebKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<WEB_KEY_OCID>', request.permission = 'KEY_DECRYPT'}
-
-Allow group PocketLedgerIdentityKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<IDENTITY_KEY_OCID>', request.permission = 'KEY_ENCRYPT'}
-Allow group PocketLedgerIdentityKmsClients to use keys in compartment id <COMPARTMENT_OCID> where all {target.key.id = '<IDENTITY_KEY_OCID>', request.permission = 'KEY_DECRYPT'}
 ```
 
-Do not grant key creation, deletion, rotation, export, vault administration or access to the other two application keys.
+Repeat for Web and Identity with their own groups and keys. Do not grant key management, export or access to another service's key.
 
-## Credential directories
+## Initial provisioning
 
-Create one private OCI directory per host under `POCKETLEDGER_SECURITY_DIRECTORY`:
+Run the administrative CLI on a trusted workstation with the .NET 10 SDK. Repeat for the API, Web and Identity PEM files:
+
+```bash
+dotnet run --project tools/PocketLedger.Security.Cli -- create-oci-credential
+```
+
+The CLI interactively asks for the passphrase-protected PEM path, output path, OCI identifiers, PEM passphrase and a new credential passphrase. Both passphrases use a no-echo terminal and are never command arguments or environment variables. It imports the key in memory, verifies the public-key fingerprint, writes no temporary plaintext key, and creates the output atomically with mode `0600`.
+
+Transfer only these files to the VPS:
 
 ```text
-api/oci/config
-api/oci/api-key.pem
-web/oci/config
-web/oci/api-key.pem
-identity/oci/config
-identity/oci/api-key.pem
+${POCKETLEDGER_SECURITY_DIRECTORY}/api/oci/api.enc
+${POCKETLEDGER_SECURITY_DIRECTORY}/web/oci/web.enc
+${POCKETLEDGER_SECURITY_DIRECTORY}/identity/oci/identity.enc
 ```
 
-Each directory is mounted only into its corresponding container. Its `config` uses the container path, not the host path:
+Each `oci` directory should be mode `0700`; each file mode `0600`; both must be readable by container UID/GID 1654. Do not leave the source PEM or OCI config on the VPS. `.gitignore` excludes `*.pem` and `*.enc`, but permissions and deployment exclusions remain mandatory.
 
-```ini
-[DEFAULT]
-user=<HOST_SPECIFIC_USER_OCID>
-fingerprint=<API_KEY_FINGERPRINT>
-tenancy=<TENANCY_OCID>
-region=eu-frankfurt-1
-key_file=/run/pocketledger-oci/api-key.pem
+## Configuration
+
+Non-secret configuration:
+
+```text
+Encryption__KeyProvider=OciVault
+Encryption__OciVault__CryptoEndpoint=https://<vault>-crypto.kms.<region>.oraclecloud.com
+Encryption__OciVault__KeyId=<service-specific-key-ocid>
+Encryption__OciVault__EncryptedCredentialPath=/run/pocketledger-oci/<service>.enc
+Encryption__OciVault__UnlockSocketPath=/tmp/pocketledger-unlock/unlock.sock
+Encryption__OciVault__TimeoutSeconds=10
+Encryption__OciVault__MaxAttempts=3
 ```
 
-Directories must be mode `0700`; `config` and private keys must be `0600` and owned by container UID 1654. Do not commit these files or include them in ordinary deployment archives.
+The Compose override supplies the three distinct file names and Key OCIDs. The only persistent secret is each `*.enc` file. The external secret is each administrator-known passphrase, which is not stored on the VPS.
 
-Set the common crypto endpoint and the three key OCIDs in `.env`. Copy the values from `.env.example`. The crypto endpoint is the vault's HTTPS **Cryptographic Endpoint**, not the OCI Console URL or management endpoint.
+## Startup and manual unlock
 
-## Local-to-OCI migration
+Start or restart normally:
 
-The migration rewraps only the Data Protection key-ring secrets. Database rows, BFF sessions and Identity data are not rewritten. Schedule downtime and retain an offline copy of the complete security directory before starting.
+```bash
+docker compose -f compose.yaml -f compose.oci-kms.yaml up -d --build
+```
 
-1. Build the new images and stop all three application containers. Keep databases stopped from application writes during the operation.
-2. Provision the OCI resources, policies and three credential directories.
-3. Run each host's migration with the temporary override. It mounts both the old certificate and the new OCI credential:
+Each process stays alive but locked. `/health/live` returns 200; `/health/ready` returns 503 and normal HTTP routes return 503 until unlock. The OCI Compose override checks readiness, so containers show `unhealthy` while locked; Docker Compose does not restart a container merely because its health status is unhealthy, and `restart: unless-stopped` therefore does not create an unlock restart loop. After unlock the health check becomes healthy.
 
-   ```bash
-   docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps api rewrap-key-ring
-   docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps web rewrap-key-ring
-   docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps identity rewrap-key-ring
-   ```
+Unlock all three services with one operator command:
 
-   Every command decrypts all source keys, wraps and verifies every target key in a staging directory, then replaces individual key files atomically. Originals remain in a private `.rewrap-backup-<UTC timestamp>` directory inside the corresponding key directory. A failed commit restores every file already replaced. An abrupt process or host interruption leaves a `.rewrap-in-progress` marker; normal application startup then fails closed until the operator restores the backup path recorded in that marker.
-4. Start with the long-term override, which removes the old encryption-certificate mounts:
+```bash
+./tools/unlock-oci-kms.sh
+```
 
-   ```bash
-   docker compose -f compose.yaml -f compose.oci-kms.yaml config --quiet
-   docker compose -f compose.yaml -f compose.oci-kms.yaml up -d --force-recreate api web identity
-   ```
+The command prompts separately for the API, Web and Identity credential passphrases through each container's no-echo TTY. It sends each passphrase over a service-local Unix domain socket whose directory is mode `0700` and socket mode `0600`; no public HTTP unlock endpoint exists. Docker `exec` runs as the application UID, so filesystem permissions authorize the local client. Each service decrypts its own credential, constructs the OCI SDK authentication provider directly from memory, performs an OCI encrypt/decrypt probe against the configured Key OCID, validates its Data Protection key ring, and only then becomes ready. A wrong passphrase, corrupt file, KMS outage, wrong key or authentication failure leaves that service locked and reports a non-secret error.
 
-5. Verify login/TOTP, existing sessions according to the planned session policy, financial reads and writes, background processing, encrypted backup export and restart of each host. Inspect key XML only for structure: it must contain `ociKmsWrappedKey` and must not contain plaintext `masterKey` values.
-6. Move the old certificate-protected backup directories and certificates to offline recovery storage. Do not destroy them until a separately restored OCI-protected deployment has successfully read the data.
+After any process/container/VPS restart, repeat the unlock command. Unlocking one service does not unlock or weaken the other two.
 
-For LUKS deployments, use `POCKETLEDGER_OCI_KMS_MODE=migration` with `tools/compose-encrypted-storage.sh` for step 3, and `POCKETLEDGER_OCI_KMS_MODE=enabled` for subsequent Compose operations. The wrapper retains all existing mount and LUKS checks.
+## Passphrase change and interruption recovery
 
-## Failure behavior and recovery
+On a host with the repository and .NET 10 SDK, run as the credential-file owner (UID 1654 in the supplied image):
 
-Missing configuration, invalid OCIDs, a non-HTTPS endpoint, inaccessible credentials, denied IAM requests, timeout, damaged ciphertext or failed KMS unwrap abort startup. PocketLedger never falls back to `Local` and never generates a replacement key for existing encrypted data.
+```bash
+sudo -u '#1654' dotnet run --project tools/PocketLedger.Security.Cli -- change-passphrase
+```
 
-The SDK retries only bounded transient failures. `TimeoutSeconds` is restricted to 1–120 and `MaxAttempts` to 1–5. Do not set long values that make container failure detection ineffective.
+The CLI decrypts in memory, generates a new salt and nonce, verifies the replacement, fsyncs a same-directory temporary file, sets mode `0600`, then atomically replaces the old file. Before the final rename an interruption leaves the original untouched; after it, the fully authenticated replacement is present. Restart and unlock the affected service to prove the new passphrase before discarding recovery knowledge of the old one. Because Compose mounts the containing directory, atomic replacement is visible to a recreated container.
 
-To roll back before deleting the local certificates, stop the applications, restore every top-level `key-*.xml` from its `.rewrap-backup-*` directory, and start with base `compose.yaml` using `KeyProvider=Local`. Never mix a restored database with a newly generated key ring.
+## OCI API signing-key rotation
 
-## Rotation
+1. Generate a new passphrase-protected signing key on a trusted workstation.
+2. Add its public key to the same dedicated OCI service user.
+3. Create a new `.enc` using `create-oci-credential` and a temporary output name.
+4. Keep the old `.enc` offline, atomically install the new file with mode `0600`, recreate the affected container and unlock it.
+5. Verify `/health/ready`, login and protected data operations.
+6. Only then delete/revoke the old OCI API key and retire the old encrypted credential.
 
-- **OCI key version rotation:** rotate the existing logical OCI key. New wraps use the new active version; the stored key-version OCID lets OCI decrypt historical key-ring entries. Keep old key versions enabled while any key ring or backup references them.
-- **Move to another OCI key:** temporarily allow the host credential to decrypt the old key and encrypt with the new key, change the host's Key OCID, stop the host and rerun `rewrap-key-ring`. Remove old-key permission only after restart and recovery validation.
-- **API credential rotation:** upload the new public API key, atomically replace the mounted config/private key, recreate the affected host, validate it, then revoke the old API key. This does not rewrap key-ring data.
-- **Compromise:** revoke the affected API credential immediately. Rotate to a new logical OCI key and rewrap from a trusted environment if the old credential might have been used. Ordinary version rotation alone does not remediate a credential that can still call decrypt.
+PocketLedger never revokes OCI credentials automatically.
 
-Back up the OCI-protected key rings after every migration. Database backups still require their matching key rings, OCI keys/key versions and a credential authorized to decrypt them.
+## Migration from the plaintext OCI design
+
+For a deployment already using PL-96 OCI-wrapped key rings:
+
+1. Stop API, Web and Identity.
+2. On a trusted machine, convert each existing passphrase-protected PEM to its service-specific `.enc`.
+3. Install the three `.enc` files and update to `compose.oci-kms.yaml`; remove plaintext `config` and `api-key.pem` only after retaining an offline recovery copy.
+4. Start the services, run `./tools/unlock-oci-kms.sh`, verify readiness and protected reads/writes.
+5. Confirm no plaintext OCI credential remains on VPS storage or in deployment backups, then securely retire the VPS copies.
+
+For Local-to-OCI migration, keep the old certificates temporarily and run the interactive migration commands; each asks for its encrypted OCI credential passphrase:
+
+```bash
+docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps api rewrap-key-ring
+docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps web rewrap-key-ring
+docker compose -f compose.yaml -f compose.oci-kms-migration.yaml run --rm --no-deps identity rewrap-key-ring
+```
+
+The existing staging, backup and `.rewrap-in-progress` recovery behavior is unchanged. Restore the backup path recorded in the marker before retrying an interrupted migration. Never mix a restored database with an unrelated key ring.
+
+## Remaining PL-98 work
+
+PL-99 does not implement runtime Linux/container hardening. Production follow-up must address core dumps, .NET diagnostics, swap, `ptrace`, `/proc` visibility, least-privilege identities, capability dropping, `no-new-privileges`, read-only root filesystems, and AppArmor/seccomp. The local socket path must be moved to an explicitly writable tmpfs when a read-only root filesystem is enabled.

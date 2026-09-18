@@ -109,6 +109,7 @@ var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeader
 if (builder.Configuration.GetValue<bool>("ForwardedHeaders:TrustAll")) { forwarded.KnownIPNetworks.Clear(); forwarded.KnownProxies.Clear(); }
 foreach (var proxy in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? []) if (IPAddress.TryParse(proxy, out var address)) forwarded.KnownProxies.Add(address);
 app.UseForwardedHeaders(forwarded);
+app.UseEncryptionReadinessGate();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -124,7 +125,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" })).AllowAnonymous();
+app.MapEncryptionHealthEndpoints();
+app.MapGet("/health", (EncryptionRuntimeState state) => state.IsReady ? Results.Ok(new { status = "ready" }) : Results.Json(new { status = "locked" }, statusCode: StatusCodes.Status503ServiceUnavailable)).AllowAnonymous();
 app.Run();
 
 public partial class Program;

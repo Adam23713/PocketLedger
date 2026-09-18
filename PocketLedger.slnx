@@ -14,5 +14,9 @@
     <Project Path="tests/PocketLedger.Api.Tests/PocketLedger.Api.Tests.csproj" />
     <Project Path="tests/PocketLedger.Identity.Tests/PocketLedger.Identity.Tests.csproj" />
     <Project Path="tests/PocketLedger.Tests/PocketLedger.Tests.csproj" />
+    <Project Path="tests/PocketLedger.Security.Tests/PocketLedger.Security.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/PocketLedger.Security.Cli/PocketLedger.Security.Cli.csproj" />
   </Folder>
 </Solution>

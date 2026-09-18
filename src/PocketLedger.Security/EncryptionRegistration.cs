@@ -25,6 +25,8 @@ public static class EncryptionRegistration
         Directory.CreateDirectory(directory);
         services.AddSingleton(new KeyRingStorageOptions(directory));
         services.AddTransient<KeyRingMigration>();
+        var requiresUnlock = providerName.Equals(EncryptionProviderNames.OciVault, StringComparison.OrdinalIgnoreCase);
+        services.AddSingleton(new EncryptionRuntimeState(requiresUnlock));
         var protection = services.AddDataProtection().SetApplicationName(applicationName).PersistKeysToFileSystem(new DirectoryInfo(directory));
         var previousCertificatePaths = configuration.GetSection("Encryption:PreviousCertificatePaths").Get<string[]>() ?? [];
         var providerConfigured = false;
@@ -41,7 +43,10 @@ public static class EncryptionRegistration
         else if (providerName.Equals(EncryptionProviderNames.OciVault, StringComparison.OrdinalIgnoreCase))
         {
             var options = LoadOciOptions(configuration);
-            services.AddSingleton<IKeyEncryptionProvider>(_ => new OciKmsKeyEncryptionProvider(options));
+            services.AddSingleton(options);
+            services.AddSingleton<LockedOciKeyEncryptionProvider>();
+            services.AddSingleton<IKeyEncryptionProvider>(provider => provider.GetRequiredService<LockedOciKeyEncryptionProvider>());
+            services.AddHostedService<OciUnlockSocketService>();
             providerConfigured = true;
         }
         else
@@ -58,7 +63,7 @@ public static class EncryptionRegistration
         decryptionCertificates.AddRange(previousCertificatePaths.Select(LoadCertificate));
         if (decryptionCertificates.Count > 0) protection.UnprotectKeysWithAnyCertificate(decryptionCertificates.ToArray());
         services.AddSingleton<DatabaseEncryption>();
-        services.AddHostedService<EncryptionStartupCheck>();
+        if (!requiresUnlock) services.AddHostedService<EncryptionStartupCheck>();
         return services;
     }
 
@@ -66,17 +71,18 @@ public static class EncryptionRegistration
     {
         var keyId = Required(configuration, "Encryption:OciVault:KeyId");
         var cryptoEndpoint = Required(configuration, "Encryption:OciVault:CryptoEndpoint");
-        var configFilePath = Required(configuration, "Encryption:OciVault:ConfigFilePath");
-        var profile = configuration["Encryption:OciVault:Profile"]?.Trim() ?? "DEFAULT";
+        var encryptedCredentialPath = Required(configuration, "Encryption:OciVault:EncryptedCredentialPath");
+        var unlockSocketPath = configuration["Encryption:OciVault:UnlockSocketPath"]?.Trim() ?? "/tmp/pocketledger-unlock/unlock.sock";
         var timeoutSeconds = configuration.GetValue("Encryption:OciVault:TimeoutSeconds", 10);
         var maxAttempts = configuration.GetValue("Encryption:OciVault:MaxAttempts", 3);
         if (!keyId.StartsWith("ocid1.key.", StringComparison.Ordinal)) throw new InvalidOperationException("Encryption:OciVault:KeyId must be an OCI key OCID.");
         if (!Uri.TryCreate(cryptoEndpoint, UriKind.Absolute, out var endpoint) || endpoint.Scheme != Uri.UriSchemeHttps)
             throw new InvalidOperationException("Encryption:OciVault:CryptoEndpoint must be an absolute HTTPS URI.");
-        if (!File.Exists(configFilePath)) throw new InvalidOperationException("Encryption:OciVault:ConfigFilePath does not exist.");
+        if (!File.Exists(encryptedCredentialPath)) throw new InvalidOperationException("Encryption:OciVault:EncryptedCredentialPath does not exist.");
+        if (!Path.IsPathFullyQualified(unlockSocketPath)) throw new InvalidOperationException("Encryption:OciVault:UnlockSocketPath must be absolute.");
         if (timeoutSeconds is < 1 or > 120) throw new InvalidOperationException("Encryption:OciVault:TimeoutSeconds must be between 1 and 120.");
         if (maxAttempts is < 1 or > 5) throw new InvalidOperationException("Encryption:OciVault:MaxAttempts must be between 1 and 5.");
-        return new OciVaultOptions(keyId, endpoint.ToString().TrimEnd('/'), configFilePath, profile, timeoutSeconds, maxAttempts);
+        return new OciVaultOptions(keyId, endpoint.ToString().TrimEnd('/'), encryptedCredentialPath, unlockSocketPath, timeoutSeconds, maxAttempts);
     }
 
     private static string Required(IConfiguration configuration, string key)
@@ -94,14 +100,26 @@ public static class EncryptionRegistration
     {
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            if (File.Exists(Path.Combine(storage.Directory, KeyRingMigration.InProgressMarker)))
-                throw new CryptographicException("An interrupted key-ring migration must be recovered before PocketLedger can start.");
-            var protector = provider.CreateProtector("PocketLedger.Encryption.StartupCheck.v1");
-            var probe = RandomNumberGenerator.GetBytes(32);
-            if (!CryptographicOperations.FixedTimeEquals(probe, protector.Unprotect(protector.Protect(probe))))
-                throw new CryptographicException("Encryption startup check failed.");
+            EncryptionReadinessCheck.Verify(provider, storage);
             return Task.CompletedTask;
         }
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+}
+
+internal static class EncryptionReadinessCheck
+{
+    public static void Verify(IDataProtectionProvider provider, KeyRingStorageOptions storage)
+    {
+        if (File.Exists(Path.Combine(storage.Directory, KeyRingMigration.InProgressMarker)))
+            throw new CryptographicException("An interrupted key-ring migration must be recovered before PocketLedger can start.");
+        var protector = provider.CreateProtector("PocketLedger.Encryption.StartupCheck.v1");
+        var probe = RandomNumberGenerator.GetBytes(32);
+        try
+        {
+            if (!CryptographicOperations.FixedTimeEquals(probe, protector.Unprotect(protector.Protect(probe))))
+                throw new CryptographicException("Encryption startup check failed.");
+        }
+        finally { CryptographicOperations.ZeroMemory(probe); }
     }
 }

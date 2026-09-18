@@ -3,8 +3,7 @@
 x-oci-kms-environment: &oci-kms-environment
   Encryption__KeyProvider: OciVault
   Encryption__OciVault__CryptoEndpoint: ${POCKETLEDGER_OCI_CRYPTO_ENDPOINT:?Set POCKETLEDGER_OCI_CRYPTO_ENDPOINT}
-  Encryption__OciVault__ConfigFilePath: /run/pocketledger-oci/config
-  Encryption__OciVault__Profile: ${POCKETLEDGER_OCI_PROFILE:-DEFAULT}
+  Encryption__OciVault__UnlockSocketPath: /tmp/pocketledger-unlock/unlock.sock
   Encryption__OciVault__TimeoutSeconds: ${POCKETLEDGER_OCI_TIMEOUT_SECONDS:-10}
   Encryption__OciVault__MaxAttempts: ${POCKETLEDGER_OCI_MAX_ATTEMPTS:-3}
 
@@ -13,6 +12,7 @@ services:
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_API_KEY_ID:?Set POCKETLEDGER_OCI_API_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/api.enc
     volumes:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/oci
@@ -24,6 +24,7 @@ services:
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_WEB_KEY_ID:?Set POCKETLEDGER_OCI_WEB_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/web.enc
     volumes:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/oci
@@ -35,6 +36,7 @@ services:
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_IDENTITY_KEY_ID:?Set POCKETLEDGER_OCI_IDENTITY_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/identity.enc
     volumes:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/oci

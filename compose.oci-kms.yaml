@@ -3,16 +3,22 @@ x-oci-kms-environment: &oci-kms-environment
   Encryption__KeyProvider: OciVault
   Encryption__CertificatePath: ""
   Encryption__OciVault__CryptoEndpoint: ${POCKETLEDGER_OCI_CRYPTO_ENDPOINT:?Set POCKETLEDGER_OCI_CRYPTO_ENDPOINT}
-  Encryption__OciVault__ConfigFilePath: /run/pocketledger-oci/config
-  Encryption__OciVault__Profile: ${POCKETLEDGER_OCI_PROFILE:-DEFAULT}
+  Encryption__OciVault__UnlockSocketPath: /tmp/pocketledger-unlock/unlock.sock
   Encryption__OciVault__TimeoutSeconds: ${POCKETLEDGER_OCI_TIMEOUT_SECONDS:-10}
   Encryption__OciVault__MaxAttempts: ${POCKETLEDGER_OCI_MAX_ATTEMPTS:-3}
 
 services:
   web:
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/security-cli/PocketLedger.Security.Cli.dll", "readiness", "http://127.0.0.1:5050/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_WEB_KEY_ID:?Set POCKETLEDGER_OCI_WEB_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/web.enc
     volumes: !override
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/web/keys
@@ -30,9 +36,16 @@ services:
         bind: { create_host_path: false }
 
   api:
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/security-cli/PocketLedger.Security.Cli.dll", "readiness", "https://127.0.0.1:5051/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_API_KEY_ID:?Set POCKETLEDGER_OCI_API_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/api.enc
     volumes: !override
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/api/keys
@@ -50,9 +63,16 @@ services:
         bind: { create_host_path: false }
 
   identity:
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/security-cli/PocketLedger.Security.Cli.dll", "readiness", "http://127.0.0.1:5052/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     environment:
       <<: *oci-kms-environment
       Encryption__OciVault__KeyId: ${POCKETLEDGER_OCI_IDENTITY_KEY_ID:?Set POCKETLEDGER_OCI_IDENTITY_KEY_ID}
+      Encryption__OciVault__EncryptedCredentialPath: /run/pocketledger-oci/identity.enc
     volumes: !override
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/keys
