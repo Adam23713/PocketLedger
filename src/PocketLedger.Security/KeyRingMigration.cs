@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.InteropServices;
 
 namespace PocketLedger.Security;
 
@@ -13,8 +14,14 @@ public static class KeyRingMigrationCommand
 
     public static int Run(IServiceProvider services)
     {
+        char[]? passphrase = null;
         try
         {
+            if (services.GetRequiredService<IKeyEncryptionProvider>() is LockedOciKeyEncryptionProvider locked)
+            {
+                passphrase = ReadSecret("OCI credential passphrase: ");
+                locked.UnlockAsync(passphrase, CancellationToken.None).GetAwaiter().GetResult();
+            }
             var result = services.GetRequiredService<KeyRingMigration>().Rewrap();
             Console.WriteLine($"Rewrapped {result.KeyCount} Data Protection key(s) with the {result.ProviderName} provider. Backup: {result.BackupDirectory}");
             return 0;
@@ -24,6 +31,29 @@ public static class KeyRingMigrationCommand
             Console.Error.WriteLine($"Key-ring migration failed: {exception.Message}");
             return 1;
         }
+        finally
+        {
+            if (passphrase is not null) Array.Clear(passphrase);
+        }
+    }
+
+    private static char[] ReadSecret(string prompt)
+    {
+        if (Console.IsInputRedirected) throw new InvalidOperationException("The OCI credential passphrase requires an interactive terminal.");
+        Console.Write(prompt);
+        var characters = new List<char>();
+        while (true)
+        {
+            var key = Console.ReadKey(intercept: true);
+            if (key.Key == ConsoleKey.Enter) break;
+            if (key.Key == ConsoleKey.Backspace) { if (characters.Count > 0) characters.RemoveAt(characters.Count - 1); continue; }
+            if (!char.IsControl(key.KeyChar)) characters.Add(key.KeyChar);
+        }
+        Console.WriteLine();
+        if (characters.Count == 0) throw new InvalidOperationException("The passphrase must not be empty.");
+        var secret = characters.ToArray();
+        CollectionsMarshal.AsSpan(characters).Clear();
+        return secret;
     }
 }
 

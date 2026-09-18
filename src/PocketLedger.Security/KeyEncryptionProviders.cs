@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Oci.Common;
 using Oci.Common.Auth;
 using Oci.Common.Retry;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 using Oci.KeymanagementService;
 using Oci.KeymanagementService.Models;
 using Oci.KeymanagementService.Requests;
@@ -27,18 +29,27 @@ internal sealed class LocalKeyEncryptionProvider(X509Certificate2 certificate, I
     public EncryptedXmlInfo Encrypt(XElement plaintextElement) => encryptor.Encrypt(plaintextElement);
 }
 
-internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDisposable
+internal interface IOciKmsClient : IDisposable
 {
-    internal const string ElementName = "ociKmsWrappedKey";
-    internal const string Algorithm = "AES_256_GCM";
-    private static readonly IReadOnlyDictionary<string, string> AssociatedData = new Dictionary<string, string> { ["purpose"] = "PocketLedger.DataProtectionKey.v1" };
-    private readonly KmsCryptoClient client;
-    private readonly string keyId;
+    EncryptedData Encrypt(EncryptDataDetails details);
+    DecryptedData Decrypt(DecryptDataDetails details);
+}
 
-    public OciKmsKeyEncryptionProvider(OciVaultOptions options)
+internal sealed class OciSdkKmsClient : IOciKmsClient
+{
+    private readonly KmsCryptoClient client;
+
+    public OciSdkKmsClient(OciVaultOptions options, OciCredential credential)
     {
-        keyId = options.KeyId;
-        var authentication = new ConfigFileAuthenticationDetailsProvider(options.ConfigFilePath, options.Profile);
+        var privateKey = (RsaKeyParameters)PrivateKeyFactory.CreateKey(credential.PrivateKeyPkcs8);
+        var authentication = new SimpleAuthenticationDetailsProvider
+        {
+            TenantId = credential.TenancyId,
+            UserId = credential.UserId,
+            Fingerprint = credential.Fingerprint,
+            Region = Region.FromRegionId(credential.Region),
+            PrivateKeySupplier = new FixedPrivateKeySupplier(privateKey)
+        };
         var retry = new RetryConfiguration
         {
             MaxAttempts = options.MaxAttempts,
@@ -51,6 +62,35 @@ internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDis
             RetryConfiguration = retry,
             ClientUserAgent = "PocketLedger/KeyEncryption"
         }, options.CryptoEndpoint);
+    }
+
+    public EncryptedData Encrypt(EncryptDataDetails details) => client.Encrypt(new EncryptRequest { EncryptDataDetails = details }).GetAwaiter().GetResult().EncryptedData;
+    public DecryptedData Decrypt(DecryptDataDetails details) => client.Decrypt(new DecryptRequest { DecryptDataDetails = details }).GetAwaiter().GetResult().DecryptedData;
+    public void Dispose() => client.Dispose();
+
+    private sealed class FixedPrivateKeySupplier(RsaKeyParameters privateKey) : ISupplier<RsaKeyParameters>
+    {
+        public RsaKeyParameters GetKey() => privateKey;
+    }
+}
+
+internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDisposable
+{
+    internal const string ElementName = "ociKmsWrappedKey";
+    internal const string Algorithm = "AES_256_GCM";
+    private static readonly IReadOnlyDictionary<string, string> AssociatedData = new Dictionary<string, string> { ["purpose"] = "PocketLedger.DataProtectionKey.v1" };
+    private readonly IOciKmsClient client;
+    private readonly string keyId;
+
+    public OciKmsKeyEncryptionProvider(OciVaultOptions options, OciCredential credential)
+        : this(options.KeyId, new OciSdkKmsClient(options, credential))
+    {
+    }
+
+    internal OciKmsKeyEncryptionProvider(string keyId, IOciKmsClient client)
+    {
+        this.keyId = keyId;
+        this.client = client;
     }
 
     public string Name => EncryptionProviderNames.OciVault;
@@ -70,18 +110,14 @@ internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDis
         }
         try
         {
-            var response = client.Encrypt(new EncryptRequest
+            var encrypted = client.Encrypt(new EncryptDataDetails
             {
-                EncryptDataDetails = new EncryptDataDetails
-                {
-                    KeyId = keyId,
-                    Plaintext = plaintext,
-                    EncryptionAlgorithm = EncryptDataDetails.EncryptionAlgorithmEnum.Aes256Gcm,
-                    AssociatedData = new Dictionary<string, string>(AssociatedData),
-                    LoggingContext = new Dictionary<string, string> { ["application"] = "PocketLedger", ["purpose"] = "DataProtectionKey" }
-                }
-            }).GetAwaiter().GetResult();
-            var encrypted = response.EncryptedData;
+                KeyId = keyId,
+                Plaintext = plaintext,
+                EncryptionAlgorithm = EncryptDataDetails.EncryptionAlgorithmEnum.Aes256Gcm,
+                AssociatedData = new Dictionary<string, string>(AssociatedData),
+                LoggingContext = new Dictionary<string, string> { ["application"] = "PocketLedger", ["purpose"] = "DataProtectionKey" }
+            });
             if (string.IsNullOrWhiteSpace(encrypted?.Ciphertext)) throw new CryptographicException("OCI KMS returned an empty ciphertext.");
             var element = new XElement(ElementName,
                 new XAttribute("version", 1),
@@ -110,21 +146,19 @@ internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDis
         var keyVersionId = (string?)encryptedElement.Attribute("keyVersionId");
         var ciphertext = (string?)encryptedElement.Element("ciphertext");
         if (string.IsNullOrWhiteSpace(wrappedKeyId) || string.IsNullOrWhiteSpace(ciphertext)) throw new CryptographicException("The OCI KMS wrapped key is incomplete.");
+        if (!string.Equals(wrappedKeyId, keyId, StringComparison.Ordinal)) throw new CryptographicException("The OCI KMS wrapped key does not belong to the configured key.");
         try
         {
-            var response = client.Decrypt(new DecryptRequest
+            var decrypted = client.Decrypt(new DecryptDataDetails
             {
-                DecryptDataDetails = new DecryptDataDetails
-                {
-                    KeyId = wrappedKeyId,
-                    KeyVersionId = string.IsNullOrWhiteSpace(keyVersionId) ? null : keyVersionId,
-                    Ciphertext = ciphertext,
-                    EncryptionAlgorithm = DecryptDataDetails.EncryptionAlgorithmEnum.Aes256Gcm,
-                    AssociatedData = new Dictionary<string, string>(AssociatedData),
-                    LoggingContext = new Dictionary<string, string> { ["application"] = "PocketLedger", ["purpose"] = "DataProtectionKey" }
-                }
-            }).GetAwaiter().GetResult();
-            var plaintext = Convert.FromBase64String(response.DecryptedData?.Plaintext ?? throw new CryptographicException("OCI KMS returned an empty plaintext."));
+                KeyId = wrappedKeyId,
+                KeyVersionId = string.IsNullOrWhiteSpace(keyVersionId) ? null : keyVersionId,
+                Ciphertext = ciphertext,
+                EncryptionAlgorithm = DecryptDataDetails.EncryptionAlgorithmEnum.Aes256Gcm,
+                AssociatedData = new Dictionary<string, string>(AssociatedData),
+                LoggingContext = new Dictionary<string, string> { ["application"] = "PocketLedger", ["purpose"] = "DataProtectionKey" }
+            });
+            var plaintext = Convert.FromBase64String(decrypted?.Plaintext ?? throw new CryptographicException("OCI KMS returned an empty plaintext."));
             try
             {
                 return XElement.Parse(Encoding.UTF8.GetString(plaintext), LoadOptions.None);
@@ -150,12 +184,15 @@ internal sealed class OciKmsKeyEncryptionProvider : IKeyEncryptionProvider, IDis
 public sealed class OciKmsXmlDecryptor(IServiceProvider services) : IXmlDecryptor
 {
     public XElement Decrypt(XElement encryptedElement)
-        => services.GetRequiredService<IKeyEncryptionProvider>() is OciKmsKeyEncryptionProvider provider
-            ? provider.Decrypt(encryptedElement)
-            : throw new CryptographicException("OCI KMS key decryption is not configured.");
+        => services.GetRequiredService<IKeyEncryptionProvider>() switch
+        {
+            OciKmsKeyEncryptionProvider provider => provider.Decrypt(encryptedElement),
+            LockedOciKeyEncryptionProvider provider => provider.Decrypt(encryptedElement),
+            _ => throw new CryptographicException("OCI KMS key decryption is not configured.")
+        };
 }
 
-internal sealed record OciVaultOptions(string KeyId, string CryptoEndpoint, string ConfigFilePath, string Profile, int TimeoutSeconds, int MaxAttempts);
+internal sealed record OciVaultOptions(string KeyId, string CryptoEndpoint, string EncryptedCredentialPath, string UnlockSocketPath, int TimeoutSeconds, int MaxAttempts);
 
 public static class EncryptionProviderNames
 {
