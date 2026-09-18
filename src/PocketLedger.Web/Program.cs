@@ -92,6 +92,11 @@ AddApiClient<IDebtService, DebtsApiClient>();
 AddApiClient<IPreferencesApiClient, PreferencesApiClient>();
 
 var app = builder.Build();
+if (args is [KeyRingMigrationCommand.Name])
+{
+    Environment.ExitCode = KeyRingMigrationCommand.Run(app.Services);
+    return;
+}
 if (builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
 {
     await using var scope = app.Services.CreateAsyncScope();
@@ -101,6 +106,7 @@ var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeader
 if (builder.Configuration.GetValue<bool>("ForwardedHeaders:TrustAll")) { forwarded.KnownIPNetworks.Clear(); forwarded.KnownProxies.Clear(); }
 foreach (var proxy in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? []) if (IPAddress.TryParse(proxy, out var address)) forwarded.KnownProxies.Add(address);
 app.UseForwardedHeaders(forwarded);
+app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Home/Error");
 app.UseStaticFiles();
 app.UseRouting();
@@ -110,6 +116,7 @@ app.UseMiddleware<BffSessionExpiredMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
 app.MapStaticAssets();
+app.MapEncryptionHealthEndpoints();
 app.Run();
 
 void AddApiClient<TService, TImplementation>() where TService : class where TImplementation : class, TService

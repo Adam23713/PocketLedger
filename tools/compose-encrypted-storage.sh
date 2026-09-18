@@ -20,4 +20,11 @@ fi
 export POCKETLEDGER_SECURITY_DIRECTORY=/srv/pocketledger/security
 repository_directory=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$repository_directory"
-exec docker compose -f compose.yaml -f compose.encrypted-storage.yaml "$@"
+compose_files=(-f compose.yaml -f compose.encrypted-storage.yaml)
+case "${POCKETLEDGER_OCI_KMS_MODE:-}" in
+    enabled) compose_files+=(-f compose.oci-kms.yaml) ;;
+    migration) compose_files+=(-f compose.oci-kms-migration.yaml) ;;
+    "") ;;
+    *) echo 'POCKETLEDGER_OCI_KMS_MODE must be empty, enabled or migration.' >&2; exit 1 ;;
+esac
+exec docker compose "${compose_files[@]}" "$@"

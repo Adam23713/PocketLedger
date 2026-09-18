@@ -81,6 +81,11 @@ builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditServi
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 
 var app = builder.Build();
+if (args is [KeyRingMigrationCommand.Name])
+{
+    Environment.ExitCode = KeyRingMigrationCommand.Run(app.Services);
+    return;
+}
 if (args.Length > 0 && (args[0] == "bootstrap-identity" || args[0] == "account"))
 {
     Environment.ExitCode = await CommandRunner.RunAsync(args, app.Services);
@@ -95,6 +100,7 @@ var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeader
 if (builder.Configuration.GetValue<bool>("ForwardedHeaders:TrustAll")) { forwarded.KnownIPNetworks.Clear(); forwarded.KnownProxies.Clear(); }
 foreach (var proxy in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? []) if (IPAddress.TryParse(proxy, out var address)) forwarded.KnownProxies.Add(address);
 app.UseForwardedHeaders(forwarded);
+app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseStaticFiles();
 app.UseRouting();
@@ -103,6 +109,7 @@ app.UseAuthentication();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+app.MapEncryptionHealthEndpoints();
 app.Run();
 
 public partial class Program;
