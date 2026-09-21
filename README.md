@@ -62,6 +62,8 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    openssl rand -base64 64
    ```
 
+   Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can otherwise select a different set of Compose-managed database volumes.
+
 3. Prepare the encryption directories as described in the [encryption guide](docs/database-encryption.md), then create the internal TLS CA and API certificate in the same security directory. Set `POCKETLEDGER_SECURITY_DIRECTORY`, build the images and initialize the Identity database and first user:
 
    ```bash
@@ -79,6 +81,8 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    ```
 
 On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as an encrypted `.plbackup` file can then be restored from **Import / Export**.
+
+If OCI KMS will be used, first finish and verify this Local-provider deployment. Then follow the [step-by-step Local-to-OCI activation procedure](docs/oci-kms.md#activate-oci-kms-on-an-existing-clean-local-deployment). Do not enable the OCI Compose override during initial database creation or Identity bootstrap.
 
 The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
 

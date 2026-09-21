@@ -144,7 +144,7 @@ internal sealed class OciUnlockSocketService(LockedOciKeyEncryptionProvider prov
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.LogWarning("OCI KMS unlock failed; the service remains locked: {ErrorType}", exception.GetType().Name);
+            logger.LogWarning("OCI KMS unlock failed; the service remains locked: {Failure}", EncryptionFailureDiagnostics.Describe(exception));
             await SendResponseAsync(client, false, "Unlock failed. Check the passphrase, credential file, OCI access, endpoint and Key OCID.", cancellationToken);
         }
         finally

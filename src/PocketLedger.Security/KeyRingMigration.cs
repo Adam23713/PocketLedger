@@ -28,7 +28,7 @@ public static class KeyRingMigrationCommand
         }
         catch (Exception exception)
         {
-            Console.Error.WriteLine($"Key-ring migration failed: {exception.Message}");
+            Console.Error.WriteLine($"Key-ring migration failed: {EncryptionFailureDiagnostics.Describe(exception)}");
             return 1;
         }
         finally
