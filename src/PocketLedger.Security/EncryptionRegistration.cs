@@ -11,6 +11,8 @@ namespace PocketLedger.Security;
 
 public static class EncryptionRegistration
 {
+    private const string DataProtectionHostedServiceTypeName = "Microsoft.AspNetCore.DataProtection.Internal.DataProtectionHostedService";
+
     public static IServiceCollection AddDatabaseEncryption(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment, string applicationName)
     {
         var providerName = configuration["Encryption:KeyProvider"]?.Trim() ?? EncryptionProviderNames.Local;
@@ -28,6 +30,7 @@ public static class EncryptionRegistration
         var requiresUnlock = providerName.Equals(EncryptionProviderNames.OciVault, StringComparison.OrdinalIgnoreCase);
         services.AddSingleton(new EncryptionRuntimeState(requiresUnlock));
         var protection = services.AddDataProtection().SetApplicationName(applicationName).PersistKeysToFileSystem(new DirectoryInfo(directory));
+        if (requiresUnlock) RemoveEagerDataProtectionKeyRingLoader(services);
         var previousCertificatePaths = configuration.GetSection("Encryption:PreviousCertificatePaths").Get<string[]>() ?? [];
         var providerConfigured = false;
         if (providerName.Equals(EncryptionProviderNames.Local, StringComparison.OrdinalIgnoreCase))
@@ -88,6 +91,13 @@ public static class EncryptionRegistration
     private static string Required(IConfiguration configuration, string key)
         => string.IsNullOrWhiteSpace(configuration[key]) ? throw new InvalidOperationException($"{key} is required for the OCI Vault key provider.") : configuration[key]!.Trim();
 
+    private static void RemoveEagerDataProtectionKeyRingLoader(IServiceCollection services)
+    {
+        var registrations = services.Where(descriptor => descriptor.ServiceType == typeof(IHostedService) && descriptor.ImplementationType?.FullName == DataProtectionHostedServiceTypeName).ToArray();
+        if (registrations.Length != 1) throw new InvalidOperationException("The Data Protection startup key-ring loader registration could not be identified safely.");
+        services.Remove(registrations[0]);
+    }
+
     private static X509Certificate2 LoadCertificate(string path)
     {
         var certificate = X509CertificateLoader.LoadPkcs12FromFile(path, null, X509KeyStorageFlags.EphemeralKeySet);
@@ -96,11 +106,11 @@ public static class EncryptionRegistration
         return certificate;
     }
 
-    private sealed class EncryptionStartupCheck(IDataProtectionProvider provider, KeyRingStorageOptions storage) : IHostedService
+    private sealed class EncryptionStartupCheck(IDataProtectionProvider provider, IKeyManager keyManager, KeyRingStorageOptions storage) : IHostedService
     {
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            EncryptionReadinessCheck.Verify(provider, storage);
+            EncryptionReadinessCheck.Verify(provider, keyManager, storage);
             return Task.CompletedTask;
         }
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -109,10 +119,24 @@ public static class EncryptionRegistration
 
 internal static class EncryptionReadinessCheck
 {
-    public static void Verify(IDataProtectionProvider provider, KeyRingStorageOptions storage)
+    public static void Verify(IDataProtectionProvider provider, IKeyManager keyManager, KeyRingStorageOptions storage)
     {
         if (File.Exists(Path.Combine(storage.Directory, KeyRingMigration.InProgressMarker)))
             throw new CryptographicException("An interrupted key-ring migration must be recovered before PocketLedger can start.");
+        var persistedKeyCount = Directory.EnumerateFiles(storage.Directory, "key-*.xml", SearchOption.TopDirectoryOnly).Count();
+        var keys = keyManager.GetAllKeys();
+        if (keys.Count != persistedKeyCount) throw new CryptographicException("The Data Protection key ring did not load every persisted key.");
+        foreach (var key in keys)
+        {
+            try
+            {
+                if (key.CreateEncryptor() is null) throw new CryptographicException("The Data Protection key produced no authenticated encryptor.");
+            }
+            catch (Exception exception)
+            {
+                throw new CryptographicException($"Data Protection key '{key.KeyId}' could not be activated.", exception);
+            }
+        }
         var protector = provider.CreateProtector("PocketLedger.Encryption.StartupCheck.v1");
         var probe = RandomNumberGenerator.GetBytes(32);
         try
