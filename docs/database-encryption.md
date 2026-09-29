@@ -55,17 +55,19 @@ Prepare a **new installation/database set**. The schema migrations intentionally
 
    The script refuses existing directories. It creates separate `api`, `web`, `identity` key/certificate directories and unpassworded `active.pfx` files protected by host permissions. Root execution assigns the .NET image UID 1654. If using a custom container UID, set ownership accordingly. The PFX itself is sensitive key material; an empty PFX password is intentional because unattended container restarts use filesystem access control. LUKS later protects that file offline.
 3. Set `POCKETLEDGER_SECURITY_DIRECTORY=/opt/pocketledger-security` in the deployment `.env`. Compose mounts only each host's own directories. Mount sources must exist; Compose will not create them automatically.
-4. Stop the old deployment in its existing Compose project. Start the new version under a **different Compose project name**, for example `pocketledger-encrypted`, so its three named PostgreSQL volumes start empty. Do not run the two deployments concurrently on the same public ports.
+4. Stop the old deployment in its existing Compose project. Set `COMPOSE_PROJECT_NAME=pocketledger-encrypted` in the new deployment's `.env` and keep it unchanged afterwards. The different project name gives the new deployment three empty named PostgreSQL volumes. Do not run the two deployments concurrently on the same public ports.
 
    ```bash
-   docker compose -p pocketledger-encrypted build
-   docker compose -p pocketledger-encrypted up -d identity-database
-   docker compose -p pocketledger-encrypted run --rm identity bootstrap-identity
-   docker compose -p pocketledger-encrypted up -d
+   docker compose build
+   docker compose up -d identity-database
+   docker compose run --rm identity bootstrap-identity
+   docker compose up -d
    ```
 
 5. Create the new Identity/TOTP setup, save the new recovery codes, and restore the `.plbackup` through the UI. Compare transaction counts, accounts, balances, planner history and notes with the old export. The imported fields are encrypted automatically on persistence.
 6. Back up the new key rings **after first use**, alongside a separately secured copy of their private certificates. A finance `.plbackup` is not a key-ring backup. Retain the old deployment only until recovery is verified, then deliberately retire its plaintext volumes and provider snapshots. Deleting a Docker volume does not guarantee secure erasure on SSDs or in provider backups.
+
+If OCI KMS will protect the new installation, stop here until the Local deployment is fully healthy and its fresh databases, Identity account, TOTP and restored finance data have been verified. Then follow the Local-to-OCI activation procedure in `docs/oci-kms.md`. Do not run the OCI key-ring migration as part of the legacy database export/recreate/restore transition.
 
 The migration guard also refuses an old populated Web database, rather than silently deleting the old session key ring. A new Web database is part of this reset. Rollback uses the old application with its old database or a fresh old-version database restored from the finance export; never point it at the new encrypted database.
 
@@ -80,8 +82,8 @@ After mounting, create `/srv/pocketledger/databases/{api,web,identity}` and `/sr
 Use the wrapper for every encrypted-storage Compose operation, preserving the chosen project name:
 
 ```bash
-sudo bash tools/compose-encrypted-storage.sh -p pocketledger-encrypted config --quiet
-sudo bash tools/compose-encrypted-storage.sh -p pocketledger-encrypted up -d
+sudo bash tools/compose-encrypted-storage.sh config --quiet
+sudo bash tools/compose-encrypted-storage.sh up -d
 ```
 
 The wrapper checks the mount, its mapper device and LUKS2 status, forces the security directory onto that mount, then uses `compose.encrypted-storage.yaml`. The override replaces all three database mounts with bind mounts on LUKS and disables Docker restart policies for the three applications and databases. This deliberately requires a manual start after reboot. Do not use the base Compose file alone once you switch to this stage, and do not bypass the wrapper. A custom Docker/systemd autostart must obey the same mount checks.

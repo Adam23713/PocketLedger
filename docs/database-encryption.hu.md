@@ -55,17 +55,19 @@ Készíts elő egy **új telepítést/adatbázis-készletet**. A séma migráci�
 
    A script elutasítja a meglévő könyvtárakat. Létrehoz külön `api`, `web`, `identity` kulcs/tanúsítvány könyvtárakat és jelszó nélküli `active.pfx` fájlokat, amelyeket host jogosultságok védenek. A root-ként történő futtatás a .NET image 1654-es UID-jét rendeli hozzájuk. Ha egyéni konténer UID-t használsz, állítsd be ennek megfelelően a tulajdonjogot. Maga a PFX érzékeny kulcsanyag; az üres PFX jelszó szándékos, mivel a felügyelet nélküli konténer-újraindítások fájlrendszer-hozzáférés-vezérlést használnak. A LUKS később offline védi ezt a fájlt.
 3. Állítsd be a `POCKETLEDGER_SECURITY_DIRECTORY=/opt/pocketledger-security` értéket a telepítési `.env` fájlban. A Compose csak az egyes hostok saját könyvtárait csatolja. A mount-forrásoknak léteznie kell; a Compose nem hozza létre őket automatikusan.
-4. Állítsd le a régi telepítést a meglévő Compose projektjében. Indítsd el az új verziót egy **eltérő Compose projektnévvel**, például `pocketledger-encrypted` néven, hogy a három elnevezett PostgreSQL kötet üresen induljon. Ne futtasd a két telepítést egyszerre ugyanazokon a nyilvános portokon.
+4. Állítsd le a régi telepítést a meglévő Compose projektjében. Az új telepítés `.env` fájljában állítsd be a `COMPOSE_PROJECT_NAME=pocketledger-encrypted` értéket, és ezután ne változtasd meg. Az eltérő projektnév miatt az új telepítés három üres, elnevezett PostgreSQL kötetet kap. Ne futtasd a két telepítést egyszerre ugyanazokon a nyilvános portokon.
 
    ```bash
-   docker compose -p pocketledger-encrypted build
-   docker compose -p pocketledger-encrypted up -d identity-database
-   docker compose -p pocketledger-encrypted run --rm identity bootstrap-identity
-   docker compose -p pocketledger-encrypted up -d
+   docker compose build
+   docker compose up -d identity-database
+   docker compose run --rm identity bootstrap-identity
+   docker compose up -d
    ```
 
 5. Hozd létre az új Identity/TOTP beállítást, mentsd el az új helyreállítási kódokat, és állítsd vissza a `.plbackup` fájlt a UI-n keresztül. Hasonlítsd össze a tranzakciók számát, a számlákat, egyenlegeket, a tervező (planner) előzményeit és a jegyzeteket a régi exporttal. Az importált mezők automatikusan titkosítva lesznek a mentéskor.
 6. Készíts biztonsági mentést az új kulcskarikákról **az első használat után**, valamint a privát tanúsítványaik külön, biztonságosan tárolt másolatáról. A pénzügyi `.plbackup` nem kulcskarika-mentés. Csak addig tartsd meg a régi telepítést, amíg a helyreállítást nem igazoltad, majd szándékosan vond ki forgalomból annak plaintext köteteit és a szolgáltatói pillanatképeket. Egy Docker kötet törlése nem garantálja a biztonságos törlést SSD-ken vagy a szolgáltatói mentésekben.
+
+Ha az új telepítést OCI KMS fogja védeni, itt állj meg addig, amíg a Local deployment teljesen egészséges, és ellenőrizted a friss adatbázisokat, az Identity fiókot, a TOTP-t és a visszaállított pénzügyi adatokat. Ezután kövesd a `docs/oci-kms.md` Local-to-OCI aktiválási eljárását. Ne futtasd az OCI key-ring migrációt a legacy adatbázis export/recreate/restore átmenet részeként.
 
 A migrációs védelem a régi, feltöltött Web adatbázist is elutasítja, ahelyett hogy csendben törölné a régi munkamenet-kulcskarikát. Egy új Web adatbázis is része ennek a resetnek. A visszaállás (rollback) a régi alkalmazást használja a régi adatbázisával, vagy egy friss, régi verziójú adatbázist, amelyet a pénzügyi exportból állítottak vissza; soha ne irányítsd az új, titkosított adatbázisra.
 
@@ -80,8 +82,8 @@ A csatolás után hozd létre a `/srv/pocketledger/databases/{api,web,identity}`
 Használd a wrappert minden titkosított tárolási Compose művelethez, megőrizve a választott projektnevet:
 
 ```bash
-sudo bash tools/compose-encrypted-storage.sh -p pocketledger-encrypted config --quiet
-sudo bash tools/compose-encrypted-storage.sh -p pocketledger-encrypted up -d
+sudo bash tools/compose-encrypted-storage.sh config --quiet
+sudo bash tools/compose-encrypted-storage.sh up -d
 ```
 
 A wrapper ellenőrzi a csatolást, annak mapper eszközét és a LUKS2 állapotát, ráerőlteti a biztonsági könyvtárat erre a csatolásra, majd a `compose.encrypted-storage.yaml`-t használja. Az override mindhárom adatbázis-csatolást bind mountokra cseréli a LUKS-on, és kikapcsolja a Docker újraindítási szabályzatokat (restart policy) a három alkalmazáshoz és adatbázishoz. Ez szándékosan manuális indítást igényel újraindítás után. Ne használd önmagában az alap Compose fájlt, miután áttértél erre a szakaszra, és ne kerüld meg a wrappert. Egy egyéni Docker/systemd automatikus indításnak ugyanazokat a csatolás-ellenőrzéseket kell követnie.

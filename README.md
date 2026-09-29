@@ -43,6 +43,8 @@ The browser uses the Web/BFF for finance operations. The public API hostname rem
 
 Selected financial text and Identity secret fields are encrypted before persistence. Production now requires separate certificate-protected key directories for API, Web and Identity. Follow the [database encryption and recovery guide](docs/database-encryption.md) before upgrading: populated legacy databases are intentionally rejected; the agreed transition uses fresh databases and an encrypted PocketLedger backup. Transaction exports are password-protected Excel workbooks. Full PostgreSQL storage encryption additionally requires the documented VPS/LUKS setup.
 
+The certificate-backed local key provider remains supported for self-hosted deployments. An optional OCI Vault/KMS provider can protect the API, Web and Identity Data Protection key rings with three isolated KMS keys; see the [OCI KMS setup, migration and rotation guide](docs/oci-kms.md).
+
 ## Docker Compose deployment
 
 Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflare, and an authenticator app supporting TOTP.
@@ -59,6 +61,8 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    ```bash
    openssl rand -base64 64
    ```
+
+   Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can otherwise select a different set of Compose-managed database volumes.
 
 3. Prepare the encryption directories as described in the [encryption guide](docs/database-encryption.md), then create the internal TLS CA and API certificate in the same security directory. Set `POCKETLEDGER_SECURITY_DIRECTORY`, build the images and initialize the Identity database and first user:
 
@@ -77,6 +81,8 @@ Requirements: Docker Engine, Docker Compose v2, DNS records proxied by Cloudflar
    ```
 
 On first login, configure TOTP and save the generated recovery codes. Finance data previously exported as an encrypted `.plbackup` file can then be restored from **Import / Export**.
+
+If OCI KMS will be used, first finish and verify this Local-provider deployment. Then follow the [step-by-step Local-to-OCI activation procedure](docs/oci-kms.md#activate-oci-kms-on-an-existing-clean-local-deployment). Do not enable the OCI Compose override during initial database creation or Identity bootstrap.
 
 The three named database volumes are `web-postgres-data`, `api-postgres-data`, and `identity-postgres-data`. `docker compose down` preserves them; `docker compose down --volumes` permanently removes all three databases.
 

@@ -5,15 +5,21 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Security;
 
 namespace PocketLedger.Services;
 
-public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory, TimeProvider timeProvider, IUserDateProvider userDates, Microsoft.Extensions.Options.IOptions<UserDateOptions> dateOptions, ILogger<RecurringTransactionWorker> logger) : BackgroundService
+public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory, TimeProvider timeProvider, IUserDateProvider userDates, Microsoft.Extensions.Options.IOptions<UserDateOptions> dateOptions, ILogger<RecurringTransactionWorker> logger, EncryptionRuntimeState? encryptionState = null) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (encryptionState is { IsReady: false })
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), timeProvider, stoppingToken);
+                continue;
+            }
             try
             {
                 await ProcessDueOccurrencesAsync(stoppingToken);
