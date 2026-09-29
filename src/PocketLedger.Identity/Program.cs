@@ -80,6 +80,7 @@ builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 
+builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
 if (args is [KeyRingMigrationCommand.Name])
 {
