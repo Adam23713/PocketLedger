@@ -60,6 +60,8 @@ public static class KeyRingMigrationCommand
 internal sealed class KeyRingMigration(IServiceProvider services)
 {
     internal const string InProgressMarker = ".rewrap-in-progress";
+    private static readonly XNamespace DataProtectionNamespace = "http://schemas.asp.net/2015/03/dataProtection";
+    private static readonly XName EncryptedSecretElementName = DataProtectionNamespace + "encryptedSecret";
 
     public KeyRingMigrationResult Rewrap()
     {
@@ -120,7 +122,9 @@ internal sealed class KeyRingMigration(IServiceProvider services)
 
     private XElement Rewrap(XElement document, IKeyEncryptionProvider targetProvider)
     {
-        var encryptedSecret = document.Descendants().SingleOrDefault(element => element.Name.LocalName == "encryptedSecret");
+        var malformedEncryptedSecret = document.Descendants().SingleOrDefault(element => element.Name.LocalName == "encryptedSecret" && element.Name != EncryptedSecretElementName);
+        if (malformedEncryptedSecret is not null) throw new CryptographicException("A key-ring entry contains an encrypted secret outside the Data Protection XML namespace.");
+        var encryptedSecret = document.Descendants(EncryptedSecretElementName).SingleOrDefault();
         XElement plaintext;
         XElement replacedNode;
         if (encryptedSecret is not null)
@@ -141,13 +145,13 @@ internal sealed class KeyRingMigration(IServiceProvider services)
 
         var wrapped = targetProvider.Encrypt(plaintext);
         var targetDecryptorTypeName = wrapped.DecryptorType.AssemblyQualifiedName ?? throw new CryptographicException("The target key provider has no serializable decryptor type.");
-        replacedNode.ReplaceWith(new XElement("encryptedSecret", new XAttribute("decryptorType", targetDecryptorTypeName), wrapped.EncryptedElement));
+        replacedNode.ReplaceWith(new XElement(EncryptedSecretElementName, new XAttribute("decryptorType", targetDecryptorTypeName), wrapped.EncryptedElement));
         return document;
     }
 
     private void ValidateTargetEncryption(XElement document)
     {
-        var encryptedSecret = document.Descendants().SingleOrDefault(element => element.Name.LocalName == "encryptedSecret")
+        var encryptedSecret = document.Descendants(EncryptedSecretElementName).SingleOrDefault()
             ?? throw new CryptographicException("The rewrapped key contains no encrypted secret.");
         var decryptorTypeName = (string?)encryptedSecret.Attribute("decryptorType") ?? throw new CryptographicException("The rewrapped key contains no decryptor type.");
         var encryptedElement = encryptedSecret.Elements().SingleOrDefault() ?? throw new CryptographicException("The rewrapped key contains no encrypted payload.");

@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
@@ -97,7 +98,7 @@ internal sealed class LockedOciKeyEncryptionProvider : IKeyEncryptionProvider, I
     }
 }
 
-internal sealed class OciUnlockSocketService(LockedOciKeyEncryptionProvider provider, OciVaultOptions options, IDataProtectionProvider dataProtection, KeyRingStorageOptions storage, ILogger<OciUnlockSocketService> logger) : BackgroundService
+internal sealed class OciUnlockSocketService(LockedOciKeyEncryptionProvider provider, OciVaultOptions options, IDataProtectionProvider dataProtection, IKeyManager keyManager, KeyRingStorageOptions storage, ILogger<OciUnlockSocketService> logger) : BackgroundService
 {
     private const int MaximumPassphraseBytes = 4096;
 
@@ -139,7 +140,7 @@ internal sealed class OciUnlockSocketService(LockedOciKeyEncryptionProvider prov
             secretBytes = new byte[length];
             await ReceiveExactlyAsync(client, secretBytes, cancellationToken);
             passphrase = Encoding.UTF8.GetChars(secretBytes);
-            await provider.UnlockAsync(passphrase, cancellationToken, () => EncryptionReadinessCheck.Verify(dataProtection, storage));
+            await provider.UnlockAsync(passphrase, cancellationToken, () => EncryptionReadinessCheck.Verify(dataProtection, keyManager, storage));
             await SendResponseAsync(client, true, "OCI KMS unlocked and verified.", cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
