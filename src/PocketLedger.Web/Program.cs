@@ -91,6 +91,7 @@ AddApiClient<IEncryptedBackupService, ImportExportApiClient>();
 AddApiClient<IDebtService, DebtsApiClient>();
 AddApiClient<IPreferencesApiClient, PreferencesApiClient>();
 
+builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
 if (args is [KeyRingMigrationCommand.Name])
 {

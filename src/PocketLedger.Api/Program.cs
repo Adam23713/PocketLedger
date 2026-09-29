@@ -94,6 +94,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 builder.Services.AddAuthorization();
 
+builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
 if (args is [KeyRingMigrationCommand.Name])
 {

@@ -30,7 +30,6 @@ public static class EncryptionRegistration
         var requiresUnlock = providerName.Equals(EncryptionProviderNames.OciVault, StringComparison.OrdinalIgnoreCase);
         services.AddSingleton(new EncryptionRuntimeState(requiresUnlock));
         var protection = services.AddDataProtection().SetApplicationName(applicationName).PersistKeysToFileSystem(new DirectoryInfo(directory));
-        if (requiresUnlock) RemoveEagerDataProtectionKeyRingLoader(services);
         var previousCertificatePaths = configuration.GetSection("Encryption:PreviousCertificatePaths").Get<string[]>() ?? [];
         var providerConfigured = false;
         if (providerName.Equals(EncryptionProviderNames.Local, StringComparison.OrdinalIgnoreCase))
@@ -67,6 +66,16 @@ public static class EncryptionRegistration
         if (decryptionCertificates.Count > 0) protection.UnprotectKeysWithAnyCertificate(decryptionCertificates.ToArray());
         services.AddSingleton<DatabaseEncryption>();
         if (!requiresUnlock) services.AddHostedService<EncryptionStartupCheck>();
+        return services;
+    }
+
+    public static IServiceCollection CompleteDatabaseEncryptionRegistration(this IServiceCollection services, IConfiguration configuration)
+    {
+        var providerName = configuration["Encryption:KeyProvider"]?.Trim() ?? EncryptionProviderNames.Local;
+        if (!providerName.Equals(EncryptionProviderNames.OciVault, StringComparison.OrdinalIgnoreCase)) return services;
+
+        // Authentication packages can register the eager loader again, so remove it only after all application services are configured.
+        RemoveEagerDataProtectionKeyRingLoader(services);
         return services;
     }
 
