@@ -8,6 +8,8 @@
             "args": [
                 "build",
                 "${workspaceFolder}/PocketLedger.slnx",
+                "--configuration",
+                "Debug",
                 "--maxcpucount:1"
             ],
             "problemMatcher": "$msCompile",
@@ -17,12 +19,12 @@
             }
         },
         {
-            "label": "start Podman socket",
+            "label": "restart Podman socket",
             "type": "process",
             "command": "systemctl",
             "args": [
                 "--user",
-                "start",
+                "restart",
                 "podman.socket"
             ],
             "problemMatcher": []
@@ -33,7 +35,7 @@
             "command": "docker",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "start Podman socket"
+                "restart Podman socket"
             ],
             "args": [
                 "compose",
@@ -66,7 +68,7 @@
             "command": "docker",
             "dependsOrder": "sequence",
             "dependsOn": [
-                "start Podman socket"
+                "restart Podman socket"
             ],
             "args": [
                 "compose",
@@ -94,7 +96,7 @@
                 },
                 "cwd": "${workspaceFolder}"
             },
-            "detail": "Starts separate databases for encrypted local development. Stop the legacy databases once before the first start."
+            "detail": "Starts the separate PostgreSQL databases used by the VS Code Development launch profiles."
         },
         {
             "label": "prepare PocketLedger development",
@@ -125,10 +127,14 @@
             "options": {
                 "env": {
                     "ASPNETCORE_ENVIRONMENT": "Development",
+                    "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                    "DOTNET_USE_POLLING_FILE_WATCHER": "1",
                     "ConnectionStrings__IdentityConnection": "Host=localhost;Port=5435;Database=pocketledger_identity;Username=pocketledger;Password=pocketledger",
                     "POCKETLEDGER_INITIAL_USERNAME": "${input:identityUsername}",
                     "POCKETLEDGER_INITIAL_PASSWORD": "${input:identityPassword}",
-                    "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption"
+                    "Encryption__KeyProvider": "Local",
+                    "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption",
+                    "Encryption__CertificatePath": ""
                 },
                 "cwd": "${workspaceFolder}/src/PocketLedger.Identity"
             },

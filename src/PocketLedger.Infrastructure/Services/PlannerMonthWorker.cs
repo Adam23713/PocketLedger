@@ -4,15 +4,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PocketLedger.Data;
+using PocketLedger.Security;
 
 namespace PocketLedger.Services;
 
-public sealed class PlannerMonthWorker(IServiceScopeFactory scopeFactory, IUserDateProvider dates, IOptions<UserDateOptions> options, ILogger<PlannerMonthWorker> logger) : BackgroundService
+public sealed class PlannerMonthWorker(IServiceScopeFactory scopeFactory, IUserDateProvider dates, IOptions<UserDateOptions> options, ILogger<PlannerMonthWorker> logger, EncryptionRuntimeState? encryptionState = null) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (encryptionState is { IsReady: false })
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                continue;
+            }
             try { await CloseDueMonthsAsync(stoppingToken); }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { return; }
             catch (Exception exception) { logger.LogError(exception, "Monthly planner rollover failed; it will be retried."); }

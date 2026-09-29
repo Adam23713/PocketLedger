@@ -6,3 +6,5 @@ caddy/logs/
 **/.local/
 *.pfx
 *.p12
+*.pem
+*.enc

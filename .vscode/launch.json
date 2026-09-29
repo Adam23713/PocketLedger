@@ -5,65 +5,75 @@
             "name": "PocketLedger Web (5050)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "prepare PocketLedger development",
             "program": "${workspaceFolder}/src/PocketLedger.Web/bin/Debug/net10.0/PocketLedger.Web.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Web",
             "stopAtEntry": false,
             "justMyCode": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                "DOTNET_USE_POLLING_FILE_WATCHER": "1",
                 "ASPNETCORE_URLS": "http://0.0.0.0:5050",
                 "ConnectionStrings__WebConnection": "Host=localhost;Port=5433;Database=pocketledger_web;Username=pocketledger;Password=pocketledger",
                 "Database__ApplyMigrationsOnStartup": "true",
                 "Landing__BaseUrl": "http://localhost:5053",
-                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Web/.local/encryption"
+                "Encryption__KeyProvider": "Local",
+                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Web/.local/encryption",
+                "Encryption__CertificatePath": ""
             }
         },
         {
             "name": "PocketLedger API (5051)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "prepare PocketLedger development",
             "program": "${workspaceFolder}/src/PocketLedger.Api/bin/Debug/net10.0/PocketLedger.Api.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Api",
             "stopAtEntry": false,
             "justMyCode": true,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                "DOTNET_USE_POLLING_FILE_WATCHER": "1",
                 "ASPNETCORE_URLS": "http://0.0.0.0:5051",
                 "ConnectionStrings__ApiConnection": "Host=localhost;Port=5434;Database=pocketledger_api;Username=pocketledger;Password=pocketledger",
                 "Database__ApplyMigrationsOnStartup": "true",
-                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Api/.local/encryption"
+                "Encryption__KeyProvider": "Local",
+                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Api/.local/encryption",
+                "Encryption__CertificatePath": ""
             }
         },
         {
             "name": "PocketLedger Identity (5052)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "prepare PocketLedger development",
             "program": "${workspaceFolder}/src/PocketLedger.Identity/bin/Debug/net10.0/PocketLedger.Identity.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Identity",
             "stopAtEntry": false,
             "justMyCode": true,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                "DOTNET_USE_POLLING_FILE_WATCHER": "1",
                 "ASPNETCORE_URLS": "http://0.0.0.0:5052",
                 "ConnectionStrings__IdentityConnection": "Host=localhost;Port=5435;Database=pocketledger_identity;Username=pocketledger;Password=pocketledger",
                 "Database__ApplyMigrationsOnStartup": "true",
-                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption"
+                "Encryption__KeyProvider": "Local",
+                "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption",
+                "Encryption__CertificatePath": ""
             }
         },
         {
             "name": "PocketLedger Landing (5053)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build PocketLedger",
             "program": "${workspaceFolder}/src/PocketLedger.Landing/bin/Debug/net10.0/PocketLedger.Landing.dll",
             "cwd": "${workspaceFolder}/src/PocketLedger.Landing",
             "stopAtEntry": false,
             "justMyCode": true,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                "DOTNET_USE_POLLING_FILE_WATCHER": "1",
                 "ASPNETCORE_URLS": "http://localhost:5053",
                 "Landing__AppBaseUrl": "http://localhost:5050"
             },
@@ -83,6 +93,7 @@
                 "PocketLedger Web (5050)",
                 "PocketLedger Landing (5053)"
             ],
+            "preLaunchTask": "prepare PocketLedger development",
             "stopAll": true
         }
     ]
