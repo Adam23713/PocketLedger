@@ -1,12 +1,12 @@
-# Database encryption (PL-93)
+# Database encryption
 
 ## Scope and guarantees
 
 PocketLedger now encrypts selected fields before EF Core writes them to PostgreSQL. All three hosts use separate ASP.NET Core Data Protection key rings, persisted outside PostgreSQL. Production requires an existing key directory and an RSA private certificate; the key ring is encrypted with that certificate. The PostgreSQL containers never mount keys or certificates. There is no production switch to disable this protection and no plaintext fallback on decryption errors.
 
-Field encryption alone does **not** encrypt the whole database. Amounts, dates, relationships, authentication lookup fields and database metadata remain readable in a database copy. Until the LUKS stage below is completed, someone obtaining the whole VPS disk may obtain both ciphertext and the certificate private keys. A separate directory or Docker bind mount is not protection against whole-disk theft.
+Field encryption alone does **not** encrypt the whole database. Amounts, dates, relationships, authentication lookup fields and database metadata remain readable in a database copy, and whoever obtains the whole VPS disk still obtains the ciphertext alongside it. A separate directory or Docker bind mount is not protection against whole-disk theft; a copy of the disk and a copy of the key material together are enough to decrypt it.
 
-LUKS protects the offline block device, including PostgreSQL tables, indexes, WAL and temporary database files stored on that filesystem. Copying files through an already unlocked filesystem, SQL access with valid credentials, root access to a running VPS, memory access and malicious database writes are outside this offline-theft guarantee. Host/provider snapshots of plaintext disks or running VM memory need separate handling. The field protection purpose separates fields and applications; it does not bind ciphertext to a specific row or prevent replay of an older value.
+Full-disk encryption (for example LUKS) is one way to close that remaining gap, by encrypting the offline block device itself — PostgreSQL's tables, indexes, WAL and temporary files included — so a stolen or copied disk is unreadable without a separate passphrase. PocketLedger doesn't ship or test a LUKS deployment path; if whole-disk encryption matters for your VPS, plan and test it independently for your provider and storage layout. This deployment instead keeps the *key* side of that risk out of reach of a disk copy by moving key custody off the VPS entirely, into an OCI Vault/KMS hardware module with encrypted (`.enc`) credential files — see the [OCI KMS guide](oci-kms.md). That protects the keys that unlock the encrypted fields; it is a different guarantee from encrypting the disk itself, and the two are complementary rather than substitutes for each other.
 
 CSV files accepted for transaction import are plaintext. Transaction exports are password-protected `.xlsx` workbooks, while complete finance backup/restore uses the password-protected `.plbackup` format. Database encryption and exported-file encryption are independent protections.
 
@@ -32,7 +32,7 @@ CSV files accepted for transaction import are plaintext. Transaction exports are
 | Cloud credentials, external financial integration tokens, backup passwords, separate goal entity | No corresponding implemented storage identified in this version. Classify and protect them when introduced. |
 | Financial cache payloads | Application encryption with a user/operation-specific purpose. Valkey still has persistence disabled. Cache-key dimensions are hashed; metadata remains visible. Old cache entries expire under the previous namespace. |
 
-Host swap, core dumps, container logs, reverse-proxy logs and provider snapshots are separate persistent surfaces. For the complete storage guarantee, keep swap disabled or encrypted, avoid application core dumps, and apply appropriate encryption/retention to logs and snapshots. The supplied Compose override only moves the three PostgreSQL data directories; it does not configure the entire VPS filesystem.
+Host swap, core dumps, container logs, reverse-proxy logs and provider snapshots are separate persistent surfaces. For the complete storage guarantee, keep swap disabled or encrypted, avoid application core dumps, and apply appropriate encryption/retention to logs and snapshots. Whatever full-disk encryption approach you add, remember it only protects what sits on the encrypted device — it doesn't by itself extend to these other surfaces.
 
 ## Application design
 
@@ -53,7 +53,7 @@ Prepare a **new installation/database set**. The schema migrations intentionally
    sudo bash tools/initialize-encryption-keys.sh /opt/pocketledger-security
    ```
 
-   The script refuses existing directories. It creates separate `api`, `web`, `identity` key/certificate directories and unpassworded `active.pfx` files protected by host permissions. Root execution assigns the .NET image UID 1654. If using a custom container UID, set ownership accordingly. The PFX itself is sensitive key material; an empty PFX password is intentional because unattended container restarts use filesystem access control. LUKS later protects that file offline.
+   The script refuses existing directories. It creates separate `api`, `web`, `identity` key/certificate directories and unpassworded `active.pfx` files protected by host permissions. Root execution assigns the .NET image UID 1654. If using a custom container UID, set ownership accordingly. The PFX itself is sensitive key material; an empty PFX password is intentional because unattended container restarts use filesystem access control. If you additionally encrypt the underlying disk (see [Scope and guarantees](#scope-and-guarantees)), that protects this file offline too.
 3. Set `POCKETLEDGER_SECURITY_DIRECTORY=/opt/pocketledger-security` in the deployment `.env`. Compose mounts only each host's own directories. Mount sources must exist; Compose will not create them automatically.
 4. Stop the old deployment in its existing Compose project. Set `COMPOSE_PROJECT_NAME=pocketledger-encrypted` in the new deployment's `.env` and keep it unchanged afterwards. The different project name gives the new deployment three empty named PostgreSQL volumes. Do not run the two deployments concurrently on the same public ports.
 
@@ -70,27 +70,6 @@ Prepare a **new installation/database set**. The schema migrations intentionally
 If OCI KMS will protect the new installation, stop here until the Local deployment is fully healthy and its fresh databases, Identity account, TOTP and restored finance data have been verified. Then follow the Local-to-OCI activation procedure in `docs/oci-kms.md`. Do not run the OCI key-ring migration as part of the legacy database export/recreate/restore transition.
 
 The migration guard also refuses an old populated Web database, rather than silently deleting the old session key ring. A new Web database is part of this reset. Rollback uses the old application with its old database or a fresh old-version database restored from the finance export; never point it at the new encrypted database.
-
-## Stage 2: manually unlocked LUKS storage on Ubuntu 22.04 LTS
-
-This stage requires an identified, dedicated block device or an independently planned storage migration. **Do not run a format command against an existing root/data partition.** The repository does not choose or format a device automatically.
-
-Provision a LUKS2 device with `cryptsetup`, keep the passphrase off the VPS disk, and back up the LUKS header separately. Unlock it as `/dev/mapper/pocketledger-data`, create an ext4 filesystem on the new mapping, and mount it at `/srv/pocketledger`. These device-specific provisioning steps must be adapted to the VPS layout. There is no automatic-unlock entry or passphrase key file supplied.
-
-After mounting, create `/srv/pocketledger/databases/{api,web,identity}` and `/srv/pocketledger/security`. If Stage 1 already contains data, stop all application and database processes before moving anything; copy the complete PostgreSQL directories while stopped, preserving ownership/modes, and copy the **existing** security directory. Do not generate replacement keys. PostgreSQL must remain on the same major version and the original data directories must stay available for rollback until validation succeeds. Alternatively, initialize fresh databases on the new mount and restore an encrypted finance backup, recreating Identity again.
-
-Use the wrapper for every encrypted-storage Compose operation, preserving the chosen project name:
-
-```bash
-sudo bash tools/compose-encrypted-storage.sh config --quiet
-sudo bash tools/compose-encrypted-storage.sh up -d
-```
-
-The wrapper checks the mount, its mapper device and LUKS2 status, forces the security directory onto that mount, then uses `compose.encrypted-storage.yaml`. The override replaces all three database mounts with bind mounts on LUKS and disables Docker restart policies for the three applications and databases. This deliberately requires a manual start after reboot. Do not use the base Compose file alone once you switch to this stage, and do not bypass the wrapper. A custom Docker/systemd autostart must obey the same mount checks.
-
-After a VPS reboot, manually unlock the device, mount `/srv/pocketledger`, then run the wrapper's `up -d`. Before closing the mapping, run the wrapper's `down`, unmount the filesystem, and close the mapping. An ordinary application-container restart while the filesystem remains mounted needs no new passphrase.
-
-A raw offline copy of this locked block device is encrypted. A `pg_dump`, plaintext application export, tar copy from the mounted directory or snapshot created from plaintext before the transition is **not** made encrypted by this change.
 
 ## Key rotation and recovery
 
@@ -119,11 +98,11 @@ A local .NET 10.0.12 Linux measurement (10,000 operations, warmed provider, 20 l
 | 500 accented characters (1,000 UTF-8 bytes) | 323 ms | 383 ms | 409 ms | 1,456 |
 | 10,000 accented characters (20,000 UTF-8 bytes) | 1,731 ms | 1,288 ms | 906 ms | 26,800 |
 
-The benchmark reports encryption/decryption/search CPU time, allocations and ciphertext expansion. It uses only synthetic data and a disposable certificate/key ring; it does not connect to an application database. Database I/O, EF materialization, wide-search cost on the real dataset, and LUKS overhead need deployment measurements. The PostgreSQL/Valkey integration suite requires its existing test endpoints; ordinary in-memory tests do not prove database ciphertext or LUKS protection.
+The benchmark reports encryption/decryption/search CPU time, allocations and ciphertext expansion. It uses only synthetic data and a disposable certificate/key ring; it does not connect to an application database. Database I/O, EF materialization and wide-search cost on the real dataset need deployment measurements. The PostgreSQL/Valkey integration suite requires its existing test endpoints; ordinary in-memory tests do not prove database ciphertext.
 
-Implementation validation used an isolated local PostgreSQL 18 instance (the supplied production image remains PostgreSQL 17). All three schemas migrated successfully. Manual API writes/readback confirmed encrypted account names, transaction notes and planner snapshots; accented and literal-wildcard searches, totals/balance, the backup serialization and restore flow available at that time, and readback after API restart succeeded. Identity bootstrap and authenticator-key reset produced encrypted `AspNetUserTokens.Value`. Key-ring XML contained certificate-encrypted secrets. The LUKS wrapper refused to run without its mount. This is not a measurement or verification of the actual VPS or PostgreSQL 17 container.
+Implementation validation used an isolated local PostgreSQL 18 instance (the supplied production image remains PostgreSQL 17). All three schemas migrated successfully. Manual API writes/readback confirmed encrypted account names, transaction notes and planner snapshots; accented and literal-wildcard searches, totals/balance, the backup serialization and restore flow available at that time, and readback after API restart succeeded. Identity bootstrap and authenticator-key reset produced encrypted `AspNetUserTokens.Value`. Key-ring XML contained certificate-encrypted secrets. This is not a measurement or verification of the actual VPS or PostgreSQL 17 container.
 
-Before retiring the old deployment, verify authorized reads after restart, encrypted backup restore, notes search (including accents and literal `%`/`_`), counts and paging, daily totals, balances, recurring transactions, planner Notes/history, TOTP/recovery and a full key/database restore. Inspect raw PostgreSQL columns in the isolated installation to confirm ciphertext, and confirm startup refuses an unmounted LUKS filesystem.
+Before retiring the old deployment, verify authorized reads after restart, encrypted backup restore, notes search (including accents and literal `%`/`_`), counts and paging, daily totals, balances, recurring transactions, planner Notes/history, TOTP/recovery and a full key/database restore. Inspect raw PostgreSQL columns in the isolated installation to confirm ciphertext.
 
 ## References
 
