@@ -1,0 +1,202 @@
+@page "/privacy"
+@inject IConfiguration Configuration
+@{
+    var appUrl = Configuration["Landing:AppBaseUrl"]!;
+    const string repository = "https://github.com/Adam23713/PocketLedger";
+    const string contactEmail = "privacy@pocketledger.dev";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="How PocketLedger collects, uses, protects and lets you delete your personal and financial data, and your rights under the GDPR." />
+    <meta name="color-scheme" content="dark" />
+    <title>Privacy Policy — PocketLedger</title>
+    <link rel="icon" type="image/png" href="/images/logo.png" />
+    <link rel="stylesheet" href="/site.css" />
+    <script src="/site.js" defer></script>
+</head>
+<body data-app-url="@appUrl">
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="0" height="0">
+        <symbol id="github-mark" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.333-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23A11.5 11.5 0 0 1 12 6.1c1.02.005 2.045.138 3.003.403 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+        </symbol>
+    </svg>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.</div>
+    <header class="header">
+        <nav class="shell nav" aria-label="Main navigation">
+            <a class="brand" href="/"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>
+            <div class="nav-links"><a href="/">Home</a><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a></div>
+            <a class="button button-login button-small" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a>
+        </nav>
+    </header>
+    <main id="main">
+        <section class="legal shell" aria-labelledby="legal-title">
+            <p class="eyebrow">LEGAL</p>
+            <h1 id="legal-title">Privacy Policy</h1>
+            <p class="updated">Effective date: 1 October 2026 · Applies to pocketledger.dev and the PocketLedger application</p>
+            <p class="legal-intro">This notice explains, in plain language, what personal data PocketLedger collects when you use our hosted service at <strong>pocketledger.dev</strong>, why we collect it, who we share it with, and the rights you have over it under the EU General Data Protection Regulation (GDPR). It does not apply to an instance of PocketLedger that you or someone else self-hosts — the operator of that instance is responsible for its own privacy notice.</p>
+
+            <nav class="legal-toc" aria-label="Table of contents">
+                <h2>On this page</h2>
+                <ol>
+                    <li><a href="#who-we-are">1. Who we are</a></li>
+                    <li><a href="#data-we-collect">2. What data we collect</a></li>
+                    <li><a href="#why-we-use-it">3. Why we use it, and on what legal basis</a></li>
+                    <li><a href="#who-we-share-it-with">4. Who we share it with</a></li>
+                    <li><a href="#international-transfers">5. International data transfers</a></li>
+                    <li><a href="#how-long-we-keep-it">6. How long we keep it</a></li>
+                    <li><a href="#how-we-protect-it">7. How we protect your data</a></li>
+                    <li><a href="#cookies">8. Cookies</a></li>
+                    <li><a href="#your-rights">9. Your rights, and how to use them</a></li>
+                    <li><a href="#automated-decisions">10. Automated decision-making</a></li>
+                    <li><a href="#children">11. Children</a></li>
+                    <li><a href="#changes">12. Changes to this notice</a></li>
+                    <li><a href="#contact">13. Contact us</a></li>
+                </ol>
+            </nav>
+
+            <article class="legal-section" id="who-we-are">
+                <h2>1. Who we are</h2>
+                <p>PocketLedger is a personal project, not a registered company. The hosted service at pocketledger.dev is operated by <strong>Ádám Kertész</strong> (Hungary), who is the data controller responsible for your personal data under the GDPR for this purpose.</p>
+                <p>We have not appointed a Data Protection Officer: at our current size and the kind of data we process, one is not legally required. You can reach us directly using the contact details in <a href="#contact">section 13</a> for anything related to your data or this notice.</p>
+            </article>
+
+            <article class="legal-section" id="data-we-collect">
+                <h2>2. What data we collect</h2>
+                <p>We only collect data that lets the Service work, keeps your account secure, or that you choose to give us.</p>
+                <table class="legal-table">
+                    <thead><tr><th>Category</th><th>Examples</th><th>Where it comes from</th></tr></thead>
+                    <tbody>
+                        <tr><td>Account &amp; authentication data</td><td>Username, email address, phone number (only if you choose to provide one), a one-way hash of your password (we never store it in plain text), your TOTP two-factor secret and recovery codes</td><td>You, when you register or manage your account</td></tr>
+                        <tr><td>Financial data you enter</td><td>Accounts, transactions and their notes, categories, recurring entries, loans and debts, planner/budget entries, your display name, and preferences such as currency, timezone, icons and colours</td><td>You, directly, as you use the Service</td></tr>
+                        <tr><td>Security &amp; activity data</td><td>Sign-in timestamps and outcomes, the IP address and browser/device identifier (user agent) of your most recent successful login, and security audit events such as password or 2FA changes</td><td>Generated automatically as you use the Service</td></tr>
+                        <tr><td>Technical &amp; connection data</td><td>IP address, requested URL, timestamp and response status for each request to our servers</td><td>Generated automatically by our edge infrastructure for every request, including from visitors who are not registered users</td></tr>
+                        <tr><td>Backup files you create</td><td>An encrypted, password-protected export of your finance data, generated only if and when you use the Import/Export feature. It never includes your password, TOTP secret, recovery codes or session data</td><td>You, on request</td></tr>
+                    </tbody>
+                </table>
+                <p>We do not ask for or knowingly collect bank account numbers, card numbers, or credentials for any outside financial institution — PocketLedger is a manual ledger, not a service that connects to your bank.</p>
+            </article>
+
+            <article class="legal-section" id="why-we-use-it">
+                <h2>3. Why we use it, and on what legal basis</h2>
+                <table class="legal-table">
+                    <thead><tr><th>Purpose</th><th>Legal basis (GDPR Art. 6)</th></tr></thead>
+                    <tbody>
+                        <tr><td>Creating and running your account; storing, showing and letting you import/export your financial data</td><td>Performance of a contract with you (Art. 6(1)(b))</td></tr>
+                        <tr><td>Keeping your account secure: two-factor authentication, recovery codes, sign-in auditing</td><td>Performance of a contract, and our legitimate interest in keeping accounts secure (Art. 6(1)(b) and (f))</td></tr>
+                        <tr><td>Detecting and blocking abusive, fraudulent or high-volume traffic (rate limiting, automated ban rules)</td><td>Our legitimate interest in protecting the Service and its users from abuse (Art. 6(1)(f))</td></tr>
+                        <tr><td>Responding when you contact us for support</td><td>Steps taken at your request, and our legitimate interest in providing support (Art. 6(1)(b) and (f))</td></tr>
+                    </tbody>
+                </table>
+                <p>We do not use your data for advertising or behavioural profiling, we run no analytics or tracking on the Service, and we do not send marketing emails. If that ever changes, we will update this notice and ask for your consent wherever the law requires it, rather than relying on this notice to cover it retroactively.</p>
+            </article>
+
+            <article class="legal-section" id="who-we-share-it-with">
+                <h2>4. Who we share it with</h2>
+                <p>We keep the list of parties who can see your data short and deliberately:</p>
+                <ul>
+                    <li><strong>Our hosting provider</strong>, who runs the physical servers your data is stored and processed on, located within the European Economic Area (EEA).</li>
+                    <li><strong>Cloudflare, Inc.</strong>, which sits in front of our servers to provide content delivery, DDoS protection and bot/abuse filtering. As part of this, Cloudflare sees connection-level metadata — such as your IP address and the host and path you're requesting — for every request to the Service. Cloudflare's data processing terms are built into its standard customer agreement; see <a class="text-link" href="https://www.cloudflare.com/trust-hub/gdpr/" target="_blank" rel="noopener noreferrer">Cloudflare's GDPR information ↗</a>.</li>
+                </ul>
+                <p>Our automated abuse-detection system (CrowdSec) runs entirely on our own servers, and its optional community threat-sharing feature is switched off — it does not send your data anywhere outside our infrastructure.</p>
+                <p>We currently use no third-party email delivery service and no analytics or advertising partners. We do not sell your data, rent it out, or share it with data brokers. We may disclose data where required by law, or to protect the rights, property or safety of PocketLedger, our users, or others.</p>
+            </article>
+
+            <article class="legal-section" id="international-transfers">
+                <h2>5. International data transfers</h2>
+                <p>Your account and financial data is stored and primarily processed on servers located within the EEA. The one transfer outside the EEA we're aware of is the connection-level metadata described above that necessarily passes through Cloudflare, Inc., headquartered in the United States, as part of its edge and security service. This relies on the EU–U.S. Data Privacy Framework, with Standard Contractual Clauses as a fallback safeguard where the Framework doesn't apply.</p>
+            </article>
+
+            <article class="legal-section" id="how-long-we-keep-it">
+                <h2>6. How long we keep it</h2>
+                <p>When you delete your account, your account, authentication, and financial data is deleted immediately — we don't keep a separate retention window "just in case." An encrypted backup you've exported yourself is yours to keep or delete; we don't retain a copy of it after you download it.</p>
+                <p>Raw technical access logs used for abuse detection are kept for a short, fixed window (currently up to seven days) and then automatically deleted; they are not linked to your account beyond that window.</p>
+                <div class="legal-note">If we ever perform routine technical backups of our servers for disaster-recovery purposes, these are rotated on a short cycle and are not used to restore data you've asked us to delete.</div>
+            </article>
+
+            <article class="legal-section" id="how-we-protect-it">
+                <h2>7. How we protect your data</h2>
+                <p>PocketLedger is open source, so you don't have to take our word for this — you can read exactly how it's built:</p>
+                <ul>
+                    <li>Sensitive fields (transaction notes, account and category names, debts, your TOTP secret, recovery codes) are <strong>encrypted before they're ever written to the database</strong>, with no setting to turn this off and no plaintext fallback on error.</li>
+                    <li>Every account is protected by <strong>TOTP-based two-factor authentication</strong> and one-time recovery codes. There is no public self-registration — accounts are created by us directly.</li>
+                    <li>Traffic to the Service passes through a rate-limiting and automated-ban layer that blocks abusive or high-volume requests before they reach the application.</li>
+                    <li>Every internal connection between our services is itself encrypted with a private TLS certificate authority, independent of the public HTTPS connection your browser uses.</li>
+                </ul>
+                <p>Full technical detail: <a class="text-link" href="@(repository + "/blob/main/docs/database-encryption.md")" target="_blank" rel="noopener noreferrer">database encryption ↗</a>, <a class="text-link" href="@(repository + "/blob/main/docs/oci-kms.md")" target="_blank" rel="noopener noreferrer">key management ↗</a>, <a class="text-link" href="@(repository + "/blob/main/docs/edge-security.md")" target="_blank" rel="noopener noreferrer">edge security ↗</a>.</p>
+            </article>
+
+            <article class="legal-section" id="cookies">
+                <h2>8. Cookies</h2>
+                <p>Signing in sets two cookies on the application domain: an encrypted session cookie that keeps you signed in, and an anti-forgery cookie that protects your account from cross-site request forgery. Both are strictly necessary for the Service to function, contain no advertising or tracking identifiers, and are not shared with any third party. Because they're strictly necessary, they don't require a cookie-consent banner under EU ePrivacy rules. We set no analytics, advertising or tracking cookies.</p>
+            </article>
+
+            <article class="legal-section" id="your-rights">
+                <h2>9. Your rights, and how to use them</h2>
+                <p>Under the GDPR, you have the right to:</p>
+                <ul>
+                    <li><strong>Access</strong> the personal data we hold about you.</li>
+                    <li><strong>Rectify</strong> inaccurate or incomplete data — most of this you can already edit directly in the app.</li>
+                    <li><strong>Erase</strong> your data ("right to be forgotten") by deleting your account.</li>
+                    <li><strong>Export your data</strong> in a portable format — use the built-in encrypted backup under Import/Export at any time; it covers your complete financial dataset.</li>
+                    <li><strong>Restrict or object</strong> to certain processing, in particular any processing based on our legitimate interest.</li>
+                    <li><strong>Withdraw consent</strong> at any time, for any processing that is ever based on consent (we currently have none).</li>
+                    <li><strong>Lodge a complaint</strong> with a supervisory authority, including the one below or the one in your own country of residence within the EU/EEA.</li>
+                </ul>
+                <p>To exercise any of these rights, contact us using the details in <a href="#contact">section 13</a>. We'll respond within one month, as required by the GDPR.</p>
+                <dl class="legal-contact">
+                    <dt>Hungarian supervisory authority</dt>
+                    <dd>Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH)</dd>
+                    <dd>1055 Budapest, Falk Miksa utca 9-11, Hungary (postal: 1363 Budapest, Pf.: 9.)</dd>
+                    <dd>ugyfelszolgalat@naih.hu · +36 (1) 391 1400 · <a class="text-link" href="https://www.naih.hu/" target="_blank" rel="noopener noreferrer">naih.hu ↗</a></dd>
+                </dl>
+            </article>
+
+            <article class="legal-section" id="automated-decisions">
+                <h2>10. Automated decision-making</h2>
+                <p>PocketLedger automatically posts recurring transactions on the schedule you set up yourself — that's carrying out your own instructions, not a decision made about you. We do not use automated decision-making or profiling that produces legal or similarly significant effects on you.</p>
+            </article>
+
+            <article class="legal-section" id="children">
+                <h2>11. Children</h2>
+                <p>The Service isn't directed at, and shouldn't be used by, anyone under the age of 16. We don't knowingly collect data from children. If you believe a child has provided us with personal data, contact us and we'll delete it.</p>
+            </article>
+
+            <article class="legal-section" id="changes">
+                <h2>12. Changes to this notice</h2>
+                <p>We may update this notice as the Service changes. The effective date at the top always reflects the latest version. If a change is material, we'll make that clear on the Service itself, not just here.</p>
+            </article>
+
+            <article class="legal-section" id="contact">
+                <h2>13. Contact us</h2>
+                <p>For anything about this notice or your personal data — access, correction, deletion, or just a question — reach out directly:</p>
+                <dl class="legal-contact">
+                    <dt>Data controller</dt>
+                    <dd>Ádám Kertész, Hungary</dd>
+                    <dt>Email</dt>
+                    <dd><a class="text-link" href="mailto:@contactEmail">@contactEmail</a></dd>
+                    <dt>Project</dt>
+                    <dd><a class="text-link github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><use href="#github-mark"></use></svg>github.com/Adam23713/PocketLedger ↗</a></dd>
+                </dl>
+            </article>
+        </section>
+    </main>
+    <footer class="shell footer"><a class="brand" href="/"><img src="/images/logo.png" width="28" height="28" alt="" />PocketLedger</a><a href="/privacy">Privacy</a><p>Made by <a href="https://www.linkedin.com/in/%C3%A1d%C3%A1m-kert%C3%A9sz-b6a541149/" target="_blank" rel="noopener noreferrer">Ádám Kertész</a></p><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a><span>AGPL-3.0-only</span></footer>
+    <dialog class="image-viewer" aria-label="PocketLedger screenshots">
+        <div class="viewer-toolbar">
+            <p id="viewer-caption" aria-live="polite"></p>
+            <button type="button" data-viewer-zoom aria-pressed="false">Zoom in</button>
+            <button type="button" data-viewer-close autofocus aria-label="Close image viewer">Close ×</button>
+        </div>
+        <div class="viewer-image"><img alt="" /></div>
+        <div class="viewer-navigation">
+            <button type="button" data-viewer-previous aria-label="Previous screenshot">← Previous</button>
+            <span data-viewer-position></span>
+            <button type="button" data-viewer-next aria-label="Next screenshot">Next →</button>
+        </div>
+    </dialog>
+</body>
+</html>

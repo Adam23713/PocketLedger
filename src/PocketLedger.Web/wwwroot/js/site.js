@@ -1,11 +1,11 @@
 (() => {
     const storageKey = "pocketledger-theme";
-    const themes = ["apple", "banking", "glass", "material"];
+    const themes = ["horizon", "banking", "glass", "material"];
     const themeMenu = document.getElementById("theme-menu");
     const themeButton = document.getElementById("theme-menu-button");
 
     function applyTheme(theme) {
-        const selectedTheme = themes.includes(theme) ? theme : "apple";
+        const selectedTheme = themes.includes(theme) ? theme : "horizon";
         document.documentElement.dataset.theme = selectedTheme;
         document.documentElement.setAttribute("data-bs-theme", selectedTheme === "banking" || selectedTheme === "glass" ? "dark" : "light");
         document.querySelectorAll("[data-theme-value]").forEach(item => {
@@ -50,7 +50,7 @@
         });
     }
 
-    applyTheme(localStorage.getItem(storageKey) ?? "apple");
+    applyTheme(localStorage.getItem(storageKey) ?? "horizon");
     if (themeButton && themeMenu) {
         setupMenu(themeButton, themeMenu);
         themeMenu.addEventListener("click", event => {
