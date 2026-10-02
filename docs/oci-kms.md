@@ -1,4 +1,4 @@
-# OCI Vault/KMS encrypted credentials and manual unlock (PL-96, PL-99)
+# OCI Vault/KMS encrypted credentials and manual unlock
 
 PocketLedger has three independent ASP.NET Core Data Protection key rings: API, Web and Identity. Each ring may contain many automatically rotated Data Protection master keys. Each service uses its own non-exportable OCI HSM AES-256 KEK, dedicated OCI IAM user and encrypted API signing credential. Automatic Data Protection key generation and rotation remain enabled.
 
@@ -8,7 +8,7 @@ There is no provider fallback. `Encryption:KeyProvider=OciVault` never falls bac
 
 Persistent VPS storage contains Data Protection key rings, normal configuration and three `*.enc` credential files, but not a plaintext OCI config, signing PEM or passphrase. A powered-off disk, VM snapshot, filesystem copy, database backup and these files are insufficient without the administrator's unlock passphrase.
 
-After unlock, the OCI signing key representation and Data Protection keys can remain in process memory because later key rotation or historical-key loading may require OCI. Temporary byte/character buffers are cleared where practical, but .NET, Bouncy Castle and the OCI SDK can create managed copies that cannot be guaranteed to be zeroized. Root/kernel compromise of an already-unlocked process can expose runtime secrets and is outside PL-99's complete protection boundary.
+After unlock, the OCI signing key representation and Data Protection keys can remain in process memory because later key rotation or historical-key loading may require OCI. Temporary byte/character buffers are cleared where practical, but .NET, Bouncy Castle and the OCI SDK can create managed copies that cannot be guaranteed to be zeroized. Root/kernel compromise of an already-unlocked process can expose runtime secrets and is outside this feature's protection boundary.
 
 ## Encrypted credential format
 
@@ -234,7 +234,7 @@ PocketLedger never revokes OCI credentials automatically.
 
 ## Migration from the plaintext OCI design
 
-For a deployment already using PL-96 OCI-wrapped key rings:
+For a deployment already using an earlier plaintext-config OCI-wrapped key-ring design:
 
 1. Stop API, Web and Identity.
 2. On a trusted machine, convert each existing passphrase-protected PEM to its service-specific `.enc`.
@@ -244,6 +244,6 @@ For a deployment already using PL-96 OCI-wrapped key rings:
 
 For Local-to-OCI migration, use only the clean-deployment activation procedure above. Never mix a restored database with an unrelated key ring.
 
-## Remaining PL-98 work
+## Known limitations and remaining hardening work
 
-PL-99 does not implement runtime Linux/container hardening. Production follow-up must address core dumps, .NET diagnostics, swap, `ptrace`, `/proc` visibility, least-privilege identities, capability dropping, `no-new-privileges`, read-only root filesystems, and AppArmor/seccomp. The local socket path must be moved to an explicitly writable tmpfs when a read-only root filesystem is enabled.
+This feature does not implement runtime Linux/container hardening. Production follow-up must address core dumps, .NET diagnostics, swap, `ptrace`, `/proc` visibility, least-privilege identities, capability dropping, `no-new-privileges`, read-only root filesystems, and AppArmor/seccomp. The local socket path must be moved to an explicitly writable tmpfs when a read-only root filesystem is enabled.
