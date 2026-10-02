@@ -126,6 +126,20 @@ docker compose up -d
 
 On first login, set up TOTP and save your recovery codes. See the [deployment guide](docs/deployment.md) for everything this skips over: generating secrets correctly, Cloudflare and CrowdSec configuration, activating OCI KMS, and moving an existing deployment to a new domain.
 
+## Demo data
+
+To explore PocketLedger with a realistic dataset, restore the checked-in **[encrypted demo backup](examples/demo-data-2026-june-august-multicurrency.plbackup)** after signing in to a local or disposable instance. It includes four HUF, EUR and USD accounts, categorized transactions from January through September 2026, recurring entries, loans and debts, and Monthly Planner data for October through December 2026.
+
+1. Open **Import / Export → Restore backup**.
+2. Select `examples/demo-data-2026-june-august-multicurrency.plbackup`.
+3. Enter the demo password: `pocketledger-demo`.
+4. Review the preview, explicitly confirm the replacement, and restore the backup.
+
+> [!WARNING]
+> Restoring a backup replaces all finance data belonging to the signed-in user. Use this demo only with an empty account or an instance whose existing data you do not need. The published password protects only this fictional dataset and must never be reused for a real backup.
+
+The restore UI intentionally accepts only encrypted `.plbackup` files. The adjacent [JSON file](examples/demo-data-2026-june-august-multicurrency.json) is the human-readable source used to maintain the demo dataset; it cannot be uploaded directly through the application.
+
 ## Local development
 
 ```bash
