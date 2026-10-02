@@ -10,7 +10,7 @@
         ("loans", "Keep track of loans & debts", "Know what you owe and what is owed to you.", 1360, 793),
         ("recurring", "Make room for the recurring", "Keep regular income and expenses in view.", 1342, 553),
         ("categories", "A place for every transaction", "Organize your finances with your own categories.", 1348, 656),
-        ("settings", "Make PocketLedger yours", "Choose your appearance, currencies and preferences.", 1329, 946)
+        ("settings", "Make PocketLedger yours", "Choose your appearance, currencies and preferences.", 1321, 873)
     };
 }
 <!DOCTYPE html>
@@ -71,6 +71,15 @@
                         <figcaption><h3>@shot.Item2 <span aria-hidden="true">↗</span></h3><p>@shot.Item3</p></figcaption>
                     </figure>
                 }
+            </div>
+        </section>
+        <section class="security section shell" aria-labelledby="security-title">
+            <div class="security-panel">
+                <div><p class="eyebrow">YOUR DATA, PROTECTED BY DESIGN</p><h2 id="security-title">Your finances stay yours.</h2></div>
+                <div class="security-copy">
+                    <p>Passwords are never stored in plain text, and sensitive financial and authentication data is encrypted before it reaches the database. The keys protecting that data are kept in separate, service-specific key rings and secured through OCI Vault/KMS, so a stolen server disk or copied database alone is not enough to unlock the protected fields. We never sell your data or share it with advertisers, analytics providers or data brokers.</p>
+                    <p>See the <a class="text-link" href="/privacy">Privacy</a> page for full details, or explore the relevant <a class="text-link" href="@(repository + "/blob/main/docs/database-encryption.md")" target="_blank" rel="noopener noreferrer">database encryption</a> and <a class="text-link" href="@(repository + "/blob/main/docs/oci-kms.md")" target="_blank" rel="noopener noreferrer">OCI KMS</a> documentation on GitHub.</p>
+                </div>
             </div>
         </section>
         <section class="story section" id="open-source" aria-labelledby="story-title">
