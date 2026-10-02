@@ -5,7 +5,7 @@
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
-<html lang="en" data-theme="apple" data-bs-theme="light">
+<html lang="en" data-theme="horizon" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,9 +15,9 @@
     <link rel="icon" type="image/png" sizes="64x64" href="~/images/app-icons/pocketledger-64.png" asp-append-version="true" />
     <script>
         (() => {
-            const themes = ["apple", "banking", "glass", "material"];
+            const themes = ["horizon", "banking", "glass", "material"];
             const savedTheme = localStorage.getItem("pocketledger-theme");
-            const theme = themes.includes(savedTheme) ? savedTheme : "apple";
+            const theme = themes.includes(savedTheme) ? savedTheme : "horizon";
             document.documentElement.dataset.theme = theme;
             document.documentElement.setAttribute("data-bs-theme", theme === "banking" || theme === "glass" ? "dark" : "light");
         })();
@@ -56,7 +56,7 @@
                         </button>
                         <div class="app-dropdown theme-menu" id="theme-menu" role="menu" aria-labelledby="theme-menu-button" hidden>
                             <div class="dropdown-heading">Appearance</div>
-                            <button type="button" role="menuitemradio" data-theme-value="apple" aria-checked="false"><span class="theme-swatch apple-swatch"></span><span>Apple / iOS</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="horizon" aria-checked="false"><span class="theme-swatch horizon-swatch"></span><span>Horizon</span><span class="theme-check">✓</span></button>
                             <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>Banking App</span><span class="theme-check">✓</span></button>
                             <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>Glassmorphism</span><span class="theme-check">✓</span></button>
                             <button type="button" role="menuitemradio" data-theme-value="material" aria-checked="false"><span class="theme-swatch material-swatch"></span><span>Material Design 3</span><span class="theme-check">✓</span></button>
