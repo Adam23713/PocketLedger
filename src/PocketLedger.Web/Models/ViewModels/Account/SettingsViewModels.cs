@@ -7,7 +7,7 @@ namespace PocketLedger.Models.ViewModels.Account;
 public sealed class SettingsViewModel : IValidatableObject
 {
     [StringLength(100)] public string? DisplayName { get; set; }
-    [Range(1, 10)] public int AvatarId { get; set; } = 1;
+    [Range(1, 5)] public int AvatarId { get; set; } = 1;
     [Required] public string DefaultCurrency { get; set; } = "HUF";
     [Required] public string TimeZoneId { get; set; } = "UTC";
     public List<CurrencyFormatViewModel> CurrencyFormats { get; set; } = [];

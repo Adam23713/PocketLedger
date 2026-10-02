@@ -9,7 +9,7 @@
         <div class="mb-3"><label asp-for="DisplayName" class="form-label"></label><input asp-for="DisplayName" class="form-control" /><span asp-validation-for="DisplayName" class="text-danger"></span></div>
         <label class="form-label">Avatar</label>
         <div class="avatar-selector mb-3">
-        @for (var avatar = 1; avatar <= 10; avatar++)
+        @for (var avatar = 1; avatar <= 5; avatar++)
         {
             <label><input asp-for="AvatarId" type="radio" value="@avatar" /><img src="~/images/avatars/@($"avatar-{avatar}.png")" alt="Avatar @avatar" /></label>
         }
