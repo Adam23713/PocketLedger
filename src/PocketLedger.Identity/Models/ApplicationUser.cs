@@ -8,4 +8,8 @@ public class ApplicationUser : IdentityUser<Guid>
     public DateTimeOffset? LastSuccessfulLoginAtUtc { get; set; }
     public string? LastSuccessfulLoginIpAddress { get; set; }
     public bool AuthenticatorSetupComplete { get; set; }
+    public bool IsBootstrapAdministrator { get; private set; }
+
+    public static ApplicationUser CreateBootstrapAdministrator(string username)
+        => new() { Id = Guid.NewGuid(), UserName = username, CreatedAtUtc = DateTimeOffset.UtcNow, IsBootstrapAdministrator = true };
 }
