@@ -73,6 +73,7 @@ jobs:
           POCKETLEDGER_WEB_DOMAIN=app.ledger.ci.local
           POCKETLEDGER_API_DOMAIN=api.ledger.ci.local
           POCKETLEDGER_IDENTITY_DOMAIN=identity.ledger.ci.local
+          POCKETLEDGER_THEME_COOKIE_DOMAIN=.ledger.ci.local
           POCKETLEDGER_WEB_CLIENT_SECRET=ci-client-secret-not-for-production
           POCKETLEDGER_SIGNING_KEY=${SIGNING_KEY}
           CROWDSEC_API_KEY=ci-only-not-for-production
