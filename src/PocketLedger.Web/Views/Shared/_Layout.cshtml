@@ -2,6 +2,8 @@
     var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentProfile = User.Identity?.IsAuthenticated == true ? await MoneyFormatter.GetUserAsync() : null;
+    var themeCookieDomain = Context.RequestServices.GetRequiredService<IConfiguration>()["Theme:CookieDomain"];
+    var themeCookieSecure = !Context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
@@ -13,15 +15,8 @@
     <link rel="icon" href="~/favicon.ico" sizes="any" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/app-icons/pocketledger-32.png" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="64x64" href="~/images/app-icons/pocketledger-64.png" asp-append-version="true" />
-    <script>
-        (() => {
-            const themes = ["horizon", "banking", "glass", "material"];
-            const savedTheme = localStorage.getItem("pocketledger-theme");
-            const theme = themes.includes(savedTheme) ? savedTheme : "horizon";
-            document.documentElement.dataset.theme = theme;
-            document.documentElement.setAttribute("data-bs-theme", theme === "banking" || theme === "glass" ? "dark" : "light");
-        })();
-    </script>
+    <script>window.pocketLedgerThemeConfig = { cookieDomain: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(themeCookieDomain)), secure: @themeCookieSecure.ToString().ToLowerInvariant(), migrateLegacyStorage: true };</script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
