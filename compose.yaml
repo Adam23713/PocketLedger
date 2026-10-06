@@ -31,6 +31,7 @@ services:
       Identity__RequireHttpsMetadata: "true"
       Identity__ClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       Api__BaseUrl: https://api:5051/
       Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
       ForwardedHeaders__TrustAll: "true"
@@ -99,6 +100,7 @@ services:
       OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
       OpenIddict__WebClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       ForwardedHeaders__TrustAll: "true"
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
