@@ -79,25 +79,28 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     public async Task<IActionResult> RecoveryCode(TwoFactorViewModel model, CancellationToken cancellationToken)
     {
         var pending = await signInManager.GetTwoFactorAuthenticationUserAsync();
-        var key = pending?.NormalizedUserName ?? "UNKNOWN";
+        var user = pending ?? (User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null);
+        var key = user?.NormalizedUserName ?? "UNKNOWN";
         if (!await AllowRequestAsync(key, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);
-        var result = await signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code);
-        await audit.WriteAsync("RecoveryCodeAuthentication", result.Succeeded ? "Success" : "Failure", pending?.Id, pending?.NormalizedUserName, result.Succeeded ? null : "InvalidCode", cancellationToken: cancellationToken);
-        if (!result.Succeeded || pending is null)
+        var succeeded = pending is not null
+            ? (await signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code)).Succeeded
+            : user is not null && (await userManager.RedeemTwoFactorRecoveryCodeAsync(user, model.Code)).Succeeded;
+        await audit.WriteAsync("RecoveryCodeAuthentication", succeeded ? "Success" : "Failure", user?.Id, user?.NormalizedUserName, succeeded ? null : "InvalidCode", cancellationToken: cancellationToken);
+        if (!succeeded || user is null)
         {
             ModelState.AddModelError(string.Empty, "Invalid authentication attempt.");
             return View(model);
         }
-        await userManager.ResetAuthenticatorKeyAsync(pending);
-        await userManager.GenerateNewTwoFactorRecoveryCodesAsync(pending, 1);
-        pending.AuthenticatorSetupComplete = false;
-        await userManager.SetTwoFactorEnabledAsync(pending, false);
-        await userManager.UpdateSecurityStampAsync(pending);
-        await userManager.UpdateAsync(pending);
-        await signInManager.SignInAsync(pending, false);
-        await audit.WriteAsync("AuthenticatorResetThroughRecovery", "Success", pending.Id, pending.NormalizedUserName, cancellationToken: cancellationToken);
-        await audit.WriteAsync("SecurityStampInvalidation", "Success", pending.Id, pending.NormalizedUserName, cancellationToken: cancellationToken);
+        await userManager.ResetAuthenticatorKeyAsync(user);
+        await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 1);
+        user.AuthenticatorSetupComplete = false;
+        await userManager.SetTwoFactorEnabledAsync(user, false);
+        await userManager.UpdateSecurityStampAsync(user);
+        await userManager.UpdateAsync(user);
+        await signInManager.SignInAsync(user, false);
+        await audit.WriteAsync("AuthenticatorResetThroughRecovery", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        await audit.WriteAsync("SecurityStampInvalidation", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
         return RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
     }
 
