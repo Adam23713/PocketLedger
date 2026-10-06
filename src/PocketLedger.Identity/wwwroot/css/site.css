@@ -1,12 +1,14 @@
 :root,
-[data-theme="apple"] {
-  --page-background: #f5f6f8;
-  --page-background-image: none;
+[data-theme="horizon"] {
+  --page-background: #eef5fd;
+  --page-background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201440%20900'%3E%3Cdefs%3E%3Cfilter%20id='b'%20x='-20%25'%20y='-20%25'%20width='140%25'%20height='140%25'%3E%3CfeGaussianBlur%20stdDeviation='32'/%3E%3C/filter%3E%3C/defs%3E%3Cg%20filter='url(%23b)'%3E%3Cpath%20d='M-200,580%20C150,400%20420,660%20760,490%20C1100,320%201280,450%201640,310%20L1640,900%20L-200,900%20Z'%20fill='%237fb2ec'%20opacity='0.4'/%3E%3Cpath%20d='M-200,430%20C180,260%20480,530%20820,370%20C1160,210%201340,350%201680,220%20L1680,900%20L-200,900%20Z'%20fill='%23ffffff'%20opacity='0.8'/%3E%3Cpath%20d='M-200,290%20C220,130%20520,370%20880,220%20C1240,70%201420,210%201680,100%20L1680,0%20L-200,0%20Z'%20fill='%23bcd9f7'%20opacity='0.4'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(170deg, #f1f7fd 0%, #e7f1fb 45%, #f5f9fd 100%);
   --surface-background: rgba(255, 255, 255, .94);
   --surface-background-hover: #f3f5f8;
   --surface-raised: #fff;
   --text-primary: #17202a;
-  --text-secondary: #66717e;
+  --text-secondary: #333b44;
   --border-color: #dfe3e8;
   --accent-color: #087aff;
   --accent-hover: #0069df;
@@ -19,6 +21,10 @@
   --header-background: rgba(255, 255, 255, .88);
   --header-shadow: 0 1px 12px rgba(20, 35, 55, .06);
   --focus-ring: rgba(8, 122, 255, .28);
+  --icon-background: #fff;
+  --icon-border-color: #d7dce2;
+  --icon-shadow: 0 2px 6px rgba(20, 35, 55, .08);
+  --table-stripe-background: rgba(0, 0, 0, .075);
   --backdrop-filter: blur(18px);
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
@@ -43,6 +49,10 @@
   --header-background: rgba(13, 17, 21, .94);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .07);
   --focus-ring: rgba(16, 191, 168, .3);
+  --icon-background: #becac7;
+  --icon-border-color: #9eada9;
+  --icon-shadow: 0 3px 8px rgba(0, 0, 0, .24);
+  --table-stripe-background: rgba(255, 255, 255, .075);
   --backdrop-filter: blur(18px);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -69,6 +79,10 @@
   --header-background: rgba(7, 25, 69, .58);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .16);
   --focus-ring: rgba(191, 170, 255, .42);
+  --icon-background: #c1c9e2;
+  --icon-border-color: rgba(255, 255, 255, .34);
+  --icon-shadow: 0 4px 12px rgba(1, 7, 30, .3);
+  --table-stripe-background: rgba(255, 255, 255, .075);
   --backdrop-filter: blur(22px) saturate(135%);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -93,6 +107,9 @@
   --header-background: rgba(255, 251, 254, .92);
   --header-shadow: 0 1px 5px rgba(45, 35, 65, .09);
   --focus-ring: rgba(103, 80, 164, .28);
+  --icon-background: #f2ecf7;
+  --icon-border-color: #d8cfe2;
+  --icon-shadow: 0 2px 5px rgba(45, 35, 65, .1);
   --backdrop-filter: blur(16px);
   --font-family: Roboto, "Segoe UI", sans-serif;
 }
@@ -119,6 +136,7 @@ body {
 [data-theme="banking"] body { --bs-link-color-rgb: 16, 191, 168; }
 [data-theme="glass"] body { --bs-link-color-rgb: 190, 205, 255; }
 [data-theme="material"] body { --bs-link-color-rgb: 103, 80, 164; }
+[data-theme="horizon"] body { background-repeat: no-repeat; background-size: cover; background-position: top center; }
 
 .app-header { background: var(--header-background); border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow); position: sticky; top: 0; z-index: 1030; }
 .app-header, .card, .app-dropdown { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); }
@@ -160,7 +178,7 @@ body {
 .app-dropdown a:hover, .app-dropdown button:hover, .app-dropdown a:focus-visible, .app-dropdown button:focus-visible { background: var(--surface-background-hover); color: var(--text-primary); outline: 0; }
 .app-dropdown a.active { background: var(--surface-background-hover); color: var(--accent-color); font-weight: 650; }
 .theme-swatch { border: 1px solid var(--border-color); border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.38); height: 1.1rem; width: 1.1rem; }
-.apple-swatch { background: #eef1f5; }
+.horizon-swatch { background: linear-gradient(145deg, #eef5fd, #7fb2ec); }
 .banking-swatch { background: #10bfa8; }
 .glass-swatch { background: linear-gradient(135deg, #087ed0, #b329c4); }
 .material-swatch { background: #6750a4; }

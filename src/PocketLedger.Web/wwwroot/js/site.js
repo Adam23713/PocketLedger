@@ -1,17 +1,6 @@
 (() => {
-    const storageKey = "pocketledger-theme";
-    const themes = ["horizon", "banking", "glass", "material"];
     const themeMenu = document.getElementById("theme-menu");
     const themeButton = document.getElementById("theme-menu-button");
-
-    function applyTheme(theme) {
-        const selectedTheme = themes.includes(theme) ? theme : "horizon";
-        document.documentElement.dataset.theme = selectedTheme;
-        document.documentElement.setAttribute("data-bs-theme", selectedTheme === "banking" || selectedTheme === "glass" ? "dark" : "light");
-        document.querySelectorAll("[data-theme-value]").forEach(item => {
-            item.setAttribute("aria-checked", String(item.dataset.themeValue === selectedTheme));
-        });
-    }
 
     function closeMenu(menu, button, restoreFocus = false) {
         menu.hidden = true;
@@ -50,14 +39,13 @@
         });
     }
 
-    applyTheme(localStorage.getItem(storageKey) ?? "horizon");
+    PocketLedgerTheme.apply(PocketLedgerTheme.read());
     if (themeButton && themeMenu) {
         setupMenu(themeButton, themeMenu);
         themeMenu.addEventListener("click", event => {
             const item = event.target.closest("[data-theme-value]");
             if (!item) return;
-            localStorage.setItem(storageKey, item.dataset.themeValue);
-            applyTheme(item.dataset.themeValue);
+            PocketLedgerTheme.select(item.dataset.themeValue);
             closeMenu(themeMenu, themeButton, true);
         });
     }
