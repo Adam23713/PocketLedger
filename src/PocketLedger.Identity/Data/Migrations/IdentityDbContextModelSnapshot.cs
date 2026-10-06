@@ -386,6 +386,9 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsBootstrapAdministrator")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTimeOffset?>("LastSuccessfulLoginAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -426,6 +429,10 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsBootstrapAdministrator")
+                        .IsUnique()
+                        .HasFilter("\"IsBootstrapAdministrator\" = TRUE");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");

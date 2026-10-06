@@ -37,7 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Lockout.AllowedForNewUsers = true;
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(78);
-}).AddEntityFrameworkStores<IdentityDbContext>().AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<IdentityDbContext>().AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "PocketLedger.Identity";
@@ -49,7 +49,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(BootstrapAdministratorAuthorization.PolicyName, policy => policy.RequireClaim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString))
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 if (builder.Environment.IsDevelopment()) builder.Services.AddCors(options => options.AddPolicy("Swagger", policy => policy.WithOrigins(builder.Configuration["OpenIddict:SwaggerBaseUrl"] ?? "http://localhost:5051").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddOpenIddict()
     .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityDbContext>())
