@@ -38,7 +38,13 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         var response = await client.GetAsync(path);
-        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, html);
+        Assert.Contains("<html lang=\"en\" data-theme=\"horizon\" data-bs-theme=\"light\">", html);
+        Assert.Contains("migrateLegacyStorage: false", html);
+        Assert.True(html.IndexOf("/js/theme.js", StringComparison.Ordinal) < html.IndexOf("/css/site.css", StringComparison.Ordinal));
+        Assert.DoesNotContain("id=\"theme-menu-button\"", html);
+        Assert.DoesNotContain("id=\"theme-menu\"", html);
     }
 
     [Fact]
