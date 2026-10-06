@@ -151,7 +151,10 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize, HttpGet]
-    public async Task<IActionResult> Security(int page = 1, CancellationToken cancellationToken = default)
+    public IActionResult Security(int page = 1) => RedirectToAction(nameof(LoginEvents), new { page });
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> LoginEvents(int page = 1, CancellationToken cancellationToken = default)
     {
         var user = await userManager.GetUserAsync(User);
         if (user is null) return Challenge();
