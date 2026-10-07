@@ -77,6 +77,7 @@ jobs:
           POCKETLEDGER_WEB_CLIENT_SECRET=ci-client-secret-not-for-production
           POCKETLEDGER_SIGNING_KEY=${SIGNING_KEY}
           CROWDSEC_API_KEY=ci-only-not-for-production
+          CROWDSEC_IDENTITY_API_KEY=ci-identity-only-not-for-production
           POSTGRES_USER=pocketledger
           POSTGRES_PASSWORD=ci-postgres-password
           POCKETLEDGER_INITIAL_USERNAME=ci-admin

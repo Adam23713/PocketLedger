@@ -100,6 +100,8 @@ services:
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       RequestTelemetry__ConnectionString: valkey:6379
+      CrowdSec__BaseUrl: http://crowdsec:8080/
+      CrowdSec__ApiKey: ${CROWDSEC_IDENTITY_API_KEY:?Set CROWDSEC_IDENTITY_API_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
       OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
@@ -160,6 +162,7 @@ services:
       COLLECTIONS: crowdsecurity/caddy
       DISABLE_ONLINE_API: "true"
       BOUNCER_KEY_pocketledger_caddy: ${CROWDSEC_API_KEY:?Set CROWDSEC_API_KEY in .env}
+      BOUNCER_KEY_pocketledger_identity: ${CROWDSEC_IDENTITY_API_KEY:?Set CROWDSEC_IDENTITY_API_KEY in .env}
     volumes:
       - caddy-logs:/var/log/caddy:ro
       - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
