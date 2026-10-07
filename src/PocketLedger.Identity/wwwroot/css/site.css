@@ -187,6 +187,8 @@ body {
 [aria-checked="true"] { font-weight: 650 !important; }
 .dropdown-divider { border-top: 1px solid var(--border-color); margin: .4rem .3rem; }
 .logout-action { color: var(--negative-color) !important; }
+.navigation-icon { flex-shrink: 0; height: 1.15rem; vertical-align: -.2em; width: 1.15rem; }
+.profile-menu .navigation-icon { margin-right: .3rem; }
 
 .app-content { padding-top: 1.75rem; }
 h1 { font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: -.035em; }

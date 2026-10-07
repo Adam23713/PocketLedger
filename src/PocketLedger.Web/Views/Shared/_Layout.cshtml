@@ -72,7 +72,7 @@
                                 <a role="menuitem" asp-controller="Settings" asp-action="Index"><partial name="_NavigationIcon" model='"Settings"' /> Settings</a>
                                 <a class="@(currentController == "Accounts" ? "active" : null)" role="menuitem" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)"><partial name="_NavigationIcon" model='"Accounts"' /> Accounts</a>
                                 <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)"><partial name="_NavigationIcon" model='"Categories"' /> Categories</a>
-                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/LoginEvents")"><partial name="_NavigationIcon" model='"Security"' /> Login Events</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")"><partial name="_NavigationIcon" model='"Security"' /> Security</a>
                                 <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
                                 <a role="menuitem" asp-controller="ImportExport" asp-action="Index"><partial name="_NavigationIcon" model='"ImportExport"' /> Import / Export</a>
                                 <div class="dropdown-divider" role="separator"></div>
