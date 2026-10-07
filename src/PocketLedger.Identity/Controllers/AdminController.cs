@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Admin;
 using PocketLedger.Security;
+using PocketLedger.Services;
 
 namespace PocketLedger.Controllers;
 
 [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public sealed class AdminController(UserManager<ApplicationUser> userManager, ISuspiciousRequestEventReader suspiciousRequestEvents) : Controller
+public sealed class AdminController(UserManager<ApplicationUser> userManager, ISuspiciousRequestEventReader suspiciousRequestEvents, ICrowdSecDecisionReader crowdSecDecisions) : Controller
 {
     private const int PageSize = 10;
 
@@ -24,7 +25,9 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IS
         var users = await query.OrderBy(user => user.LastSuccessfulLoginAtUtc == null).ThenByDescending(user => user.LastSuccessfulLoginAtUtc)
             .ThenBy(user => user.NormalizedUserName).ThenBy(user => user.Id).Skip((page - 1) * PageSize).Take(PageSize)
             .Select(user => new AdminUserOverviewItem(user.UserName ?? "Unavailable", user.LastSuccessfulLoginAtUtc)).ToListAsync(cancellationToken);
-        var suspiciousRequests = await suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
-        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, suspiciousRequests));
+        var suspiciousRequestsTask = suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
+        var crowdSecBansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
+        await Task.WhenAll(suspiciousRequestsTask, crowdSecBansTask);
+        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, await suspiciousRequestsTask, await crowdSecBansTask));
     }
 }

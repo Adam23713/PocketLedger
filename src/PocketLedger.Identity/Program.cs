@@ -19,6 +19,11 @@ builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environmen
 builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
+builder.Services.AddOptions<CrowdSecOptions>().BindConfiguration(CrowdSecOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddHttpClient<ICrowdSecDecisionReader, CrowdSecDecisionReader>((services, client) =>
+{
+    client.Timeout = TimeSpan.FromSeconds(services.GetRequiredService<Microsoft.Extensions.Options.IOptions<CrowdSecOptions>>().Value.TimeoutSeconds);
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<IdentityDbContext>(options =>
 {

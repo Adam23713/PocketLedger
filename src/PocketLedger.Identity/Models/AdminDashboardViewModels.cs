@@ -1,7 +1,9 @@
 using PocketLedger.Security;
+using PocketLedger.Services;
 
 namespace PocketLedger.Models.ViewModels.Admin;
 
 public sealed record AdminUserOverviewItem(string Username, DateTimeOffset? LastSuccessfulLoginAtUtc);
 
-public sealed record AdminDashboardViewModel(IReadOnlyList<AdminUserOverviewItem> Users, int Page, int TotalPages, int TotalUsers, SuspiciousRequestEventsResult SuspiciousRequests);
+public sealed record AdminDashboardViewModel(IReadOnlyList<AdminUserOverviewItem> Users, int Page, int TotalPages, int TotalUsers, SuspiciousRequestEventsResult SuspiciousRequests,
+    CrowdSecBanDecisionsResult CrowdSecBans);
