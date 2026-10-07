@@ -39,6 +39,17 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
+    public async Task Security_RequiresAuthentication()
+    {
+        using var client = anonymousFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/Account/Security");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", response.Headers.Location?.AbsolutePath);
+    }
+
+    [Fact]
     public async Task LoginEvents_ReturnsOnlyTheCurrentUsersRequestedPage()
     {
         await SeedEventsAsync();
@@ -57,15 +68,37 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
-    public async Task Security_RedirectsToLoginEventsAndPreservesPage()
+    public async Task Security_ShowsExactlyTheCurrentUsersFiveLatestEventsAndActions()
     {
         await SeedEventsAsync();
         using var client = authenticatedFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
-        var response = await client.GetAsync("/Account/Security?page=3");
+        var response = await client.GetAsync("/Account/Security");
+        var content = await response.Content.ReadAsStringAsync();
 
-        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.Equal("/Account/LoginEvents?page=3", response.Headers.Location?.OriginalString);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("<h1 class=\"mb-1\">Security</h1>", content);
+        Assert.Contains("href=\"/Account/LoginEvents\"", content);
+        Assert.Contains("href=\"/Account/ChangePassword\"", content);
+        Assert.Contains("href=\"/Account/RecoveryCode\"", content);
+        for (var index = 30; index >= 26; index--) Assert.Contains($"Current-{index:00}", content);
+        Assert.DoesNotContain("Current-25", content);
+        Assert.DoesNotContain("OtherUserSecret", content);
+        Assert.True(content.IndexOf("Current-30", StringComparison.Ordinal) < content.IndexOf("Current-29", StringComparison.Ordinal));
+        Assert.True(content.IndexOf("Current-29", StringComparison.Ordinal) < content.IndexOf("Current-28", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Security_ShowsClearEmptyHistoryState()
+    {
+        await SeedCurrentUserAsync();
+        using var client = authenticatedFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/Account/Security");
+        var content = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("No login events are available for your account yet.", content);
     }
 
     private static WebApplicationFactory<Program> ConfigureFactory(WebApplicationFactory<Program> factory, bool authenticate) => factory.WithWebHostBuilder(builder =>
@@ -91,10 +124,9 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
 
     private async Task SeedEventsAsync()
     {
+        await SeedCurrentUserAsync();
         await using var scope = authenticatedFactory.Services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-        await dbContext.Database.EnsureDeletedAsync();
-        dbContext.Users.Add(new ApplicationUser { Id = CurrentUserId, UserName = "current-user", NormalizedUserName = "CURRENT-USER" });
         var start = new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.Zero);
         dbContext.AuthenticationAuditEvents.AddRange(Enumerable.Range(0, 31).Select(index => new AuthenticationAuditEvent
         {
@@ -116,6 +148,15 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
             RequestPath = "/Account/Login",
             HttpMethod = "POST"
         });
+        await dbContext.SaveChangesAsync();
+    }
+
+    private async Task SeedCurrentUserAsync()
+    {
+        await using var scope = authenticatedFactory.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+        dbContext.Users.Add(new ApplicationUser { Id = CurrentUserId, UserName = "current-user", NormalizedUserName = "CURRENT-USER" });
         await dbContext.SaveChangesAsync();
     }
 
