@@ -192,7 +192,14 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize, HttpGet]
-    public IActionResult Security(int page = 1) => RedirectToAction(nameof(LoginEvents), new { page });
+    public async Task<IActionResult> Security(CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        var events = await dbContext.AuthenticationAuditEvents.AsNoTracking().Where(item => item.UserId == user.Id)
+            .OrderByDescending(item => item.TimestampUtc).ThenByDescending(item => item.Id).Take(5).ToListAsync(cancellationToken);
+        return View(new SecurityDashboardViewModel(events));
+    }
 
     [Authorize, HttpGet]
     public async Task<IActionResult> LoginEvents(int page = 1, CancellationToken cancellationToken = default)

@@ -1,0 +1,56 @@
+@model PocketLedger.Models.ViewModels.Account.SecurityDashboardViewModel
+@{ ViewData["Title"] = "Security"; }
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Security</h1>
+        <p class="text-muted mb-0">Review recent account activity and manage your sign-in security.</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-action="LoginEvents">View all login events</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Password</h2>
+                <p class="text-muted">Change your password while keeping your current signed-in session active.</p>
+                <a class="btn btn-primary" asp-action="ChangePassword">Change password</a>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-md-6">
+        <section class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Authenticator recovery</h2>
+                <p class="text-muted">Use a recovery code to replace the authenticator registered to your account.</p>
+                <a class="btn btn-primary" asp-action="RecoveryCode">Use a recovery code</a>
+            </div>
+        </section>
+    </div>
+</div>
+
+<section aria-labelledby="recent-login-events-heading">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+        <h2 class="h4 mb-0" id="recent-login-events-heading">Recent login events</h2>
+        <span class="text-muted">Latest five</span>
+    </div>
+    @if (Model.RecentEvents.Count == 0)
+    {
+        <div class="alert alert-info" role="status">No login events are available for your account yet.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">UTC time</th><th scope="col">Event</th><th scope="col">Result</th><th scope="col">Address</th></tr></thead>
+                <tbody>
+                    @foreach (var item in Model.RecentEvents)
+                    {
+                        <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress ?? "Not available")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
