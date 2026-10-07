@@ -23,6 +23,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      RequestTelemetry__ConnectionString: valkey:6379
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
@@ -52,6 +53,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       web-database: { condition: service_healthy }
+      valkey: { condition: service_started }
       api: { condition: service_started }
       identity: { condition: service_started }
     restart: unless-stopped
@@ -63,6 +65,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey:6379
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
@@ -86,6 +89,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       api-database: { condition: service_healthy }
+      valkey: { condition: service_started }
     restart: unless-stopped
 
   identity:
@@ -95,6 +99,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      RequestTelemetry__ConnectionString: valkey:6379
       Database__ApplyMigrationsOnStartup: "true"
       OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
@@ -116,6 +121,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
+      valkey: { condition: service_started }
     restart: unless-stopped
 
   caddy:

@@ -81,6 +81,8 @@ builder.Services.AddSingleton<IAuthenticationRateLimiter, AuthenticationRateLimi
 builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>();
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddRequestTelemetry(builder.Configuration);
 
 builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
@@ -109,6 +111,7 @@ app.UseStaticFiles();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
+app.UseRequestTelemetry();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");

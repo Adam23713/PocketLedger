@@ -11,6 +11,7 @@ This is the complete walkthrough for running PocketLedger in production on your 
 - [Security systems overview](#security-systems-overview)
 - [Moving an existing deployment to the app subdomain](#moving-an-existing-deployment-to-the-app-subdomain)
 - [Financial cache (Valkey)](#financial-cache-valkey)
+- [Request telemetry (Valkey)](#request-telemetry-valkey)
 - [Backups](#backups)
 - [Volumes](#volumes)
 
@@ -141,6 +142,16 @@ Apply API migrations before enabling caching. The PostgreSQL/Valkey integration 
 ```bash
 dotnet test tests/PocketLedger.Tests --filter FullyQualifiedName~FinancialCacheTests
 ```
+
+## Request telemetry (Valkey)
+
+Web, API and Identity aggregate relevant dynamic requests into five-minute Valkey hashes for the security dashboard. Each hash stores only counters: total, anonymous/unattributed and authenticated user ID counts. Paths, query strings, headers, cookies, tokens and request or response bodies are never stored. Health endpoints, static assets, OpenAPI/Swagger and OpenID Connect discovery requests are excluded by the shared classifier.
+
+Production Compose configures all three applications with `RequestTelemetry__ConnectionString=valkey:6379`. For applications run directly on the host, set it to `localhost:6379`; leaving it unset disables collection and makes queries return empty results. `RequestTelemetry__RetentionHours` defaults to and cannot exceed 48, while `RequestTelemetry__BucketMinutes` is fixed at 5 so later dashboard consumers can reuse the same bucket contract.
+
+Recording is placed after authentication in every pipeline. Requests enqueue an in-memory observation and never wait for Valkey; a background worker coalesces observations before incrementing bucket counters. Buckets receive an absolute expiry at their start time plus the configured retention, so no bucket remains queryable after 48 hours. A full queue or a Valkey connection/write failure drops telemetry and logs a rate-limited warning without affecting the application request.
+
+Query intervals use an inclusive start and exclusive end. Inputs are expanded to whole five-minute UTC buckets, and the returned `FromUtc`/`ToUtc` expose those effective aligned boundaries. `AverageRequestsPerMinute` uses the selected user's count when a user filter is present, otherwise total volume, divided by the complete aligned interval in minutes. `IsAvailable` distinguishes a successful zero-count query from disabled configuration or a Valkey read failure.
 
 ## Backups
 

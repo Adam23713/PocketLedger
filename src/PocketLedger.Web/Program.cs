@@ -73,6 +73,7 @@ builder.Services.AddCors(options => options.AddPolicy("LandingSession", policy =
 builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddRequestTelemetry(builder.Configuration);
 builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddScoped<IUserContextService, WebUserContextService>();
 builder.Services.AddTransient<AccessTokenHandler>();
@@ -113,6 +114,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
+app.UseRequestTelemetry();
 app.UseMiddleware<BffSessionExpiredMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
