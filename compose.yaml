@@ -105,6 +105,7 @@ services:
       Database__ApplyMigrationsOnStartup: "true"
       OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       OpenIddict__WebClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}

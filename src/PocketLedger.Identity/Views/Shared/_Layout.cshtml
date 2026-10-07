@@ -6,6 +6,7 @@
     var showThemeSelector = User.Identity?.IsAuthenticated == true;
     var isBootstrapAdministrator = User.HasClaim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString);
     var webBaseUrl = configuration["OpenIddict:WebBaseUrl"]!.TrimEnd('/');
+    var landingBaseUrl = configuration["Landing:BaseUrl"]!.TrimEnd('/');
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     string NavClass(string controller, string action) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
@@ -28,7 +29,10 @@
         <header class="app-header">
             <nav class="navbar navbar-expand-lg" aria-label="Identity navigation">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="@webBaseUrl">PocketLedger</a>
+                    <a class="navbar-brand" href="@webBaseUrl">
+                        <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
+                        <span>PocketLedger</span>
+                    </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#identity-navigation" aria-controls="identity-navigation" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -61,6 +65,9 @@
                             </button>
                             <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
                                 <div class="profile-menu-header"><div><strong>@User.Identity?.Name</strong></div></div>
+                                <div class="dropdown-divider" role="separator"></div>
+                                <a role="menuitem" href="@webBaseUrl"><partial name="_NavigationIcon" model='"App"' /> PocketLedger app</a>
+                                <a role="menuitem" href="@landingBaseUrl"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
                             </div>
