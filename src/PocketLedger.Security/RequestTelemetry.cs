@@ -69,6 +69,8 @@ public static class RequestTelemetryRegistration
         services.AddSingleton<RequestTelemetryService>();
         services.AddSingleton<IRequestTelemetryReader>(services => services.GetRequiredService<RequestTelemetryService>());
         services.AddSingleton<IHostedService>(services => services.GetRequiredService<RequestTelemetryService>());
+        services.AddSingleton<SuspiciousRequestDetectionService>();
+        services.AddSingleton<ISuspiciousRequestEventReader>(services => services.GetRequiredService<SuspiciousRequestDetectionService>());
         return services;
     }
 
@@ -77,16 +79,21 @@ public static class RequestTelemetryRegistration
 
 internal readonly record struct RequestTelemetryObservation(DateTimeOffset BucketStartUtc, Guid? UserId);
 
-internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTelemetryService telemetry, TimeProvider timeProvider)
+internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTelemetryService telemetry, SuspiciousRequestDetectionService suspiciousRequests, TimeProvider timeProvider)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (RelevantRequestClassifier.IsRelevant(context.Request.Path)) telemetry.TryRecord(context.User, timeProvider.GetUtcNow());
+        if (RelevantRequestClassifier.IsRelevant(context.Request.Path))
+        {
+            var timestamp = timeProvider.GetUtcNow();
+            telemetry.TryRecord(context.User, timestamp);
+            suspiciousRequests.TryRecord(context, timestamp);
+        }
         await next(context);
     }
 }
 
-internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> options, ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
+internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> options, SuspiciousRequestDetectionService suspiciousRequests, ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
 {
     private const string KeyPrefix = "pocketledger:request-telemetry:v1:";
     private const string TotalField = "total";
@@ -150,41 +157,51 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (await queue.Reader.WaitToReadAsync(stoppingToken))
+        var suspiciousRequestWorker = suspiciousRequests.RunAsync(stoppingToken);
+        try
         {
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
-            var observations = new List<RequestTelemetryObservation>(8192);
-            while (observations.Count < 8192 && queue.Reader.TryRead(out var observation)) observations.Add(observation);
-            if (observations.Count == 0) continue;
-            try
+            while (await queue.Reader.WaitToReadAsync(stoppingToken))
             {
-                var database = (await GetConnectionAsync(stoppingToken)).GetDatabase();
-                var writes = observations.GroupBy(item => new { item.BucketStartUtc, item.UserId }).Select(group =>
+                await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                var observations = new List<RequestTelemetryObservation>(8192);
+                while (observations.Count < 8192 && queue.Reader.TryRead(out var observation)) observations.Add(observation);
+                if (observations.Count == 0) continue;
+                try
                 {
-                    var count = group.LongCount();
-                    var key = Key(group.Key.BucketStartUtc);
-                    RedisValue field = group.Key.UserId is { } userId ? UserField(userId) : AnonymousField;
-                    var expiresAtUnixMilliseconds = group.Key.BucketStartUtc.AddHours(options.Value.RetentionHours).ToUnixTimeMilliseconds();
-                    return database.ScriptEvaluateAsync(IncrementScript, [key], [count, field, expiresAtUnixMilliseconds]);
-                });
-                await Task.WhenAll(writes);
+                    var database = (await GetConnectionAsync(stoppingToken)).GetDatabase();
+                    var writes = observations.GroupBy(item => new { item.BucketStartUtc, item.UserId }).Select(group =>
+                    {
+                        var count = group.LongCount();
+                        var key = Key(group.Key.BucketStartUtc);
+                        RedisValue field = group.Key.UserId is { } userId ? UserField(userId) : AnonymousField;
+                        var expiresAtUnixMilliseconds = group.Key.BucketStartUtc.AddHours(options.Value.RetentionHours).ToUnixTimeMilliseconds();
+                        return database.ScriptEvaluateAsync(IncrementScript, [key], [count, field, expiresAtUnixMilliseconds]);
+                    });
+                    await Task.WhenAll(writes);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    LogFailure(exception, "Request telemetry write failed; observations were discarded.");
+                }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
-            catch (Exception exception)
-            {
-                LogFailure(exception, "Request telemetry write failed; observations were discarded.");
-            }
+        }
+        finally
+        {
+            await suspiciousRequestWorker;
         }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         queue.Writer.TryComplete();
+        suspiciousRequests.Complete();
         await base.StopAsync(cancellationToken);
         if (connection is not null) await connection.DisposeAsync();
+        await suspiciousRequests.DisposeAsync();
     }
 
     private async Task<IConnectionMultiplexer> GetConnectionAsync(CancellationToken cancellationToken)
