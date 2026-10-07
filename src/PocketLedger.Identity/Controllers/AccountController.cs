@@ -151,6 +151,44 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize, HttpGet]
+    public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model, CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (!await AllowPasswordChangeRequestAsync(user, cancellationToken)) return TooManyRequests();
+        if (!ModelState.IsValid)
+        {
+            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, "ValidationFailed", cancellationToken: cancellationToken);
+            return View(model);
+        }
+
+        var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            var invalidCurrentPassword = result.Errors.Any(error => error.Code == "PasswordMismatch");
+            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, invalidCurrentPassword ? "InvalidCurrentPassword" : "InvalidNewPassword", cancellationToken: cancellationToken);
+            if (invalidCurrentPassword)
+            {
+                ModelState.AddModelError(nameof(model.CurrentPassword), "Password change was not completed. Check your current password and try again.");
+            }
+            else
+            {
+                foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+            }
+            return View(model);
+        }
+
+        await signInManager.RefreshSignInAsync(user);
+        await audit.WriteAsync("PasswordChange", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        await audit.WriteAsync("SecurityStampInvalidation", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        TempData["PasswordChangeStatus"] = "Your password has been changed.";
+        return RedirectToAction(nameof(ChangePassword));
+    }
+
+    [Authorize, HttpGet]
     public IActionResult Security(int page = 1) => RedirectToAction(nameof(LoginEvents), new { page });
 
     [Authorize, HttpGet]
@@ -182,6 +220,14 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         using var lease = await rateLimiter.AcquireAsync(username, cancellationToken);
         if (lease.IsAcquired) return true;
         await audit.WriteAsync("RateLimitRejected", "Failure", normalizedUsername: userManager.NormalizeName(username.Trim()), failureReason: "RateLimited", cancellationToken: cancellationToken);
+        return false;
+    }
+
+    private async Task<bool> AllowPasswordChangeRequestAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        using var lease = await rateLimiter.AcquireAsync($"password-change:{user.Id}", cancellationToken);
+        if (lease.IsAcquired) return true;
+        await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, "RateLimited", cancellationToken: cancellationToken);
         return false;
     }
 
