@@ -27,7 +27,7 @@ CrowdSec's online API is disabled: this deployment uses local detections, withou
 ## Deployment
 
 1. Back up the deployed Caddyfile, Compose file and `.env`, and record the previous Caddy image ID before rollout. Preserve local routing customizations when merging `Caddyfile.example` into the deployed `Caddyfile`; copying the template blindly can erase them.
-2. Generate a private bouncer key with `openssl rand -hex 32`, add `CROWDSEC_API_KEY=<value>` to `.env`, and restrict that file to its owner (`chmod 600 .env`). Never use the example or CI key. The same value bootstraps `BOUNCER_KEY_pocketledger_caddy` and configures Caddy. Missing/empty keys fail Compose interpolation. Environment-based secrets are visible to Docker administrators; do not publish expanded `docker compose config` output.
+2. Generate two independent private bouncer keys with `openssl rand -hex 32`. Add `CROWDSEC_API_KEY=<value>` for Caddy and `CROWDSEC_IDENTITY_API_KEY=<different-value>` for the Identity Admin dashboard to `.env`, then restrict that file to its owner (`chmod 600 .env`). Never use the example or CI keys, and never reuse the Caddy credential for Identity. Compose bootstraps `pocketledger_caddy` and `pocketledger_identity` separately; the Identity credential is injected only into the Identity container and is used only for read-only active-decision queries over the internal container network. Missing/empty keys fail Compose interpolation. Environment-based secrets are visible to Docker administrators; do not publish expanded `docker compose config` output.
 3. Check Cloudflare settings and origin firewall rules described above. Merge/copy the new Caddy template before starting Caddy.
 4. Validate and build:
 
@@ -55,7 +55,7 @@ CrowdSec's online API is disabled: this deployment uses local detections, withou
    docker compose exec crowdsec cscli decisions list
    ```
 
-   Expect the Caddy collection, `pocketledger_caddy` with recent API pull, parsed access logs and acquisition counters increasing. Exercise all four routes and a normal login/refresh flow. An empty alerts/decisions list is normal without attacks.
+   Expect the Caddy collection, both `pocketledger_caddy` and `pocketledger_identity`, recent API pulls, parsed access logs and acquisition counters increasing. Exercise all four routes, the bootstrap administrator dashboard and a normal login/refresh flow. An empty alerts/decisions list is normal without attacks. CrowdSec downtime must show an unavailable state on the Admin dashboard without affecting login.
 
 ## Safe verification and troubleshooting
 
@@ -79,6 +79,8 @@ docker compose exec crowdsec cscli decisions delete --ip <YOUR_PUBLIC_IP>
 Do not run production flood tests. A Cloudflare-cached response does not reach Caddy. Empty metrics can mean cached traffic, no fresh requests, missing logs, parser errors, or an intentionally whitelisted private/edge IP. Check the log's client_ip and use `cscli explain --file /var/log/caddy/access.log --type caddy` inside CrowdSec, handling the sensitive output privately. Check disk capacity and log volume permissions if logging stops. Do not chmod volumes globally writable.
 
 Changing `.env` alone does **not** rotate an existing registered bouncer key. To rotate: generate/update the secret, delete `pocketledger_caddy` using `cscli bouncers delete pocketledger_caddy`, recreate CrowdSec with `docker compose up -d --force-recreate --wait crowdsec`, then recreate Caddy with `docker compose up -d --no-deps --force-recreate caddy`. Verify recent polling again. This creates a brief enforcement gap; schedule it. Do not delete CrowdSec volumes to rotate a key.
+
+Rotate the Identity credential independently: update only `CROWDSEC_IDENTITY_API_KEY`, delete `pocketledger_identity` with `cscli bouncers delete pocketledger_identity`, recreate CrowdSec so the bootstrap environment registers the new key, then recreate Identity with `docker compose up -d --no-deps --force-recreate identity`. Verify the dashboard and `cscli bouncers list`. This temporarily makes the CrowdSec dashboard section unavailable but must not interrupt authentication. Never rotate either credential by deleting CrowdSec volumes.
 
 ## Rollback
 
