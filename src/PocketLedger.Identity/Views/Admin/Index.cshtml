@@ -1,0 +1,54 @@
+@model PocketLedger.Models.ViewModels.Admin.AdminDashboardViewModel
+@{ ViewData["Title"] = "Admin"; }
+
+<div class="mb-4">
+    <h1 class="mb-1">Admin dashboard</h1>
+    <p class="text-muted mb-0">Read-only operational overview for the bootstrap administrator.</p>
+</div>
+
+<section aria-labelledby="user-overview-heading">
+    <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
+        <h2 class="h4 mb-0" id="user-overview-heading">Users</h2>
+        <span class="text-muted">@Model.TotalUsers total</span>
+    </div>
+    @if (Model.Users.Count == 0)
+    {
+        <div class="alert alert-info" role="status">No users are available.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">Username</th><th scope="col">Last successful login (UTC)</th></tr></thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr><td>@user.Username</td><td>@(user.LastSuccessfulLoginAtUtc?.ToString("u") ?? "Never signed in")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex align-items-center justify-content-between mt-3" aria-label="User overview pages">
+            @if (Model.Page > 1)
+            {
+                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page - 1)" rel="prev">Previous</a>
+            }
+            else
+            {
+                <span></span>
+            }
+            <span class="text-muted">Page @Model.Page of @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page + 1)" rel="next">Next</a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </nav>
+    }
+</section>
