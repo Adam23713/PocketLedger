@@ -17,6 +17,7 @@ using PocketLedger.Controllers;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Security;
+using PocketLedger.Services;
 
 namespace PocketLedger.Identity.Tests;
 
@@ -42,6 +43,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
                 options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
                 options.DefaultForbidScheme = TestAuthenticationHandler.SchemeName;
             }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationHandler.SchemeName, _ => { });
+            services.RemoveAll<ICrowdSecDecisionReader>();
+            services.AddSingleton<ICrowdSecDecisionReader>(new TestCrowdSecDecisionReader());
         });
     });
 
@@ -83,6 +86,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         Assert.True(content.IndexOf("user-11", StringComparison.Ordinal) < content.IndexOf("user-10", StringComparison.Ordinal));
         Assert.DoesNotContain("type=\"search\"", content, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Page 1 of 2", content);
+        Assert.Contains("203.0.113.99", content);
+        Assert.Contains("pocketledger/http-flood", content);
     }
 
     [Fact]
@@ -136,5 +141,11 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
             var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
         }
+    }
+
+    private sealed class TestCrowdSecDecisionReader : ICrowdSecDecisionReader
+    {
+        public Task<CrowdSecBanDecisionsResult> GetActiveBansAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(new CrowdSecBanDecisionsResult(true, [new CrowdSecBanDecision("203.0.113.99", "Ip", "pocketledger/http-flood", "crowdsec", "ban", "30m")]));
     }
 }
