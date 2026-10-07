@@ -1,0 +1,34 @@
+@model PocketLedger.Security.SuspiciousRequestEventsResult
+
+<section class="mt-5" aria-labelledby="suspicious-requests-heading">
+    <h2 class="h4 mb-2" id="suspicious-requests-heading">Suspicious request bursts</h2>
+    @if (!Model.IsAvailable)
+    {
+        <div class="alert alert-info" role="status">Suspicious request detection is currently unavailable.</div>
+    }
+    else if (Model.Events.Count == 0)
+    {
+        <div class="alert alert-info" role="status">No suspicious request bursts were detected recently.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">Detected (UTC)</th><th scope="col">Client address</th><th scope="col">Requests</th><th scope="col">Window</th><th scope="col">Users</th><th scope="col">Application / host</th></tr></thead>
+                <tbody>
+                    @foreach (var item in Model.Events)
+                    {
+                        <tr>
+                            <td>@item.DetectedAtUtc.ToString("u")</td>
+                            <td><code>@item.ClientIpAddress</code></td>
+                            <td>@item.RequestCount</td>
+                            <td>@item.Window.TotalMinutes.ToString("0") minutes</td>
+                            <td>@(item.UserIds.Count == 0 ? "Anonymous or unattributed" : string.Join(", ", item.UserIds))</td>
+                            <td>@string.Join(", ", item.Applications)<br /><span class="text-muted">@string.Join(", ", item.Hosts)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

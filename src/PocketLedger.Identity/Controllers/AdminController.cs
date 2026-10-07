@@ -10,7 +10,7 @@ namespace PocketLedger.Controllers;
 
 [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public sealed class AdminController(UserManager<ApplicationUser> userManager) : Controller
+public sealed class AdminController(UserManager<ApplicationUser> userManager, ISuspiciousRequestEventReader suspiciousRequestEvents) : Controller
 {
     private const int PageSize = 10;
 
@@ -24,6 +24,7 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager) : 
         var users = await query.OrderBy(user => user.LastSuccessfulLoginAtUtc == null).ThenByDescending(user => user.LastSuccessfulLoginAtUtc)
             .ThenBy(user => user.NormalizedUserName).ThenBy(user => user.Id).Skip((page - 1) * PageSize).Take(PageSize)
             .Select(user => new AdminUserOverviewItem(user.UserName ?? "Unavailable", user.LastSuccessfulLoginAtUtc)).ToListAsync(cancellationToken);
-        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers));
+        var suspiciousRequests = await suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
+        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, suspiciousRequests));
     }
 }
