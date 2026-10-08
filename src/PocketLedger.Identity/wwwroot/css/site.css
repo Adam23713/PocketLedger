@@ -284,6 +284,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder { color: var(--text-secondary); text-align: end; }
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder { text-align: start; }
 .form-narrow { max-width: 720px; }
+.request-activity-chart-container { height: 22rem; position: relative; }
+.request-activity-table-container { max-height: 28rem; overflow-y: auto; }
 
 @media (max-width: 991.98px) {
   .navbar > .container-fluid { flex-wrap: wrap; }
