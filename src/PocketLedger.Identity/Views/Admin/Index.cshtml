@@ -53,5 +53,11 @@
     }
 </section>
 
+<partial name="_RequestActivity" model="Model.RequestActivity" />
 <partial name="_SuspiciousRequestEvents" model="Model.SuspiciousRequests" />
 <partial name="_CrowdSecBans" model="Model.CrowdSecBans" />
+
+@section Scripts {
+    <script src="~/lib/chart.js/chart.umd.min.js"></script>
+    <script src="~/js/request-activity.js" asp-append-version="true"></script>
+}
