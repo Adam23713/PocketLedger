@@ -1,5 +1,7 @@
 using System.Net;
+using System.Reflection;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +50,64 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     }
 
     [Fact]
+    public void AllowAnonymous_IsLimitedToLoginFlowOidcProtocolAndIdentityRoot()
+    {
+        var anonymousActions = typeof(Program).Assembly.GetTypes()
+            .Where(type => typeof(Controller).IsAssignableFrom(type))
+            .SelectMany(type => type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Where(method => method.GetCustomAttribute<AllowAnonymousAttribute>() is not null)
+                .Select(method => $"{type.Name}.{method.Name}"))
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal(new[]
+        {
+            "AccountController.Login",
+            "AccountController.RecoveryCode",
+            "AccountController.TwoFactor",
+            "AuthorizationController.AuthorizeEndpoint",
+            "AuthorizationController.TokenEndpoint",
+            "HomeController.Index"
+        }, anonymousActions);
+    }
+
+    [Theory]
+    [InlineData("/Account/AccessDenied")]
+    [InlineData("/Account/SetupAuthenticator")]
+    [InlineData("/Account/RecoveryCodes")]
+    [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/Security")]
+    [InlineData("/Account/LoginEvents")]
+    [InlineData("/Admin")]
+    [InlineData("/Admin/RequestActivity")]
+    [InlineData("/connect/logout")]
+    public async Task AnonymousUser_IsRedirectedFromEveryProtectedPage(string path)
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", GetRedirectPath(response));
+    }
+
+    [Theory]
+    [InlineData("/Account/SetupAuthenticator")]
+    [InlineData("/Account/RecoveryCodes")]
+    [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/Logout")]
+    public async Task AnonymousUser_IsRejectedBeforeProtectedPostActionRuns(string path)
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.PostAsync(path, new FormUrlEncodedContent([]));
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", GetRedirectPath(response));
+    }
+
+    [Fact]
     public async Task AuthorizationEndpoint_RedirectsAnonymousUserToIdentityLogin()
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
@@ -87,5 +147,12 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
         var result = Assert.IsType<RedirectResult>(controller.Index());
 
         Assert.Equal("https://app.example.test", result.Url);
+    }
+
+    private static string? GetRedirectPath(HttpResponseMessage response)
+    {
+        var location = response.Headers.Location;
+        if (location is null) return null;
+        return location.IsAbsoluteUri ? location.AbsolutePath : location.OriginalString.Split('?', 2)[0];
     }
 }

@@ -3,7 +3,8 @@
     var configuration = Context.RequestServices.GetRequiredService<IConfiguration>();
     var themeCookieDomain = configuration["Theme:CookieDomain"];
     var themeCookieSecure = !Context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
-    var showThemeSelector = User.Identity?.IsAuthenticated == true;
+    var hideAuthenticatedNavigation = ViewData["HideAuthenticatedNavigation"] as bool? == true;
+    var showThemeSelector = User.Identity?.IsAuthenticated == true && !hideAuthenticatedNavigation;
     var isBootstrapAdministrator = User.HasClaim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString);
     var webBaseUrl = configuration["OpenIddict:WebBaseUrl"]!.TrimEnd('/');
     var landingBaseUrl = configuration["Landing:BaseUrl"]!.TrimEnd('/');

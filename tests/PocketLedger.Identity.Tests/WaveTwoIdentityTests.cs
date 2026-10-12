@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Security;
@@ -66,6 +67,44 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
         Assert.Contains("action=\"/Account/Logout\"", regularHtml);
         Assert.DoesNotContain("href=\"/Admin\"", regularHtml);
         Assert.Contains("href=\"/Admin\"", adminHtml);
+    }
+
+    [Theory]
+    [InlineData("/")]
+    [InlineData("/Account/Login")]
+    [InlineData("/Account/TwoFactor")]
+    [InlineData("/Account/RecoveryCode")]
+    [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/Security")]
+    [InlineData("/Account/LoginEvents")]
+    [InlineData("/Admin")]
+    [InlineData("/connect/authorize?client_id=pocketledger-web&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A5050%2Fsignin-oidc&scope=openid&code_challenge=abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG&code_challenge_method=S256")]
+    public async Task IncompleteTwoFactorSetup_IsRedirectedFromEveryNonSetupPage(string path)
+    {
+        await SeedIncompleteUserAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/SetupAuthenticator", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task IncompleteTwoFactorSetup_CanOpenSetupWithoutAuthenticatedNavigation()
+    {
+        await SeedIncompleteUserAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/Account/SetupAuthenticator");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Configure Microsoft Authenticator", html);
+        Assert.DoesNotContain("<header class=\"app-header\">", html);
+        Assert.DoesNotContain("id=\"theme-menu-button\"", html);
+        Assert.DoesNotContain("href=\"/Account/Security\"", html);
+        Assert.DoesNotContain("href=\"/Account/LoginEvents\"", html);
     }
 
     [Fact]
@@ -198,8 +237,34 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
         var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
         await db.Database.EnsureDeletedAsync();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var user = new ApplicationUser { Id = CurrentUserId, UserName = "wave-two-user", NormalizedUserName = "WAVE-TWO-USER", AuthenticatorSetupComplete = true };
+        var user = new ApplicationUser { Id = CurrentUserId, UserName = "wave-two-user", NormalizedUserName = "WAVE-TWO-USER", TwoFactorEnabled = true, AuthenticatorSetupComplete = true };
         Assert.True((await users.CreateAsync(user, CurrentPassword)).Succeeded);
+    }
+
+    private async Task SeedIncompleteUserAsync()
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        await db.Database.EnsureDeletedAsync();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = new ApplicationUser { Id = CurrentUserId, UserName = "wave-two-user", NormalizedUserName = "WAVE-TWO-USER", AuthenticatorSetupComplete = false };
+        Assert.True((await users.CreateAsync(user, CurrentPassword)).Succeeded);
+        var applications = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
+        await applications.CreateAsync(new OpenIddictApplicationDescriptor
+        {
+            ClientId = "pocketledger-web",
+            ClientType = OpenIddictConstants.ClientTypes.Public,
+            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+            RedirectUris = { new Uri("http://localhost:5050/signin-oidc") },
+            Permissions =
+            {
+                OpenIddictConstants.Permissions.Endpoints.Authorization,
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                OpenIddictConstants.Permissions.ResponseTypes.Code,
+                OpenIddictConstants.Permissions.Prefixes.Scope + OpenIddictConstants.Scopes.OpenId
+            },
+            Requirements = { OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange }
+        });
     }
 
     private async Task<string> SeedUserWithAuthenticatorAsync()
