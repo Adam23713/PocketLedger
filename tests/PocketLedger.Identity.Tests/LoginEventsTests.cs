@@ -156,7 +156,7 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
         await using var scope = authenticatedFactory.Services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
         await dbContext.Database.EnsureDeletedAsync();
-        dbContext.Users.Add(new ApplicationUser { Id = CurrentUserId, UserName = "current-user", NormalizedUserName = "CURRENT-USER" });
+        dbContext.Users.Add(new ApplicationUser { Id = CurrentUserId, UserName = "current-user", NormalizedUserName = "CURRENT-USER", TwoFactorEnabled = true, AuthenticatorSetupComplete = true });
         await dbContext.SaveChangesAsync();
     }
 

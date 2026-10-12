@@ -223,7 +223,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         return RedirectToAction(nameof(Login));
     }
 
-    [AllowAnonymous] public IActionResult AccessDenied() => View();
+    [Authorize] public IActionResult AccessDenied() => View();
 
     private async Task<bool> AllowRequestAsync(string username, CancellationToken cancellationToken)
     {

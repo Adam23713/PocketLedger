@@ -48,15 +48,18 @@ public sealed class ThemeContractTests
     }
 
     [Fact]
-    public void Layouts_LoadTheThemeBootstrapBeforeStylesAndIdentitySelectorRequiresAuthentication()
+    public void Layouts_LoadTheThemeBootstrapBeforeStylesAndIdentitySelectorRequiresCompletedAuthenticationFlow()
     {
         var webLayout = Read(WebRoot, "Views", "Shared", "_Layout.cshtml");
         var identityLayout = Read(IdentityRoot, "Views", "Shared", "_Layout.cshtml");
 
         AssertBootstrapBeforeStyles(webLayout);
         AssertBootstrapBeforeStyles(identityLayout);
-        Assert.Contains("var showThemeSelector = User.Identity?.IsAuthenticated == true;", identityLayout);
+        Assert.Contains("var hideAuthenticatedNavigation = ViewData[\"HideAuthenticatedNavigation\"] as bool? == true;", identityLayout);
+        Assert.Contains("var showThemeSelector = User.Identity?.IsAuthenticated == true && !hideAuthenticatedNavigation;", identityLayout);
         Assert.Matches(new Regex("@if \\(showThemeSelector\\)[\\s\\S]*id=\"theme-menu-button\"", RegexOptions.CultureInvariant), identityLayout);
+        Assert.Contains("ViewData[\"HideAuthenticatedNavigation\"] = true", Read(IdentityRoot, "Views", "Account", "SetupAuthenticator.cshtml"));
+        Assert.Contains("ViewData[\"HideAuthenticatedNavigation\"] = true", Read(IdentityRoot, "Views", "Account", "RecoveryCodes.cshtml"));
     }
 
     [Fact]
