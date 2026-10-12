@@ -24,6 +24,7 @@ RUN dotnet publish src/PocketLedger.Web/PocketLedger.Web.csproj -c Release -o /a
 RUN dotnet publish src/PocketLedger.Api/PocketLedger.Api.csproj -c Release -o /app/api --no-restore /p:UseAppHost=false
 RUN dotnet publish src/PocketLedger.Identity/PocketLedger.Identity.csproj -c Release -o /app/identity --no-restore /p:UseAppHost=false
 RUN dotnet publish tools/PocketLedger.Security.Cli/PocketLedger.Security.Cli.csproj -c Release -o /app/security-cli --no-restore /p:UseAppHost=false
+RUN chmod -R a+rX /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS web
 WORKDIR /app
