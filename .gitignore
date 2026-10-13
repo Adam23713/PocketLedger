@@ -8,3 +8,4 @@ caddy/logs/
 *.p12
 *.pem
 *.enc
+*.p8

@@ -115,6 +115,10 @@ services:
       Authentication__Google__ClientSecret: ${POCKETLEDGER_GOOGLE_CLIENT_SECRET:-}
       Authentication__Facebook__AppId: ${POCKETLEDGER_FACEBOOK_APP_ID:-}
       Authentication__Facebook__AppSecret: ${POCKETLEDGER_FACEBOOK_APP_SECRET:-}
+      Authentication__Apple__ClientId: ${POCKETLEDGER_APPLE_CLIENT_ID:-}
+      Authentication__Apple__TeamId: ${POCKETLEDGER_APPLE_TEAM_ID:-}
+      Authentication__Apple__KeyId: ${POCKETLEDGER_APPLE_KEY_ID:-}
+      Authentication__Apple__PrivateKeyPath: ${POCKETLEDGER_APPLE_PRIVATE_KEY_FILE:+/run/pocketledger-apple/private-key.p8}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
@@ -125,6 +129,11 @@ services:
       - type: bind
         source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/identity/certificates
         target: /run/pocketledger-certificates
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_APPLE_PRIVATE_KEY_FILE:-/dev/null}
+        target: /run/pocketledger-apple/private-key.p8
         read_only: true
         bind: { create_host_path: false }
     depends_on:
