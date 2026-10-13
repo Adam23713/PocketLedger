@@ -364,7 +364,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (user is null) return Challenge();
         var events = await dbContext.AuthenticationAuditEvents.AsNoTracking().Where(item => item.UserId == user.Id)
             .OrderByDescending(item => item.TimestampUtc).ThenByDescending(item => item.Id).Take(5).ToListAsync(cancellationToken);
-        return View(new SecurityDashboardViewModel(events));
+        return View(new SecurityDashboardViewModel(events, await userManager.HasPasswordAsync(user)));
     }
 
     [Authorize, HttpGet]
