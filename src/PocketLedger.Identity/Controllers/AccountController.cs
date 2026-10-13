@@ -1,7 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Account;
@@ -12,15 +17,18 @@ namespace PocketLedger.Controllers;
 
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
-    IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver) : Controller
+    IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
+    IOptions<PublicRegistrationOptions> registrationOptions) : Controller
 {
     [AllowAnonymous, HttpGet]
-    public IActionResult Login(string? returnUrl = null) => User.Identity?.IsAuthenticated == true ? LocalRedirect(returnUrl ?? "/") : View(new LoginViewModel { ReturnUrl = returnUrl });
+    public async Task<IActionResult> Login(string? returnUrl = null) => User.Identity?.IsAuthenticated == true
+        ? LocalRedirect(returnUrl ?? "/")
+        : View(await BuildLoginModelAsync(returnUrl));
 
     [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid) return View(await BuildLoginModelAsync(model.ReturnUrl, model));
         if (!await AllowRequestAsync(model.Username, cancellationToken)) return TooManyRequests();
         var normalized = userManager.NormalizeName(model.Username.Trim());
         var user = await userManager.FindByNameAsync(model.Username.Trim());
@@ -42,7 +50,165 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var reason = result.IsLockedOut || wasLocked || nowLocked ? "LockedOut" : "InvalidCredentials";
         await audit.WriteAsync(reason == "LockedOut" ? "LoginLockout" : "LoginFailed", "Failure", user?.Id, normalized, reason, cancellationToken: cancellationToken);
         ModelState.AddModelError(string.Empty, reason == "LockedOut" ? "Login is temporarily unavailable." : "Invalid login attempt.");
-        return View(model);
+        return View(await BuildLoginModelAsync(model.ReturnUrl, model));
+    }
+
+    [AllowAnonymous, HttpGet]
+    public async Task<IActionResult> Register(string? returnUrl = null)
+    {
+        if (!registrationOptions.Value.Enabled) return NotFound();
+        if (User.Identity?.IsAuthenticated == true) return LocalRedirect(returnUrl ?? "/");
+        return View(await BuildRegisterModelAsync(returnUrl));
+    }
+
+    [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken cancellationToken)
+    {
+        if (!registrationOptions.Value.Enabled) return NotFound();
+        if (User.Identity?.IsAuthenticated == true) return LocalRedirect(model.ReturnUrl ?? "/");
+        if (!await AllowRegistrationRequestAsync(cancellationToken)) return TooManyRequests();
+        if (!ModelState.IsValid)
+        {
+            await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "ValidationFailed", cancellationToken: cancellationToken);
+            return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
+        }
+
+        if (await EmailExistsAsync(model.Email, cancellationToken))
+        {
+            await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "ExistingEmail", cancellationToken: cancellationToken);
+            ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
+            return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
+        }
+
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false };
+        IdentityResult result;
+        try
+        {
+            result = await userManager.CreateAsync(user, model.Password);
+        }
+        catch (DbUpdateException)
+        {
+            dbContext.Entry(user).State = EntityState.Detached;
+            await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "EmailCollision", cancellationToken: cancellationToken);
+            ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
+            return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
+        }
+        if (!result.Succeeded)
+        {
+            await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "IdentityValidationFailed", cancellationToken: cancellationToken);
+            foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+            return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
+        }
+
+        await signInManager.SignInAsync(user, false);
+        await audit.WriteAsync("Registration", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        return RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
+    }
+
+    [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExternalLogin(string provider, string? returnUrl = null, CancellationToken cancellationToken = default)
+    {
+        if (!await AllowExternalLoginRequestAsync("challenge", provider, cancellationToken)) return TooManyRequests();
+        var scheme = (await signInManager.GetExternalAuthenticationSchemesAsync()).SingleOrDefault(item => string.Equals(item.Name, provider, StringComparison.Ordinal));
+        if (scheme is null || string.IsNullOrWhiteSpace(scheme.DisplayName))
+        {
+            await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "UnsupportedProvider", cancellationToken: cancellationToken);
+            return BadRequest("The selected external login provider is unavailable.");
+        }
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), new { returnUrl });
+        return Challenge(signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl), provider);
+    }
+
+    [AllowAnonymous, HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null, CancellationToken cancellationToken = default)
+    {
+        if (!await AllowExternalLoginRequestAsync("callback", null, cancellationToken)) return TooManyRequests();
+        if (!string.IsNullOrWhiteSpace(remoteError))
+        {
+            await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "ProviderError", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "The external login was cancelled or rejected by the provider.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+        {
+            await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "MissingExternalLoginInfo", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "The external login response could not be validated.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+        var linkedUser = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+        if (linkedUser is not null)
+        {
+            var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false, bypassTwoFactor: false);
+            if (result.RequiresTwoFactor)
+            {
+                await audit.WriteAsync("ExternalLoginTotpRequired", "Success", linkedUser.Id, linkedUser.NormalizedUserName, cancellationToken: cancellationToken);
+                return RedirectToAction(nameof(TwoFactor), new { returnUrl });
+            }
+            if (result.Succeeded)
+            {
+                await RecordSuccessfulLoginAsync(linkedUser);
+                await audit.WriteAsync(linkedUser.AuthenticatorSetupComplete ? "ExternalLoginSucceeded" : "ExternalLoginAcceptedSetupRequired", "Success", linkedUser.Id, linkedUser.NormalizedUserName, cancellationToken: cancellationToken);
+                return linkedUser.AuthenticatorSetupComplete ? LocalRedirect(returnUrl ?? "/") : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
+            }
+
+            await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, result.IsLockedOut ? "LockedOut" : "SignInRejected", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, result.IsLockedOut ? "Login is temporarily unavailable." : "The external login could not be completed.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+
+        if (!TryGetVerifiedEmail(info.Principal, out var email))
+        {
+            await audit.WriteAsync("ExternalRegistration", "Failure", failureReason: "VerifiedEmailRequired", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "The external provider must supply a verified email address.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+        if (!registrationOptions.Value.Enabled)
+        {
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "RegistrationDisabled", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "Registration is currently unavailable.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+        if (await EmailExistsAsync(email, cancellationToken))
+        {
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "ExistingEmail", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "An account already exists for this email address. Sign in with the existing account instead.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = email, Email = email, EmailConfirmed = true };
+        IdentityResult createResult;
+        try
+        {
+            createResult = await userManager.CreateAsync(user);
+        }
+        catch (DbUpdateException)
+        {
+            dbContext.Entry(user).State = EntityState.Detached;
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "EmailCollision", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "An account already exists for this email address. Sign in with the existing account instead.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+        if (!createResult.Succeeded)
+        {
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "IdentityValidationFailed", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "The external account could not be registered.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+
+        var addLoginResult = await userManager.AddLoginAsync(user, info);
+        if (!addLoginResult.Succeeded)
+        {
+            await userManager.DeleteAsync(user);
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "ExternalLoginLinkFailed", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, "The external account could not be registered.");
+            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+        }
+
+        await signInManager.SignInAsync(user, false, info.LoginProvider);
+        await audit.WriteAsync("ExternalRegistration", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        return RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
     }
 
     [AllowAnonymous, HttpGet]
@@ -239,6 +405,72 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (lease.IsAcquired) return true;
         await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, "RateLimited", cancellationToken: cancellationToken);
         return false;
+    }
+
+    private async Task<bool> AllowRegistrationRequestAsync(CancellationToken cancellationToken)
+    {
+        var clientAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext) ?? "UNKNOWN";
+        using var lease = await rateLimiter.AcquireAsync($"registration:{clientAddress}", cancellationToken);
+        if (lease.IsAcquired) return true;
+        await audit.WriteAsync("Registration", "Failure", failureReason: "RateLimited", cancellationToken: cancellationToken);
+        return false;
+    }
+
+    private async Task<bool> AllowExternalLoginRequestAsync(string stage, string? provider, CancellationToken cancellationToken)
+    {
+        var clientAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext) ?? "UNKNOWN";
+        using var lease = await rateLimiter.AcquireAsync($"external-login:{stage}:{provider}:{clientAddress}", cancellationToken);
+        if (lease.IsAcquired) return true;
+        await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "RateLimited", cancellationToken: cancellationToken);
+        return false;
+    }
+
+    private async Task<LoginViewModel> BuildLoginModelAsync(string? returnUrl, LoginViewModel? model = null)
+    {
+        model ??= new LoginViewModel();
+        model.ReturnUrl = returnUrl;
+        model.RegistrationEnabled = registrationOptions.Value.Enabled;
+        model.ExternalProviders = await GetExternalProvidersAsync();
+        return model;
+    }
+
+    private async Task<RegisterViewModel> BuildRegisterModelAsync(string? returnUrl, RegisterViewModel? model = null)
+    {
+        model ??= new RegisterViewModel();
+        model.ReturnUrl = returnUrl;
+        model.ExternalProviders = await GetExternalProvidersAsync();
+        return model;
+    }
+
+    private async Task<IReadOnlyList<ExternalLoginProviderViewModel>> GetExternalProvidersAsync()
+        => (await signInManager.GetExternalAuthenticationSchemesAsync()).Where(item => !string.IsNullOrWhiteSpace(item.DisplayName))
+            .Select(item => new ExternalLoginProviderViewModel(item.Name, item.DisplayName!)).OrderBy(item => item.DisplayName, StringComparer.Ordinal).ToArray();
+
+    private async Task RecordSuccessfulLoginAsync(ApplicationUser user)
+    {
+        if (!user.AuthenticatorSetupComplete) return;
+        user.LastSuccessfulLoginAtUtc = DateTimeOffset.UtcNow;
+        user.LastSuccessfulLoginIpAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext);
+        await userManager.UpdateAsync(user);
+    }
+
+    private Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
+    {
+        var normalizedEmail = userManager.NormalizeEmail(email.Trim());
+        return userManager.Users.AsNoTracking().AnyAsync(user => user.NormalizedEmail == normalizedEmail, cancellationToken);
+    }
+
+    private static bool TryGetVerifiedEmail(ClaimsPrincipal principal, out string email)
+    {
+        email = principal.FindFirstValue(ClaimTypes.Email) ?? principal.FindFirstValue("email") ?? string.Empty;
+        var emailVerified = principal.FindAll("email_verified").Any(claim => string.Equals(claim.Value, bool.TrueString, StringComparison.OrdinalIgnoreCase));
+        if (!emailVerified || email.Length > 256 || !new EmailAddressAttribute().IsValid(email))
+        {
+            email = string.Empty;
+            return false;
+        }
+        email = email.Trim();
+        return true;
     }
 
     private ViewResult TooManyRequests()
