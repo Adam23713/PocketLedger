@@ -435,7 +435,9 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasFilter("\"IsBootstrapAdministrator\" = TRUE");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
+                        .IsUnique()
+                        .HasDatabaseName("EmailIndex")
+                        .HasFilter("\"NormalizedEmail\" IS NOT NULL");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()

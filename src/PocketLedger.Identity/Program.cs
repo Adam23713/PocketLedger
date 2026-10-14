@@ -18,6 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
 builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName);
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
 builder.Services.AddOptions<CrowdSecOptions>().BindConfiguration(CrowdSecOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddHttpClient<ICrowdSecDecisionReader, CrowdSecDecisionReader>((services, client) =>

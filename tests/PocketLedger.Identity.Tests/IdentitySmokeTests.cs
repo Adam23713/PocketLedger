@@ -50,6 +50,18 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     }
 
     [Fact]
+    public async Task PublicRegistration_IsUnavailableByDefault()
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/Account/Register");
+        var loginHtml = await client.GetStringAsync("/Account/Login");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.DoesNotContain("href=\"/Account/Register\"", loginHtml);
+    }
+
+    [Fact]
     public void AllowAnonymous_IsLimitedToLoginFlowOidcProtocolAndIdentityRoot()
     {
         var anonymousActions = typeof(Program).Assembly.GetTypes()
@@ -63,8 +75,11 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
 
         Assert.Equal(new[]
         {
+            "AccountController.ExternalLogin",
+            "AccountController.ExternalLoginCallback",
             "AccountController.Login",
             "AccountController.RecoveryCode",
+            "AccountController.Register",
             "AccountController.TwoFactor",
             "AuthorizationController.AuthorizeEndpoint",
             "AuthorizationController.TokenEndpoint",
