@@ -13,6 +13,13 @@ public sealed class AuthenticationSecurityOptions
     [Range(1, 3600)] public int RateLimitWindowSeconds { get; set; } = 60;
 }
 
+public sealed class PublicRegistrationOptions
+{
+    public const string SectionName = "Registration";
+
+    public bool Enabled { get; set; }
+}
+
 public sealed class ForwardedHeadersOptionsConfig
 {
     public string[] KnownProxies { get; set; } = [];
