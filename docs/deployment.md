@@ -38,8 +38,11 @@ In `.env`, set all four domain names and replace every placeholder secret:
 - `POCKETLEDGER_SIGNING_KEY` — at least 32 random bytes, Base64-encoded: `openssl rand -base64 64`.
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.
+- `POCKETLEDGER_GOOGLE_CLIENT_ID` / `POCKETLEDGER_GOOGLE_CLIENT_SECRET` — optional Google OAuth web client credentials. Create the client in Google Cloud Console and add `https://<POCKETLEDGER_IDENTITY_DOMAIN>/signin-google` as an authorized redirect URI. Leave both values empty to keep Google login disabled; never commit the production secret.
 - `CROWDSEC_API_KEY` — `openssl rand -hex 32`. Review the [edge security guide](edge-security.md) for the rest of the Cloudflare and CrowdSec setup, including verification, monitoring, key rotation and rollback.
 - `CROWDSEC_IDENTITY_API_KEY` — a second `openssl rand -hex 32` value used only by the Identity Admin dashboard for read-only LAPI decision queries. Never reuse `CROWDSEC_API_KEY`.
+
+For Google login, configure the OAuth consent screen and create a **Web application** OAuth client in Google Cloud Console. Register the exact production callback `https://<identity-domain>/signin-google`; for direct local development also register `http://localhost:5052/signin-google`. Google login appears only when both credential values are non-empty. PocketLedger requests only the `openid` and `email` scopes and accepts a new external account only when Google reports its email as verified.
 
 Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can select a different set of Compose-managed database volumes — Compose uses the project name to identify its containers, networks and named volumes, not the directory path.
 
