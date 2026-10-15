@@ -22,7 +22,7 @@ using PocketLedger.Security;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private static readonly Guid CurrentUserId = Guid.Parse("d34a26aa-f46d-48ce-a9f7-fbf3f928dffe");
     private const string CurrentPassword = "Old!PocketLedger#2026";
@@ -46,6 +46,8 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
             }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationHandler.SchemeName, _ => { });
         });
     });
+
+    public void Dispose() => factory.Dispose();
 
     [Fact]
     public async Task AuthenticatedNavigation_UsesConfiguredLinksAndShowsAdminOnlyForClaim()

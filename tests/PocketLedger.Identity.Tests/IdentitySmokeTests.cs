@@ -15,7 +15,7 @@ using PocketLedger.Data;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private readonly WebApplicationFactory<Program> factory;
 
@@ -31,6 +31,8 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
             services.AddDbContext<IdentityDbContext>(options => { options.UseInMemoryDatabase(nameof(IdentitySmokeTests)); options.UseOpenIddict(); });
         });
     });
+
+    public void Dispose() => factory.Dispose();
 
     [Theory]
     [InlineData("/Account/Login")]
@@ -50,15 +52,15 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     }
 
     [Fact]
-    public async Task PublicRegistration_IsUnavailableByDefault()
+    public async Task PublicRegistration_IsAvailableByDefault()
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
         var response = await client.GetAsync("/Account/Register");
         var loginHtml = await client.GetStringAsync("/Account/Login");
 
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        Assert.DoesNotContain("href=\"/Account/Register\"", loginHtml);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("href=\"/Account/Register\"", loginHtml);
     }
 
     [Fact]

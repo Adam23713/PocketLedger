@@ -2,6 +2,8 @@
 @inject IConfiguration Configuration
 @{
     var appUrl = Configuration["Landing:AppBaseUrl"]!;
+    var identityUrl = Configuration["Landing:IdentityBaseUrl"]!;
+    var registrationEnabled = Configuration.GetValue<bool>("Registration:Enabled");
     const string repository = "https://github.com/Adam23713/PocketLedger";
     const string contactEmail = "privacy@pocketledger.dev";
 }
@@ -24,7 +26,7 @@
         </symbol>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.</div>
+    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. @if (registrationEnabled) { <span>Public registration is open — <a href="@(identityUrl + "/Account/Register")">create your account</a>.</span> } else { <span>Public registration is currently closed.</span> }</div>
     <header class="header">
         <nav class="shell nav" aria-label="Main navigation">
             <a class="brand" href="/"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>
@@ -122,7 +124,7 @@
                 <p>PocketLedger is open source, so you don't have to take our word for this — you can read exactly how it's built:</p>
                 <ul>
                     <li>Sensitive fields (transaction notes, account and category names, debts, your TOTP secret, recovery codes) are <strong>encrypted before they're ever written to the database</strong>, with no setting to turn this off and no plaintext fallback on error.</li>
-                    <li>Every account is protected by <strong>TOTP-based two-factor authentication</strong> and one-time recovery codes. There is no public self-registration — accounts are created by us directly.</li>
+                    <li>Every account is protected by <strong>TOTP-based two-factor authentication</strong> and one-time recovery codes. When public registration is enabled, new users can create their own account.</li>
                     <li>Traffic to the Service passes through a rate-limiting and automated-ban layer that blocks abusive or high-volume requests before they reach the application.</li>
                     <li>Every internal connection between our services is itself encrypted with a private TLS certificate authority, independent of the public HTTPS connection your browser uses.</li>
                 </ul>

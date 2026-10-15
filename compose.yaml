@@ -14,6 +14,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      Landing__IdentityBaseUrl: https://${POCKETLEDGER_IDENTITY_DOMAIN}
+      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-true}
     restart: unless-stopped
 
   web:
@@ -110,7 +112,7 @@ services:
       OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       ForwardedHeaders__TrustAll: "true"
-      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-false}
+      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-true}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
