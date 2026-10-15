@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using AspNet.Security.OAuth.Apple;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -78,6 +79,31 @@ if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(face
         options.ClaimActions.Clear();
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.Add(new FacebookVerifiedEmailClaimAction());
+    });
+}
+var appleClientId = builder.Configuration["Authentication:Apple:ClientId"];
+var appleTeamId = builder.Configuration["Authentication:Apple:TeamId"];
+var appleKeyId = builder.Configuration["Authentication:Apple:KeyId"];
+var applePrivateKeyPath = builder.Configuration["Authentication:Apple:PrivateKeyPath"];
+if (!string.IsNullOrWhiteSpace(appleClientId) && !string.IsNullOrWhiteSpace(appleTeamId) && !string.IsNullOrWhiteSpace(appleKeyId)
+    && !string.IsNullOrWhiteSpace(applePrivateKeyPath) && File.Exists(applePrivateKeyPath))
+{
+    builder.Services.AddAuthentication().AddApple(options =>
+    {
+        options.ClientId = appleClientId;
+        options.TeamId = appleTeamId;
+        options.KeyId = appleKeyId;
+        options.GenerateClientSecret = true;
+        options.PrivateKey = async (_, cancellationToken) => (await File.ReadAllTextAsync(applePrivateKeyPath, cancellationToken)).AsMemory();
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("email");
+        options.ValidateTokens = true;
+        options.Events.OnCreatingTicket = context =>
+        {
+            if (context.Identity is not null) AppleIdentityClaims.Normalize(context.Identity);
+            return Task.CompletedTask;
+        };
     });
 }
 builder.Services.ConfigureApplicationCookie(options =>
