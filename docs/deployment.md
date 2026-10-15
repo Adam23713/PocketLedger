@@ -39,10 +39,13 @@ In `.env`, set all four domain names and replace every placeholder secret:
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.
 - `POCKETLEDGER_GOOGLE_CLIENT_ID` / `POCKETLEDGER_GOOGLE_CLIENT_SECRET` — optional Google OAuth web client credentials. Create the client in Google Cloud Console and add `https://<POCKETLEDGER_IDENTITY_DOMAIN>/signin-google` as an authorized redirect URI. Leave both values empty to keep Google login disabled; never commit the production secret.
+- `POCKETLEDGER_FACEBOOK_APP_ID` / `POCKETLEDGER_FACEBOOK_APP_SECRET` — optional Meta app credentials for Facebook Login. Add `https://<POCKETLEDGER_IDENTITY_DOMAIN>/signin-facebook` as a valid OAuth redirect URI. Leave both values empty to keep Facebook login disabled; never commit the app secret.
 - `CROWDSEC_API_KEY` — `openssl rand -hex 32`. Review the [edge security guide](edge-security.md) for the rest of the Cloudflare and CrowdSec setup, including verification, monitoring, key rotation and rollback.
 - `CROWDSEC_IDENTITY_API_KEY` — a second `openssl rand -hex 32` value used only by the Identity Admin dashboard for read-only LAPI decision queries. Never reuse `CROWDSEC_API_KEY`.
 
 For Google login, configure the OAuth consent screen and create a **Web application** OAuth client in Google Cloud Console. Register the exact production callback `https://<identity-domain>/signin-google`; for direct local development also register `http://localhost:5052/signin-google`. Google login appears only when both credential values are non-empty. PocketLedger requests only the `openid` and `email` scopes and accepts a new external account only when Google reports its email as verified.
+
+For Facebook login, create a Meta app with the **Facebook Login** product, configure its basic App ID and App Secret, and add the exact production callback `https://<identity-domain>/signin-facebook` under **Valid OAuth Redirect URIs**. For direct local development, also register `http://localhost:5052/signin-facebook`. Facebook login appears only when both credential values are non-empty. PocketLedger requests only the `email` permission and the `id` and `email` profile fields. A Facebook account that does not return a syntactically valid email is rejected rather than linked or registered; Meta test users and app roles may be required while the app remains in development mode.
 
 Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can select a different set of Compose-managed database volumes — Compose uses the project name to identify its containers, networks and named volumes, not the directory path.
 

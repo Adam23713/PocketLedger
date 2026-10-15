@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -59,6 +60,24 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         options.Scope.Add("openid");
         options.Scope.Add("email");
         options.ClaimActions.MapJsonKey("email_verified", "verified_email", ClaimValueTypes.Boolean);
+    });
+}
+var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
+var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret))
+{
+    builder.Services.AddAuthentication().AddFacebook(options =>
+    {
+        options.AppId = facebookAppId;
+        options.AppSecret = facebookAppSecret;
+        options.Scope.Clear();
+        options.Scope.Add("email");
+        options.Fields.Clear();
+        options.Fields.Add("id");
+        options.Fields.Add("email");
+        options.ClaimActions.Clear();
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.Add(new FacebookVerifiedEmailClaimAction());
     });
 }
 builder.Services.ConfigureApplicationCookie(options =>
