@@ -37,6 +37,7 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             services.AddDbContext<IdentityDbContext>(options => { options.UseInMemoryDatabase(nameof(FoundationRegistrationTests)); options.UseOpenIddict(); });
             services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, VerifiedExternalAuthenticationHandler>(VerifiedExternalAuthenticationHandler.SchemeName, "Verified provider", _ => { })
+                .AddScheme<AuthenticationSchemeOptions, SecondVerifiedExternalAuthenticationHandler>(SecondVerifiedExternalAuthenticationHandler.SchemeName, "Second verified provider", _ => { })
                 .AddScheme<AuthenticationSchemeOptions, UnverifiedExternalAuthenticationHandler>(UnverifiedExternalAuthenticationHandler.SchemeName, "Unverified provider", _ => { });
         });
     });
@@ -147,6 +148,82 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
     }
 
     [Fact]
+    public async Task DifferentProviderWithExistingEmail_IsRejectedWithoutAutomaticLinking()
+    {
+        await ResetDatabaseAsync();
+        using (var firstClient = CreateClient())
+        {
+            var firstResponse = await CompleteExternalLoginAsync(firstClient, VerifiedExternalAuthenticationHandler.SchemeName);
+            Assert.Equal(HttpStatusCode.Redirect, firstResponse.StatusCode);
+        }
+
+        using var secondClient = CreateClient();
+        var secondResponse = await CompleteExternalLoginAsync(secondClient, SecondVerifiedExternalAuthenticationHandler.SchemeName);
+        var html = await secondResponse.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, secondResponse.StatusCode);
+        Assert.Contains("already exists for this email address", html);
+        await using var scope = factory.Services.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        Assert.Single(await users.Users.ToListAsync());
+        Assert.Null(await users.FindByLoginAsync(SecondVerifiedExternalAuthenticationHandler.SchemeName, SecondVerifiedExternalAuthenticationHandler.SubjectValue));
+    }
+
+    [Fact]
+    public async Task PasswordRegistration_RemainsUsableWithExternalProvidersConfigured()
+    {
+        await ResetDatabaseAsync();
+        using (var registrationClient = CreateClient())
+        {
+            var registrationToken = await GetAntiforgeryTokenAsync(registrationClient, "/Account/Register");
+            var registrationResponse = await registrationClient.PostAsync("/Account/Register", Form(new Dictionary<string, string>
+            {
+                ["Username"] = "password-user",
+                ["Email"] = "password-user@example.test",
+                ["Password"] = Password,
+                ["ConfirmPassword"] = Password,
+                ["__RequestVerificationToken"] = registrationToken
+            }));
+            Assert.Equal(HttpStatusCode.Redirect, registrationResponse.StatusCode);
+        }
+
+        using var loginClient = CreateClient();
+        var loginToken = await GetAntiforgeryTokenAsync(loginClient, "/Account/Login");
+        var loginResponse = await loginClient.PostAsync("/Account/Login", Form(new Dictionary<string, string>
+        {
+            ["Username"] = "password-user",
+            ["Password"] = Password,
+            ["__RequestVerificationToken"] = loginToken
+        }));
+
+        Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
+        Assert.StartsWith("/Account/SetupAuthenticator", loginResponse.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task ExternalOnlyAccount_SecurityPageDoesNotOfferPasswordChange()
+    {
+        await ResetDatabaseAsync();
+        using var client = CreateClient();
+        var registrationResponse = await CompleteExternalLoginAsync(client, VerifiedExternalAuthenticationHandler.SchemeName);
+        Assert.Equal(HttpStatusCode.Redirect, registrationResponse.StatusCode);
+
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = (await users.FindByLoginAsync(VerifiedExternalAuthenticationHandler.SchemeName, VerifiedExternalAuthenticationHandler.Subject))!;
+            user.TwoFactorEnabled = true;
+            user.AuthenticatorSetupComplete = true;
+            Assert.True((await users.UpdateAsync(user)).Succeeded);
+        }
+
+        var html = await client.GetStringAsync("/Account/Security");
+
+        Assert.Contains("does not have a PocketLedger password", html);
+        Assert.DoesNotContain("href=\"/Account/ChangePassword\"", html);
+    }
+
+    [Fact]
     public void IdentityModel_EnforcesUniqueNonNullNormalizedEmail()
     {
         using var scope = factory.Services.CreateScope();
@@ -198,6 +275,8 @@ public abstract class ExternalAuthenticationHandlerBase(IOptionsMonitor<Authenti
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     protected abstract bool EmailVerified { get; }
+    protected virtual string ProviderSubject => VerifiedExternalAuthenticationHandler.Subject;
+    protected virtual string ProviderEmail => VerifiedExternalAuthenticationHandler.Email;
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync() => Task.FromResult(AuthenticateResult.NoResult());
 
@@ -205,8 +284,8 @@ public abstract class ExternalAuthenticationHandlerBase(IOptionsMonitor<Authenti
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, VerifiedExternalAuthenticationHandler.Subject),
-            new(ClaimTypes.Email, VerifiedExternalAuthenticationHandler.Email),
+            new(ClaimTypes.NameIdentifier, ProviderSubject),
+            new(ClaimTypes.Email, ProviderEmail),
             new("email_verified", EmailVerified.ToString())
         };
         await Context.SignInAsync(IdentityConstants.ExternalScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)), properties);
@@ -228,4 +307,13 @@ public sealed class UnverifiedExternalAuthenticationHandler(IOptionsMonitor<Auth
 {
     public const string SchemeName = "UnverifiedProvider";
     protected override bool EmailVerified => false;
+}
+
+public sealed class SecondVerifiedExternalAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+    : ExternalAuthenticationHandlerBase(options, logger, encoder)
+{
+    public const string SchemeName = "SecondVerifiedProvider";
+    public const string SubjectValue = "second-provider-subject-456";
+    protected override bool EmailVerified => true;
+    protected override string ProviderSubject => SubjectValue;
 }
