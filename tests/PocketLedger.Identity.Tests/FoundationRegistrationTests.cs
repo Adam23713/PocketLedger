@@ -18,7 +18,7 @@ using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private const string Password = "Registration!Password#2026";
     private readonly WebApplicationFactory<Program> factory;
@@ -40,6 +40,8 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
                 .AddScheme<AuthenticationSchemeOptions, UnverifiedExternalAuthenticationHandler>(UnverifiedExternalAuthenticationHandler.SchemeName, "Unverified provider", _ => { });
         });
     });
+
+    public void Dispose() => factory.Dispose();
 
     [Fact]
     public async Task PasswordRegistration_CreatesUserAuditsSuccessAndStartsAuthenticatorOnboarding()

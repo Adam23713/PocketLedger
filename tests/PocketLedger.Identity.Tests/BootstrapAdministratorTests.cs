@@ -13,7 +13,7 @@ using PocketLedger.Security;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class BootstrapAdministratorTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class BootstrapAdministratorTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private readonly WebApplicationFactory<Program> factory;
 
@@ -29,6 +29,8 @@ public sealed class BootstrapAdministratorTests : IClassFixture<WebApplicationFa
             services.AddDbContext<IdentityDbContext>(options => { options.UseInMemoryDatabase(nameof(BootstrapAdministratorTests)); options.UseOpenIddict(); });
         });
     });
+
+    public void Dispose() => factory.Dispose();
 
     [Fact]
     public async Task BootstrapFactoryCreatesOnlyAdministratorUser()
