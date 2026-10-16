@@ -28,9 +28,9 @@
         <div class="card-body">
             <div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>Monthly overview</span></div>
             <div class="dashboard-period">
-                <span><small title="Income" aria-label="Income">↓</small><strong class="text-success">+@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Income, Model.ActiveCurrency)</strong></span>
-                <span><small title="Expenses" aria-label="Expenses">↑</small><strong class="text-danger">−@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Expenses, Model.ActiveCurrency)</strong></span>
-                <span><small title="Result" aria-label="Result">=</small><strong>@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Balance, Model.ActiveCurrency)</strong></span>
+                <span><small>Income</small><strong class="text-success">+@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Income, Model.ActiveCurrency)</strong></span>
+                <span><small>Expenses</small><strong class="text-danger">−@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Expenses, Model.ActiveCurrency)</strong></span>
+                <span><small>Result</small><strong>@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Balance, Model.ActiveCurrency)</strong></span>
             </div>
         </div>
     </div>

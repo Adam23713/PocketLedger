@@ -263,15 +263,23 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .modal-content { border-radius: var(--card-radius); box-shadow: var(--card-shadow); }
 .modal-header, .modal-footer { border-color: var(--border-color); }
 
-.account-card { isolation: isolate; overflow: hidden; position: relative; transition: transform .15s ease, box-shadow .15s ease; }
-.account-card::before { background: color-mix(in srgb, var(--surface-raised) 76%, transparent); content: ""; inset: 0; position: absolute; z-index: -1; }
-[data-theme="banking"] .account-card::before { background: rgba(7, 12, 15, .68); }
-[data-theme="glass"] .account-card::before { background: rgba(8, 22, 64, .55); }
-[data-theme="horizon"] .account-card::before { background: linear-gradient(155deg, rgba(255, 255, 255, .82) 0%, rgba(255, 255, 255, .7) 55%, rgba(255, 255, 255, .8) 100%); }
+.account-card { --account-color: var(--accent-color); background: linear-gradient(145deg, color-mix(in srgb, var(--account-color) 17%, var(--surface-raised)), color-mix(in srgb, var(--account-color) 7%, var(--surface-raised))); border-color: color-mix(in srgb, var(--account-color) 32%, var(--border-color)); isolation: isolate; overflow: hidden; position: relative; transition: transform .15s ease, box-shadow .15s ease; }
+.account-card::before, .account-card::after { border-radius: 48% 0 0 48%; content: ""; pointer-events: none; position: absolute; right: -14%; transform: rotate(-14deg); z-index: 0; }
+.account-card::before { background: color-mix(in srgb, var(--account-color) 16%, transparent); bottom: 10%; height: 46%; width: 62%; }
+.account-card::after { background: color-mix(in srgb, var(--account-color) 10%, transparent); bottom: -4%; height: 40%; right: -4%; width: 48%; }
+.account-card > * { position: relative; z-index: 1; }
 .account-card:hover { box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .16); transform: translateY(-2px); }
 .account-card, .account-card .text-body { color: var(--text-primary) !important; }
-.account-card-main { display: block; }
-.account-card-actions { background: transparent; border-top-color: color-mix(in srgb, var(--border-color) 70%, transparent); }
+.account-card-main { display: block; padding: 1rem 1.1rem .9rem; }
+.account-card-header { align-items: flex-start; display: flex; gap: .75rem; justify-content: space-between; }
+.account-card-identity { align-items: center; display: flex; gap: .8rem; min-width: 0; }
+.account-card-identity h2 { font-size: 1.05rem; font-weight: 700; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-type-badge { align-items: center; background: color-mix(in srgb, var(--account-color) 16%, var(--surface-raised)); border: 1px solid color-mix(in srgb, var(--account-color) 30%, var(--border-color)); border-radius: 999px; color: color-mix(in srgb, var(--account-color) 70%, var(--text-primary)); display: inline-flex; flex: 0 0 auto; font-size: .7rem; font-weight: 650; gap: .3rem; padding: .3rem .55rem; }
+.account-type-badge .navigation-icon { height: .95rem; margin: 0; width: .95rem; }
+.account-card-balance { margin-top: 1.15rem; }
+.account-card-balance small { color: var(--text-secondary); display: block; font-size: .75rem; margin-bottom: .12rem; }
+.account-card-balance strong { display: block; font-size: clamp(1.35rem, 2.2vw, 1.7rem); font-weight: 730; letter-spacing: -.035em; line-height: 1.15; }
+.account-card-actions { background: color-mix(in srgb, var(--surface-raised) 76%, transparent); border-top-color: color-mix(in srgb, var(--account-color) 22%, var(--border-color)); padding: .65rem .8rem; }
 .account-card-actions .dashboard-action-button { font-size: .7rem; gap: .18rem; padding: .28rem .18rem; }
 .account-card-actions .dashboard-action-button svg { height: .95rem; width: .95rem; }
 .account-icon, .category-icon {
