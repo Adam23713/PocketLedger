@@ -160,6 +160,26 @@ body {
 .dashboard-privacy-button svg { fill: none; height: 1.3rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.3rem; }
 .dashboard-action-button { align-items: center; display: inline-flex; flex: 1 1 0; gap: .35rem; justify-content: center; min-width: 0; padding-left: .4rem; padding-right: .4rem; white-space: nowrap; }
 .dashboard-action-button svg { fill: none; height: 1.1rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; width: 1.1rem; }
+.dashboard-metric { --metric-accent: var(--accent-color); border-top: 3px solid var(--metric-accent); overflow: hidden; position: relative; }
+.dashboard-metric::after { background: color-mix(in srgb, var(--metric-accent) 10%, transparent); border-radius: 50%; content: ""; height: 7rem; pointer-events: none; position: absolute; right: -2.8rem; top: -3.2rem; width: 7rem; }
+.dashboard-metric .card-body { position: relative; z-index: 1; }
+.dashboard-metric-heading { align-items: center; color: var(--text-secondary); display: flex; font-size: .82rem; font-weight: 650; gap: .65rem; letter-spacing: .02em; margin-bottom: .8rem; text-transform: uppercase; }
+.dashboard-metric-icon { align-items: center; background: color-mix(in srgb, var(--metric-accent) 15%, var(--surface-raised)); border: 1px solid color-mix(in srgb, var(--metric-accent) 30%, var(--border-color)); border-radius: .7rem; color: var(--metric-accent); display: inline-flex; height: 2.5rem; justify-content: center; width: 2.5rem; }
+.dashboard-metric-icon .navigation-icon { height: 1.35rem; margin: 0; width: 1.35rem; }
+.dashboard-metric-value { font-size: clamp(1.2rem, 2vw, 1.7rem); font-weight: 720; letter-spacing: -.035em; line-height: 1.2; overflow-wrap: anywhere; }
+.dashboard-metric-caption { color: var(--text-secondary); display: block; margin-top: .35rem; }
+.dashboard-metric-net-worth { --metric-accent: var(--positive-color); }
+.dashboard-metric-accounts { --metric-accent: color-mix(in srgb, var(--accent-color) 55%, var(--text-secondary)); }
+.dashboard-metric-month { --metric-accent: color-mix(in srgb, var(--accent-color) 60%, var(--positive-color)); }
+.statistics-metric-income { --metric-accent: var(--positive-color); }
+.statistics-metric-expenses { --metric-accent: var(--negative-color); }
+.statistics-metric-savings { --metric-accent: color-mix(in srgb, var(--positive-color) 65%, var(--accent-color)); }
+.statistics-metric-balance { --metric-accent: var(--accent-color); }
+.dashboard-period { display: grid; gap: .45rem .8rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dashboard-period span { min-width: 0; }
+.dashboard-period small, .dashboard-period strong { display: block; }
+.dashboard-period small { color: var(--text-secondary); font-size: .72rem; margin-bottom: .1rem; }
+.dashboard-period strong { font-size: .9rem; overflow-wrap: anywhere; }
 .privacy-hidden-icon { display: none; }
 [data-dashboard-amounts-hidden="true"] .privacy-visible-icon { display: none; }
 [data-dashboard-amounts-hidden="true"] .privacy-hidden-icon { display: block; }
@@ -252,6 +272,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .account-card, .account-card .text-body { color: var(--text-primary) !important; }
 .account-card-main { display: block; }
 .account-card-actions { background: transparent; border-top-color: color-mix(in srgb, var(--border-color) 70%, transparent); }
+.account-card-actions .dashboard-action-button { font-size: .7rem; gap: .18rem; padding: .28rem .18rem; }
+.account-card-actions .dashboard-action-button svg { height: .95rem; width: .95rem; }
 .account-icon, .category-icon {
   background: var(--icon-background);
   border: 1px solid var(--icon-border-color);
@@ -286,10 +308,28 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .account-icon-option input:checked + .account-icon-selection { border-color: var(--accent-color); box-shadow: 0 0 0 .2rem var(--focus-ring); }
 .account-icon-option input:focus-visible + .account-icon-selection { outline: .2rem solid var(--focus-ring); outline-offset: .15rem; }
 
+.calendar-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+.calendar-toolbar h1 { margin: 0; }
+.calendar-month-picker { align-items: center; background: var(--surface-background); border: 1px solid color-mix(in srgb, var(--accent-color) 45%, var(--border-color)); border-radius: var(--card-radius); box-shadow: 0 .3rem .85rem color-mix(in srgb, var(--accent-color) 12%, transparent); display: grid; grid-template-columns: 2.2rem minmax(8rem, auto) 2.2rem; overflow: hidden; }
+.calendar-month-picker strong { color: var(--text-primary); font-size: .9rem; letter-spacing: -.01em; padding: .45rem .7rem; text-align: center; }
+.calendar-month-arrow { align-items: center; align-self: stretch; background: color-mix(in srgb, var(--accent-color) 10%, var(--surface-raised)); color: var(--accent-color); display: flex; font-size: 1rem; font-weight: 700; justify-content: center; text-decoration: none; }
+.calendar-month-arrow:hover, .calendar-month-arrow:focus-visible { background: var(--accent-color); color: var(--accent-contrast); }
+[data-theme="horizon"] .calendar-month-picker { background: linear-gradient(145deg, #fff, #edf4fb); border-color: #8eabc8; box-shadow: 0 .3rem .85rem rgba(54, 91, 128, .16); }
+.calendar-currency-selector { align-items: center; background: var(--surface-background); border: 1px solid color-mix(in srgb, var(--accent-color) 35%, var(--border-color)); border-radius: var(--card-radius); box-shadow: 0 .25rem .75rem color-mix(in srgb, var(--accent-color) 9%, transparent); display: flex; gap: .65rem; padding: .4rem .55rem .4rem .75rem; width: fit-content; }
+.calendar-currency-selector .form-label { color: var(--text-secondary); font-size: .8rem; font-weight: 600; margin: 0; }
+.calendar-currency-selector .form-select { background-color: color-mix(in srgb, var(--accent-color) 7%, var(--surface-raised)); border-color: color-mix(in srgb, var(--accent-color) 32%, var(--border-color)); font-size: .85rem; min-width: 10.5rem; padding-bottom: .25rem; padding-top: .25rem; width: auto; }
+[data-theme="horizon"] .calendar-currency-selector { background: linear-gradient(145deg, #fff, #edf4fb); border-color: #a8bed3; }
+.calendar-financial-summary { align-items: start; display: grid; gap: 1rem; grid-template-columns: minmax(15rem, .8fr) minmax(0, 2.2fr); }
+.calendar-weekly-summary { align-content: start; display: grid; gap: .4rem .75rem; grid-auto-flow: column; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); }
+.calendar-week-card { border-top: 2px solid color-mix(in srgb, var(--accent-color) 55%, var(--border-color)); }
+.calendar-week-card .card-body { align-items: center; display: grid; gap: .6rem; grid-template-columns: minmax(7.5rem, .5fr) minmax(0, 2fr); padding: .4rem .7rem; }
+.calendar-week-heading { align-items: center; display: flex; gap: .5rem; justify-content: space-between; }
+.calendar-week-heading strong { font-size: .78rem; white-space: nowrap; }
+.calendar-week-values { display: grid; gap: .4rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.calendar-week-values span { align-items: baseline; display: flex; gap: .25rem; min-width: 0; }
+.calendar-week-values small { color: var(--text-secondary); font-size: .72rem; font-weight: 700; }
+.calendar-week-values strong { font-size: .78rem; white-space: nowrap; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.calendar-currency-cards { display: grid; gap: 1rem; grid-auto-columns: minmax(15rem, 1fr); grid-auto-flow: column; overflow-x: auto; padding: .2rem; }
-.calendar-currency-card { color: var(--text-primary); min-width: 15rem; }
-.calendar-currency-card.active { border-color: var(--accent-color); box-shadow: 0 0 0 .2rem var(--focus-ring), var(--card-shadow); }
 .calendar-day { border: 1px solid var(--border-color); color: var(--text-primary) !important; min-height: 110px; padding: .5rem; }
 [data-theme="horizon"] .calendar-day { border-color: #1c232c; }
 .calendar-day.outside-month { opacity: .45; }
@@ -317,7 +357,11 @@ h2, h3, h4 { letter-spacing: -.02em; }
   .app-content { padding-top: 1.2rem; }
   .category-icon-groups { grid-template-columns: 1fr; }
   .account-icon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .calendar-financial-summary { grid-template-columns: 1fr; }
+  .calendar-weekly-summary { grid-auto-flow: row; grid-template-columns: 1fr; grid-template-rows: none; }
+  .calendar-week-card .card-body { gap: .45rem; grid-template-columns: 1fr; }
   .calendar-day { min-height: 72px; padding: .25rem; }
+  .calendar-month-picker { grid-template-columns: 2.2rem minmax(8rem, 1fr) 2.2rem; width: 100%; }
   .calendar-day small { font-size: .68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-dropdown { position: fixed; right: .75rem; top: 4.25rem; width: min(19rem, calc(100vw - 1.5rem)); }
 }

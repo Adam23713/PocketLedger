@@ -8,16 +8,28 @@
     var next = selected.AddMonths(1);
     var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 }
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="calendar-toolbar mb-3">
     <h1>Statistics</h1>
-    <div class="btn-group"><a class="btn btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month">←</a><span class="btn btn-outline-secondary disabled">@selected.ToString("MMMM yyyy")</span><a class="btn btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month">→</a></div>
+    <div class="calendar-month-picker" aria-label="Selected statistics month">
+        <a class="calendar-month-arrow" asp-route-year="@previous.Year" asp-route-month="@previous.Month" asp-route-currency="@Model.Currency" aria-label="Previous month">←</a>
+        <strong>@selected.ToString("MMMM yyyy")</strong>
+        <a class="calendar-month-arrow" asp-route-year="@next.Year" asp-route-month="@next.Month" asp-route-currency="@Model.Currency" aria-label="Next month">→</a>
+    </div>
 </div>
-<form method="get" class="mb-3"><input type="hidden" name="year" value="@Model.Year" /><input type="hidden" name="month" value="@Model.Month" /><label class="form-label">Currency</label><select name="currency" class="form-select w-auto" onchange="this.form.submit()" disabled="@(Model.AvailableCurrencies.Count == 0)">@if (Model.AvailableCurrencies.Count == 0) { <option>No transaction currencies this month</option> } else { @foreach (var currency in Model.AvailableCurrencies) { <option value="@currency.Code" selected="@(currency.Code == Model.Currency)">@currency.Code — @currency.DisplayName</option> } }</select></form>
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Income</small><div class="h4 text-success">@MoneyFormatter.Format(Model.Income, Model.Currency)</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Expenses</small><div class="h4 text-danger">@MoneyFormatter.Format(Model.Expenses, Model.Currency)</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Savings</small><div class="h4">@MoneyFormatter.Format(Model.Savings, Model.Currency)</div></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small>Balance</small><div class="h4">@MoneyFormatter.Format(Model.Balance, Model.Currency)</div></div></div></div>
+<form method="get" class="calendar-currency-selector mb-3">
+    <input type="hidden" name="year" value="@Model.Year" />
+    <input type="hidden" name="month" value="@Model.Month" />
+    <label class="form-label" for="statistics-currency">Currency</label>
+    <select class="form-select form-select-sm" id="statistics-currency" name="currency" onchange="this.form.submit()" disabled="@(Model.AvailableCurrencies.Count == 0)">
+        @if (Model.AvailableCurrencies.Count == 0) { <option>No transaction currencies this month</option> }
+        else { @foreach (var currency in Model.AvailableCurrencies) { <option value="@currency.Code" selected="@(currency.Code == Model.Currency)">@currency.Code — @currency.DisplayName</option> } }
+    </select>
+</form>
+<div class="row g-3 mb-4 dashboard-summary statistics-summary">
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-income h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Income"' /></span><span>Income</span></div><div class="dashboard-metric-value text-success">@MoneyFormatter.Format(Model.Income, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-expenses h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Expense"' /></span><span>Expenses</span></div><div class="dashboard-metric-value text-danger">@MoneyFormatter.Format(Model.Expenses, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-savings h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Available"' /></span><span>Savings</span></div><div class="dashboard-metric-value">@MoneyFormatter.Format(Model.Savings, Model.Currency)</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-balance h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Statistics"' /></span><span>Balance</span></div><div class="dashboard-metric-value">@MoneyFormatter.Format(Model.Balance, Model.Currency)</div></div></div></div>
 </div>
 <section class="mb-5" aria-labelledby="expense-distribution-heading">
     <h2 class="h4" id="expense-distribution-heading">Expenses by main category</h2>

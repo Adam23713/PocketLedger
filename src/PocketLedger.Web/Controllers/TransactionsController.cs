@@ -82,12 +82,12 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(Guid? accountId, TransactionType? type, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(Guid? accountId, Guid? targetAccountId, TransactionType? type, CancellationToken cancellationToken)
     {
         var user = await userContext.GetUserAsync(cancellationToken);
         var now = userDates.LocalTime(user.TimeZoneId);
         var initialType = type is TransactionType.Income or TransactionType.Expense or TransactionType.Transfer ? type.Value : TransactionType.Expense;
-        var model = new TransactionFormViewModel { Type = initialType, AccountId = accountId, TransactionDate = userDates.Today(user.TimeZoneId), TransactionHour = now.Hour, TransactionMinute = now.Minute };
+        var model = new TransactionFormViewModel { Type = initialType, AccountId = accountId, TargetAccountId = targetAccountId, TransactionDate = userDates.Today(user.TimeZoneId), TransactionHour = now.Hour, TransactionMinute = now.Minute };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }
