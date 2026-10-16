@@ -44,8 +44,8 @@ public sealed class MainBalanceWebTests
 
         var html = await RenderHomeViewAsync(model);
 
-        Assert.Contains("EUR <span data-private-amount>100.00</span>", html);
-        Assert.Contains("HUF <span data-private-amount>100</span>", html);
+        Assert.Contains("<div class=\"dashboard-metric-value\" data-private-amount>EUR 100.00</div>", html);
+        Assert.Contains("<div class=\"dashboard-metric-value\" data-private-amount>HUF 100</div>", html);
         Assert.DoesNotContain("200", html);
     }
 
@@ -56,8 +56,8 @@ public sealed class MainBalanceWebTests
 
         var html = await RenderHomeViewAsync(model);
 
-        Assert.Contains("Total main balance: </p>", html);
-        Assert.DoesNotContain("Total main balance: 0", html);
+        Assert.Contains("<span>Total balance</span>", html);
+        Assert.DoesNotContain("dashboard-metric-value\" data-private-amount", html);
     }
 
     private static async Task<HomeViewModel> CreateHomeModelAsync(IReadOnlyList<CurrencyBalance> mainBalances)
@@ -139,7 +139,7 @@ public sealed class MainBalanceWebTests
     private sealed class TestMoneyFormatter : IUserContextService
     {
         public string FormatNumber(decimal amount, string? currency) => amount.ToString(currency == "HUF" ? "F0" : "F2", System.Globalization.CultureInfo.InvariantCulture);
-        public string Format(decimal amount, string? currency) => FormatNumber(amount, currency);
+        public string Format(decimal amount, string? currency) => $"{currency} {FormatNumber(amount, currency)}";
         public Task<string> FormatMoneyAsync(decimal amount, string currency, CancellationToken cancellationToken = default) => Task.FromResult(Format(amount, currency));
         public Task<UserPreference> GetUserAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public MoneyInputFormat GetMoneyInputFormat(string currency) => throw new NotSupportedException();

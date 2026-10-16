@@ -18,8 +18,11 @@
   --card-shadow: 0 5px 18px rgba(20, 35, 55, .06);
   --card-radius: .75rem;
   --control-radius: .55rem;
-  --header-background: rgba(255, 255, 255, .88);
-  --header-shadow: 0 1px 12px rgba(20, 35, 55, .06);
+  --header-background: rgba(205, 226, 248, .97);
+  --header-shadow: 0 5px 18px rgba(54, 91, 128, .16);
+  --nav-active-background: #fff0c7;
+  --nav-active-border: #dfa52f;
+  --nav-active-color: #714300;
   --focus-ring: rgba(8, 122, 255, .28);
   --icon-background: #fff;
   --icon-border-color: #d7dce2;
@@ -48,6 +51,9 @@
   --control-radius: .35rem;
   --header-background: rgba(13, 17, 21, .94);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .07);
+  --nav-active-background: #173b34;
+  --nav-active-border: #25d09b;
+  --nav-active-color: #78f0c9;
   --focus-ring: rgba(16, 191, 168, .3);
   --icon-background: #becac7;
   --icon-border-color: #9eada9;
@@ -78,6 +84,9 @@
   --control-radius: .55rem;
   --header-background: rgba(7, 25, 69, .58);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .16);
+  --nav-active-background: rgba(255, 209, 102, .2);
+  --nav-active-border: #ffd166;
+  --nav-active-color: #ffe6a6;
   --focus-ring: rgba(191, 170, 255, .42);
   --icon-background: #c1c9e2;
   --icon-border-color: rgba(255, 255, 255, .34);
@@ -104,8 +113,11 @@
   --card-shadow: 0 2px 7px rgba(45, 35, 65, .08);
   --card-radius: 1.1rem;
   --control-radius: 1.25rem;
-  --header-background: rgba(255, 251, 254, .92);
-  --header-shadow: 0 1px 5px rgba(45, 35, 65, .09);
+  --header-background: rgba(230, 220, 246, .97);
+  --header-shadow: 0 5px 16px rgba(72, 55, 105, .15);
+  --nav-active-background: #f3e1f5;
+  --nav-active-border: #a96bb2;
+  --nav-active-color: #67316f;
   --focus-ring: rgba(103, 80, 164, .28);
   --icon-background: #f2ecf7;
   --icon-border-color: #d8cfe2;
