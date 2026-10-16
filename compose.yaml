@@ -14,7 +14,6 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
-      Landing__IdentityBaseUrl: https://${POCKETLEDGER_IDENTITY_DOMAIN}
       Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-true}
     restart: unless-stopped
 

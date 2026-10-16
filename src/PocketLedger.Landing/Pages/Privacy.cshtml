@@ -2,7 +2,6 @@
 @inject IConfiguration Configuration
 @{
     var appUrl = Configuration["Landing:AppBaseUrl"]!;
-    var identityUrl = Configuration["Landing:IdentityBaseUrl"]!;
     var registrationEnabled = Configuration.GetValue<bool>("Registration:Enabled");
     const string repository = "https://github.com/Adam23713/PocketLedger";
     const string contactEmail = "privacy@pocketledger.dev";
@@ -26,7 +25,7 @@
         </symbol>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. @if (registrationEnabled) { <span>Public registration is open — <a href="@(identityUrl + "/Account/Register")">create your account</a>.</span> } else { <span>Public registration is currently closed.</span> }</div>
+    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. @if (registrationEnabled) { <span data-registration-content>Public registration is open — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span> } else { <span>Public registration is currently closed.</span> }</div>
     <header class="header">
         <nav class="shell nav" aria-label="Main navigation">
             <a class="brand" href="/"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>

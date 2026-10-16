@@ -65,6 +65,7 @@ public class TransactionDetailsViewModel
     public Guid Id { get; init; }
     public TransactionType Type { get; init; }
     public AdjustmentDirection? AdjustmentDirection { get; init; }
+    public Guid? AccountId { get; init; }
     public string? AccountName { get; init; }
     public string? TargetAccountName { get; init; }
     public string Currency { get; init; } = string.Empty;

@@ -15,9 +15,9 @@ public sealed class RegistrationLinksTests
         var privacyHtml = await client.GetStringAsync("/privacy");
 
         Assert.Contains("Public registration is open", html);
-        Assert.Contains("href=\"https://identity.example.test/Account/Register\"", html);
+        Assert.Contains("href=\"https://app.example.test/Session/Register\"", html);
         Assert.Contains("Create account", html);
-        Assert.Contains("href=\"https://identity.example.test/Account/Register\"", privacyHtml);
+        Assert.Contains("href=\"https://app.example.test/Session/Register\"", privacyHtml);
     }
 
     [Fact]
@@ -29,14 +29,13 @@ public sealed class RegistrationLinksTests
         var html = await client.GetStringAsync("/");
 
         Assert.Contains("Public registration is currently closed", html);
-        Assert.DoesNotContain("/Account/Register", html);
+        Assert.DoesNotContain("/Session/Register", html);
     }
 
     private static WebApplicationFactory<Program> CreateFactory(bool registrationEnabled) => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
     {
         builder.UseEnvironment("Development");
         builder.UseSetting("Landing:AppBaseUrl", "https://app.example.test");
-        builder.UseSetting("Landing:IdentityBaseUrl", "https://identity.example.test");
         builder.UseSetting("Registration:Enabled", registrationEnabled.ToString());
     });
 }
