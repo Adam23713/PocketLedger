@@ -2,6 +2,9 @@
 @using PocketLedger.Models.Enums
 @{
     ViewData["Title"] = "Dashboard";
+    string AccountTypeLabel(AccountType type) => type switch { AccountType.BankAccount => "Bank Account", AccountType.CreditCard => "Credit Card", _ => type.ToString() };
+    string AccountTypeIcon(AccountType type) => type switch { AccountType.BankAccount => "BankAccount", AccountType.Savings => "Savings", AccountType.CreditCard => "CreditCard", AccountType.Cash => "Cash", _ => "Other" };
+    var availableAccountTypes = Model.Accounts.Select(account => account.Type).Distinct().OrderBy(type => type).ToList();
 }
 <script>
     if (localStorage.getItem("pocketledger-dashboard-amounts-hidden") === "true") document.documentElement.dataset.dashboardAmountsHidden = "true";
@@ -31,7 +34,20 @@
     <div class="col-12 col-lg-4"><div class="card dashboard-metric dashboard-metric-month h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>This month</span></div>@foreach (var total in Model.MonthlyTotals) { <div class="dashboard-period"><span><small>Income</small><strong class="text-success" data-private-amount>+@MoneyFormatter.Format(total.Income, total.Currency)</strong></span><span><small>Expenses</small><strong class="text-danger" data-private-amount>−@MoneyFormatter.Format(total.Expenses, total.Currency)</strong></span><span><small>Change</small><strong data-private-amount>@MoneyFormatter.Format(total.Change, total.Currency)</strong></span></div> }</div></div></div>
 </div>
 
-<h2 class="h4">Account balances</h2>
+<div class="account-balance-toolbar">
+    <h2 class="h4 mb-0">Account balances</h2>
+    @if (availableAccountTypes.Count > 0)
+    {
+        <div class="account-type-filters" id="dashboard-account-filters" role="group" aria-label="Filter accounts by type">
+            <button class="account-type-filter active" type="button" data-account-filter="all" aria-pressed="true">All</button>
+            @foreach (var accountType in availableAccountTypes)
+            {
+                <button class="account-type-filter active" type="button" data-account-filter="@accountType" aria-pressed="true"><partial name="_NavigationIcon" model="AccountTypeIcon(accountType)" />@AccountTypeLabel(accountType)</button>
+            }
+        </div>
+    }
+</div>
+<div class="alert alert-info mb-3" id="dashboard-account-filter-empty" hidden>No account types are selected.</div>
 <div class="row g-3 mb-5">
     @if (Model.Accounts.Count == 0)
     {
@@ -39,9 +55,9 @@
     }
     @foreach (var account in Model.Accounts)
     {
-        var accountType = account.Type switch { AccountType.BankAccount => "Bank Account", AccountType.CreditCard => "Credit Card", _ => account.Type.ToString() };
-        var accountTypeIcon = account.Type switch { AccountType.BankAccount => "BankAccount", AccountType.Savings => "Savings", AccountType.CreditCard => "CreditCard", AccountType.Cash => "Cash", _ => "Other" };
-        <div class="col-12 col-md-6 col-xl-4">
+        var accountType = AccountTypeLabel(account.Type);
+        var accountTypeIcon = AccountTypeIcon(account.Type);
+        <div class="col-12 col-md-6 col-xl-4" data-account-card data-account-type="@account.Type">
             <div class="card account-card h-100" style="--account-color: @account.Color">
                 <a class="card-body account-card-main text-decoration-none text-body" asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">
                     <div class="account-card-header">
@@ -66,7 +82,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h2 class="h4 mb-0">Latest transactions</h2>
-    <a asp-controller="Transactions" asp-action="Index">View all</a>
+    <a class="btn btn-sm btn-outline-primary" asp-controller="Transactions" asp-action="Index">View all</a>
 </div>
 @if (Model.RecentTransactions.Count == 0)
 {
@@ -74,7 +90,7 @@
 }
 else
 {
-    <div class="table-responsive">
+    <div class="table-responsive edge-to-edge-table">
         <table class="table align-middle">
             <thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Category</th><th class="text-end">Amount</th></tr></thead>
             <tbody>
