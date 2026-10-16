@@ -22,10 +22,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PocketLedger.Web.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="@ViewData["BodyClass"]">
     <header class="app-header">
         <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
-            <div class="container-fluid">
+            <div class="container-fluid app-navbar-shell">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" title="PocketLedger v@(applicationVersion)">
                     <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
                     <span>PocketLedger</span>
