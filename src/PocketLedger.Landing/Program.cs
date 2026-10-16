@@ -1,8 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 var appUri = GetOrigin(builder.Configuration["Landing:AppBaseUrl"] ?? "https://app.pocketledger.dev", "Landing:AppBaseUrl", builder.Environment);
-var identityUri = GetOrigin(builder.Configuration["Landing:IdentityBaseUrl"] ?? "https://identity.pocketledger.dev", "Landing:IdentityBaseUrl", builder.Environment);
 builder.Configuration["Landing:AppBaseUrl"] = appUri.GetLeftPart(UriPartial.Authority);
-builder.Configuration["Landing:IdentityBaseUrl"] = identityUri.GetLeftPart(UriPartial.Authority);
 builder.Services.AddRazorPages();
 var app = builder.Build();
 app.Use(async (context, next) =>

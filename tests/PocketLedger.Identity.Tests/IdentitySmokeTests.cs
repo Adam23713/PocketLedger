@@ -163,7 +163,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
 
         var result = Assert.IsType<RedirectResult>(controller.Index());
 
-        Assert.Equal("https://app.example.test", result.Url);
+        Assert.Equal("https://app.example.test/Session/CompleteSignIn", result.Url);
     }
 
     private static string? GetRedirectPath(HttpResponseMessage response)
