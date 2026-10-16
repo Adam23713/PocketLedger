@@ -274,7 +274,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .account-card-header { align-items: flex-start; display: flex; gap: .75rem; justify-content: space-between; }
 .account-card-identity { align-items: center; display: flex; gap: .8rem; min-width: 0; }
 .account-card-identity h2 { font-size: 1.05rem; font-weight: 700; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.account-type-badge { align-items: center; background: color-mix(in srgb, var(--account-color) 16%, var(--surface-raised)); border: 1px solid color-mix(in srgb, var(--account-color) 30%, var(--border-color)); border-radius: 999px; color: color-mix(in srgb, var(--account-color) 70%, var(--text-primary)); display: inline-flex; flex: 0 0 auto; font-size: .7rem; font-weight: 650; gap: .3rem; padding: .3rem .55rem; }
+.account-type-badge { align-items: center; background: color-mix(in srgb, var(--account-color) 18%, var(--page-background)); border: 1px solid color-mix(in srgb, var(--account-color) 48%, var(--border-color)); border-radius: 999px; box-shadow: 0 .18rem .45rem color-mix(in srgb, var(--account-color) 16%, rgba(0, 0, 0, .12)); color: #111827; display: inline-flex; flex: 0 0 auto; font-size: .7rem; font-weight: 650; gap: .3rem; padding: .3rem .55rem; }
+[data-theme="banking"] .account-type-badge, [data-theme="glass"] .account-type-badge { color: #fff; }
 .account-type-badge .navigation-icon { height: .95rem; margin: 0; width: .95rem; }
 .account-card-balance { margin-top: 1.15rem; }
 .account-card-balance small { color: var(--text-secondary); display: block; font-size: .75rem; margin-bottom: .12rem; }
@@ -282,6 +283,14 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .account-card-actions { background: color-mix(in srgb, var(--surface-raised) 76%, transparent); border-top-color: color-mix(in srgb, var(--account-color) 22%, var(--border-color)); padding: .65rem .8rem; }
 .account-card-actions .dashboard-action-button { font-size: .7rem; gap: .18rem; padding: .28rem .18rem; }
 .account-card-actions .dashboard-action-button svg { height: .95rem; width: .95rem; }
+.account-balance-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: .75rem 1rem; justify-content: space-between; margin-bottom: .8rem; }
+.account-type-filters { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+.account-type-filter { align-items: center; background: color-mix(in srgb, var(--surface-background) 72%, var(--border-color)); border: 1px solid var(--border-color); border-radius: 999px; color: var(--text-secondary); display: inline-flex; font-size: .72rem; font-weight: 650; gap: .3rem; opacity: .72; padding: .35rem .65rem; transition: background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease, transform .15s ease; }
+.account-type-filter:hover { border-color: var(--accent-color); color: var(--text-primary); opacity: 1; transform: translateY(-1px); }
+.account-type-filter.active { background: var(--accent-color); border-color: var(--accent-color); color: var(--accent-contrast); box-shadow: 0 .25rem .65rem color-mix(in srgb, var(--accent-color) 28%, transparent); opacity: 1; }
+.account-type-filter.active:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--accent-contrast); }
+.account-type-filter .navigation-icon { height: .9rem; margin: 0; width: .9rem; }
+.edge-to-edge-table { padding: 0; }
 .account-icon, .category-icon {
   background: var(--icon-background);
   border: 1px solid var(--icon-border-color);
