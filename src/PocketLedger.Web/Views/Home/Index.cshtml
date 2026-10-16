@@ -2,7 +2,6 @@
 @using PocketLedger.Models.Enums
 @{
     ViewData["Title"] = "Dashboard";
-    ViewData["BodyClass"] = "dashboard-page";
     string AccountTypeLabel(AccountType type) => type switch { AccountType.BankAccount => "Bank Account", AccountType.CreditCard => "Credit Card", _ => type.ToString() };
     string AccountTypeIcon(AccountType type) => type switch { AccountType.BankAccount => "BankAccount", AccountType.Savings => "Savings", AccountType.CreditCard => "CreditCard", AccountType.Cash => "Cash", _ => "Other" };
     var availableAccountTypes = Model.Accounts.Select(account => account.Type).Distinct().OrderBy(type => type).ToList();
@@ -11,17 +10,17 @@
     if (localStorage.getItem("pocketledger-dashboard-amounts-hidden") === "true") document.documentElement.dataset.dashboardAmountsHidden = "true";
 </script>
 
-<div class="dashboard-hero">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <div class="d-flex align-items-center gap-2">
-            <h1 class="mb-0">Dashboard</h1>
+            <h1>Dashboard</h1>
             <button class="dashboard-privacy-button" id="dashboard-privacy-button" type="button" aria-label="Hide dashboard amounts" aria-pressed="false" title="Hide dashboard amounts">
                 <svg class="privacy-visible-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.75" /></svg>
                 <svg class="privacy-hidden-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
             </button>
         </div>
     </div>
-    <a class="btn btn-primary dashboard-new-account" asp-controller="Accounts" asp-action="Create"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>New account</a>
+    <a class="btn btn-primary" asp-controller="Accounts" asp-action="Create">New account</a>
 </div>
 @foreach (var warning in Model.DebtFundingWarnings)
 {
