@@ -365,23 +365,27 @@ body > .container { position: relative; z-index: 1; }
   width: 2px;
 }
 
-.app-header { background: var(--header-background); border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow); position: sticky; top: 0; z-index: 1030; }
+.app-header { background: transparent; padding: .5rem clamp(.55rem, 2vw, 1.8rem) 0; position: sticky; top: 0; z-index: 1030; }
 .app-header, .card, .app-dropdown { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); }
-[data-theme="horizon"] .app-header { backdrop-filter: blur(28px) saturate(145%); -webkit-backdrop-filter: blur(28px) saturate(145%); border-bottom-color: rgba(255, 255, 255, .72); }
-[data-theme="banking"] .app-header { background: rgba(3, 13, 23, .82); border-bottom-color: rgba(69, 168, 190, .32); box-shadow: 0 1px 0 rgba(83, 244, 235, .14), 0 12px 38px rgba(0, 0, 0, .34); }
-.navbar { min-height: 4.25rem; padding: .55rem 0; }
+.navbar { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); background: var(--header-background); border: 1px solid color-mix(in srgb, var(--border-color) 70%, rgba(255, 255, 255, .65)); border-radius: 1.3rem; box-shadow: var(--header-shadow); min-height: 4rem; padding: .45rem .65rem; }
+.app-navbar-shell { max-width: none; }
+[data-theme="horizon"] .navbar { backdrop-filter: blur(28px) saturate(145%); -webkit-backdrop-filter: blur(28px) saturate(145%); border-color: rgba(255, 255, 255, .78); box-shadow: 0 16px 44px rgba(67, 118, 169, .11), inset 0 1px 0 rgba(255, 255, 255, .82); }
+[data-theme="banking"] .app-header { padding-left: clamp(.35rem, 1vw, .85rem); padding-right: clamp(.35rem, 1vw, .85rem); }
+[data-theme="banking"] .navbar { background: rgba(3, 13, 23, .82); border-color: rgba(69, 168, 190, .32); box-shadow: 0 1px 0 rgba(83, 244, 235, .14), 0 12px 38px rgba(0, 0, 0, .34); }
 .navbar-brand { align-items: center; color: var(--text-primary); display: inline-flex; font-weight: 650; gap: .55rem; letter-spacing: -.02em; margin-right: 1.35rem; }
 .navbar-brand:hover, .navbar-brand:focus { color: var(--accent-color); }
-.navbar-brand img { border-radius: .45rem; }
+.navbar-brand img { border-radius: .55rem; box-shadow: 0 .3rem .7rem rgba(27, 76, 123, .16); }
+.navbar-brand span { font-size: .9rem; }
 .navbar-nav { gap: .08rem; }
-.navbar .nav-link { border-radius: var(--control-radius); color: var(--text-secondary); font-size: 1rem; font-weight: 520; padding: .65rem .8rem; position: relative; }
+.navbar .nav-link { border: 1px solid transparent; border-radius: .8rem; color: var(--text-secondary); font-size: 1rem; font-weight: 540; padding: .65rem .8rem; position: relative; transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
 .navbar .nav-link:hover, .navbar .nav-link:focus-visible { background: var(--surface-background-hover); color: var(--text-primary); }
-.navbar .nav-link.active { color: var(--accent-color); font-weight: 650; }
-.navbar .nav-link.active::after { background: var(--accent-color); border-radius: 1rem; bottom: -.62rem; content: ""; height: 2px; left: .65rem; position: absolute; right: .65rem; }
+.navbar .nav-link.active { background: var(--nav-active-background); border-color: var(--nav-active-border); box-shadow: 0 .45rem 1.1rem color-mix(in srgb, var(--accent-color) 15%, transparent), inset 0 1px 0 rgba(255, 255, 255, .78); color: var(--nav-active-color); font-weight: 700; }
+.navbar .nav-link.active::after { content: none; }
+[data-theme="banking"] .navbar .nav-link.active { background: linear-gradient(135deg, rgba(0, 219, 199, .2), rgba(0, 128, 151, .13)); border-color: #14e4d0; box-shadow: 0 0 1.35rem rgba(0, 232, 211, .2), inset 0 1px 0 rgba(176, 255, 248, .17); color: #42f3df; }
 .navbar-toggler { border-color: var(--border-color); margin-left: auto; }
 .header-actions { align-items: center; display: flex; gap: .35rem; margin-left: .6rem; order: 3; }
 .app-menu { position: relative; }
-.header-icon-button { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 50%; color: var(--text-secondary); display: inline-flex; height: 2.5rem; justify-content: center; padding: 0; width: 2.5rem; }
+.header-icon-button { align-items: center; background: rgba(255, 255, 255, .18); border: 1px solid transparent; border-radius: 50%; color: var(--text-secondary); display: inline-flex; height: 2.5rem; justify-content: center; padding: 0; width: 2.5rem; }
 .header-icon-button:hover, .header-icon-button[aria-expanded="true"] { background: var(--surface-background-hover); color: var(--accent-color); }
 .header-icon-button svg { fill: none; height: 1.25rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.25rem; }
 .dashboard-privacy-button { align-items: center; background: transparent; border: 0; border-radius: 50%; color: var(--text-secondary); display: inline-flex; flex: 0 0 auto; height: 2.25rem; justify-content: center; padding: 0; width: 2.25rem; }
@@ -554,12 +558,11 @@ h2, h3, h4 { letter-spacing: -.02em; }
   .navbar-collapse { flex-basis: 100%; order: 4; }
   .navbar-nav { border-top: 1px solid var(--border-color); margin-top: .65rem; padding-top: .55rem; }
   .navbar .nav-link { padding: .7rem .8rem; }
-  .navbar .nav-link.active::after { bottom: .25rem; left: .8rem; right: auto; top: .25rem; height: auto; width: 3px; }
   .header-actions { margin-left: .35rem; }
 }
 
 @media (max-width: 575.98px) {
-  .navbar-brand span { font-size: .95rem; }
+  .navbar-brand span { font-size: .85rem; }
   .app-content { padding-top: 1.2rem; }
   .category-icon-groups { grid-template-columns: 1fr; }
   .account-icon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }

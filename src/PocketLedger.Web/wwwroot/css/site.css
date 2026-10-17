@@ -212,6 +212,9 @@ body > footer.footer.text-muted { margin-top: 2rem; position: relative; z-index:
 .dashboard-period small, .dashboard-period strong { display: block; }
 .dashboard-period small { color: var(--text-secondary); font-size: .72rem; margin-bottom: .1rem; }
 .dashboard-period strong { font-size: .9rem; overflow-wrap: anywhere; }
+.dashboard-metric-value,
+.dashboard-period strong,
+.account-card-balance strong { font-variant-numeric: tabular-nums; word-spacing: .22em; }
 .privacy-hidden-icon { display: none; }
 [data-dashboard-amounts-hidden="true"] .privacy-visible-icon { display: none; }
 [data-dashboard-amounts-hidden="true"] .privacy-hidden-icon { display: block; }
