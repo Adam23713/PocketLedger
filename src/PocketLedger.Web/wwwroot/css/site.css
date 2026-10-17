@@ -521,3 +521,259 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .planner-pause { margin-top: .35rem; }
 .planner-actions .btn { font-size: .75rem; padding: .2rem .4rem; }
 .planner-actions > small { margin-top: .35rem; }
+
+/* Banking experience */
+[data-theme="banking"] body {
+  background:
+    radial-gradient(ellipse 46% 32% at 76% 4%, rgba(0, 236, 220, .16), transparent 72%),
+    radial-gradient(ellipse 40% 36% at 8% 42%, rgba(0, 133, 255, .12), transparent 74%),
+    radial-gradient(ellipse 38% 30% at 94% 82%, rgba(74, 47, 190, .13), transparent 75%),
+    linear-gradient(145deg, #030b16 0%, #061421 48%, #03101a 100%);
+  overflow-x: hidden;
+}
+
+[data-theme="banking"] body::before,
+[data-theme="banking"] body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+[data-theme="banking"] body::before {
+  background:
+    radial-gradient(circle at 52% 52%, rgba(0, 245, 222, .15), rgba(0, 135, 181, .055) 42%, transparent 70%),
+    radial-gradient(circle at 30% 28%, rgba(0, 255, 231, .62) 0 2px, rgba(0, 255, 231, .15) 3px 10px, transparent 27px),
+    radial-gradient(circle at 76% 64%, rgba(0, 190, 255, .62) 0 2px, rgba(0, 190, 255, .12) 3px 9px, transparent 24px);
+  border-radius: 50%;
+  filter: blur(.5px);
+  height: 34rem;
+  right: -5rem;
+  top: -15rem;
+  width: 46rem;
+}
+
+[data-theme="banking"] body::after {
+  background: radial-gradient(circle at 36% 28%, rgba(24, 218, 255, .18), rgba(14, 79, 162, .08) 45%, transparent 70%);
+  border: 1px solid rgba(22, 176, 255, .22);
+  border-radius: 50%;
+  bottom: -16rem;
+  box-shadow: inset 2rem 1rem 5rem rgba(0, 235, 218, .06), 0 0 5rem rgba(0, 127, 255, .07);
+  height: 34rem;
+  right: -13rem;
+  width: 34rem;
+}
+
+[data-theme="banking"] body .app-header {
+  padding-left: clamp(.35rem, 1vw, .85rem);
+  padding-right: clamp(.35rem, 1vw, .85rem);
+}
+
+[data-theme="banking"] body .navbar {
+  background: rgba(3, 13, 23, .82);
+  border-color: rgba(69, 168, 190, .32);
+  box-shadow: 0 1px 0 rgba(83, 244, 235, .14), 0 12px 38px rgba(0, 0, 0, .34);
+}
+
+[data-theme="banking"] body .navbar .nav-link.active {
+  background: linear-gradient(135deg, rgba(0, 219, 199, .2), rgba(0, 128, 151, .13));
+  border-color: #14e4d0;
+  box-shadow: 0 0 1.35rem rgba(0, 232, 211, .2), inset 0 1px 0 rgba(176, 255, 248, .17);
+  color: #42f3df;
+}
+
+[data-theme="banking"] body .app-content {
+  max-width: 1240px;
+  padding-top: 1.55rem;
+}
+
+[data-theme="banking"] .app-dropdown,
+[data-theme="banking"] .modal-content {
+  background: rgba(7, 23, 34, .94);
+  border-color: rgba(62, 164, 181, .36);
+  box-shadow: 0 1rem 2.6rem rgba(0, 4, 12, .48), inset 0 1px 0 rgba(193, 249, 255, .07);
+}
+
+[data-theme="banking"] .card:not(.account-card):not(.dashboard-metric),
+[data-theme="banking"] .table-responsive,
+[data-theme="banking"] .planner-panel,
+[data-theme="banking"] .planner-metric,
+[data-theme="banking"] .planner-month,
+[data-theme="banking"] .calendar-month-picker,
+[data-theme="banking"] .calendar-currency-selector,
+[data-theme="banking"] .category-tree,
+[data-theme="banking"] .category-icon-group {
+  background: linear-gradient(145deg, rgba(12, 36, 49, .8), rgba(5, 20, 31, .84));
+  border-color: rgba(57, 146, 165, .34);
+  box-shadow: 0 .85rem 2.2rem rgba(0, 4, 12, .3), inset 0 1px 0 rgba(193, 249, 255, .065);
+}
+
+[data-theme="banking"] .form-control,
+[data-theme="banking"] .form-select,
+[data-theme="banking"] .input-group-text {
+  background-color: rgba(5, 19, 29, .86);
+  border-color: rgba(54, 135, 151, .42);
+}
+
+[data-theme="banking"] .form-control:hover,
+[data-theme="banking"] .form-select:hover { border-color: rgba(26, 218, 201, .58); }
+
+[data-theme="banking"] .alert,
+[data-theme="banking"] .list-group-item,
+[data-theme="banking"] .accordion-item {
+  background-color: rgba(7, 24, 35, .82);
+  border-color: rgba(55, 141, 158, .34);
+}
+
+[data-theme="banking"] .footer { background: rgba(2, 11, 18, .34); border-top-color: rgba(45, 132, 149, .24); }
+
+.dashboard-page { isolation: isolate; position: relative; }
+.dashboard-hero { min-height: 3.2rem; }
+.dashboard-hero h1 { margin-bottom: 0; }
+.dashboard-primary-action { align-items: center; display: inline-flex; gap: .5rem; justify-content: center; }
+.dashboard-primary-action svg { fill: none; height: 1.2rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; width: 1.2rem; }
+.dashboard-latest { position: relative; }
+
+[data-theme="banking"] .dashboard-page::before,
+[data-theme="banking"] .dashboard-page::after {
+  border-radius: 50%;
+  content: "";
+  filter: blur(1px);
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+[data-theme="banking"] .dashboard-page::before {
+  background: radial-gradient(circle at 35% 32%, rgba(25, 242, 223, .22), rgba(0, 112, 178, .07) 50%, transparent 72%);
+  height: 20rem;
+  left: -18rem;
+  top: 13rem;
+  width: 20rem;
+}
+
+[data-theme="banking"] .dashboard-page::after {
+  background: radial-gradient(circle, rgba(92, 55, 222, .13), transparent 67%);
+  height: 28rem;
+  right: -22rem;
+  top: 33rem;
+  width: 28rem;
+}
+
+[data-theme="banking"] .dashboard-hero { margin-bottom: 1.2rem !important; }
+[data-theme="banking"] .dashboard-hero h1 { font-size: clamp(2rem, 3.3vw, 2.65rem); font-weight: 760; text-shadow: 0 .2rem 1.5rem rgba(0, 207, 255, .12); }
+[data-theme="banking"] .dashboard-privacy-button { color: #8fa9b4; }
+[data-theme="banking"] .dashboard-privacy-button:hover { background: rgba(27, 238, 219, .09); color: #36ead6; }
+[data-theme="banking"] .dashboard-primary-action {
+  background: linear-gradient(135deg, #21ecd9, #00c9d6);
+  border: 1px solid rgba(133, 255, 247, .7);
+  border-radius: .75rem;
+  box-shadow: 0 0 1.7rem rgba(0, 231, 216, .26), inset 0 1px 0 rgba(255, 255, 255, .34);
+  color: #021716;
+  min-height: 2.65rem;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+}
+[data-theme="banking"] .dashboard-primary-action:hover,
+[data-theme="banking"] .dashboard-primary-action:focus-visible { background: linear-gradient(135deg, #55f7e6, #18d9e5); color: #021716; transform: translateY(-1px); }
+
+[data-theme="banking"] .dashboard-summary { margin-bottom: 2rem !important; }
+[data-theme="banking"] .dashboard-metric {
+  background:
+    linear-gradient(145deg, rgba(13, 42, 57, .78), rgba(6, 22, 37, .82)),
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--metric-accent) 22%, transparent), transparent 46%);
+  border-color: color-mix(in srgb, var(--metric-accent) 58%, rgba(116, 174, 198, .3));
+  border-radius: .85rem;
+  box-shadow: 0 1rem 2.4rem rgba(0, 4, 12, .38), 0 0 1.35rem color-mix(in srgb, var(--metric-accent) 7%, transparent), inset 0 1px 0 rgba(184, 245, 255, .09);
+  min-height: 9.35rem;
+}
+[data-theme="banking"] .dashboard-metric::before {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--metric-accent) 70%, #fff), transparent);
+  content: "";
+  height: 1px;
+  left: 12%;
+  opacity: .42;
+  position: absolute;
+  right: 12%;
+  top: 0;
+}
+[data-theme="banking"] .dashboard-metric::after {
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--metric-accent) 34%, rgba(184, 255, 249, .15)), color-mix(in srgb, var(--metric-accent) 7%, transparent) 68%);
+  border-color: color-mix(in srgb, var(--metric-accent) 68%, rgba(255, 255, 255, .16));
+  height: 8.4rem;
+  opacity: .85;
+  right: -3.2rem;
+  top: -4.3rem;
+  width: 8.4rem;
+}
+[data-theme="banking"] .dashboard-metric .card-body { padding: 1rem 1.05rem; }
+[data-theme="banking"] .dashboard-metric-heading { color: #c1d2da; margin-bottom: .85rem; }
+[data-theme="banking"] .dashboard-metric-icon {
+  background: rgba(2, 26, 38, .6);
+  border-color: color-mix(in srgb, var(--metric-accent) 78%, rgba(255, 255, 255, .18));
+  box-shadow: 0 0 1rem color-mix(in srgb, var(--metric-accent) 16%, transparent), inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+[data-theme="banking"] .dashboard-metric-value { color: #f7fbff; text-shadow: 0 .2rem 1.2rem rgba(0, 0, 0, .45); }
+[data-theme="banking"] .dashboard-metric-caption,
+[data-theme="banking"] .dashboard-period small { color: #91a7b2; }
+[data-theme="banking"] .dashboard-metric-net-worth { --metric-accent: #18c8ff; }
+[data-theme="banking"] .dashboard-metric-accounts { --metric-accent: #9b8cff; }
+[data-theme="banking"] .dashboard-metric-month { --metric-accent: #22dfd3; }
+
+[data-theme="banking"] .account-balance-toolbar { margin-bottom: .85rem; }
+[data-theme="banking"] .account-balance-toolbar h2 { font-size: 1.55rem; text-shadow: 0 .2rem 1.25rem rgba(0, 0, 0, .42); }
+[data-theme="banking"] .account-type-filters { gap: .5rem; }
+[data-theme="banking"] .account-type-filter {
+  background: rgba(4, 20, 30, .64);
+  border-color: rgba(23, 219, 199, .58);
+  box-shadow: inset 0 1px 0 rgba(158, 255, 246, .05);
+  color: #70dfd3;
+  opacity: 1;
+  padding: .44rem .85rem;
+}
+[data-theme="banking"] .account-type-filter:hover { background: rgba(10, 57, 63, .65); box-shadow: 0 0 1rem rgba(0, 231, 213, .12); color: #bcfff8; }
+[data-theme="banking"] .account-type-filter.active {
+  background: linear-gradient(135deg, #2af1df, #00c9ca);
+  border-color: #55fff0;
+  box-shadow: 0 0 1.35rem rgba(0, 237, 215, .28), inset 0 1px 0 rgba(255, 255, 255, .35);
+  color: #031b1a;
+}
+
+[data-theme="banking"] .dashboard-account-grid { --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; }
+[data-theme="banking"] .dashboard-account-grid .account-card {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--account-color) 24%, rgba(14, 31, 43, .92)), color-mix(in srgb, var(--account-color) 8%, rgba(5, 18, 30, .95))),
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--account-color) 28%, transparent), transparent 52%);
+  border-color: color-mix(in srgb, var(--account-color) 58%, rgba(123, 192, 218, .42));
+  border-radius: .75rem;
+  box-shadow: 0 .85rem 2rem rgba(0, 4, 12, .4), 0 0 1rem color-mix(in srgb, var(--account-color) 8%, transparent), inset 0 1px 0 rgba(213, 249, 255, .12);
+}
+[data-theme="banking"] .dashboard-account-grid .account-card:hover { box-shadow: 0 1.15rem 2.4rem rgba(0, 4, 12, .5), 0 0 1.5rem color-mix(in srgb, var(--account-color) 13%, transparent), inset 0 1px 0 rgba(213, 249, 255, .16); }
+[data-theme="banking"] .dashboard-account-grid .account-card::before { background: color-mix(in srgb, var(--account-color) 28%, transparent); }
+[data-theme="banking"] .dashboard-account-grid .account-card::after { background: color-mix(in srgb, var(--account-color) 15%, transparent); }
+[data-theme="banking"] .dashboard-account-grid .account-card-actions { background: rgba(3, 14, 23, .58); border-top-color: color-mix(in srgb, var(--account-color) 38%, rgba(124, 180, 198, .24)); }
+[data-theme="banking"] .dashboard-account-grid .account-type-badge { background: rgba(3, 15, 25, .55); box-shadow: 0 0 .85rem color-mix(in srgb, var(--account-color) 12%, transparent); }
+[data-theme="banking"] .dashboard-account-grid .account-icon { border-color: rgba(191, 229, 235, .55); box-shadow: 0 .35rem .85rem rgba(0, 0, 0, .34); }
+[data-theme="banking"] .dashboard-account-grid .btn-primary { --bs-btn-bg: #16d8cf; --bs-btn-border-color: #22eee3; --bs-btn-hover-bg: #42eee5; --bs-btn-hover-border-color: #66fff4; }
+[data-theme="banking"] .dashboard-account-grid .btn-success { --bs-btn-bg: #079c77; --bs-btn-border-color: #16c99d; --bs-btn-hover-bg: #12b78d; --bs-btn-hover-border-color: #2addb1; }
+[data-theme="banking"] .dashboard-account-grid .btn-danger { --bs-btn-bg: #ef1745; --bs-btn-border-color: #ff3d65; --bs-btn-hover-bg: #ff315c; --bs-btn-hover-border-color: #ff6684; }
+
+[data-theme="banking"] .dashboard-latest .table-responsive {
+  background: rgba(5, 20, 31, .74);
+  border-color: rgba(42, 149, 169, .34);
+  box-shadow: 0 .9rem 2.2rem rgba(0, 4, 12, .32), inset 0 1px 0 rgba(199, 249, 255, .06);
+}
+
+@media (max-width: 767.98px) {
+  [data-theme="banking"] body::before { right: -18rem; }
+  [data-theme="banking"] .dashboard-hero { align-items: flex-start !important; gap: 1rem; }
+  [data-theme="banking"] .dashboard-primary-action { flex: 0 0 auto; padding-left: .85rem; padding-right: .85rem; }
+  [data-theme="banking"] .dashboard-summary { margin-bottom: 1.55rem !important; }
+  [data-theme="banking"] .account-balance-toolbar { align-items: flex-start; flex-direction: column; }
+  [data-theme="banking"] .account-type-filters { justify-content: flex-start; }
+}
+
+@media (max-width: 420px) {
+  [data-theme="banking"] .dashboard-hero { flex-wrap: wrap; }
+  [data-theme="banking"] .dashboard-primary-action { width: 100%; }
+}
