@@ -11,6 +11,7 @@ This is the complete walkthrough for running PocketLedger in production on your 
 - [Security systems overview](#security-systems-overview)
 - [Moving an existing deployment to the app subdomain](#moving-an-existing-deployment-to-the-app-subdomain)
 - [Financial cache (Valkey)](#financial-cache-valkey)
+- [Request telemetry (Valkey)](#request-telemetry-valkey)
 - [Backups](#backups)
 - [Volumes](#volumes)
 
@@ -38,6 +39,7 @@ In `.env`, set all four domain names and replace every placeholder secret:
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.
 - `CROWDSEC_API_KEY` — `openssl rand -hex 32`. Review the [edge security guide](edge-security.md) for the rest of the Cloudflare and CrowdSec setup, including verification, monitoring, key rotation and rollback.
+- `CROWDSEC_IDENTITY_API_KEY` — a second `openssl rand -hex 32` value used only by the Identity Admin dashboard for read-only LAPI decision queries. Never reuse `CROWDSEC_API_KEY`.
 
 Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can select a different set of Compose-managed database volumes — Compose uses the project name to identify its containers, networks and named volumes, not the directory path.
 
@@ -62,7 +64,9 @@ docker compose up -d identity-database
 docker compose run --rm identity bootstrap-identity
 ```
 
-This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is intentionally disabled — every other account is created or managed administratively after this point.
+This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is disabled by default; set `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=true` only when self-service account creation should be available.
+
+The bootstrap command permanently marks this first account as the sole administrator. The flag cannot be granted, revoked, or transferred through the UI, API, or account commands, and the database rejects a second administrator. When upgrading an existing deployment, the Identity migration assigns the flag to the oldest user by `CreatedAtUtc`, using the user ID as a deterministic tie-breaker. Existing sessions must sign in again to receive the administrator claim. Review the selected account before exposing future administrator endpoints; changing the designation is intentionally unsupported.
 
 ## 4. Start the deployment
 
@@ -104,7 +108,7 @@ PocketLedger layers several independent protections rather than relying on any s
 
 **Edge protection.** Caddy and CrowdSec sit in front of all four public hosts, behind Cloudflare. Only Cloudflare's published IP ranges are trusted for client-IP headers, a shared rate limiter caps requests per client across all hosts (with a stricter limit on Identity's authentication endpoints), and CrowdSec bans IPs that match flood or abuse patterns using only local detection — no data is shared with CrowdSec's community service. → [Edge security guide](edge-security.md)
 
-**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes, and there is no public self-registration endpoint — accounts are created at bootstrap or administratively afterward.
+**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes. Public self-registration is disabled by default and can be enabled with `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=true`.
 
 Together these mean a single leaked backup file, a stolen disk, or a flood of malicious requests each run into a layer built specifically to stop them, rather than one boundary doing all the work.
 
@@ -119,7 +123,7 @@ If you're moving from a single-domain deployment to the recommended `app.` subdo
 
 On Identity startup, the existing Web OIDC client's login/logout redirect URIs are automatically synchronized with `OpenIddict:WebBaseUrl`; its client secret and permissions are preserved. Existing host-only browser cookies do **not** move to the new subdomain, so users may need to sign in again, and bookmarks to app paths on the old domain should be updated.
 
-`Landing:AppBaseUrl` configures the landing page's app links; `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status` — an endpoint that returns only an authentication boolean with no-store caching and shares no cookies or tokens with the landing page. Configure Cloudflare to bypass caching for `/Session/*` on the app domain, and don't apply public-page caching rules to authenticated app routes. When the app can't be reached, the landing page keeps a working login link.
+`Landing:AppBaseUrl` configures the landing page's app and registration links. Registration enters through Web so any existing BFF session is cleared before Identity creates a different account, and the completed onboarding flow establishes a matching Web session. The same `Registration:Enabled` value is passed to Landing and Identity so the CTA is shown only while the endpoint is available. `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status` — an endpoint that returns only an authentication boolean with no-store caching and shares no cookies or tokens with the landing page. Configure Cloudflare to bypass caching for `/Session/*` on the app domain, and don't apply public-page caching rules to authenticated app routes. When the app can't be reached, the landing page keeps a working login link.
 
 ## Financial cache (Valkey)
 
@@ -139,6 +143,16 @@ Apply API migrations before enabling caching. The PostgreSQL/Valkey integration 
 ```bash
 dotnet test tests/PocketLedger.Tests --filter FullyQualifiedName~FinancialCacheTests
 ```
+
+## Request telemetry (Valkey)
+
+Web, API and Identity aggregate relevant dynamic requests into five-minute Valkey hashes for the security dashboard. Each hash stores only counters: total, anonymous/unattributed and authenticated user ID counts. Paths, query strings, headers, cookies, tokens and request or response bodies are never stored. Health endpoints, static assets, OpenAPI/Swagger and OpenID Connect discovery requests are excluded by the shared classifier.
+
+Production Compose configures all three applications with `RequestTelemetry__ConnectionString=valkey:6379`. For applications run directly on the host, set it to `localhost:6379`; leaving it unset disables collection and makes queries return empty results. `RequestTelemetry__RetentionHours` defaults to and cannot exceed 48, while `RequestTelemetry__BucketMinutes` is fixed at 5 so later dashboard consumers can reuse the same bucket contract.
+
+Recording is placed after authentication in every pipeline. Requests enqueue an in-memory observation and never wait for Valkey; a background worker coalesces observations before incrementing bucket counters. Buckets receive an absolute expiry at their start time plus the configured retention, so no bucket remains queryable after 48 hours. A full queue or a Valkey connection/write failure drops telemetry and logs a rate-limited warning without affecting the application request.
+
+Query intervals use an inclusive start and exclusive end. Inputs are expanded to whole five-minute UTC buckets, and the returned `FromUtc`/`ToUtc` expose those effective aligned boundaries. `AverageRequestsPerMinute` uses the selected user's count when a user filter is present, otherwise total volume, divided by the complete aligned interval in minutes. `IsAvailable` distinguishes a successful zero-count query from disabled configuration or a Valkey read failure.
 
 ## Backups
 

@@ -13,6 +13,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/PocketLedger.Api.Tests/PocketLedger.Api.Tests.csproj" />
     <Project Path="tests/PocketLedger.Identity.Tests/PocketLedger.Identity.Tests.csproj" />
+    <Project Path="tests/PocketLedger.Landing.Tests/PocketLedger.Landing.Tests.csproj" />
     <Project Path="tests/PocketLedger.Tests/PocketLedger.Tests.csproj" />
     <Project Path="tests/PocketLedger.Security.Tests/PocketLedger.Security.Tests.csproj" />
   </Folder>

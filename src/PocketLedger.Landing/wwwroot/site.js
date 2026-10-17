@@ -56,6 +56,7 @@
 
     const appUrl = document.body.dataset.appUrl;
     const links = document.querySelectorAll('[data-app-link]');
+    const registrationElements = document.querySelectorAll('[data-registration-link], [data-registration-content]');
     async function updateSession() {
         try {
             const response = await fetch(`${appUrl}/Session/Status`, { credentials: 'include', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000) });
@@ -65,6 +66,7 @@
                 link.href = authenticated === true ? `${appUrl}/` : `${appUrl}/Session/Login`;
                 link.querySelector('[data-app-label]').textContent = authenticated === true ? 'Open PocketLedger' : 'Log in';
             }
+            for (const element of registrationElements) element.hidden = authenticated === true;
         } catch {
             // Keep the server-rendered login link usable when the app is unavailable.
         }

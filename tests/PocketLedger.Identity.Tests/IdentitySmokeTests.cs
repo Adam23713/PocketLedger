@@ -1,5 +1,7 @@
 using System.Net;
+using System.Reflection;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +15,7 @@ using PocketLedger.Data;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private readonly WebApplicationFactory<Program> factory;
 
@@ -30,6 +32,8 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
         });
     });
 
+    public void Dispose() => factory.Dispose();
+
     [Theory]
     [InlineData("/Account/Login")]
     [InlineData("/Account/TwoFactor")]
@@ -38,7 +42,86 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         var response = await client.GetAsync(path);
-        Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.True(response.StatusCode == HttpStatusCode.OK, html);
+        Assert.Contains("<html lang=\"en\" data-theme=\"horizon\" data-bs-theme=\"light\">", html);
+        Assert.Contains("migrateLegacyStorage: false", html);
+        Assert.True(html.IndexOf("/js/theme.js", StringComparison.Ordinal) < html.IndexOf("/css/site.css", StringComparison.Ordinal));
+        Assert.DoesNotContain("id=\"theme-menu-button\"", html);
+        Assert.DoesNotContain("id=\"theme-menu\"", html);
+    }
+
+    [Fact]
+    public async Task PublicRegistration_IsDisabledByDefault()
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/Account/Register");
+        var loginHtml = await client.GetStringAsync("/Account/Login");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.DoesNotContain("href=\"/Account/Register\"", loginHtml);
+    }
+
+    [Fact]
+    public void AllowAnonymous_IsLimitedToLoginFlowOidcProtocolAndIdentityRoot()
+    {
+        var anonymousActions = typeof(Program).Assembly.GetTypes()
+            .Where(type => typeof(Controller).IsAssignableFrom(type))
+            .SelectMany(type => type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Where(method => method.GetCustomAttribute<AllowAnonymousAttribute>() is not null)
+                .Select(method => $"{type.Name}.{method.Name}"))
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        Assert.Equal(new[]
+        {
+            "AccountController.ExternalLogin",
+            "AccountController.ExternalLoginCallback",
+            "AccountController.Login",
+            "AccountController.RecoveryCode",
+            "AccountController.Register",
+            "AccountController.TwoFactor",
+            "AuthorizationController.AuthorizeEndpoint",
+            "AuthorizationController.TokenEndpoint",
+            "HomeController.Index"
+        }, anonymousActions);
+    }
+
+    [Theory]
+    [InlineData("/Account/AccessDenied")]
+    [InlineData("/Account/SetupAuthenticator")]
+    [InlineData("/Account/RecoveryCodes")]
+    [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/Security")]
+    [InlineData("/Account/LoginEvents")]
+    [InlineData("/Admin")]
+    [InlineData("/Admin/RequestActivity")]
+    [InlineData("/connect/logout")]
+    public async Task AnonymousUser_IsRedirectedFromEveryProtectedPage(string path)
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", GetRedirectPath(response));
+    }
+
+    [Theory]
+    [InlineData("/Account/SetupAuthenticator")]
+    [InlineData("/Account/RecoveryCodes")]
+    [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/Logout")]
+    public async Task AnonymousUser_IsRejectedBeforeProtectedPostActionRuns(string path)
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.PostAsync(path, new FormUrlEncodedContent([]));
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/Login", GetRedirectPath(response));
     }
 
     [Fact]
@@ -80,6 +163,13 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
 
         var result = Assert.IsType<RedirectResult>(controller.Index());
 
-        Assert.Equal("https://app.example.test", result.Url);
+        Assert.Equal("https://app.example.test/Session/CompleteSignIn", result.Url);
+    }
+
+    private static string? GetRedirectPath(HttpResponseMessage response)
+    {
+        var location = response.Headers.Location;
+        if (location is null) return null;
+        return location.IsAbsoluteUri ? location.AbsolutePath : location.OriginalString.Split('?', 2)[0];
     }
 }

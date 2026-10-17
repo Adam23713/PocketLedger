@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using PocketLedger.Models.Entities;
+using PocketLedger.Security;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace PocketLedger.Controllers;
@@ -34,7 +35,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         {
             claim.SetDestinations(claim.Type switch
             {
-                Claims.Name or Claims.Subject => [Destinations.AccessToken, Destinations.IdentityToken],
+                Claims.Name or Claims.Subject or BootstrapAdministratorAuthorization.ClaimType => [Destinations.AccessToken, Destinations.IdentityToken],
                 _ => [Destinations.AccessToken]
             });
         }
@@ -62,7 +63,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         {
             claim.SetDestinations(claim.Type switch
             {
-                Claims.Name or Claims.Subject => [Destinations.AccessToken, Destinations.IdentityToken],
+                Claims.Name or Claims.Subject or BootstrapAdministratorAuthorization.ClaimType => [Destinations.AccessToken, Destinations.IdentityToken],
                 _ => [Destinations.AccessToken]
             });
         }

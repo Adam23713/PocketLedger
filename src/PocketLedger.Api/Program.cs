@@ -74,6 +74,7 @@ builder.Services.AddScoped<IImportExportService, ImportExportService>();
 builder.Services.AddScoped<IEncryptedBackupService, ImportExportService>();
 builder.Services.AddScoped<IDebtService, DebtService>();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddRequestTelemetry(builder.Configuration);
 builder.Services.AddHostedService<RecurringTransactionWorker>();
 builder.Services.AddHostedService<PlannerMonthWorker>();
 var signingKey = builder.Configuration["Authentication:SigningKey"] ?? throw new InvalidOperationException("Authentication:SigningKey is required.");
@@ -113,6 +114,7 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
+app.UseRequestTelemetry();
 app.UseAuthorization();
 app.MapOpenApi("/openapi/{documentName}.json");
 if (app.Environment.IsDevelopment())

@@ -7,6 +7,6 @@ public sealed class HomeController(IConfiguration configuration) : Controller
 {
     [AllowAnonymous]
     public IActionResult Index() => User.Identity?.IsAuthenticated == true
-        ? Redirect(configuration["OpenIddict:WebBaseUrl"] ?? "https://app.localhost")
+        ? Redirect($"{(configuration["OpenIddict:WebBaseUrl"] ?? "https://app.localhost").TrimEnd('/')}/Session/CompleteSignIn")
         : RedirectToAction("Login", "Account");
 }

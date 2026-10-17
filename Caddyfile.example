@@ -26,13 +26,35 @@
 	crowdsec {
 		api_url http://crowdsec:8080
 		api_key {env.CROWDSEC_API_KEY}
-		ticker_interval 15s
+		ticker_interval 5s
 	}
 }
 
 {$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN} {
 	log {
+		hostnames {$POCKETLEDGER_LANDING_DOMAIN} {$POCKETLEDGER_WEB_DOMAIN} {$POCKETLEDGER_API_DOMAIN}
 		output file /var/log/caddy/access.log {
+			roll_size 100MiB
+			roll_keep 5
+			roll_keep_for 168h
+		}
+		format filter {
+			wrap json
+			fields {
+				request>uri query {
+					replace code REDACTED
+					replace state REDACTED
+					replace id_token_hint REDACTED
+					replace access_token REDACTED
+				}
+				request>headers>Referer delete
+				resp_headers>Location delete
+			}
+		}
+	}
+	log identity_access {
+		hostnames {$POCKETLEDGER_IDENTITY_DOMAIN}
+		output file /var/log/caddy/identity-access.log {
 			roll_size 100MiB
 			roll_keep 5
 			roll_keep_for 168h
@@ -60,7 +82,17 @@
 		rate_limit {
 			zone pocketledger_global {
 				key {client_ip}
-				events 600
+				events 400
+				window 1m
+				ipv6_prefix 64
+			}
+
+			zone pocketledger_identity {
+				match {
+					host {$POCKETLEDGER_IDENTITY_DOMAIN}
+				}
+				key {client_ip}
+				events 100
 				window 1m
 				ipv6_prefix 64
 			}
@@ -73,7 +105,7 @@
 					method POST
 				}
 				key {client_ip}
-				events 30
+				events 15
 				window 1m
 				ipv6_prefix 64
 			}

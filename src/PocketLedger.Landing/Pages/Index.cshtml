@@ -2,6 +2,7 @@
 @inject IConfiguration Configuration
 @{
     var appUrl = Configuration["Landing:AppBaseUrl"]!;
+    var registrationEnabled = Configuration.GetValue<bool>("Registration:Enabled");
     const string repository = "https://github.com/Adam23713/PocketLedger";
     var screenshots = new[] {
         ("trs", "Income, expenses & transfers", "Follow the everyday movement of your money.", 1340, 796),
@@ -32,7 +33,7 @@
         </symbol>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="development"><span class="status-dot" aria-hidden="true"></span> PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.</div>
+    <div class="development"><span class="status-dot" aria-hidden="true"></span>@if (registrationEnabled) { <span>PocketLedger is still under active development. </span><span data-registration-content>Public registration is open — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span> } else { <span>PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.</span> }</div>
     <header class="header">
         <nav class="shell nav" aria-label="Main navigation">
             <a class="brand" href="#"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>
@@ -45,7 +46,7 @@
             <div class="eyebrow"><span class="status-dot" aria-hidden="true"></span> PERSONAL FINANCE. FREE & OPEN SOURCE.</div>
             <h1 id="hero-title">See more clearly today.<br /><span>Live more confidently tomorrow.</span></h1>
             <p class="hero-copy">Financial security does not necessarily begin when you have more money. It begins when you understand what is happening with what you already have.</p>
-            <div class="actions"><a class="button button-login" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a><a class="button button-github github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>Explore on GitHub <span aria-hidden="true">↗</span></a></div>
+            <div class="actions">@if (registrationEnabled) { <a class="button" data-registration-link href="@(appUrl + "/Session/Register")">Create account</a> }<a class="button button-login" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a><a class="button button-github github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>Explore on GitHub <span aria-hidden="true">↗</span></a></div>
             <p class="hero-note">It does not require a subscription.</p>
             <figure class="hero-image">
                 <a href="/images/landing_page.webp" data-gallery-image aria-label="View PocketLedger dashboard and themes">
@@ -88,7 +89,7 @@
         <section class="section shell" id="self-hosting" aria-labelledby="hosting-title">
             <p class="eyebrow">CHOOSE WHAT WORKS FOR YOU</p><h2 id="hosting-title">A home for your finances.</h2>
             <div class="hosting-grid">
-                <article class="hosting-card"><span class="pill">FREE HOSTED POCKETLEDGER</span><h3>Let me take care<br />of the hosting.</h3><p>I run a PocketLedger instance that is currently free to use. I cover the server costs myself, so account availability is limited and accounts are currently managed manually.</p><p>Capacity may grow over time. Already have an account? You can sign in below.</p><a class="button button-login" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a></article>
+                <article class="hosting-card"><span class="pill">FREE HOSTED POCKETLEDGER</span><h3>Let me take care<br />of the hosting.</h3><p>I run a PocketLedger instance that is currently free to use. I cover the server costs myself, so account availability is limited.</p><p>@if (registrationEnabled) { <span data-registration-content>Create an account or sign in below.</span> } else { <span>Already have an account? You can sign in below.</span> }</p><div class="hosting-actions">@if (registrationEnabled) { <a class="button" data-registration-link href="@(appUrl + "/Session/Register")">Create account</a> }<a class="button button-login" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a></div></article>
                 <article class="hosting-card self-host"><span class="pill">SELF-HOSTED · AGPL-3.0-ONLY</span><h3>Your server.<br />Your own instance.</h3><p>Run PocketLedger on your own server, fork it and change it to suit your needs under the AGPL-3.0-only license. You don’t have to use my hosted instance.</p><p>If you offer a modified version over a network, the license requires making the corresponding source available to its users.</p><a class="text-link" href="@(repository + "#docker-compose-deployment")" target="_blank" rel="noopener noreferrer">Self-hosting guide ↗</a><a class="license-link" href="@(repository + "/blob/main/LICENSE")" target="_blank" rel="noopener noreferrer">Read the license ↗</a></article>
             </div>
         </section>

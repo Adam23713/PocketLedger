@@ -1,7 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
-var appBaseUrl = builder.Configuration["Landing:AppBaseUrl"] ?? "https://app.pocketledger.dev";
-if (!Uri.TryCreate(appBaseUrl, UriKind.Absolute, out var appUri) || (appUri.Scheme != "https" && !(builder.Environment.IsDevelopment() && appUri.Scheme == "http")) || appUri.AbsolutePath != "/" || !string.IsNullOrEmpty(appUri.Query) || !string.IsNullOrEmpty(appUri.Fragment) || !string.IsNullOrEmpty(appUri.UserInfo))
-    throw new InvalidOperationException("Landing:AppBaseUrl must be an HTTPS origin (HTTP is allowed in Development).");
+var appUri = GetOrigin(builder.Configuration["Landing:AppBaseUrl"] ?? "https://app.pocketledger.dev", "Landing:AppBaseUrl", builder.Environment);
 builder.Configuration["Landing:AppBaseUrl"] = appUri.GetLeftPart(UriPartial.Authority);
 builder.Services.AddRazorPages();
 var app = builder.Build();
@@ -15,3 +13,12 @@ app.Use(async (context, next) =>
 app.UseStaticFiles();
 app.MapRazorPages();
 app.Run();
+
+static Uri GetOrigin(string value, string configurationKey, IWebHostEnvironment environment)
+{
+    if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || (uri.Scheme != "https" && !(environment.IsDevelopment() && uri.Scheme == "http")) || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment) || !string.IsNullOrEmpty(uri.UserInfo))
+        throw new InvalidOperationException($"{configurationKey} must be an HTTPS origin (HTTP is allowed in Development).");
+    return uri;
+}
+
+public partial class Program;

@@ -1,17 +1,6 @@
 (() => {
-    const storageKey = "pocketledger-theme";
-    const themes = ["horizon", "banking", "glass", "material"];
     const themeMenu = document.getElementById("theme-menu");
     const themeButton = document.getElementById("theme-menu-button");
-
-    function applyTheme(theme) {
-        const selectedTheme = themes.includes(theme) ? theme : "horizon";
-        document.documentElement.dataset.theme = selectedTheme;
-        document.documentElement.setAttribute("data-bs-theme", selectedTheme === "banking" || selectedTheme === "glass" ? "dark" : "light");
-        document.querySelectorAll("[data-theme-value]").forEach(item => {
-            item.setAttribute("aria-checked", String(item.dataset.themeValue === selectedTheme));
-        });
-    }
 
     function closeMenu(menu, button, restoreFocus = false) {
         menu.hidden = true;
@@ -50,14 +39,13 @@
         });
     }
 
-    applyTheme(localStorage.getItem(storageKey) ?? "horizon");
+    PocketLedgerTheme.apply(PocketLedgerTheme.read());
     if (themeButton && themeMenu) {
         setupMenu(themeButton, themeMenu);
         themeMenu.addEventListener("click", event => {
             const item = event.target.closest("[data-theme-value]");
             if (!item) return;
-            localStorage.setItem(storageKey, item.dataset.themeValue);
-            applyTheme(item.dataset.themeValue);
+            PocketLedgerTheme.select(item.dataset.themeValue);
             closeMenu(themeMenu, themeButton, true);
         });
     }
@@ -84,5 +72,54 @@
             localStorage.setItem(privacyStorageKey, String(hidden));
             applyDashboardPrivacy(hidden);
         });
+    }
+
+    const accountFilters = document.getElementById("dashboard-account-filters");
+    if (accountFilters) {
+        const storageKey = "pocketledger-dashboard-account-types";
+        const filterButtons = [...accountFilters.querySelectorAll("[data-account-filter]")];
+        const typeButtons = filterButtons.filter(button => button.dataset.accountFilter !== "all");
+        const accountCards = [...document.querySelectorAll("[data-account-card]")];
+        const emptyState = document.getElementById("dashboard-account-filter-empty");
+        const availableTypes = new Set(typeButtons.map(button => button.dataset.accountFilter));
+        let selectedTypes = new Set(availableTypes);
+
+        try {
+            const storedTypes = JSON.parse(localStorage.getItem(storageKey));
+            if (Array.isArray(storedTypes)) selectedTypes = new Set(storedTypes.filter(type => availableTypes.has(type)));
+        } catch {
+            localStorage.removeItem(storageKey);
+        }
+
+        const applyAccountFilters = () => {
+            let visibleCount = 0;
+            accountCards.forEach(card => {
+                card.hidden = !selectedTypes.has(card.dataset.accountType);
+                if (!card.hidden) visibleCount++;
+            });
+            typeButtons.forEach(button => {
+                const active = selectedTypes.has(button.dataset.accountFilter);
+                button.classList.toggle("active", active);
+                button.setAttribute("aria-pressed", String(active));
+            });
+            const allButton = filterButtons.find(button => button.dataset.accountFilter === "all");
+            const allActive = selectedTypes.size === availableTypes.size;
+            allButton.classList.toggle("active", allActive);
+            allButton.setAttribute("aria-pressed", String(allActive));
+            emptyState.hidden = visibleCount > 0;
+        };
+
+        accountFilters.addEventListener("click", event => {
+            const button = event.target.closest("[data-account-filter]");
+            if (!button) return;
+            const filter = button.dataset.accountFilter;
+            if (filter === "all") selectedTypes = new Set(availableTypes);
+            else if (selectedTypes.has(filter)) selectedTypes.delete(filter);
+            else selectedTypes.add(filter);
+            localStorage.setItem(storageKey, JSON.stringify([...selectedTypes]));
+            applyAccountFilters();
+        });
+
+        applyAccountFilters();
     }
 })();

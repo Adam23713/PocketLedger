@@ -3,7 +3,7 @@
 @if (User.Identity?.IsAuthenticated == true)
 {
     <p>Signed in as <strong>@User.Identity.Name</strong>.</p>
-    <p><a asp-controller="Account" asp-action="Security">Security and audit log</a></p>
+    <p><a asp-controller="Account" asp-action="LoginEvents">Login Events</a></p>
 }
 else
 {

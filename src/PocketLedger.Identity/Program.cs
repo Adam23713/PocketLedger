@@ -18,7 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
 builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName);
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
+builder.Services.AddOptions<CrowdSecOptions>().BindConfiguration(CrowdSecOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddHttpClient<ICrowdSecDecisionReader, CrowdSecDecisionReader>((services, client) =>
+{
+    client.Timeout = TimeSpan.FromSeconds(services.GetRequiredService<Microsoft.Extensions.Options.IOptions<CrowdSecOptions>>().Value.TimeoutSeconds);
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<IdentityDbContext>(options =>
 {
@@ -37,7 +43,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Lockout.AllowedForNewUsers = true;
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(78);
-}).AddEntityFrameworkStores<IdentityDbContext>().AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<IdentityDbContext>().AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "PocketLedger.Identity";
@@ -49,7 +55,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(BootstrapAdministratorAuthorization.PolicyName, policy => policy.RequireClaim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString))
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 if (builder.Environment.IsDevelopment()) builder.Services.AddCors(options => options.AddPolicy("Swagger", policy => policy.WithOrigins(builder.Configuration["OpenIddict:SwaggerBaseUrl"] ?? "http://localhost:5051").AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddOpenIddict()
     .AddCore(options => options.UseEntityFrameworkCore().UseDbContext<IdentityDbContext>())
@@ -79,6 +87,8 @@ builder.Services.AddSingleton<IAuthenticationRateLimiter, AuthenticationRateLimi
 builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>();
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddRequestTelemetry(builder.Configuration);
 
 builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
@@ -107,6 +117,7 @@ app.UseStaticFiles();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
+app.UseRequestTelemetry();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
