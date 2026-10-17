@@ -1,0 +1,18 @@
+type: leaky
+name: pocketledger/identity-abuse
+description: Detect excessive request volume from one client IP against PocketLedger Identity
+filter: "evt.Meta.service == 'http' && evt.Meta.log_type == 'http_access-log' && evt.Line.Labels.pocketledger_site == 'identity' && evt.Meta.http_status != '403'"
+groupby: evt.Meta.source_ip
+capacity: 80
+# Identity normally serves a short login burst. After that burst, retain pressure at 12 requests/minute.
+leakspeed: 5s
+blackhole: 5m
+labels:
+  service: http
+  confidence: 3
+  spoofable: 0
+  classification:
+    - attack.T1595
+  behavior: "http:identity-abuse"
+  label: "PocketLedger Identity abuse"
+  remediation: true

@@ -171,6 +171,7 @@ services:
       - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - ./crowdsec/scenarios/pocketledger-http-flood.yaml:/etc/crowdsec/scenarios/pocketledger-http-flood.yaml:ro
+      - ./crowdsec/scenarios/pocketledger-identity-abuse.yaml:/etc/crowdsec/scenarios/pocketledger-identity-abuse.yaml:ro
       - ./crowdsec/parsers/cloudflare-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/cloudflare-whitelist.yaml:ro
       - crowdsec-config:/etc/crowdsec
       - crowdsec-data:/var/lib/crowdsec/data
