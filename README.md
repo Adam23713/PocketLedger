@@ -19,7 +19,7 @@
 PocketLedger is a self-hosted personal finance manager built with ASP.NET Core and PostgreSQL. It covers accounts, categorized transactions, recurring entries, loans and debts, a calendar view, statistics, CSV import, and password‑protected Excel export and backup/restore — all behind a security design where the database is encrypted at the field level, secrets never touch plaintext storage, and the whole deployment can sit behind an edge that rate-limits and bans abuse automatically.
 
 > [!WARNING]
-> **[pocketledger.dev](https://pocketledger.dev) is a live, work-in-progress deployment.** Public registration is available, and every new account must configure TOTP-based two-factor authentication before using the application. You can also [run your own instance](#quick-start-docker-compose).
+> **[pocketledger.dev](https://pocketledger.dev) is a live, work-in-progress deployment.** Public registration is currently closed; existing account holders can still sign in. You can also [run your own instance](#quick-start-docker-compose).
 
 <br>
 
@@ -98,7 +98,7 @@ PocketLedger is designed so that no single layer is the only thing standing betw
 | **Cloud HSM key custody (optional)** | Hands key-wrapping for all three Data Protection key rings to an OCI Vault/KMS hardware security module, with one isolated key per service, encrypted `.enc` credential files, and a manual-unlock boot sequence. | [OCI KMS guide →](docs/oci-kms.md) |
 | **Internal TLS** | Every hop to the API is encrypted with a private CA; a wrong or missing certificate fails closed. | [Internal API TLS →](docs/deployment.md#internal-api-tls) |
 | **Edge protection** | Caddy + CrowdSec behind Cloudflare: trusted-IP-only rate limiting, automatic bans on flood/abuse patterns, redacted logs. | [Edge security guide →](docs/edge-security.md) |
-| **Authentication** | Public registration with mandatory TOTP-based two-factor auth and recovery codes for every account. Operators can disable self-service registration. | — |
+| **Authentication** | Optional public registration with mandatory TOTP-based two-factor auth and recovery codes for every account. Operators must explicitly enable self-service registration. | — |
 
 Whole-disk encryption (for example LUKS) is a further option worth considering on top of this, but it isn't part of the reference deployment — see [Scope and guarantees](docs/database-encryption.md#scope-and-guarantees) for why key custody via OCI KMS was chosen here instead.
 

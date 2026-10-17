@@ -27,9 +27,12 @@ public sealed class RegistrationLinksTests
         using var client = factory.CreateClient();
 
         var html = await client.GetStringAsync("/");
+        var privacyHtml = await client.GetStringAsync("/privacy");
 
-        Assert.Contains("Public registration is currently closed", html);
+        Assert.Contains("PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.", html);
         Assert.DoesNotContain("/Session/Register", html);
+        Assert.Contains("PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.", privacyHtml);
+        Assert.DoesNotContain("/Session/Register", privacyHtml);
     }
 
     private static WebApplicationFactory<Program> CreateFactory(bool registrationEnabled) => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
