@@ -52,15 +52,15 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     }
 
     [Fact]
-    public async Task PublicRegistration_IsAvailableByDefault()
+    public async Task PublicRegistration_IsDisabledByDefault()
     {
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
         var response = await client.GetAsync("/Account/Register");
         var loginHtml = await client.GetStringAsync("/Account/Login");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("href=\"/Account/Register\"", loginHtml);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.DoesNotContain("href=\"/Account/Register\"", loginHtml);
     }
 
     [Fact]

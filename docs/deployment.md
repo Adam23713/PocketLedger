@@ -64,7 +64,7 @@ docker compose up -d identity-database
 docker compose run --rm identity bootstrap-identity
 ```
 
-This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is enabled by default; set `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=false` to restrict account creation to administrative workflows.
+This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is disabled by default; set `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=true` only when self-service account creation should be available.
 
 The bootstrap command permanently marks this first account as the sole administrator. The flag cannot be granted, revoked, or transferred through the UI, API, or account commands, and the database rejects a second administrator. When upgrading an existing deployment, the Identity migration assigns the flag to the oldest user by `CreatedAtUtc`, using the user ID as a deterministic tie-breaker. Existing sessions must sign in again to receive the administrator claim. Review the selected account before exposing future administrator endpoints; changing the designation is intentionally unsupported.
 
@@ -108,7 +108,7 @@ PocketLedger layers several independent protections rather than relying on any s
 
 **Edge protection.** Caddy and CrowdSec sit in front of all four public hosts, behind Cloudflare. Only Cloudflare's published IP ranges are trusted for client-IP headers, a shared rate limiter caps requests per client across all hosts (with a stricter limit on Identity's authentication endpoints), and CrowdSec bans IPs that match flood or abuse patterns using only local detection — no data is shared with CrowdSec's community service. → [Edge security guide](edge-security.md)
 
-**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes. Public self-registration is enabled by default and can be disabled with `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=false`.
+**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes. Public self-registration is disabled by default and can be enabled with `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=true`.
 
 Together these mean a single leaked backup file, a stolen disk, or a flood of malicious requests each run into a layer built specifically to stop them, rather than one boundary doing all the work.
 
