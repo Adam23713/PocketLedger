@@ -20,7 +20,7 @@
   --card-shadow: 0 14px 38px rgba(56, 108, 158, .1), 0 2px 8px rgba(38, 73, 112, .05);
   --card-radius: 1rem;
   --control-radius: .75rem;
-  --header-background: rgba(255, 255, 255, .68);
+  --header-background: rgba(255, 255, 255, .5);
   --header-shadow: 0 16px 44px rgba(67, 118, 169, .14), inset 0 1px 0 rgba(255, 255, 255, .82);
   --nav-active-background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(222, 239, 255, .86));
   --nav-active-border: rgba(255, 255, 255, .94);
@@ -161,6 +161,12 @@ body > footer.footer.text-muted { margin-top: 2rem; position: relative; z-index:
 [data-theme="glass"] body { --bs-link-color-rgb: 190, 205, 255; }
 [data-theme="material"] body { --bs-link-color-rgb: 103, 80, 164; }
 [data-theme="horizon"] body { background-repeat: no-repeat; background-size: cover; background-position: top center; }
+[data-theme="horizon"] body .navbar {
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+  border-color: rgba(255, 255, 255, .78);
+  box-shadow: 0 16px 44px rgba(67, 118, 169, .11), inset 0 1px 0 rgba(255, 255, 255, .82);
+}
 
 .app-header { background: transparent; padding: .5rem clamp(.55rem, 2vw, 1.8rem) 0; position: sticky; top: 0; z-index: 1030; }
 .app-header, .card, .app-dropdown { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); }
