@@ -2,10 +2,10 @@
 [data-theme="horizon"] {
   --page-background: #edf6ff;
   --page-background-image:
-    radial-gradient(ellipse 72% 44% at 5% 10%, rgba(184, 219, 255, .82), transparent 68%),
-    radial-gradient(ellipse 60% 42% at 94% 8%, rgba(205, 230, 255, .88), transparent 68%),
-    radial-gradient(ellipse 48% 38% at 74% 68%, rgba(208, 235, 255, .48), transparent 74%),
-    linear-gradient(145deg, #f7fbff 0%, #eaf5ff 48%, #f8fbff 100%);
+    radial-gradient(ellipse 76% 48% at 7% 4%, rgba(153, 207, 255, .72), transparent 66%),
+    radial-gradient(ellipse 64% 44% at 92% 10%, rgba(184, 214, 255, .7), transparent 68%),
+    radial-gradient(ellipse 54% 42% at 70% 70%, rgba(183, 226, 255, .5), transparent 72%),
+    linear-gradient(145deg, #f8fcff 0%, #e7f4ff 45%, #f6faff 100%);
   --surface-background: rgba(255, 255, 255, .76);
   --surface-background-hover: rgba(225, 240, 255, .72);
   --surface-raised: rgba(255, 255, 255, .94);
