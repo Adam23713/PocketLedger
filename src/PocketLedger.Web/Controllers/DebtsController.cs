@@ -56,7 +56,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> AddOperation(DebtOperationFormViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
-        try { await debtService.AddOperationAsync(model.DebtId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation recorded."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
+        try { if (await PrepareOverpaymentResolutionAsync(model, null, cancellationToken)) { await PopulateAccountsAsync(model, cancellationToken); return View(model); } await debtService.AddOperationAsync(model.DebtId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note, model.OverpaymentResolution), cancellationToken); TempData["SuccessMessage"] = "Debt operation recorded."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpGet] public async Task<IActionResult> EditOperation(Guid id, CancellationToken cancellationToken)
@@ -67,7 +67,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> EditOperation(DebtOperationFormViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
-        try { await debtService.UpdateOperationAsync(model.TransactionId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note), cancellationToken); TempData["SuccessMessage"] = "Debt operation updated."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
+        try { if (await PrepareOverpaymentResolutionAsync(model, model.TransactionId, cancellationToken)) { await PopulateAccountsAsync(model, cancellationToken); return View(model); } await debtService.UpdateOperationAsync(model.TransactionId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note, model.OverpaymentResolution), cancellationToken); TempData["SuccessMessage"] = "Debt operation updated."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
         catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> DeleteOperation(Guid id, Guid debtId, CancellationToken cancellationToken) { try { await debtService.DeleteOperationAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt operation deleted."; return RedirectToAction(nameof(Details), new { id = debtId }); } catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; return RedirectToAction(nameof(Details), new { id = debtId }); } }
@@ -104,6 +104,19 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     {
         if (!model.AutomaticPaymentEnabled || model.LastPaymentDate is not null || model.NextPaymentDate is null || model.AutomaticPaymentAmount is not > 0 || remainingAmount <= 0) return;
         model.LastPaymentDate = DebtRules.CalculateLastPaymentDate(remainingAmount, model.AutomaticPaymentAmount.Value, model.NextPaymentDate.Value, model.Frequency);
+    }
+    private async Task<bool> PrepareOverpaymentResolutionAsync(DebtOperationFormViewModel model, Guid? excludedTransactionId, CancellationToken cancellationToken)
+    {
+        if (model.OverpaymentResolution is not null) return false;
+        var details = await debtService.GetByIdAsync(model.DebtId, cancellationToken);
+        if (details is null) return false;
+        var remainingBeforeOperation = DebtBalanceCalculator.Calculate(details.Debt.OriginalAmount, details.Transactions, excludedTransactionId);
+        var result = remainingBeforeOperation + DebtRules.GetDebtDelta(model.Type, model.Amount);
+        if (result >= 0) return false;
+        model.RequiresOverpaymentResolution = true;
+        model.OverpaymentDifference = -result;
+        model.Currency = details.Debt.Currency;
+        return true;
     }
     private TimeOnly UserLocalTime(UserPreference user) => userDates.LocalTime(user.TimeZoneId);
 }

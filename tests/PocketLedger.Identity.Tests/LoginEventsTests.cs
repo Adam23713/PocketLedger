@@ -15,7 +15,7 @@ using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private static readonly Guid CurrentUserId = Guid.Parse("c37c93e2-9824-4245-a672-cc11a4802f52");
     private readonly WebApplicationFactory<Program> anonymousFactory;
@@ -25,6 +25,12 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
     {
         anonymousFactory = ConfigureFactory(factory, authenticate: false);
         authenticatedFactory = ConfigureFactory(factory, authenticate: true);
+    }
+
+    public void Dispose()
+    {
+        anonymousFactory.Dispose();
+        authenticatedFactory.Dispose();
     }
 
     [Fact]

@@ -64,7 +64,7 @@ docker compose up -d identity-database
 docker compose run --rm identity bootstrap-identity
 ```
 
-This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is intentionally disabled — every other account is created or managed administratively after this point.
+This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is enabled by default; set `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=false` to restrict account creation to administrative workflows.
 
 The bootstrap command permanently marks this first account as the sole administrator. The flag cannot be granted, revoked, or transferred through the UI, API, or account commands, and the database rejects a second administrator. When upgrading an existing deployment, the Identity migration assigns the flag to the oldest user by `CreatedAtUtc`, using the user ID as a deterministic tie-breaker. Existing sessions must sign in again to receive the administrator claim. Review the selected account before exposing future administrator endpoints; changing the designation is intentionally unsupported.
 
@@ -108,7 +108,7 @@ PocketLedger layers several independent protections rather than relying on any s
 
 **Edge protection.** Caddy and CrowdSec sit in front of all four public hosts, behind Cloudflare. Only Cloudflare's published IP ranges are trusted for client-IP headers, a shared rate limiter caps requests per client across all hosts (with a stricter limit on Identity's authentication endpoints), and CrowdSec bans IPs that match flood or abuse patterns using only local detection — no data is shared with CrowdSec's community service. → [Edge security guide](edge-security.md)
 
-**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes, and there is no public self-registration endpoint — accounts are created at bootstrap or administratively afterward.
+**Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes. Public self-registration is enabled by default and can be disabled with `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED=false`.
 
 Together these mean a single leaked backup file, a stolen disk, or a flood of malicious requests each run into a layer built specifically to stop them, rather than one boundary doing all the work.
 
@@ -123,7 +123,7 @@ If you're moving from a single-domain deployment to the recommended `app.` subdo
 
 On Identity startup, the existing Web OIDC client's login/logout redirect URIs are automatically synchronized with `OpenIddict:WebBaseUrl`; its client secret and permissions are preserved. Existing host-only browser cookies do **not** move to the new subdomain, so users may need to sign in again, and bookmarks to app paths on the old domain should be updated.
 
-`Landing:AppBaseUrl` configures the landing page's app links; `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status` — an endpoint that returns only an authentication boolean with no-store caching and shares no cookies or tokens with the landing page. Configure Cloudflare to bypass caching for `/Session/*` on the app domain, and don't apply public-page caching rules to authenticated app routes. When the app can't be reached, the landing page keeps a working login link.
+`Landing:AppBaseUrl` configures the landing page's app and registration links. Registration enters through Web so any existing BFF session is cleared before Identity creates a different account, and the completed onboarding flow establishes a matching Web session. The same `Registration:Enabled` value is passed to Landing and Identity so the CTA is shown only while the endpoint is available. `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status` — an endpoint that returns only an authentication boolean with no-store caching and shares no cookies or tokens with the landing page. Configure Cloudflare to bypass caching for `/Session/*` on the app domain, and don't apply public-page caching rules to authenticated app routes. When the app can't be reached, the landing page keeps a working login link.
 
 ## Financial cache (Valkey)
 

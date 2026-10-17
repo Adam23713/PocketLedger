@@ -22,7 +22,7 @@ using PocketLedger.Services;
 
 namespace PocketLedger.Identity.Tests;
 
-public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     private static readonly Guid CurrentUserId = Guid.Parse("95a8be08-bb94-4515-80b2-b1e628f3145f");
     private static readonly DateTimeOffset CurrentTimeUtc = new(2026, 10, 8, 12, 2, 0, TimeSpan.Zero);
@@ -57,6 +57,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
             });
         });
     }
+
+    public void Dispose() => factory.Dispose();
 
     [Fact]
     public void AdminControllerAndActions_ExplicitlyRequireBootstrapAdministratorPolicy()

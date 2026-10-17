@@ -6,11 +6,11 @@
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Transaction details</h1>
-    <div>@if (Model.DebtId is null) { <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a> } else { <a class="btn btn-outline-primary" asp-controller="Debts" asp-action="Details" asp-route-id="@Model.DebtId">View debt</a> }</div>
+    <div class="d-flex flex-wrap gap-2"><a class="btn btn-primary" asp-action="Create" asp-route-accountId="@Model.AccountId">@(Model.AccountName is null ? "Add new transaction" : $"Add new transaction to {Model.AccountName}")</a>@if (Model.DebtId is null) { <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a> } else { <a class="btn btn-outline-primary" asp-controller="Debts" asp-action="Details" asp-route-id="@Model.DebtId">View debt</a> }</div>
 </div>
 <div class="card mb-3">
-    <div class="table-responsive">
-        <table class="table table-striped align-middle mb-0">
+    <div class="table-responsive edge-to-edge-table">
+        <table class="table align-middle mb-0">
             <tbody>
                 <tr><th class="w-25" scope="row">Type</th><td>@Model.Type @Model.AdjustmentDirection</td></tr>
                 <tr><th scope="row">Account</th><td>@(Model.AccountName ?? "No account movement")</td></tr>
@@ -29,4 +29,4 @@
         </table>
     </div>
 </div>
-<a class="btn btn-link px-0" asp-action="Index">Back to transactions</a>
+<a class="btn btn-sm btn-outline-primary" asp-action="Index">Back to transactions</a>

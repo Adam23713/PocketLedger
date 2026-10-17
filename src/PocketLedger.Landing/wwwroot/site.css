@@ -88,6 +88,12 @@ img {
     background:var(--warning-ink);
 }
 
+.development a {
+    font-weight:750;
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+
 .status-dot {
     display:inline-block;
     flex-shrink:0;
@@ -221,6 +227,12 @@ h1 span {
     gap:30px;
     align-items:center;
     justify-content:center;
+}
+
+.hosting-actions {
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
 }
 
 .text-link {

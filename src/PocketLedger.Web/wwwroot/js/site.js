@@ -73,4 +73,53 @@
             applyDashboardPrivacy(hidden);
         });
     }
+
+    const accountFilters = document.getElementById("dashboard-account-filters");
+    if (accountFilters) {
+        const storageKey = "pocketledger-dashboard-account-types";
+        const filterButtons = [...accountFilters.querySelectorAll("[data-account-filter]")];
+        const typeButtons = filterButtons.filter(button => button.dataset.accountFilter !== "all");
+        const accountCards = [...document.querySelectorAll("[data-account-card]")];
+        const emptyState = document.getElementById("dashboard-account-filter-empty");
+        const availableTypes = new Set(typeButtons.map(button => button.dataset.accountFilter));
+        let selectedTypes = new Set(availableTypes);
+
+        try {
+            const storedTypes = JSON.parse(localStorage.getItem(storageKey));
+            if (Array.isArray(storedTypes)) selectedTypes = new Set(storedTypes.filter(type => availableTypes.has(type)));
+        } catch {
+            localStorage.removeItem(storageKey);
+        }
+
+        const applyAccountFilters = () => {
+            let visibleCount = 0;
+            accountCards.forEach(card => {
+                card.hidden = !selectedTypes.has(card.dataset.accountType);
+                if (!card.hidden) visibleCount++;
+            });
+            typeButtons.forEach(button => {
+                const active = selectedTypes.has(button.dataset.accountFilter);
+                button.classList.toggle("active", active);
+                button.setAttribute("aria-pressed", String(active));
+            });
+            const allButton = filterButtons.find(button => button.dataset.accountFilter === "all");
+            const allActive = selectedTypes.size === availableTypes.size;
+            allButton.classList.toggle("active", allActive);
+            allButton.setAttribute("aria-pressed", String(allActive));
+            emptyState.hidden = visibleCount > 0;
+        };
+
+        accountFilters.addEventListener("click", event => {
+            const button = event.target.closest("[data-account-filter]");
+            if (!button) return;
+            const filter = button.dataset.accountFilter;
+            if (filter === "all") selectedTypes = new Set(availableTypes);
+            else if (selectedTypes.has(filter)) selectedTypes.delete(filter);
+            else selectedTypes.add(filter);
+            localStorage.setItem(storageKey, JSON.stringify([...selectedTypes]));
+            applyAccountFilters();
+        });
+
+        applyAccountFilters();
+    }
 })();

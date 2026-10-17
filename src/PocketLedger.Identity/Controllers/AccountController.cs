@@ -18,11 +18,11 @@ namespace PocketLedger.Controllers;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
-    IOptions<PublicRegistrationOptions> registrationOptions) : Controller
+    IOptions<PublicRegistrationOptions> registrationOptions, IConfiguration configuration) : Controller
 {
     [AllowAnonymous, HttpGet]
     public async Task<IActionResult> Login(string? returnUrl = null) => User.Identity?.IsAuthenticated == true
-        ? LocalRedirect(returnUrl ?? "/")
+        ? ContinueAfterAuthentication(returnUrl)
         : View(await BuildLoginModelAsync(returnUrl));
 
     [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
@@ -44,7 +44,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                 await userManager.UpdateAsync(user);
             }
             await audit.WriteAsync(user.AuthenticatorSetupComplete ? "LoginSucceeded" : "PasswordAcceptedSetupRequired", "Success", user.Id, normalized, cancellationToken: cancellationToken);
-            return user.AuthenticatorSetupComplete ? LocalRedirect(model.ReturnUrl ?? "/") : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
+            return user.AuthenticatorSetupComplete ? ContinueAfterAuthentication(model.ReturnUrl) : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
         }
         var nowLocked = user is not null && await userManager.IsLockedOutAsync(user);
         var reason = result.IsLockedOut || wasLocked || nowLocked ? "LockedOut" : "InvalidCredentials";
@@ -150,7 +150,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             {
                 await RecordSuccessfulLoginAsync(linkedUser);
                 await audit.WriteAsync(linkedUser.AuthenticatorSetupComplete ? "ExternalLoginSucceeded" : "ExternalLoginAcceptedSetupRequired", "Success", linkedUser.Id, linkedUser.NormalizedUserName, cancellationToken: cancellationToken);
-                return linkedUser.AuthenticatorSetupComplete ? LocalRedirect(returnUrl ?? "/") : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
+                return linkedUser.AuthenticatorSetupComplete ? ContinueAfterAuthentication(returnUrl) : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
             }
 
             await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, result.IsLockedOut ? "LockedOut" : "SignInRejected", cancellationToken: cancellationToken);
@@ -232,7 +232,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                 await userManager.UpdateAsync(pending);
                 await audit.WriteAsync("LoginSucceeded", "Success", pending.Id, pending.NormalizedUserName, cancellationToken: cancellationToken);
             }
-            return LocalRedirect(model.ReturnUrl ?? "/");
+            return ContinueAfterAuthentication(model.ReturnUrl);
         }
         ModelState.AddModelError(string.Empty, "Invalid authentication attempt.");
         return View(model);
@@ -308,15 +308,16 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     public IActionResult RecoveryCodes() => NotFound();
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> RecoveryCodes(RecoveryCodesViewModel model)
+    public async Task<IActionResult> RecoveryCodes(RecoveryCodesViewModel model, CancellationToken cancellationToken)
     {
         if (!model.Confirmed) return BadRequest("Recovery code storage confirmation is required.");
         var user = await userManager.GetUserAsync(User);
         if (user is null || !user.TwoFactorEnabled) return Challenge();
         user.AuthenticatorSetupComplete = true;
-        await userManager.UpdateAsync(user);
+        await RecordSuccessfulLoginAsync(user);
         await signInManager.RefreshSignInAsync(user);
-        return LocalRedirect(model.ReturnUrl ?? "/");
+        await audit.WriteAsync("LoginSucceeded", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        return ContinueAfterAuthentication(model.ReturnUrl);
     }
 
     [Authorize, HttpGet]
@@ -386,7 +387,8 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var user = await userManager.GetUserAsync(User);
         await audit.WriteAsync("Logout", "Success", user?.Id, user?.NormalizedUserName, cancellationToken: cancellationToken);
         await signInManager.SignOutAsync();
-        return RedirectToAction(nameof(Login));
+        var webBaseUrl = configuration["OpenIddict:WebBaseUrl"] ?? throw new InvalidOperationException("OpenIddict:WebBaseUrl is required.");
+        return Redirect($"{webBaseUrl.TrimEnd('/')}/Session/CompleteLogout");
     }
 
     [Authorize] public IActionResult AccessDenied() => View();
@@ -452,6 +454,20 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         user.LastSuccessfulLoginAtUtc = DateTimeOffset.UtcNow;
         user.LastSuccessfulLoginIpAddress = clientIpAddressResolver.GetClientIpAddress(HttpContext);
         await userManager.UpdateAsync(user);
+    }
+
+    private IActionResult ContinueAfterAuthentication(string? returnUrl)
+    {
+        if (IsAuthorizationReturnUrl(returnUrl)) return LocalRedirect(returnUrl!);
+        var webBaseUrl = configuration["OpenIddict:WebBaseUrl"] ?? throw new InvalidOperationException("OpenIddict:WebBaseUrl is required.");
+        return Redirect($"{webBaseUrl.TrimEnd('/')}/Session/CompleteSignIn");
+    }
+
+    private bool IsAuthorizationReturnUrl(string? returnUrl)
+    {
+        if (!Url.IsLocalUrl(returnUrl)) return false;
+        var path = returnUrl!.Split('?', 2)[0];
+        return string.Equals(path, "/connect/authorize", StringComparison.OrdinalIgnoreCase);
     }
 
     private Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)

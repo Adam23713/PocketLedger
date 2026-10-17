@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.Transactions;
 using PocketLedger.Models;
+using PocketLedger.Services;
 
 namespace PocketLedger.Models.ViewModels.Debts;
 
@@ -107,5 +108,9 @@ public class DebtOperationFormViewModel
     public Guid? AccountId { get; set; }
     [Required] public DateOnly Date { get; set; }
     [StringLength(500)] public string? Note { get; set; }
+    public DebtOverpaymentResolution? OverpaymentResolution { get; set; }
+    public bool RequiresOverpaymentResolution { get; set; }
+    public decimal OverpaymentDifference { get; set; }
+    public string Currency { get; set; } = string.Empty;
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
 }

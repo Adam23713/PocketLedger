@@ -14,6 +14,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-true}
     restart: unless-stopped
 
   web:
@@ -110,7 +111,7 @@ services:
       OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
       Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       ForwardedHeaders__TrustAll: "true"
-      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-false}
+      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-true}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
@@ -170,6 +171,7 @@ services:
       - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - ./crowdsec/scenarios/pocketledger-http-flood.yaml:/etc/crowdsec/scenarios/pocketledger-http-flood.yaml:ro
+      - ./crowdsec/scenarios/pocketledger-identity-abuse.yaml:/etc/crowdsec/scenarios/pocketledger-identity-abuse.yaml:ro
       - ./crowdsec/parsers/cloudflare-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/cloudflare-whitelist.yaml:ro
       - crowdsec-config:/etc/crowdsec
       - crowdsec-data:/var/lib/crowdsec/data

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PocketLedger.Models;
 using PocketLedger.Models.ViewModels.Calendar;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
@@ -18,7 +19,8 @@ public class CalendarController(ICalendarService calendarService, IUserContextSe
             var defaultCurrency = (await userContext.GetUserAsync(cancellationToken)).DefaultCurrency;
             var activeCurrency = monthlyTotals.Any(total => total.Currency == currency) ? currency! : monthlyTotals.Any(total => total.Currency == defaultCurrency) ? defaultCurrency : monthlyTotals.FirstOrDefault()?.Currency ?? defaultCurrency;
             var gridStart = selected.AddDays(-(((int)selected.DayOfWeek + 6) % 7));
-            var gridEnd = selected.AddMonths(1).AddDays(6 - (((int)selected.AddMonths(1).AddDays(-1).DayOfWeek + 6) % 7));
+            var monthEnd = selected.AddMonths(1).AddDays(-1);
+            var gridEnd = monthEnd.AddDays(6 - (((int)monthEnd.DayOfWeek + 6) % 7));
             var days = new List<CalendarDayViewModel>();
             for (var date = gridStart; date <= gridEnd; date = date.AddDays(1))
             {
@@ -32,6 +34,14 @@ public class CalendarController(ICalendarService calendarService, IUserContextSe
                     Totals = summary?.Totals.Where(total => total.Currency == activeCurrency).Select(total => new CalendarCurrencyTotalViewModel(total.Currency, total.Income, total.Expenses, total.Balance)).ToList() ?? []
                 });
             }
+            var activeMonthlyTotal = monthlyTotals.FirstOrDefault(total => total.Currency == activeCurrency) ?? new CalendarCurrencyTotalViewModel(activeCurrency, 0, 0, 0);
+            var weeklyTotals = days.Chunk(7).Select(week =>
+            {
+                var totals = week.Where(day => day.IsCurrentMonth).SelectMany(day => day.Totals).ToList();
+                var income = totals.Sum(total => total.Income);
+                var expenses = totals.Sum(total => total.Expenses);
+                return new CalendarWeekTotalViewModel(week[0].Date < selected ? selected : week[0].Date, week[^1].Date > monthEnd ? monthEnd : week[^1].Date, income, expenses, income - expenses);
+            }).ToList();
 
             return View(new CalendarViewModel
             {
@@ -39,7 +49,10 @@ public class CalendarController(ICalendarService calendarService, IUserContextSe
                 Month = selected.Month,
                 Today = today,
                 ActiveCurrency = activeCurrency,
+                AvailableCurrencies = Currencies.All.Where(definition => monthlyTotals.Any(total => total.Currency == definition.Code)).ToList(),
                 MonthlyTotals = monthlyTotals.Count > 0 ? monthlyTotals : [new CalendarCurrencyTotalViewModel(defaultCurrency, 0, 0, 0)],
+                ActiveMonthlyTotal = activeMonthlyTotal,
+                WeeklyTotals = weeklyTotals,
                 Days = days
             });
         }
