@@ -94,6 +94,17 @@ try:
 \t\t}'''
         assert api_tls_proxy in local, 'Production API TLS proxy block changed; update the isolated fixture explicitly'
         local = local.replace(api_tls_proxy, '\t\treverse_proxy @api api:5051')
+        landing_route = '\t\t@landing host {$POCKETLEDGER_LANDING_DOMAIN}'
+        identity_limit_fixture = '''\t\t# Test-only response: exercise the Identity limiter without feeding accepted events to its CrowdSec scenario.
+\t\t@identity_limit_test {
+\t\t\thost {$POCKETLEDGER_IDENTITY_DOMAIN}
+\t\t\tpath /__identity-limit-test
+\t\t}
+\t\trespond @identity_limit_test 403
+
+'''
+        assert landing_route in local, 'Production landing route changed; update the isolated fixture explicitly'
+        local = local.replace(landing_route, identity_limit_fixture + landing_route)
         config.write_text(local)
         proxy = container('proxy', *env_args, '-p', '127.0.0.1::8080', '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy', IMAGE)
         port = int(run('docker', 'port', proxy, '8080/tcp').strip().rsplit(':', 1)[1])
@@ -152,11 +163,11 @@ try:
         assert request('identity.test', 'POST', '11.12.13.15')[0] == 429
         assert request('identity.test', 'GET', '11.12.13.15')[0] == 200
         assert request('web.test', 'POST', '11.12.13.15')[0] == 200
-        # Use a parser-whitelisted Cloudflare address so the CrowdSec abuse scenario cannot race this Caddy-only boundary check.
-        for _ in range(100):
-            assert request('identity.test', 'GET', '173.245.48.2')[0] == 200
-        assert request('identity.test', 'GET', '173.245.48.2')[0] == 429
-        assert request('web.test', 'GET', '173.245.48.2')[0] == 200
+        # Accepted 403s are excluded from the abuse scenario, isolating this Caddy-only boundary check from bouncer polling.
+        for i in range(100):
+            assert request('identity.test', 'GET', '11.12.13.20', path='/__identity-limit-test')[0] == 403, i
+        assert request('identity.test', 'GET', '11.12.13.20', path='/__identity-limit-test')[0] == 429
+        assert request('web.test', 'GET', '11.12.13.20')[0] == 200
         for i in range(15):
             assert request('identity.test', 'POST', f'2001:4860:1234:5678::{i + 1:x}')[0] == 200
         assert request('identity.test', 'POST', '2001:4860:1234:5678::ffff')[0] == 429
