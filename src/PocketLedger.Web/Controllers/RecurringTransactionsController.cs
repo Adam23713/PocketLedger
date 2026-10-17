@@ -41,7 +41,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
             };
         }).OrderBy(item => !item.Enabled).ThenBy(item => item.NextOccurrence is null).ThenBy(item => item.NextOccurrence).ThenBy(item => item.FirstOccurrence).ToList();
         var normalItems = items.Where(item => item.DebtId is null).ToList();
-        var loanItems = items.Where(item => item.DebtId is not null).ToList();
+        var loanItems = items.Where(item => item.DebtId is not null && (item.LastOccurrence is null || item.LastOccurrence >= today)).ToList();
         var expenseTotals = normalItems.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
             .GroupBy(item => item.Currency)
             .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => item.Amount)))

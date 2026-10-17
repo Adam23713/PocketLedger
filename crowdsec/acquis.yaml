@@ -4,3 +4,12 @@ filenames:
   - /var/log/caddy/access.log
 labels:
   type: caddy
+  pocketledger_site: application
+---
+# Identity traffic is isolated so its stricter scenario does not depend on a deployed domain name.
+force_inotify: true
+filenames:
+  - /var/log/caddy/identity-access.log
+labels:
+  type: caddy
+  pocketledger_site: identity
