@@ -6,6 +6,14 @@ decisions:
     duration: 1h
 on_success: break
 ---
+name: pocketledger_identity_abuse
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() == "pocketledger/identity-abuse"
+decisions:
+  - type: ban
+    duration: 4h
+on_success: break
+---
 name: default_ip_remediation
 filters:
   - Alert.Remediation == true && Alert.GetScope() == "Ip"
