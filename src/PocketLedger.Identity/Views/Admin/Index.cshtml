@@ -93,11 +93,8 @@
                                             <input name="page" type="hidden" value="@Model.Page" />
                                             <button class="btn btn-sm @(user.IsAccessBlocked ? "btn-outline-success" : "btn-outline-warning")" type="submit">@(user.IsAccessBlocked ? "Unblock" : "Block")</button>
                                         </form>
-                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Permanently delete this user and all PocketLedger data?');">
-                                            <input name="userId" type="hidden" value="@user.Id" />
-                                            <input name="page" type="hidden" value="@Model.Page" />
-                                            <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
-                                        </form>
+                                        <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#delete-user-modal"
+                                                data-delete-user-id="@user.Id" data-delete-username="@user.Username">Delete</button>
                                     </div>
                                 }
                             </td>
@@ -135,7 +132,32 @@
 <partial name="_SuspiciousRequestEvents" model="Model.SuspiciousRequests" />
 <partial name="_CrowdSecBans" model="Model.CrowdSecBans" />
 
+@section Modals {
+    <div class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-modal-title" aria-describedby="delete-user-warning" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form asp-action="Delete" method="post" class="modal-content" id="delete-user-form">
+                <input name="userId" type="hidden" />
+                <input name="page" type="hidden" value="@Model.Page" />
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="delete-user-modal-title">Permanently delete user?</h2>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="delete-user-warning">This permanently deletes <strong data-delete-username></strong> and all of their PocketLedger data. This action cannot be undone.</p>
+                    <label class="form-label" for="delete-confirmation">Type <strong>DELETE</strong> to confirm</label>
+                    <input class="form-control" id="delete-confirmation" name="confirmation" type="text" autocomplete="off" spellcheck="false" required />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger" type="submit" data-delete-submit disabled>Permanently delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
 @section Scripts {
     <script src="~/lib/chart.js/chart.umd.min.js"></script>
     <script src="~/js/request-activity.js" asp-append-version="true"></script>
+    <script src="~/js/admin-user-deletion.js" asp-append-version="true"></script>
 }
