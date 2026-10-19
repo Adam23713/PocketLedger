@@ -3,7 +3,7 @@ using PocketLedger.Services;
 
 namespace PocketLedger.Models.ViewModels.Admin;
 
-public sealed record AdminUserOverviewItem(string Username, DateTimeOffset? LastSuccessfulLoginAtUtc);
+public sealed record AdminUserOverviewItem(Guid Id, string Username, string? Email, DateTimeOffset? LastSuccessfulLoginAtUtc, bool IsAccessBlocked, bool IsBootstrapAdministrator);
 
 public sealed record RequestActivityUserOption(Guid Id, string Username);
 

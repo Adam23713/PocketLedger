@@ -25,6 +25,7 @@ services:
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       RequestTelemetry__ConnectionString: valkey:6379
+      AccessControl__ConnectionString: valkey:6379
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
@@ -67,6 +68,8 @@ services:
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
       RequestTelemetry__ConnectionString: valkey:6379
+      AccessControl__ConnectionString: valkey:6379
+      AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
@@ -101,6 +104,10 @@ services:
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       RequestTelemetry__ConnectionString: valkey:6379
+      AccessControl__ConnectionString: valkey:6379
+      AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
+      Api__BaseUrl: https://api:5051/
+      Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
       CrowdSec__BaseUrl: http://crowdsec:8080/
       CrowdSec__ApiKey: ${CROWDSEC_IDENTITY_API_KEY:?Set CROWDSEC_IDENTITY_API_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
@@ -124,9 +131,15 @@ services:
         target: /run/pocketledger-certificates
         read_only: true
         bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
+        read_only: true
+        bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
       valkey: { condition: service_started }
+      api: { condition: service_started }
     restart: unless-stopped
 
   caddy:

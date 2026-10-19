@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.EntityFrameworkCore.Models;
+using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Admin;
 using PocketLedger.Security;
@@ -12,7 +14,8 @@ namespace PocketLedger.Controllers;
 [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class AdminController(UserManager<ApplicationUser> userManager, IRequestTelemetryReader requestTelemetry, ISuspiciousRequestEventReader suspiciousRequestEvents,
-    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider) : Controller
+    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessBlockStore accessBlockStore, IAdminUserDataClient userDataClient,
+    IdentityDbContext dbContext) : Controller
 {
     private const int PageSize = 10;
     private const int BucketMinutes = 5;
@@ -28,12 +31,61 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         page = Math.Clamp(page, 1, totalPages);
         var users = await query.OrderBy(user => user.LastSuccessfulLoginAtUtc == null).ThenByDescending(user => user.LastSuccessfulLoginAtUtc)
             .ThenBy(user => user.NormalizedUserName).ThenBy(user => user.Id).Skip((page - 1) * PageSize).Take(PageSize)
-            .Select(user => new AdminUserOverviewItem(user.UserName ?? "Unavailable", user.LastSuccessfulLoginAtUtc)).ToListAsync(cancellationToken);
+            .Select(user => new AdminUserOverviewItem(user.Id, user.UserName ?? "Unavailable", user.Email, user.LastSuccessfulLoginAtUtc, user.IsAccessBlocked,
+                user.IsBootstrapAdministrator)).ToListAsync(cancellationToken);
         var suspiciousRequestsTask = suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
         var crowdSecBansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
         await Task.WhenAll(suspiciousRequestsTask, crowdSecBansTask);
         return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours),
             await suspiciousRequestsTask, await crowdSecBansTask));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Block(Guid userId, int page = 1, CancellationToken cancellationToken = default)
+    {
+        var user = await FindManageableUserAsync(userId);
+        if (user is null) return NotFound();
+        user.IsAccessBlocked = true;
+        var result = await userManager.UpdateSecurityStampAsync(user);
+        if (!result.Succeeded) throw new InvalidOperationException("The user could not be blocked.");
+        await accessBlockStore.SetBlockedAsync(user.Id, true, cancellationToken);
+        TempData["AdminMessage"] = $"{user.UserName} has been blocked.";
+        return RedirectToAction(nameof(Index), new { page });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Unblock(Guid userId, int page = 1, CancellationToken cancellationToken = default)
+    {
+        var user = await FindManageableUserAsync(userId);
+        if (user is null) return NotFound();
+        user.IsAccessBlocked = false;
+        var result = await userManager.UpdateSecurityStampAsync(user);
+        if (!result.Succeeded) throw new InvalidOperationException("The user could not be unblocked.");
+        await accessBlockStore.SetBlockedAsync(user.Id, false, cancellationToken);
+        TempData["AdminMessage"] = $"{user.UserName} has been unblocked.";
+        return RedirectToAction(nameof(Index), new { page });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid userId, int page = 1, CancellationToken cancellationToken = default)
+    {
+        var user = await FindManageableUserAsync(userId);
+        if (user is null) return NotFound();
+        user.IsAccessBlocked = true;
+        var blockResult = await userManager.UpdateSecurityStampAsync(user);
+        if (!blockResult.Succeeded) throw new InvalidOperationException("The user could not be prepared for deletion.");
+        await accessBlockStore.SetBlockedAsync(user.Id, true, cancellationToken);
+
+        await userDataClient.DeleteAsync(user.Id, cancellationToken);
+        await using var transaction = dbContext.Database.IsRelational() ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
+        await DeleteIdentityHistoryAsync(user.Id, cancellationToken);
+        dbContext.DeletedUserTombstones.Add(new DeletedUserTombstone { UserId = user.Id, DeletedAtUtc = timeProvider.GetUtcNow() });
+        var deleteResult = await userManager.DeleteAsync(user);
+        if (!deleteResult.Succeeded) throw new InvalidOperationException("The user identity could not be deleted.");
+        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+
+        TempData["AdminMessage"] = $"{user.UserName} has been deleted.";
+        return RedirectToAction(nameof(Index), new { page });
     }
 
     [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName), HttpGet]
@@ -73,5 +125,27 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         var expectedBucketCount = (int)((statistics.ToUtc - statistics.FromUtc).TotalMinutes / BucketMinutes);
         if (statistics.Buckets.Count != expectedBucketCount) return true;
         return statistics.Buckets.Where((bucket, index) => bucket.StartedAtUtc != statistics.FromUtc.AddMinutes(index * BucketMinutes)).Any();
+    }
+
+    private async Task<ApplicationUser?> FindManageableUserAsync(Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        return user is null || user.IsBootstrapAdministrator || user.Id.ToString() == userManager.GetUserId(User) ? null : user;
+    }
+
+    private async Task DeleteIdentityHistoryAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var subject = userId.ToString();
+        if (dbContext.Database.IsRelational())
+        {
+            await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
+            await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
+            await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+            return;
+        }
+
+        dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
+        dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
+        dbContext.RemoveRange(await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ToListAsync(cancellationToken));
     }
 }

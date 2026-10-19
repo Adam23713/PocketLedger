@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
@@ -28,6 +29,7 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     private static readonly DateTimeOffset CurrentTimeUtc = new(2026, 10, 8, 12, 2, 0, TimeSpan.Zero);
     private readonly WebApplicationFactory<Program> factory;
     private readonly TestRequestTelemetryReader requestTelemetry = new();
+    private readonly TestAdminUserDataClient userDataClient = new();
 
     public AdminDashboardTests(WebApplicationFactory<Program> factory)
     {
@@ -54,6 +56,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(CurrentTimeUtc));
                 services.RemoveAll<ICrowdSecDecisionReader>();
                 services.AddSingleton<ICrowdSecDecisionReader>(new TestCrowdSecDecisionReader());
+                services.RemoveAll<IAdminUserDataClient>();
+                services.AddSingleton<IAdminUserDataClient>(userDataClient);
             });
         });
     }
@@ -95,8 +99,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        for (var index = 11; index >= 2; index--) Assert.Contains($"<tr><td>user-{index:00}</td>", content);
-        Assert.DoesNotContain("<tr><td>user-01</td>", content);
+        for (var index = 11; index >= 2; index--) Assert.Contains($">user-{index:00}</td>", content);
+        Assert.DoesNotContain(">user-01</td>", content);
         Assert.DoesNotContain("never-signed-in", content);
         Assert.True(content.IndexOf("user-11", StringComparison.Ordinal) < content.IndexOf("user-10", StringComparison.Ordinal));
         Assert.DoesNotContain("type=\"search\"", content, StringComparison.OrdinalIgnoreCase);
@@ -116,10 +120,55 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
 
         Assert.Contains("Page 1 of 2", firstPage);
         Assert.Contains("Page 2 of 2", lastPage);
-        Assert.Contains("<tr><td>user-01</td>", lastPage);
+        Assert.Contains(">user-01</td>", lastPage);
         Assert.Contains("never-signed-in", lastPage);
         Assert.Contains("Never signed in", lastPage);
-        Assert.DoesNotContain("<tr><td>user-02</td>", lastPage);
+        Assert.DoesNotContain(">user-02</td>", lastPage);
+    }
+
+    [Fact]
+    public async Task BlockAndUnblock_UpdateUserAccessState()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var userId = await FindUserIdAsync("user-02");
+
+        var blockResponse = await PostAdminActionAsync(client, "Block", userId);
+        Assert.Equal(HttpStatusCode.Redirect, blockResponse.StatusCode);
+        await using (var blockedScope = factory.Services.CreateAsyncScope())
+            Assert.True((await blockedScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()))!.IsAccessBlocked);
+
+        var unblockResponse = await PostAdminActionAsync(client, "Unblock", userId);
+        Assert.Equal(HttpStatusCode.Redirect, unblockResponse.StatusCode);
+        await using var activeScope = factory.Services.CreateAsyncScope();
+        Assert.False((await activeScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()))!.IsAccessBlocked);
+    }
+
+    [Fact]
+    public async Task Delete_RemovesIdentityAfterDeletingUserDataAndKeepsAccessTombstone()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var userId = await FindUserIdAsync("user-02");
+        await using (var auditScope = factory.Services.CreateAsyncScope())
+        {
+            var db = auditScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            db.AuthenticationAuditEvents.Add(new AuthenticationAuditEvent
+            {
+                Id = Guid.NewGuid(), UserId = userId, TimestampUtc = CurrentTimeUtc, EventType = "LoginSucceeded", Outcome = "Success", RequestPath = "/", HttpMethod = "GET"
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var response = await PostAdminActionAsync(client, "Delete", userId);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal(userId, userDataClient.DeletedUserId);
+        await using var scope = factory.Services.CreateAsyncScope();
+        Assert.Null(await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()));
+        var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+        Assert.True(await dbContext.DeletedUserTombstones.AnyAsync(item => item.UserId == userId));
+        Assert.False(await dbContext.AuthenticationAuditEvents.AnyAsync(item => item.UserId == userId));
     }
 
     [Fact]
@@ -237,6 +286,32 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         return client.SendAsync(request);
     }
 
+    private async Task<Guid> FindUserIdAsync(string username)
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        return (await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByNameAsync(username))!.Id;
+    }
+
+    private static async Task<HttpResponseMessage> PostAdminActionAsync(HttpClient client, string action, Guid userId)
+    {
+        var get = new HttpRequestMessage(HttpMethod.Get, "/Admin");
+        get.Headers.Add(TestAuthenticationHandler.AdministratorHeader, "true");
+        var html = await (await client.SendAsync(get)).Content.ReadAsStringAsync();
+        var match = Regex.Match(html, "name=\"__RequestVerificationToken\" type=\"hidden\" value=\"([^\"]+)\"");
+        Assert.True(match.Success, html);
+        var post = new HttpRequestMessage(HttpMethod.Post, $"/Admin/{action}")
+        {
+            Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["userId"] = userId.ToString(),
+                ["page"] = "1",
+                ["__RequestVerificationToken"] = System.Net.WebUtility.HtmlDecode(match.Groups[1].Value)
+            })
+        };
+        post.Headers.Add(TestAuthenticationHandler.AdministratorHeader, "true");
+        return await client.SendAsync(post);
+    }
+
     private sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string SchemeName = "AdminDashboardTest";
@@ -255,6 +330,16 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     {
         public Task<CrowdSecBanDecisionsResult> GetActiveBansAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(new CrowdSecBanDecisionsResult(true, [new CrowdSecBanDecision("203.0.113.99", "Ip", "pocketledger/http-flood", "crowdsec", "ban", "30m")]));
+    }
+
+    private sealed class TestAdminUserDataClient : IAdminUserDataClient
+    {
+        public Guid? DeletedUserId { get; private set; }
+        public Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            DeletedUserId = userId;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class TestRequestTelemetryReader : IRequestTelemetryReader

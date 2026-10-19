@@ -35,6 +35,7 @@ cp Caddyfile.example Caddyfile
 In `.env`, set all four domain names and replace every placeholder secret:
 
 - `POCKETLEDGER_WEB_CLIENT_SECRET` — a long random string.
+- `POCKETLEDGER_ADMIN_OPERATIONS_KEY` — a separate long random string used only for authenticated Identity-to-API user deletion requests.
 - `POCKETLEDGER_SIGNING_KEY` — at least 32 random bytes, Base64-encoded: `openssl rand -base64 64`.
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.

@@ -12,6 +12,18 @@ namespace PocketLedger.Tests;
 
 public sealed class SessionControllerTests
 {
+    [Fact]
+    public async Task AccessBlocked_ClearsWebSessionAndShowsBlockedView()
+    {
+        var authentication = new RecordingAuthenticationService();
+        var controller = CreateController(authentication);
+
+        var result = Assert.IsType<ViewResult>(await controller.AccessBlocked());
+
+        Assert.Equal("BffCookie", authentication.SignedOutScheme);
+        Assert.Null(result.ViewName);
+    }
+
     [Theory]
     [InlineData("/Statistics", "/Statistics")]
     [InlineData("https://attacker.example/redirect", "/")]
@@ -53,7 +65,9 @@ public sealed class SessionControllerTests
 
     private static SessionController CreateController(IAuthenticationService authentication)
     {
-        var services = new ServiceCollection().AddSingleton(authentication).BuildServiceProvider();
+        var serviceCollection = new ServiceCollection().AddSingleton(authentication);
+        serviceCollection.AddControllersWithViews();
+        var services = serviceCollection.BuildServiceProvider();
         var httpContext = new DefaultHttpContext
         {
             RequestServices = services,

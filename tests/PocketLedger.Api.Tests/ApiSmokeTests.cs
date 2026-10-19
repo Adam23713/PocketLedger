@@ -15,6 +15,8 @@ using PocketLedger.Data;
 using PocketLedger.Contracts;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
+using PocketLedger.Security;
+using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Api.Tests;
 
@@ -54,6 +56,43 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         var response = await client.GetAsync("/api/v1/accounts");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("[]", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task AuthenticatedEndpoint_RejectsBlockedUser()
+    {
+        using var blockedFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUserAccessBlockStore>();
+            services.AddSingleton<IUserAccessBlockStore>(new BlockedUserAccessStore());
+        }));
+        using var client = blockedFactory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/accounts");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Contains("currently blocked and under review", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task InternalUserDeletion_RequiresCredentialAndInvokesDeletionService()
+    {
+        var deletion = new RecordingUserDataDeletionService();
+        using var deletionFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUserDataDeletionService>();
+            services.AddSingleton<IUserDataDeletionService>(deletion);
+        }));
+        using var client = deletionFactory.CreateClient();
+        var userId = Guid.NewGuid();
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.DeleteAsync($"/api/v1/internal-admin/users/{userId}")).StatusCode);
+        using var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/internal-admin/users/{userId}");
+        request.Headers.Add(InternalAdminAuthentication.HeaderName, "development-only-admin-operations-key");
+        var authorized = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NoContent, authorized.StatusCode);
+        Assert.Equal(userId, deletion.DeletedUserId);
     }
 
     [Fact]
@@ -147,6 +186,23 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         {
             var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3").ToString())], SchemeName);
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
+        }
+    }
+
+    private sealed class BlockedUserAccessStore : IUserAccessBlockStore
+    {
+        public Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult(UserAccessBlockState.Blocked);
+        public Task SetBlockedAsync(Guid userId, bool blocked, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task InitializeIfMissingAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
+
+    private sealed class RecordingUserDataDeletionService : IUserDataDeletionService
+    {
+        public Guid? DeletedUserId { get; private set; }
+        public Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            DeletedUserId = userId;
+            return Task.CompletedTask;
         }
     }
 }

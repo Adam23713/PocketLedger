@@ -77,6 +77,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
 
         Assert.Equal(new[]
         {
+            "AccountController.AccessBlocked",
             "AccountController.ExternalLogin",
             "AccountController.ExternalLoginCallback",
             "AccountController.Login",
