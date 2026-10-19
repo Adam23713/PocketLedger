@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using OpenIddict.EntityFrameworkCore.Models;
+using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Admin;
@@ -16,7 +17,7 @@ namespace PocketLedger.Controllers;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class AdminController(UserManager<ApplicationUser> userManager, IRequestTelemetryReader requestTelemetry, ISuspiciousRequestEventReader suspiciousRequestEvents,
     ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessPropagation accessPropagation, IAdminUserDataClient userDataClient,
-    IdentityDbContext dbContext, ILogger<AdminController> logger) : Controller
+    IdentityDbContext dbContext, IRegistrationSettingsService registrationSettings, IAuthenticationAuditService audit, ILogger<AdminController> logger) : Controller
 {
     private const int PageSize = 10;
     private const int BucketMinutes = 5;
@@ -37,8 +38,27 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         var suspiciousRequestsTask = suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
         var crowdSecBansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
         await Task.WhenAll(suspiciousRequestsTask, crowdSecBansTask);
-        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours),
+        var registration = await registrationSettings.GetStatusAsync(cancellationToken);
+        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, registration, new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours),
             await suspiciousRequestsTask, await crowdSecBansTask));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateRegistration(bool isOpen, int? maximumUserCount, int page = 1, CancellationToken cancellationToken = default)
+    {
+        if (maximumUserCount is < 1 or > PublicRegistrationOptions.MaximumAllowedUserCount)
+        {
+            TempData["AdminWarning"] = $"The account limit must be between 1 and {PublicRegistrationOptions.MaximumAllowedUserCount:N0}, or left empty for no limit.";
+            return RedirectToAction(nameof(Index), new { page });
+        }
+        await registrationSettings.UpdateAsync(isOpen, maximumUserCount, cancellationToken);
+        await audit.WriteAsync("RegistrationSettingsChanged", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
+            metadata: $"IsOpen={isOpen};MaximumUserCount={maximumUserCount?.ToString() ?? "Unlimited"}", cancellationToken: cancellationToken);
+        var status = await registrationSettings.GetStatusAsync(cancellationToken);
+        TempData["AdminMessage"] = !status.IsOpen ? "Registration settings saved. Public registration is closed."
+            : status.RemainingSlots is { } remaining ? $"Registration settings saved. Public registration is open with {remaining} of {status.MaximumUserCount} accounts available."
+            : "Registration settings saved. Public registration is open without an account limit.";
+        return RedirectToAction(nameof(Index), new { page });
     }
 
     [HttpPost, ValidateAntiForgeryToken]

@@ -1,0 +1,26 @@
+@model PocketLedger.Landing.RegistrationStatus
+@{
+    var appUrl = (string)ViewData["AppUrl"]!;
+    const string development = "PocketLedger is still under active development.";
+    var remaining = Model.RemainingSlots ?? 0;
+    var spots = remaining == 1 ? "spot" : "spots";
+}
+<div class="development"><span class="status-dot" aria-hidden="true"></span>@if (Model.AcceptsRegistrations)
+{
+    <span>@development </span>@if (Model.RemainingSlots is not null)
+    {
+        <span data-registration-content>Public registration is open — @remaining of @Model.MaximumUserCount @spots left — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
+    }
+    else
+    {
+        <span data-registration-content>Public registration is open — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
+    }
+}
+else if (Model.MaximumUserCount is not null && Model.RemainingSlots == 0)
+{
+    <span>@development Public registration is open, but all @Model.MaximumUserCount spots are currently taken — check back soon.</span>
+}
+else
+{
+    <span>@development Public registration isn't open yet — it's coming soon.</span>
+}</div>

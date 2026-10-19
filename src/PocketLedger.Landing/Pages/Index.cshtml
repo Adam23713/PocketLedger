@@ -1,8 +1,11 @@
 @page "/"
 @inject IConfiguration Configuration
+@inject PocketLedger.Landing.IRegistrationStatusProvider RegistrationStatusProvider
 @{
     var appUrl = Configuration["Landing:AppBaseUrl"]!;
-    var registrationEnabled = Configuration.GetValue<bool>("Registration:Enabled");
+    var registration = await RegistrationStatusProvider.GetAsync(HttpContext.RequestAborted);
+    var registrationEnabled = registration.AcceptsRegistrations;
+    ViewData["AppUrl"] = appUrl;
     const string repository = "https://github.com/Adam23713/PocketLedger";
     var screenshots = new[] {
         ("trs", "Income, expenses & transfers", "Follow the everyday movement of your money.", 1340, 796),
@@ -33,7 +36,7 @@
         </symbol>
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="development"><span class="status-dot" aria-hidden="true"></span>@if (registrationEnabled) { <span>PocketLedger is still under active development. </span><span data-registration-content>Public registration is open — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span> } else { <span>PocketLedger is still under active development. Public registration isn't open yet — it's coming soon.</span> }</div>
+    @await Html.PartialAsync("_DevelopmentBanner", registration)
     <header class="header">
         <nav class="shell nav" aria-label="Main navigation">
             <a class="brand" href="#"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>

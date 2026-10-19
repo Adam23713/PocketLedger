@@ -16,8 +16,11 @@ public sealed class AuthenticationSecurityOptions
 public sealed class PublicRegistrationOptions
 {
     public const string SectionName = "Registration";
+    public const int MaximumAllowedUserCount = 100_000;
 
+    // Defaults used until an administrator saves the registration settings on the admin dashboard.
     public bool Enabled { get; set; }
+    [Range(1, MaximumAllowedUserCount)] public int? MaximumUserCount { get; set; }
 }
 
 public sealed class ForwardedHeadersOptionsConfig

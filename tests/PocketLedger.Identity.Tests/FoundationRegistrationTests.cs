@@ -98,6 +98,52 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             item => item.EventType == "Registration" && item.Outcome == "Success" && item.UserId == user.Id);
     }
 
+    [Fact]
+    public async Task PasswordRegistration_IsRejectedOnceTheAccountLimitIsReached()
+    {
+        await ResetDatabaseAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<PocketLedger.Services.IRegistrationSettingsService>().UpdateAsync(true, 1);
+            Assert.True((await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>()
+                .CreateAsync(new ApplicationUser { Id = Guid.NewGuid(), UserName = "existing-user", Email = "existing@example.test" }, Password)).Succeeded);
+        }
+        using var client = CreateClient();
+
+        var registerHtml = await client.GetStringAsync("/Account/Register");
+        var loginHtml = await client.GetStringAsync("/Account/Login");
+        var response = await client.PostAsync("/Account/Register", Form(new Dictionary<string, string>
+        {
+            ["Username"] = "over-limit",
+            ["Email"] = "over-limit@example.test",
+            ["Password"] = Password,
+            ["ConfirmPassword"] = Password,
+            ["__RequestVerificationToken"] = await GetAntiforgeryTokenAsync(client, "/Account/Login")
+        }));
+
+        Assert.Contains("All available accounts are taken", registerHtml);
+        Assert.DoesNotContain("href=\"/Account/Register\"", loginHtml);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("All available accounts are taken", await response.Content.ReadAsStringAsync());
+        await using var verificationScope = factory.Services.CreateAsyncScope();
+        Assert.Null(await verificationScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByNameAsync("over-limit"));
+        Assert.Contains(await verificationScope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.ToListAsync(),
+            item => item.EventType == "Registration" && item.Outcome == "Failure" && item.FailureReason == "RegistrationFull");
+    }
+
+    [Fact]
+    public async Task PasswordRegistration_StoredSettingsOverrideTheConfiguredDefault()
+    {
+        await ResetDatabaseAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+            await scope.ServiceProvider.GetRequiredService<PocketLedger.Services.IRegistrationSettingsService>().UpdateAsync(false, null);
+        using var client = CreateClient();
+
+        var response = await client.GetAsync("/Account/Register");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     [Theory]
     [InlineData(null, "http://localhost:5050/Session/CompleteSignIn")]
     [InlineData("/connect/authorize?client_id=pocketledger-web", "/connect/authorize?client_id=pocketledger-web")]

@@ -14,5 +14,5 @@ public sealed record RequestActivityPoint(DateTimeOffset StartedAtUtc, double Av
 public sealed record RequestActivityDataViewModel(bool IsAvailable, bool IsPartial, bool IsEmpty, int LookbackHours, Guid? UserId, string SeriesLabel, long SeriesRequests,
     long TotalRequests, long AnonymousRequests, IReadOnlyList<RequestActivityUserOption> Users, IReadOnlyList<RequestActivityPoint> Points);
 
-public sealed record AdminDashboardViewModel(IReadOnlyList<AdminUserOverviewItem> Users, int Page, int TotalPages, int TotalUsers, RequestActivityViewModel RequestActivity,
-    SuspiciousRequestEventsResult SuspiciousRequests, CrowdSecBanDecisionsResult CrowdSecBans);
+public sealed record AdminDashboardViewModel(IReadOnlyList<AdminUserOverviewItem> Users, int Page, int TotalPages, int TotalUsers, RegistrationStatus Registration,
+    RequestActivityViewModel RequestActivity, SuspiciousRequestEventsResult SuspiciousRequests, CrowdSecBanDecisionsResult CrowdSecBans);

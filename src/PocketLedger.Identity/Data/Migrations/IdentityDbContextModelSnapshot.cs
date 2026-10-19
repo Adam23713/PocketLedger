@@ -372,9 +372,6 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.Property<bool>("AuthenticatorSetupComplete")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsAccessBlocked")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -387,6 +384,9 @@ namespace PocketLedger.Identity.Data.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsAccessBlocked")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsBootstrapAdministrator")
@@ -521,7 +521,7 @@ namespace PocketLedger.Identity.Data.Migrations
             modelBuilder.Entity("PocketLedger.Models.Entities.DeletedUserTombstone", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .ValueGeneratedNever()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("DeletedAtUtc")
@@ -530,6 +530,28 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("DeletedUserTombstones");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.RegistrationSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaximumUserCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RegistrationSettings", t =>
+                        {
+                            t.HasCheckConstraint("CK_RegistrationSettings_Singleton", "\"Id\" = 1");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
 builder.Services.AddControllersWithViews();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
-builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName);
+builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
 builder.Services.AddOptions<CrowdSecOptions>().BindConfiguration(CrowdSecOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddHttpClient<ICrowdSecDecisionReader, CrowdSecDecisionReader>((services, client) =>
@@ -87,6 +87,7 @@ builder.Services.AddOpenIddict()
 builder.Services.AddSingleton<IAuthenticationRateLimiter, AuthenticationRateLimiter>();
 builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>();
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
+builder.Services.AddScoped<IRegistrationSettingsService, RegistrationSettingsService>();
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);
