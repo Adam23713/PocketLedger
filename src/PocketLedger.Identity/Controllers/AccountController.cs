@@ -24,6 +24,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     public async Task<IActionResult> AccessBlocked()
     {
         await signInManager.SignOutAsync();
+        HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
         return View();
     }
 

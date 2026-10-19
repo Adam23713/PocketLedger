@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace PocketLedger.Controllers;
 
@@ -11,6 +12,7 @@ public sealed class SessionController(IConfiguration configuration) : Controller
     public async Task<IActionResult> AccessBlocked()
     {
         await HttpContext.SignOutAsync("BffCookie");
+        HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
         return View();
     }
 
