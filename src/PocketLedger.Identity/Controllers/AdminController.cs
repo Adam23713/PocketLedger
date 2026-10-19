@@ -103,8 +103,13 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(Guid userId, int page = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Delete(Guid userId, string? confirmation, int page = 1, CancellationToken cancellationToken = default)
     {
+        if (!string.Equals(confirmation, "DELETE", StringComparison.Ordinal))
+        {
+            TempData["AdminWarning"] = "The user was not deleted because the confirmation text did not match DELETE.";
+            return RedirectToAction(nameof(Index), new { page });
+        }
         var user = await FindManageableUserAsync(userId);
         if (user is null) return NotFound();
         await BlockInIdentityAsync(user, cancellationToken);
