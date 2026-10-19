@@ -9,6 +9,7 @@
   --surface-background: rgba(255, 255, 255, .76);
   --surface-background-hover: rgba(225, 240, 255, .72);
   --surface-raised: rgba(255, 255, 255, .94);
+  --modal-background: #fff;
   --text-primary: #10254a;
   --text-secondary: #5c6f8c;
   --border-color: rgba(160, 190, 221, .4);
@@ -40,6 +41,7 @@
   --surface-background: #181d22;
   --surface-background-hover: #22292f;
   --surface-raised: #1c2228;
+  --modal-background: #1c2228;
   --text-primary: #f4f7f6;
   --text-secondary: #9ba7a5;
   --border-color: #2b343a;
@@ -71,6 +73,7 @@
   --surface-background: rgba(255, 255, 255, .105);
   --surface-background-hover: rgba(255, 255, 255, .17);
   --surface-raised: rgba(255, 255, 255, .14);
+  --modal-background: #10255f;
   --text-primary: #fff;
   --text-secondary: #cbd8f6;
   --border-color: rgba(255, 255, 255, .2);
@@ -104,6 +107,7 @@
   --surface-background: #fffbfe;
   --surface-background-hover: #f1edf8;
   --surface-raised: #fff;
+  --modal-background: #fff;
   --text-primary: #1d1b20;
   --text-secondary: #625f67;
   --border-color: #ded8e5;

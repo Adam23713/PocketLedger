@@ -235,7 +235,10 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
             await db.SaveChangesAsync();
         }
 
-        var response = await PostAdminActionAsync(client, "Delete", userId);
+        var response = await PostAdminFormAsync(client, "Delete", new Dictionary<string, string>
+        {
+            ["userId"] = userId.ToString(), ["confirmation"] = "DELETE", ["page"] = "1"
+        });
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Equal(userId, userDataClient.DeletedUserId);
@@ -245,6 +248,24 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
         Assert.True(await dbContext.DeletedUserTombstones.AnyAsync(item => item.UserId == userId));
         Assert.False(await dbContext.AuthenticationAuditEvents.AnyAsync(item => item.UserId == userId));
+    }
+
+    [Fact]
+    public async Task Delete_RejectsMissingConfirmationWithoutSideEffects()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var userId = await FindUserIdAsync("user-02");
+
+        var response = await PostAdminActionAsync(client, "Delete", userId);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Null(userDataClient.DeletedUserId);
+        Assert.DoesNotContain(userId, accessPropagation.BlockedUserIds);
+        await using var scope = factory.Services.CreateAsyncScope();
+        var user = await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString());
+        Assert.NotNull(user);
+        Assert.False(user.IsAccessBlocked);
     }
 
     [Fact]
