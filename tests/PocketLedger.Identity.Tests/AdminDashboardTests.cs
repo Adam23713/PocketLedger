@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
+using OpenIddict.EntityFrameworkCore.Models;
 using PocketLedger.Controllers;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
@@ -30,6 +32,7 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     private readonly WebApplicationFactory<Program> factory;
     private readonly TestRequestTelemetryReader requestTelemetry = new();
     private readonly TestAdminUserDataClient userDataClient = new();
+    private readonly RecordingUserAccessPropagation accessPropagation = new();
 
     public AdminDashboardTests(WebApplicationFactory<Program> factory)
     {
@@ -58,6 +61,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
                 services.AddSingleton<ICrowdSecDecisionReader>(new TestCrowdSecDecisionReader());
                 services.RemoveAll<IAdminUserDataClient>();
                 services.AddSingleton<IAdminUserDataClient>(userDataClient);
+                services.RemoveAll<IUserAccessPropagation>();
+                services.AddSingleton<IUserAccessPropagation>(accessPropagation);
             });
         });
     }
@@ -133,15 +138,50 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
         var userId = await FindUserIdAsync("user-02");
 
+        await using (var tokenScope = factory.Services.CreateAsyncScope())
+        {
+            var db = tokenScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            db.Set<OpenIddictEntityFrameworkCoreToken>().Add(new OpenIddictEntityFrameworkCoreToken { Subject = userId.ToString(), Status = OpenIddictConstants.Statuses.Valid, Type = "refresh_token" });
+            await db.SaveChangesAsync();
+        }
+
         var blockResponse = await PostAdminActionAsync(client, "Block", userId);
         Assert.Equal(HttpStatusCode.Redirect, blockResponse.StatusCode);
+        Assert.Contains(userId, accessPropagation.BlockedUserIds);
         await using (var blockedScope = factory.Services.CreateAsyncScope())
+        {
             Assert.True((await blockedScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()))!.IsAccessBlocked);
+            var tokens = await blockedScope.ServiceProvider.GetRequiredService<IdentityDbContext>().Set<OpenIddictEntityFrameworkCoreToken>()
+                .Where(item => item.Subject == userId.ToString()).ToListAsync();
+            Assert.All(tokens, token => Assert.Equal(OpenIddictConstants.Statuses.Revoked, token.Status));
+        }
 
         var unblockResponse = await PostAdminActionAsync(client, "Unblock", userId);
         Assert.Equal(HttpStatusCode.Redirect, unblockResponse.StatusCode);
+        Assert.Contains(userId, accessPropagation.UnblockedUserIds);
         await using var activeScope = factory.Services.CreateAsyncScope();
         Assert.False((await activeScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()))!.IsAccessBlocked);
+    }
+
+    [Fact]
+    public async Task Block_StillBlocksInIdentityWhenPropagationFails()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var userId = await FindUserIdAsync("user-03");
+        accessPropagation.FailBlock = true;
+        try
+        {
+            var response = await PostAdminActionAsync(client, "Block", userId);
+
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+            await using var scope = factory.Services.CreateAsyncScope();
+            Assert.True((await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()))!.IsAccessBlocked);
+        }
+        finally
+        {
+            accessPropagation.FailBlock = false;
+        }
     }
 
     [Fact]
@@ -164,6 +204,7 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Equal(userId, userDataClient.DeletedUserId);
+        Assert.Contains(userId, accessPropagation.BlockedUserIds);
         await using var scope = factory.Services.CreateAsyncScope();
         Assert.Null(await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByIdAsync(userId.ToString()));
         var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
@@ -340,6 +381,28 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
             DeletedUserId = userId;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class RecordingUserAccessPropagation : IUserAccessPropagation
+    {
+        public bool FailBlock { get; set; }
+        public List<Guid> BlockedUserIds { get; } = [];
+        public List<Guid> UnblockedUserIds { get; } = [];
+
+        public Task BlockAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            if (FailBlock) throw new HttpRequestException("The API is unreachable.");
+            BlockedUserIds.Add(userId);
+            return Task.CompletedTask;
+        }
+
+        public Task UnblockAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            UnblockedUserIds.Add(userId);
+            return Task.CompletedTask;
+        }
+
+        public Task SynchronizeAsync(IReadOnlyCollection<Guid> blockedUserIds, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 
     private sealed class TestRequestTelemetryReader : IRequestTelemetryReader

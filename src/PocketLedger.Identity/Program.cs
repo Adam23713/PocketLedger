@@ -54,6 +54,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = false;
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.Events.OnValidatePrincipal = BlockedUserCookieValidation.ValidatePrincipalAsync;
 });
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(BootstrapAdministratorAuthorization.PolicyName, policy => policy.RequireClaim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString))
@@ -89,10 +90,20 @@ builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditServi
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);
-builder.Services.AddUserAccessBlocking(builder.Configuration);
-builder.Services.AddHostedService<UserAccessBlockSynchronizer>();
 builder.Services.AddHttpClient<IAdminUserDataClient, AdminUserDataClient>(client => client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5051/"))
     .ConfigurePrimaryHttpMessageHandler(() => InternalApiTls.CreateHandler(builder.Configuration, builder.Environment));
+builder.Services.AddHttpClient(UserAccessPropagation.ApiClientName, client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5051/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+}).ConfigurePrimaryHttpMessageHandler(() => InternalApiTls.CreateHandler(builder.Configuration, builder.Environment));
+builder.Services.AddHttpClient(UserAccessPropagation.WebClientName, client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Web:InternalBaseUrl"] ?? "http://localhost:5050/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddSingleton<IUserAccessPropagation, UserAccessPropagation>();
+builder.Services.AddHostedService<UserAccessBlockSynchronizer>();
 
 builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
@@ -121,7 +132,7 @@ app.UseStaticFiles();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
-app.UseUserAccessBlocking("/Account/AccessBlocked");
+app.UseBlockedUserRedirect();
 app.UseRequestTelemetry();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();

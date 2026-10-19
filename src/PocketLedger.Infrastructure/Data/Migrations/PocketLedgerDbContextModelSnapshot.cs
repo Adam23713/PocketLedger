@@ -93,6 +93,22 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                     b.ToTable("accounts", (string)null);
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.BlockedUser", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedNever()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTimeOffset>("BlockedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("blocked_at_utc");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("blocked_users", (string)null);
+                });
+
             modelBuilder.Entity("PocketLedger.Models.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")

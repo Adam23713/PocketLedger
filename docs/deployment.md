@@ -10,6 +10,7 @@ This is the complete walkthrough for running PocketLedger in production on your 
 - [Internal API TLS](#internal-api-tls)
 - [Security systems overview](#security-systems-overview)
 - [Moving an existing deployment to the app subdomain](#moving-an-existing-deployment-to-the-app-subdomain)
+- [Blocking and deleting users](#blocking-and-deleting-users)
 - [Financial cache (Valkey)](#financial-cache-valkey)
 - [Request telemetry (Valkey)](#request-telemetry-valkey)
 - [Backups](#backups)
@@ -35,7 +36,7 @@ cp Caddyfile.example Caddyfile
 In `.env`, set all four domain names and replace every placeholder secret:
 
 - `POCKETLEDGER_WEB_CLIENT_SECRET` — a long random string.
-- `POCKETLEDGER_ADMIN_OPERATIONS_KEY` — a separate long random string used only for authenticated Identity-to-API user deletion requests.
+- `POCKETLEDGER_ADMIN_OPERATIONS_KEY` — a separate long random string used only for authenticated Identity-to-API and Identity-to-Web admin requests (user blocking, session termination and user deletion).
 - `POCKETLEDGER_SIGNING_KEY` — at least 32 random bytes, Base64-encoded: `openssl rand -base64 64`.
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.
@@ -125,6 +126,17 @@ If you're moving from a single-domain deployment to the recommended `app.` subdo
 On Identity startup, the existing Web OIDC client's login/logout redirect URIs are automatically synchronized with `OpenIddict:WebBaseUrl`; its client secret and permissions are preserved. Existing host-only browser cookies do **not** move to the new subdomain, so users may need to sign in again, and bookmarks to app paths on the old domain should be updated.
 
 `Landing:AppBaseUrl` configures the landing page's app and registration links. Registration enters through Web so any existing BFF session is cleared before Identity creates a different account, and the completed onboarding flow establishes a matching Web session. The same `Registration:Enabled` value is passed to Landing and Identity so the CTA is shown only while the endpoint is available. `Landing:BaseUrl` on Web configures the profile-menu website link and the exact allowed CORS origin for `GET /Session/Status` — an endpoint that returns only an authentication boolean with no-store caching and shares no cookies or tokens with the landing page. Configure Cloudflare to bypass caching for `/Session/*` on the app domain, and don't apply public-page caching rules to authenticated app routes. When the app can't be reached, the landing page keeps a working login link.
+
+## Blocking and deleting users
+
+The `IsAccessBlocked` flag in the Identity database is the source of truth; nothing about blocking depends on Valkey. When an administrator blocks (or deletes) a user, Identity immediately:
+
+1. sets the flag and rotates the security stamp, so sign-in and token issuance refuse the user and the Identity cookie, which is checked against the database on every request, stops working;
+2. revokes all of the user's OpenIddict tokens and authorizations, so no refresh token can mint new access tokens;
+3. adds the user to the API's `blocked_users` table — the API checks it on every authenticated request, so even an already issued, unexpired access token is rejected with `403`, whichever client sends it;
+4. tells Web to terminate all of the user's sessions — the stored tickets and their tokens are wiped, and the next request from any of the user's browsers is redirected to the "access blocked" page.
+
+Steps 3–4 go over the internal network (`Api__BaseUrl`, `Web__InternalBaseUrl`) authenticated with `POCKETLEDGER_ADMIN_OPERATIONS_KEY`. If either service is unreachable, the admin dashboard shows a warning, and a background job in Identity re-sends the full list of blocked and deleted users every 30 seconds until both are in sync. Deletion does not continue until steps 3–4 succeed. `Caddyfile.example` returns `404` for `/internal-admin/*` and `/api/v1/internal-admin/*` on the public hostnames; keep that rule in your deployed Caddyfile.
 
 ## Financial cache (Valkey)
 

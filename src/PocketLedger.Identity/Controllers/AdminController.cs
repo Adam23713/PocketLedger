@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.Abstractions;
 using OpenIddict.EntityFrameworkCore.Models;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
@@ -14,8 +15,8 @@ namespace PocketLedger.Controllers;
 [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class AdminController(UserManager<ApplicationUser> userManager, IRequestTelemetryReader requestTelemetry, ISuspiciousRequestEventReader suspiciousRequestEvents,
-    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessBlockStore accessBlockStore, IAdminUserDataClient userDataClient,
-    IdentityDbContext dbContext) : Controller
+    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessPropagation accessPropagation, IAdminUserDataClient userDataClient,
+    IdentityDbContext dbContext, ILogger<AdminController> logger) : Controller
 {
     private const int PageSize = 10;
     private const int BucketMinutes = 5;
@@ -45,11 +46,18 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         var user = await FindManageableUserAsync(userId);
         if (user is null) return NotFound();
-        user.IsAccessBlocked = true;
-        var result = await userManager.UpdateSecurityStampAsync(user);
-        if (!result.Succeeded) throw new InvalidOperationException("The user could not be blocked.");
-        await accessBlockStore.SetBlockedAsync(user.Id, true, cancellationToken);
-        TempData["AdminMessage"] = $"{user.UserName} has been blocked.";
+        await BlockInIdentityAsync(user, cancellationToken);
+        try
+        {
+            await accessPropagation.BlockAsync(user.Id, cancellationToken);
+            TempData["AdminMessage"] = $"{user.UserName} has been blocked and all of their sessions were terminated.";
+        }
+        catch (Exception exception) when (IsPropagationFailure(exception, cancellationToken))
+        {
+            logger.LogError(exception, "Blocking user {UserId} could not be propagated to the API or web app.", user.Id);
+            TempData["AdminWarning"] = $"{user.UserName} is blocked and can no longer sign in, but the API or web app could not be reached. " +
+                $"Their remaining sessions are terminated automatically within {UserAccessBlockSynchronizer.Interval.TotalSeconds:0} seconds once it is reachable.";
+        }
         return RedirectToAction(nameof(Index), new { page });
     }
 
@@ -61,8 +69,16 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         user.IsAccessBlocked = false;
         var result = await userManager.UpdateSecurityStampAsync(user);
         if (!result.Succeeded) throw new InvalidOperationException("The user could not be unblocked.");
-        await accessBlockStore.SetBlockedAsync(user.Id, false, cancellationToken);
-        TempData["AdminMessage"] = $"{user.UserName} has been unblocked.";
+        try
+        {
+            await accessPropagation.UnblockAsync(user.Id, cancellationToken);
+            TempData["AdminMessage"] = $"{user.UserName} has been unblocked.";
+        }
+        catch (Exception exception) when (IsPropagationFailure(exception, cancellationToken))
+        {
+            logger.LogError(exception, "Unblocking user {UserId} could not be propagated to the API.", user.Id);
+            TempData["AdminWarning"] = $"{user.UserName} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes.";
+        }
         return RedirectToAction(nameof(Index), new { page });
     }
 
@@ -71,10 +87,9 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         var user = await FindManageableUserAsync(userId);
         if (user is null) return NotFound();
-        user.IsAccessBlocked = true;
-        var blockResult = await userManager.UpdateSecurityStampAsync(user);
-        if (!blockResult.Succeeded) throw new InvalidOperationException("The user could not be prepared for deletion.");
-        await accessBlockStore.SetBlockedAsync(user.Id, true, cancellationToken);
+        await BlockInIdentityAsync(user, cancellationToken);
+        // Deletion only continues once the API rejects the user's tokens and every web session is gone.
+        await accessPropagation.BlockAsync(user.Id, cancellationToken);
 
         await userDataClient.DeleteAsync(user.Id, cancellationToken);
         await using var transaction = dbContext.Database.IsRelational() ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
@@ -131,6 +146,38 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         return user is null || user.IsBootstrapAdministrator || user.Id.ToString() == userManager.GetUserId(User) ? null : user;
+    }
+
+    private async Task BlockInIdentityAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        // The database flag is the source of truth: sign-in, token issuance and the Identity cookie check it on every request.
+        user.IsAccessBlocked = true;
+        var result = await userManager.UpdateSecurityStampAsync(user);
+        if (!result.Succeeded) throw new InvalidOperationException("The user could not be blocked.");
+        await RevokeIdentitySessionsAsync(user.Id, cancellationToken);
+    }
+
+    private static bool IsPropagationFailure(Exception exception, CancellationToken cancellationToken)
+        => exception is HttpRequestException || (exception is TaskCanceledException && !cancellationToken.IsCancellationRequested);
+
+    // Revokes every OpenIddict token and authorization of the user, so no refresh token can mint new access tokens.
+    private async Task RevokeIdentitySessionsAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var subject = userId.ToString();
+        if (dbContext.Database.IsRelational())
+        {
+            await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject && item.Status != OpenIddictConstants.Statuses.Revoked)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, OpenIddictConstants.Statuses.Revoked), cancellationToken);
+            await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject && item.Status != OpenIddictConstants.Statuses.Revoked)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.Status, OpenIddictConstants.Statuses.Revoked), cancellationToken);
+            return;
+        }
+
+        foreach (var token in await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ToListAsync(cancellationToken))
+            token.Status = OpenIddictConstants.Statuses.Revoked;
+        foreach (var authorization in await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ToListAsync(cancellationToken))
+            authorization.Status = OpenIddictConstants.Statuses.Revoked;
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task DeleteIdentityHistoryAsync(Guid userId, CancellationToken cancellationToken)
