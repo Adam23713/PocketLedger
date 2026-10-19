@@ -46,6 +46,31 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
     public void Dispose() => factory.Dispose();
 
     [Fact]
+    public async Task PasswordLogin_RedirectsBlockedUserToAccessBlockedPage()
+    {
+        await ResetDatabaseAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = "blocked-user", Email = "blocked@example.test", IsAccessBlocked = true };
+            Assert.True((await users.CreateAsync(user, Password)).Succeeded);
+        }
+        using var client = CreateClient();
+        var token = await GetAntiforgeryTokenAsync(client, "/Account/Login");
+
+        var response = await client.PostAsync("/Account/Login", Form(new Dictionary<string, string>
+        {
+            ["Username"] = "blocked-user",
+            ["Password"] = Password,
+            ["__RequestVerificationToken"] = token
+        }));
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/AccessBlocked", response.Headers.Location?.OriginalString);
+        Assert.Contains("currently disabled and under review", await client.GetStringAsync(response.Headers.Location));
+    }
+
+    [Fact]
     public async Task PasswordRegistration_CreatesUserAuditsSuccessAndStartsAuthenticatorOnboarding()
     {
         await ResetDatabaseAsync();

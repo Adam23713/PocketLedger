@@ -21,6 +21,13 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     IOptions<PublicRegistrationOptions> registrationOptions, IConfiguration configuration) : Controller
 {
     [AllowAnonymous, HttpGet]
+    public async Task<IActionResult> AccessBlocked()
+    {
+        await signInManager.SignOutAsync();
+        return View();
+    }
+
+    [AllowAnonymous, HttpGet]
     public async Task<IActionResult> Login(string? returnUrl = null) => User.Identity?.IsAuthenticated == true
         ? ContinueAfterAuthentication(returnUrl)
         : View(await BuildLoginModelAsync(returnUrl));
@@ -32,6 +39,11 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!await AllowRequestAsync(model.Username, cancellationToken)) return TooManyRequests();
         var normalized = userManager.NormalizeName(model.Username.Trim());
         var user = await userManager.FindByNameAsync(model.Username.Trim());
+        if (user?.IsAccessBlocked == true)
+        {
+            await audit.WriteAsync("LoginBlocked", "Failure", user.Id, normalized, "AccessBlocked", cancellationToken: cancellationToken);
+            return RedirectToAction(nameof(AccessBlocked));
+        }
         var wasLocked = user is not null && await userManager.IsLockedOutAsync(user);
         var result = await signInManager.PasswordSignInAsync(model.Username.Trim(), model.Password, false, lockoutOnFailure: true);
         if (result.RequiresTwoFactor) return RedirectToAction(nameof(TwoFactor), new { returnUrl = model.ReturnUrl });
@@ -140,6 +152,11 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var linkedUser = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
         if (linkedUser is not null)
         {
+            if (linkedUser.IsAccessBlocked)
+            {
+                await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, "AccessBlocked", cancellationToken: cancellationToken);
+                return RedirectToAction(nameof(AccessBlocked));
+            }
             var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false, bypassTwoFactor: false);
             if (result.RequiresTwoFactor)
             {
@@ -218,6 +235,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     public async Task<IActionResult> TwoFactor(TwoFactorViewModel model, CancellationToken cancellationToken)
     {
         var pending = await signInManager.GetTwoFactorAuthenticationUserAsync();
+        if (pending?.IsAccessBlocked == true) return RedirectToAction(nameof(AccessBlocked));
         var key = pending?.NormalizedUserName ?? "UNKNOWN";
         if (!await AllowRequestAsync(key, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);
@@ -246,6 +264,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     {
         var pending = await signInManager.GetTwoFactorAuthenticationUserAsync();
         var user = pending ?? (User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null);
+        if (user?.IsAccessBlocked == true) return RedirectToAction(nameof(AccessBlocked));
         var key = user?.NormalizedUserName ?? "UNKNOWN";
         if (!await AllowRequestAsync(key, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);

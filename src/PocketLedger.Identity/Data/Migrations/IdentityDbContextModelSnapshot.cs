@@ -372,6 +372,9 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.Property<bool>("AuthenticatorSetupComplete")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsAccessBlocked")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -513,6 +516,20 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.HasIndex("UserId", "TimestampUtc");
 
                     b.ToTable("authentication_audit_events", (string)null);
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.DeletedUserTombstone", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedNever()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("DeletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("DeletedUserTombstones");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

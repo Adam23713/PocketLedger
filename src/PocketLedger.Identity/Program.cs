@@ -89,6 +89,10 @@ builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditServi
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);
+builder.Services.AddUserAccessBlocking(builder.Configuration);
+builder.Services.AddHostedService<UserAccessBlockSynchronizer>();
+builder.Services.AddHttpClient<IAdminUserDataClient, AdminUserDataClient>(client => client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5051/"))
+    .ConfigurePrimaryHttpMessageHandler(() => InternalApiTls.CreateHandler(builder.Configuration, builder.Environment));
 
 builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);
 var app = builder.Build();
@@ -117,6 +121,7 @@ app.UseStaticFiles();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
+app.UseUserAccessBlocking("/Account/AccessBlocked");
 app.UseRequestTelemetry();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();

@@ -3,8 +3,13 @@
 
 <div class="mb-4">
     <h1 class="mb-1">Admin dashboard</h1>
-    <p class="text-muted mb-0">Read-only operational overview for the bootstrap administrator.</p>
+    <p class="text-muted mb-0">Operational overview and user access management for the bootstrap administrator.</p>
 </div>
+
+@if (TempData["AdminMessage"] is string message)
+{
+    <div class="alert alert-success" role="status">@message</div>
+}
 
 <section aria-labelledby="user-overview-heading">
     <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
@@ -19,11 +24,37 @@
     {
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th scope="col">Username</th><th scope="col">Last successful login (UTC)</th></tr></thead>
+                <thead><tr><th scope="col">Username</th><th scope="col">Email</th><th scope="col">Last successful login (UTC)</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
                 <tbody>
                     @foreach (var user in Model.Users)
                     {
-                        <tr><td>@user.Username</td><td>@(user.LastSuccessfulLoginAtUtc?.ToString("u") ?? "Never signed in")</td></tr>
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@(user.Email ?? "Not available")</td>
+                            <td>@(user.LastSuccessfulLoginAtUtc?.ToString("u") ?? "Never signed in")</td>
+                            <td>@(user.IsAccessBlocked ? "Blocked" : "Active")</td>
+                            <td>
+                                @if (user.IsBootstrapAdministrator)
+                                {
+                                    <span class="text-muted">Protected administrator</span>
+                                }
+                                else
+                                {
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <form asp-action="@(user.IsAccessBlocked ? "Unblock" : "Block")" method="post">
+                                            <input name="userId" type="hidden" value="@user.Id" />
+                                            <input name="page" type="hidden" value="@Model.Page" />
+                                            <button class="btn btn-sm @(user.IsAccessBlocked ? "btn-outline-success" : "btn-outline-warning")" type="submit">@(user.IsAccessBlocked ? "Unblock" : "Block")</button>
+                                        </form>
+                                        <form asp-action="Delete" method="post" onsubmit="return confirm('Permanently delete this user and all PocketLedger data?');">
+                                            <input name="userId" type="hidden" value="@user.Id" />
+                                            <input name="page" type="hidden" value="@Model.Page" />
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>

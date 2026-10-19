@@ -7,6 +7,13 @@ namespace PocketLedger.Controllers;
 
 public sealed class SessionController(IConfiguration configuration) : Controller
 {
+    [AllowAnonymous, HttpGet]
+    public async Task<IActionResult> AccessBlocked()
+    {
+        await HttpContext.SignOutAsync("BffCookie");
+        return View();
+    }
+
     [AllowAnonymous, HttpGet, EnableCors("LandingSession")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult Status() => Json(new { authenticated = User.Identity?.IsAuthenticated == true });

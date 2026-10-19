@@ -74,6 +74,7 @@ builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPo
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);
+builder.Services.AddUserAccessBlocking(builder.Configuration);
 builder.Services.AddSingleton<IUserDateProvider, UserDateProvider>();
 builder.Services.AddScoped<IUserContextService, WebUserContextService>();
 builder.Services.AddTransient<AccessTokenHandler>();
@@ -114,6 +115,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
+app.UseUserAccessBlocking("/Session/AccessBlocked");
 app.UseRequestTelemetry();
 app.UseMiddleware<BffSessionExpiredMiddleware>();
 app.UseAuthorization();

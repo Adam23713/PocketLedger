@@ -15,6 +15,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         => optionsBuilder.ReplaceService<IModelCacheKeyFactory, EncryptionModelCacheKeyFactory>();
 
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
+    public DbSet<DeletedUserTombstone> DeletedUserTombstones => Set<DeletedUserTombstone>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -29,6 +30,11 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         encryption?.Configure(builder.Entity<ApplicationUser>().Property(item => item.LastSuccessfulLoginIpAddress), "ApplicationUser.LastSuccessfulLoginIpAddress");
         builder.Entity<ApplicationUser>().HasIndex(item => item.NormalizedEmail).IsUnique().HasFilter("\"NormalizedEmail\" IS NOT NULL");
         builder.Entity<ApplicationUser>().HasIndex(item => item.IsBootstrapAdministrator).IsUnique().HasFilter("\"IsBootstrapAdministrator\" = TRUE");
+        builder.Entity<DeletedUserTombstone>(entity =>
+        {
+            entity.HasKey(item => item.UserId);
+            entity.Property(item => item.DeletedAtUtc).IsRequired();
+        });
         builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
         encryption?.Configure(builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress), "AuthenticationAuditEvent.RemoteIpAddress", 64);
         builder.Entity<AuthenticationAuditEvent>().Property(item => item.ForwardedClientIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
