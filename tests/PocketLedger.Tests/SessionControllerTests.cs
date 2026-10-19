@@ -21,6 +21,7 @@ public sealed class SessionControllerTests
         var result = Assert.IsType<ViewResult>(await controller.AccessBlocked());
 
         Assert.Equal("BffCookie", authentication.SignedOutScheme);
+        Assert.False(controller.User.Identity?.IsAuthenticated);
         Assert.Null(result.ViewName);
     }
 
