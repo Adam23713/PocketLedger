@@ -43,6 +43,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
     public DbSet<Debt> Debts => Set<Debt>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<UserCurrencyFormat> UserCurrencyFormats => Set<UserCurrencyFormat>();
+    public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.ReplaceService<IModelCacheKeyFactory, EncryptionModelCacheKeyFactory>();

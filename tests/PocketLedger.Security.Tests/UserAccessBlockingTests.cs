@@ -30,7 +30,5 @@ public sealed class UserAccessBlockingTests
     private sealed class BlockedStore : IUserAccessBlockStore
     {
         public Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult(UserAccessBlockState.Blocked);
-        public Task SetBlockedAsync(Guid userId, bool blocked, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task InitializeIfMissingAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

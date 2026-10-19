@@ -86,7 +86,9 @@
                 "60",
                 "web-database",
                 "api-database",
-                "identity-database"
+                "identity-database",
+                "identity-database",
+                "valkey"
             ],
             "problemMatcher": [],
             "options": {

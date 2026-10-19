@@ -1,17 +1,15 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace PocketLedger.Security;
 
+/// <summary>
+/// Authoritative per-request lookup of whether a user is blocked. Implementations must read durable storage
+/// (a database), never a cache that can silently lose entries.
+/// </summary>
 public interface IUserAccessBlockStore
 {
     Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default);
-    Task SetBlockedAsync(Guid userId, bool blocked, CancellationToken cancellationToken = default);
-    Task InitializeIfMissingAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken = default);
 }
 
 public enum UserAccessBlockState
@@ -23,92 +21,8 @@ public enum UserAccessBlockState
 
 public static class UserAccessBlockingRegistration
 {
-    public static IServiceCollection AddUserAccessBlocking(this IServiceCollection services, IConfiguration configuration)
-    {
-        var connectionString = configuration["AccessControl:ConnectionString"];
-        if (string.IsNullOrWhiteSpace(connectionString)) services.AddSingleton<IUserAccessBlockStore, DisabledUserAccessBlockStore>();
-        else services.AddSingleton<IUserAccessBlockStore>(provider => new RedisUserAccessBlockStore(connectionString, provider.GetRequiredService<ILogger<RedisUserAccessBlockStore>>()));
-        return services;
-    }
-
     public static IApplicationBuilder UseUserAccessBlocking(this IApplicationBuilder app, string? blockedPath = null)
         => blockedPath is null ? app.UseMiddleware<UserAccessBlockMiddleware>() : app.UseMiddleware<UserAccessBlockMiddleware>(blockedPath);
-}
-
-internal sealed class DisabledUserAccessBlockStore : IUserAccessBlockStore
-{
-    public Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult(UserAccessBlockState.Active);
-    public Task SetBlockedAsync(Guid userId, bool blocked, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    public Task InitializeIfMissingAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken = default) => Task.CompletedTask;
-}
-
-internal sealed class RedisUserAccessBlockStore(string connectionString, ILogger<RedisUserAccessBlockStore> logger) : IUserAccessBlockStore, IDisposable
-{
-    private const string StateKey = "pocketledger:access-control:state";
-    private const string InitializedField = "__initialized";
-    private readonly SemaphoreSlim connectionLock = new(1, 1);
-    private IConnectionMultiplexer? connection;
-
-    public async Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
-            if (!await database.HashExistsAsync(StateKey, InitializedField)) return UserAccessBlockState.Unavailable;
-            return await database.HashExistsAsync(StateKey, userId.ToString("N")) ? UserAccessBlockState.Blocked : UserAccessBlockState.Active;
-        }
-        catch (RedisException exception)
-        {
-            logger.LogError(exception, "User access block state is unavailable.");
-            return UserAccessBlockState.Unavailable;
-        }
-    }
-
-    public async Task SetBlockedAsync(Guid userId, bool blocked, CancellationToken cancellationToken = default)
-    {
-        var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
-        if (blocked) await database.HashSetAsync(StateKey, userId.ToString("N"), "1");
-        else await database.HashDeleteAsync(StateKey, userId.ToString("N"));
-        await database.HashSetAsync(StateKey, InitializedField, "1");
-    }
-
-    public async Task InitializeIfMissingAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken = default)
-    {
-        var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
-        var transaction = database.CreateTransaction();
-        transaction.AddCondition(Condition.KeyNotExists(StateKey));
-        var entries = userIds.Select(userId => new HashEntry(userId.ToString("N"), "1")).Append(new HashEntry(InitializedField, "1")).ToArray();
-        _ = transaction.HashSetAsync(StateKey, entries);
-        await transaction.ExecuteAsync();
-    }
-
-    private async Task<IConnectionMultiplexer> GetConnectionAsync(CancellationToken cancellationToken)
-    {
-        if (connection is { IsConnected: true }) return connection;
-        await connectionLock.WaitAsync(cancellationToken);
-        try
-        {
-            if (connection is { IsConnected: true }) return connection;
-            connection?.Dispose();
-            var configuration = ConfigurationOptions.Parse(connectionString);
-            configuration.AbortOnConnectFail = false;
-            configuration.ConnectTimeout = 1000;
-            configuration.AsyncTimeout = 1000;
-            configuration.ConnectRetry = 1;
-            connection = await ConnectionMultiplexer.ConnectAsync(configuration);
-            return connection;
-        }
-        finally
-        {
-            connectionLock.Release();
-        }
-    }
-
-    public void Dispose()
-    {
-        connection?.Dispose();
-        connectionLock.Dispose();
-    }
 }
 
 public sealed class UserAccessBlockMiddleware(RequestDelegate next, string? blockedPath = null)
@@ -128,7 +42,7 @@ public sealed class UserAccessBlockMiddleware(RequestDelegate next, string? bloc
             {
                 if (blockedPath is not null)
                 {
-                    context.Response.Redirect(blockedPath);
+                    context.Response.Redirect($"{context.Request.PathBase}{blockedPath}");
                     return;
                 }
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;

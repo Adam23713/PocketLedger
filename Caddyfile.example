@@ -113,6 +113,11 @@
 			log_key
 		}
 
+		# Internal admin endpoints are service-to-service only (Identity -> API/Web on
+		# the Docker network). Never expose them through the public hostnames.
+		@internal_admin path /internal-admin/* /api/v1/internal-admin/*
+		respond @internal_admin 404
+
 		@landing host {$POCKETLEDGER_LANDING_DOMAIN}
 		reverse_proxy @landing landing:5053
 

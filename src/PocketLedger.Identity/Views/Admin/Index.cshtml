@@ -10,6 +10,10 @@
 {
     <div class="alert alert-success" role="status">@message</div>
 }
+@if (TempData["AdminWarning"] is string warning)
+{
+    <div class="alert alert-warning" role="alert">@warning</div>
+}
 
 <section aria-labelledby="user-overview-heading">
     <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
