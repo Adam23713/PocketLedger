@@ -1,7 +1,15 @@
+using PocketLedger.Landing;
+
 var builder = WebApplication.CreateBuilder(args);
 var appUri = GetOrigin(builder.Configuration["Landing:AppBaseUrl"] ?? "https://app.pocketledger.dev", "Landing:AppBaseUrl", builder.Environment);
 builder.Configuration["Landing:AppBaseUrl"] = appUri.GetLeftPart(UriPartial.Authority);
 builder.Services.AddRazorPages();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<IRegistrationStatusProvider, RegistrationStatusProvider>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Identity:InternalBaseUrl"] ?? "http://localhost:5052/");
+    client.Timeout = TimeSpan.FromSeconds(3);
+});
 var app = builder.Build();
 app.Use(async (context, next) =>
 {

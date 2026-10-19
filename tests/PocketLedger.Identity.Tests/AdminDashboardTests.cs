@@ -164,6 +164,41 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
+    public async Task UpdateRegistration_StoresSettingsAndShowsRegisteredAndFreeAccounts()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+
+        var closedDashboard = await (await SendAsAdministratorAsync(client, "/Admin")).Content.ReadAsStringAsync();
+        Assert.Contains("data-registration-registered>12</dd>", closedDashboard);
+        Assert.Contains("data-registration-remaining>Unlimited</dd>", closedDashboard);
+
+        var response = await PostAdminFormAsync(client, "UpdateRegistration", new Dictionary<string, string> { ["isOpen"] = "true", ["maximumUserCount"] = "15", ["page"] = "1" });
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+
+        var dashboard = await (await SendAsAdministratorAsync(client, "/Admin")).Content.ReadAsStringAsync();
+        Assert.Contains("data-registration-maximum>15</dd>", dashboard);
+        Assert.Contains("data-registration-remaining>3</dd>", dashboard);
+        Assert.Contains("open with 3 of 15 accounts available", dashboard);
+        using var status = JsonDocument.Parse(await client.GetStringAsync("/Registration/Status"));
+        Assert.True(status.RootElement.GetProperty("acceptsRegistrations").GetBoolean());
+        Assert.Equal(15, status.RootElement.GetProperty("maximumUserCount").GetInt32());
+        Assert.Equal(3, status.RootElement.GetProperty("remainingSlots").GetInt32());
+
+        await PostAdminFormAsync(client, "UpdateRegistration", new Dictionary<string, string> { ["isOpen"] = "true", ["maximumUserCount"] = "10", ["page"] = "1" });
+        using var full = JsonDocument.Parse(await client.GetStringAsync("/Registration/Status"));
+        Assert.False(full.RootElement.GetProperty("acceptsRegistrations").GetBoolean());
+        Assert.Equal(0, full.RootElement.GetProperty("remainingSlots").GetInt32());
+
+        var rejected = await PostAdminFormAsync(client, "UpdateRegistration", new Dictionary<string, string> { ["isOpen"] = "false", ["maximumUserCount"] = "0", ["page"] = "1" });
+        Assert.Equal(HttpStatusCode.Redirect, rejected.StatusCode);
+        await using var scope = factory.Services.CreateAsyncScope();
+        var settings = await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().RegistrationSettings.SingleAsync();
+        Assert.True(settings.IsOpen);
+        Assert.Equal(10, settings.MaximumUserCount);
+    }
+
+    [Fact]
     public async Task Block_StillBlocksInIdentityWhenPropagationFails()
     {
         await SeedUsersAsync();
@@ -333,7 +368,10 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         return (await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByNameAsync(username))!.Id;
     }
 
-    private static async Task<HttpResponseMessage> PostAdminActionAsync(HttpClient client, string action, Guid userId)
+    private static Task<HttpResponseMessage> PostAdminActionAsync(HttpClient client, string action, Guid userId)
+        => PostAdminFormAsync(client, action, new Dictionary<string, string> { ["userId"] = userId.ToString(), ["page"] = "1" });
+
+    private static async Task<HttpResponseMessage> PostAdminFormAsync(HttpClient client, string action, Dictionary<string, string> form)
     {
         var get = new HttpRequestMessage(HttpMethod.Get, "/Admin");
         get.Headers.Add(TestAuthenticationHandler.AdministratorHeader, "true");
@@ -342,10 +380,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         Assert.True(match.Success, html);
         var post = new HttpRequestMessage(HttpMethod.Post, $"/Admin/{action}")
         {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            Content = new FormUrlEncodedContent(new Dictionary<string, string>(form)
             {
-                ["userId"] = userId.ToString(),
-                ["page"] = "1",
                 ["__RequestVerificationToken"] = System.Net.WebUtility.HtmlDecode(match.Groups[1].Value)
             })
         };

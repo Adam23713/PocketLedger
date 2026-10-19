@@ -86,7 +86,8 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
             "AccountController.TwoFactor",
             "AuthorizationController.AuthorizeEndpoint",
             "AuthorizationController.TokenEndpoint",
-            "HomeController.Index"
+            "HomeController.Index",
+            "RegistrationController.Status"
         }, anonymousActions);
     }
 

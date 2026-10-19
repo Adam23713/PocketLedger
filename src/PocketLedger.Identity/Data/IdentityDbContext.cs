@@ -16,6 +16,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
 
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
     public DbSet<DeletedUserTombstone> DeletedUserTombstones => Set<DeletedUserTombstone>();
+    public DbSet<RegistrationSettings> RegistrationSettings => Set<RegistrationSettings>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,6 +35,13 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         {
             entity.HasKey(item => item.UserId);
             entity.Property(item => item.DeletedAtUtc).IsRequired();
+        });
+        builder.Entity<RegistrationSettings>(entity =>
+        {
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.Id).ValueGeneratedNever();
+            entity.Property(item => item.UpdatedAtUtc).IsRequired();
+            entity.ToTable(table => table.HasCheckConstraint("CK_RegistrationSettings_Singleton", "\"Id\" = 1"));
         });
         builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
         encryption?.Configure(builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress), "AuthenticationAuditEvent.RemoteIpAddress", 64);

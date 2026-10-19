@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Account;
@@ -18,7 +16,7 @@ namespace PocketLedger.Controllers;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
-    IOptions<PublicRegistrationOptions> registrationOptions, IConfiguration configuration) : Controller
+    IRegistrationSettingsService registrationSettings, IConfiguration configuration) : Controller
 {
     [AllowAnonymous, HttpGet]
     public async Task<IActionResult> AccessBlocked()
@@ -67,17 +65,19 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [AllowAnonymous, HttpGet]
-    public async Task<IActionResult> Register(string? returnUrl = null)
+    public async Task<IActionResult> Register(string? returnUrl = null, CancellationToken cancellationToken = default)
     {
-        if (!registrationOptions.Value.Enabled) return NotFound();
+        var status = await registrationSettings.GetStatusAsync(cancellationToken);
+        if (!status.IsOpen) return NotFound();
         if (User.Identity?.IsAuthenticated == true) return LocalRedirect(returnUrl ?? "/");
+        if (status.IsFull) return View("RegistrationFull");
         return View(await BuildRegisterModelAsync(returnUrl));
     }
 
     [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken cancellationToken)
     {
-        if (!registrationOptions.Value.Enabled) return NotFound();
+        if (!(await registrationSettings.GetStatusAsync(cancellationToken)).IsOpen) return NotFound();
         if (User.Identity?.IsAuthenticated == true) return LocalRedirect(model.ReturnUrl ?? "/");
         if (!await AllowRegistrationRequestAsync(cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid)
@@ -91,6 +91,15 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "ExistingEmail", cancellationToken: cancellationToken);
             ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
+        }
+
+        using var registrationLock = await registrationSettings.AcquireRegistrationLockAsync(cancellationToken);
+        var status = await registrationSettings.GetStatusAsync(cancellationToken);
+        if (!status.AcceptsRegistrations)
+        {
+            await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()),
+                failureReason: status.IsOpen ? "RegistrationFull" : "RegistrationDisabled", cancellationToken: cancellationToken);
+            return status.IsOpen ? View("RegistrationFull") : NotFound();
         }
 
         var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false };
@@ -182,10 +191,13 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             ModelState.AddModelError(string.Empty, "The external provider must supply a verified email address.");
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
-        if (!registrationOptions.Value.Enabled)
+        using var registrationLock = await registrationSettings.AcquireRegistrationLockAsync(cancellationToken);
+        var registrationStatus = await registrationSettings.GetStatusAsync(cancellationToken);
+        if (!registrationStatus.AcceptsRegistrations)
         {
-            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "RegistrationDisabled", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "Registration is currently unavailable.");
+            await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email),
+                failureReason: registrationStatus.IsOpen ? "RegistrationFull" : "RegistrationDisabled", cancellationToken: cancellationToken);
+            ModelState.AddModelError(string.Empty, registrationStatus.IsOpen ? "All available accounts are currently taken." : "Registration is currently unavailable.");
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
         if (await EmailExistsAsync(email, cancellationToken))
@@ -451,7 +463,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     {
         model ??= new LoginViewModel();
         model.ReturnUrl = returnUrl;
-        model.RegistrationEnabled = registrationOptions.Value.Enabled;
+        model.RegistrationEnabled = (await registrationSettings.GetStatusAsync()).AcceptsRegistrations;
         model.ExternalProviders = await GetExternalProvidersAsync();
         return model;
     }

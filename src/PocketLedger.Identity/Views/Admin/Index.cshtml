@@ -15,6 +15,49 @@
     <div class="alert alert-warning" role="alert">@warning</div>
 }
 
+@{ var registration = Model.Registration; }
+<section class="card mb-5" aria-labelledby="registration-heading">
+    <div class="card-header d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 py-3">
+        <div>
+            <h2 class="h5 mb-0" id="registration-heading">Registration</h2>
+            <p class="text-muted small mb-0">Control public sign-up and how many accounts the instance can hold.</p>
+        </div>
+        <span class="badge @(registration.AcceptsRegistrations ? "text-bg-success" : registration.IsOpen ? "text-bg-warning" : "text-bg-secondary")">
+            @(registration.AcceptsRegistrations ? "Open" : registration.IsOpen ? "Open — no free accounts" : "Closed")
+        </span>
+    </div>
+    <div class="card-body">
+        <dl class="row g-3 text-center mb-4">
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Registered</dt><dd class="fs-3 fw-semibold mb-0" data-registration-registered>@registration.RegisteredUserCount</dd></div></div>
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Limit</dt><dd class="fs-3 fw-semibold mb-0" data-registration-maximum>@(registration.MaximumUserCount?.ToString() ?? "Unlimited")</dd></div></div>
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Free</dt><dd class="fs-3 fw-semibold mb-0" data-registration-remaining>@(registration.RemainingSlots?.ToString() ?? "Unlimited")</dd></div></div>
+        </dl>
+        @if (registration.MaximumUserCount is { } limit && registration.RegisteredUserCount > limit)
+        {
+            <div class="alert alert-warning" role="status">There are more registered accounts than the limit allows. Existing accounts are kept; new registrations stay blocked until the count drops below the limit.</div>
+        }
+        <form asp-action="UpdateRegistration" method="post" class="row g-3 align-items-end border-top pt-3">
+            <input name="page" type="hidden" value="@Model.Page" />
+            <div class="col-12 col-md-auto">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="registration-open" name="isOpen" value="true" @(registration.IsOpen ? "checked" : null) />
+                    <input type="hidden" name="isOpen" value="false" />
+                    <label class="form-check-label" for="registration-open">Public registration is open</label>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <label class="form-label" for="registration-maximum">Maximum number of accounts</label>
+                <input class="form-control" type="number" id="registration-maximum" name="maximumUserCount" min="1" max="@PocketLedger.Configuration.PublicRegistrationOptions.MaximumAllowedUserCount" step="1"
+                       value="@registration.MaximumUserCount" placeholder="Unlimited" aria-describedby="registration-maximum-help" />
+            </div>
+            <div class="col-12 col-md-auto">
+                <button class="btn btn-primary" type="submit">Save registration settings</button>
+            </div>
+            <div class="col-12 form-text mt-1" id="registration-maximum-help">Every account counts toward the limit, including the administrator and blocked accounts. Leave the limit empty for no limit.</div>
+        </form>
+    </div>
+</section>
+
 <section aria-labelledby="user-overview-heading">
     <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
         <h2 class="h4 mb-0" id="user-overview-heading">Users</h2>
