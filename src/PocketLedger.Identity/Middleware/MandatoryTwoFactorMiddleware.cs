@@ -10,6 +10,8 @@ public sealed class MandatoryTwoFactorMiddleware(RequestDelegate next)
     {
         "SetupAuthenticator",
         "RecoveryCodes",
+        "CreateDataPassword",
+        "UnlockData",
         "Logout"
     };
 

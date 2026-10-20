@@ -17,6 +17,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Security;
+using PocketLedger.Services;
 
 namespace PocketLedger.Identity.Tests;
 
@@ -86,14 +88,22 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             ["__RequestVerificationToken"] = token
         }));
 
-        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.StartsWith("/Account/SetupAuthenticator", response.Headers.Location?.OriginalString);
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Data recovery key", html);
+        Assert.Contains("action=\"/Account/SetupAuthenticator\"", html);
+        Assert.Contains(response.Headers.GetValues("Set-Cookie"), cookie => cookie.StartsWith(PendingSignInKeys.CookieName + "=", StringComparison.Ordinal));
+        var recoveryKey = Regex.Match(html, "<code data-recovery-key>([^<]+)</code>").Groups[1].Value;
         await using var scope = factory.Services.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = (await users.FindByNameAsync("new-user"))!;
         Assert.Equal("new-user@example.test", user.Email);
         Assert.False(user.EmailConfirmed);
         Assert.False(user.AuthenticatorSetupComplete);
+        var dataKeys = scope.ServiceProvider.GetRequiredService<IUserDataKeyService>();
+        using (var byPassword = await dataKeys.UnlockAsync(user.Id, Password, UserKeySecretKind.Password))
+        using (var byRecoveryKey = await dataKeys.UnlockAsync(user.Id, recoveryKey, UserKeySecretKind.RecoveryKey))
+            Assert.Equal("same key", UserFieldCipher.DecryptString(UserFieldCipher.EncryptString("same key", byPassword!, "Note"), byRecoveryKey!, "Note"));
         Assert.Contains(await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.ToListAsync(),
             item => item.EventType == "Registration" && item.Outcome == "Success" && item.UserId == user.Id);
     }
@@ -163,7 +173,8 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             ["ReturnUrl"] = returnUrl ?? string.Empty,
             ["__RequestVerificationToken"] = registrationToken
         }));
-        var setupHtml = await client.GetStringAsync(registrationResponse.Headers.Location);
+        Assert.Equal(HttpStatusCode.OK, registrationResponse.StatusCode);
+        var setupHtml = await client.GetStringAsync(SetupAuthenticatorPath(returnUrl));
         string authenticatorKey;
         await using (var setupScope = factory.Services.CreateAsyncScope())
         {
@@ -217,7 +228,8 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             ["ConfirmPassword"] = Password,
             ["__RequestVerificationToken"] = registrationToken
         }));
-        var setupHtml = await client.GetStringAsync(registrationResponse.Headers.Location);
+        Assert.Equal(HttpStatusCode.OK, registrationResponse.StatusCode);
+        var setupHtml = await client.GetStringAsync(SetupAuthenticatorPath(null));
 
         var logoutResponse = await client.PostAsync("/Account/Logout", Form(new Dictionary<string, string>
         {
@@ -226,6 +238,7 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
 
         Assert.Equal(HttpStatusCode.Redirect, logoutResponse.StatusCode);
         Assert.Equal("http://localhost:5050/Session/CompleteLogout", logoutResponse.Headers.Location?.OriginalString);
+        Assert.Contains(logoutResponse.Headers.GetValues("Set-Cookie"), cookie => cookie.StartsWith(PendingSignInKeys.CookieName + "=;", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -288,14 +301,14 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
         {
             var firstResponse = await CompleteExternalLoginAsync(firstClient, VerifiedExternalAuthenticationHandler.SchemeName);
             Assert.Equal(HttpStatusCode.Redirect, firstResponse.StatusCode);
-            Assert.StartsWith("/Account/SetupAuthenticator", firstResponse.Headers.Location?.OriginalString);
+            Assert.StartsWith("/Account/CreateDataPassword", firstResponse.Headers.Location?.OriginalString);
         }
 
         using (var returningClient = CreateClient())
         {
             var returningResponse = await CompleteExternalLoginAsync(returningClient, VerifiedExternalAuthenticationHandler.SchemeName);
             Assert.Equal(HttpStatusCode.Redirect, returningResponse.StatusCode);
-            Assert.StartsWith("/Account/SetupAuthenticator", returningResponse.Headers.Location?.OriginalString);
+            Assert.StartsWith("/Account/CreateDataPassword", returningResponse.Headers.Location?.OriginalString);
         }
 
         await using var scope = factory.Services.CreateAsyncScope();
@@ -317,6 +330,10 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
     }
 
     private HttpClient CreateClient() => factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+
+    // The recovery key page continues with a plain GET form to the authenticator setup.
+    private static string SetupAuthenticatorPath(string? returnUrl)
+        => string.IsNullOrEmpty(returnUrl) ? "/Account/SetupAuthenticator" : "/Account/SetupAuthenticator?returnUrl=" + Uri.EscapeDataString(returnUrl);
 
     private async Task ResetDatabaseAsync()
     {
