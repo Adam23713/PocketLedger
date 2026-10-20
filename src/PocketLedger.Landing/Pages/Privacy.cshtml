@@ -117,6 +117,7 @@
                 <h2>6. How long we keep it</h2>
                 <p>When you delete your account, your account, authentication, and financial data is deleted immediately — we don't keep a separate retention window "just in case." An encrypted backup you've exported yourself is yours to keep or delete; we don't retain a copy of it after you download it.</p>
                 <p>Raw technical access logs used for abuse detection are kept for a short, fixed window (currently up to seven days) and then automatically deleted; they are not linked to your account beyond that window.</p>
+                <p>The application also keeps short-lived security statistics for at most 48 hours, after which they expire automatically: request counts in five-minute intervals, broken down by account but without the pages you visited, and the IP address of every request for a rolling three-minute window so unusually high request volumes can be detected. When an IP address exceeds that threshold, we record an incident containing the address, the accounts and the parts of the Service involved, the request count and the time, so the traffic can be reviewed and blocked if necessary.</p>
                 <div class="legal-note">If we ever perform routine technical backups of our servers for disaster-recovery purposes, these are rotated on a short cycle and are not used to restore data you've asked us to delete.</div>
             </article>
 

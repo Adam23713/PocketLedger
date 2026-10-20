@@ -66,6 +66,7 @@ public static class RequestTelemetryRegistration
             .Validate(options => options.RetentionHours is >= 1 and <= 48, "Request telemetry retention must be between 1 and 48 hours.")
             .Validate(options => options.BucketMinutes == 5, "Request telemetry uses five-minute buckets.")
             .ValidateOnStart();
+        services.AddSingleton<RequestTelemetryConnection>();
         services.AddSingleton<RequestTelemetryService>();
         services.AddSingleton<IRequestTelemetryReader>(services => services.GetRequiredService<RequestTelemetryService>());
         services.AddSingleton<IHostedService>(services => services.GetRequiredService<RequestTelemetryService>());
@@ -74,16 +75,35 @@ public static class RequestTelemetryRegistration
         return services;
     }
 
-    public static IApplicationBuilder UseRequestTelemetry(this IApplicationBuilder app) => app.UseMiddleware<RequestTelemetryMiddleware>();
+    public static IApplicationBuilder UseRequestTelemetry(this IApplicationBuilder app) => app.UseMiddleware<RequestTelemetryMiddleware>(RequestTelemetryClientFilter.None);
+
+    // Requests authenticated with an access token issued to one of these clients are neither counted nor fed to suspicious request detection.
+    // The API uses this for the Web BFF, whose calls all arrive from the Web container's address and were already observed by the Web with the real client address.
+    public static IApplicationBuilder UseRequestTelemetry(this IApplicationBuilder app, params string[] ignoredClientIds)
+        => app.UseMiddleware<RequestTelemetryMiddleware>(new RequestTelemetryClientFilter(ignoredClientIds));
+}
+
+internal sealed class RequestTelemetryClientFilter(IEnumerable<string> ignoredClientIds)
+{
+    public static readonly RequestTelemetryClientFilter None = new([]);
+    private readonly HashSet<string> ignoredClientIds = new(ignoredClientIds, StringComparer.Ordinal);
+
+    public bool IsIgnored(ClaimsPrincipal principal)
+    {
+        if (ignoredClientIds.Count == 0 || principal.Identity?.IsAuthenticated != true) return false;
+        var clientId = principal.FindFirstValue("client_id") ?? principal.FindFirstValue("azp");
+        return clientId is not null && ignoredClientIds.Contains(clientId);
+    }
 }
 
 internal readonly record struct RequestTelemetryObservation(DateTimeOffset BucketStartUtc, Guid? UserId);
 
-internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTelemetryService telemetry, SuspiciousRequestDetectionService suspiciousRequests, TimeProvider timeProvider)
+internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTelemetryService telemetry, SuspiciousRequestDetectionService suspiciousRequests, TimeProvider timeProvider,
+    RequestTelemetryClientFilter clientFilter)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (RelevantRequestClassifier.IsRelevant(context.Request.Path))
+        if (RelevantRequestClassifier.IsRelevant(context.Request.Path) && !clientFilter.IsIgnored(context.User))
         {
             var timestamp = timeProvider.GetUtcNow();
             telemetry.TryRecord(context.User, timestamp);
@@ -93,15 +113,48 @@ internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTe
     }
 }
 
-internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> options, SuspiciousRequestDetectionService suspiciousRequests, ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
+// One multiplexer shared by request telemetry and suspicious request detection; the DI container disposes it on shutdown.
+internal sealed class RequestTelemetryConnection(IOptions<RequestTelemetryOptions> options) : IAsyncDisposable
+{
+    private readonly SemaphoreSlim connectionLock = new(1, 1);
+    private IConnectionMultiplexer? connection;
+
+    public async Task<IDatabase> GetDatabaseAsync(CancellationToken cancellationToken)
+    {
+        if (connection is not null) return connection.GetDatabase();
+        await connectionLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (connection is not null) return connection.GetDatabase();
+            var configuration = ConfigurationOptions.Parse(options.Value.ConnectionString!);
+            configuration.AbortOnConnectFail = false;
+            configuration.ConnectTimeout = 500;
+            configuration.AsyncTimeout = 500;
+            configuration.ConnectRetry = 0;
+            configuration.BacklogPolicy = BacklogPolicy.FailFast;
+            connection = await ConnectionMultiplexer.ConnectAsync(configuration);
+            return connection.GetDatabase();
+        }
+        finally
+        {
+            connectionLock.Release();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (connection is not null) await connection.DisposeAsync();
+    }
+}
+
+internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> options, RequestTelemetryConnection store, SuspiciousRequestDetectionService suspiciousRequests,
+    ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
 {
     private const string KeyPrefix = "pocketledger:request-telemetry:v1:";
     private const string TotalField = "total";
     private const string AnonymousField = "anonymous";
     private const string IncrementScript = "redis.call('HINCRBY', KEYS[1], 'total', ARGV[1]); redis.call('HINCRBY', KEYS[1], ARGV[2], ARGV[1]); return redis.call('PEXPIREAT', KEYS[1], ARGV[3])";
     private readonly Channel<RequestTelemetryObservation> queue = Channel.CreateBounded<RequestTelemetryObservation>(new BoundedChannelOptions(8192) { FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true, SingleWriter = false });
-    private readonly SemaphoreSlim connectionLock = new(1, 1);
-    private IConnectionMultiplexer? connection;
     private long lastFailureLogUtcTicks;
 
     public void TryRecord(ClaimsPrincipal principal, DateTimeOffset timestamp)
@@ -137,7 +190,7 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
         if (string.IsNullOrWhiteSpace(options.Value.ConnectionString)) return EmptyStatistics(fromUtc, toUtc, userId, starts, false);
         try
         {
-            var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
+            var database = await store.GetDatabaseAsync(cancellationToken);
             RedisValue[] fields = userId is null ? [TotalField, AnonymousField] : [TotalField, AnonymousField, UserField(userId.Value)];
             var reads = starts.Select(start => database.HashGetAsync(Key(start), fields)).ToArray();
             await Task.WhenAll(reads).WaitAsync(cancellationToken);
@@ -168,7 +221,7 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
                 if (observations.Count == 0) continue;
                 try
                 {
-                    var database = (await GetConnectionAsync(stoppingToken)).GetDatabase();
+                    var database = await store.GetDatabaseAsync(stoppingToken);
                     var writes = observations.GroupBy(item => new { item.BucketStartUtc, item.UserId }).Select(group =>
                     {
                         var count = group.LongCount();
@@ -200,30 +253,6 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
         queue.Writer.TryComplete();
         suspiciousRequests.Complete();
         await base.StopAsync(cancellationToken);
-        if (connection is not null) await connection.DisposeAsync();
-        await suspiciousRequests.DisposeAsync();
-    }
-
-    private async Task<IConnectionMultiplexer> GetConnectionAsync(CancellationToken cancellationToken)
-    {
-        if (connection is not null) return connection;
-        await connectionLock.WaitAsync(cancellationToken);
-        try
-        {
-            if (connection is not null) return connection;
-            var configuration = ConfigurationOptions.Parse(options.Value.ConnectionString!);
-            configuration.AbortOnConnectFail = false;
-            configuration.ConnectTimeout = 500;
-            configuration.AsyncTimeout = 500;
-            configuration.ConnectRetry = 0;
-            configuration.BacklogPolicy = BacklogPolicy.FailFast;
-            connection = await ConnectionMultiplexer.ConnectAsync(configuration);
-            return connection;
-        }
-        finally
-        {
-            connectionLock.Release();
-        }
     }
 
     private static RequestTelemetryBucketSnapshot ToSnapshot(DateTimeOffset start, RedisValue[] values, bool hasSelectedUser)
