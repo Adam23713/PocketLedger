@@ -34,7 +34,7 @@ public static class BlockedUserCookieValidation
     {
         if (context.Items.ContainsKey(BlockedItemKey) && !context.Request.Path.Equals(BlockedPath, StringComparison.OrdinalIgnoreCase))
         {
-            context.Response.Redirect($"{context.Request.PathBase}{BlockedPath}");
+            context.Response.Redirect(BlockedPath);
             return;
         }
         await next();

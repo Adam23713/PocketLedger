@@ -9,12 +9,22 @@ public sealed class UserAccessBlockingTests
     public async Task BlockedWebRequest_RedirectsToBlockedPage()
     {
         var context = CreateAuthenticatedContext("/Transactions");
+        context.Request.PathBase = "//attacker.example";
         var middleware = new UserAccessBlockMiddleware(_ => Task.CompletedTask, "/Session/AccessBlocked");
 
         await middleware.InvokeAsync(context, new BlockedStore());
 
         Assert.Equal(StatusCodes.Status302Found, context.Response.StatusCode);
         Assert.Equal("/Session/AccessBlocked", context.Response.Headers.Location);
+    }
+
+    [Theory]
+    [InlineData("https://attacker.example/blocked")]
+    [InlineData("//attacker.example/blocked")]
+    [InlineData("/\\attacker.example/blocked")]
+    public void Constructor_RejectsNonLocalBlockedPath(string blockedPath)
+    {
+        Assert.Throws<ArgumentException>(() => new UserAccessBlockMiddleware(_ => Task.CompletedTask, blockedPath));
     }
 
     private static DefaultHttpContext CreateAuthenticatedContext(string path)

@@ -27,6 +27,8 @@ public static class UserAccessBlockingRegistration
 
 public sealed class UserAccessBlockMiddleware(RequestDelegate next, string? blockedPath = null)
 {
+    private readonly string? safeBlockedPath = ValidateBlockedPath(blockedPath);
+
     public async Task InvokeAsync(HttpContext context, IUserAccessBlockStore store)
     {
         if (TryGetUserId(context.User, out var userId))
@@ -38,11 +40,11 @@ public sealed class UserAccessBlockMiddleware(RequestDelegate next, string? bloc
                 await context.Response.WriteAsync("User access validation is temporarily unavailable.", context.RequestAborted);
                 return;
             }
-            if (state == UserAccessBlockState.Blocked && (blockedPath is null || !context.Request.Path.Equals(blockedPath, StringComparison.OrdinalIgnoreCase)))
+            if (state == UserAccessBlockState.Blocked && (safeBlockedPath is null || !context.Request.Path.Equals(safeBlockedPath, StringComparison.OrdinalIgnoreCase)))
             {
-                if (blockedPath is not null)
+                if (safeBlockedPath is not null)
                 {
-                    context.Response.Redirect($"{context.Request.PathBase}{blockedPath}");
+                    context.Response.Redirect(safeBlockedPath);
                     return;
                 }
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -51,6 +53,14 @@ public sealed class UserAccessBlockMiddleware(RequestDelegate next, string? bloc
             }
         }
         await next(context);
+    }
+
+    private static string? ValidateBlockedPath(string? blockedPath)
+    {
+        if (blockedPath is null) return null;
+        if (!blockedPath.StartsWith('/') || blockedPath.StartsWith("//", StringComparison.Ordinal) || blockedPath.Contains('\\'))
+            throw new ArgumentException("The blocked path must be an application-local absolute path.", nameof(blockedPath));
+        return blockedPath;
     }
 
     private static bool TryGetUserId(System.Security.Claims.ClaimsPrincipal principal, out Guid userId)

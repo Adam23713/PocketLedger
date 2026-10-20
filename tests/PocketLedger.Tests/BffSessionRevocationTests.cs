@@ -52,6 +52,7 @@ public sealed class BffSessionRevocationTests
         var authentication = new RecordingAuthenticationService();
         var context = new DefaultHttpContext { RequestServices = new ServiceCollection().AddSingleton<IAuthenticationService>(authentication).BuildServiceProvider() };
         context.Request.Path = "/Transactions";
+        context.Request.PathBase = "//attacker.example";
         context.Items[DatabaseTicketStore.RevokedSessionItemKey] = true;
         var nextCalled = false;
 
