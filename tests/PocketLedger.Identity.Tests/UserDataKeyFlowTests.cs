@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OpenIddict.Abstractions;
 using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
@@ -269,6 +271,78 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
     }
 
     [Fact]
+    public async Task CodeExchange_HandsTheSessionDataKeyToTheClientOnceAndRefreshKeepsTheSession()
+    {
+        var seeded = await SeedUserAsync();
+        await RegisterTestClientAsync();
+        using var client = CreateClient();
+        await LoginAsync(client, Password);
+        Assert.Equal(HttpStatusCode.Redirect, (await SubmitTwoFactorAsync(client, seeded.AuthenticatorKey)).StatusCode);
+
+        var (code, verifier) = await AuthorizeAsync(client);
+        using var tokens = await RedeemAsync(client, new Dictionary<string, string>
+        {
+            ["grant_type"] = "authorization_code",
+            ["code"] = code,
+            ["redirect_uri"] = TestRedirectUri,
+            ["client_id"] = TestClientId,
+            ["code_verifier"] = verifier
+        });
+
+        var root = tokens.RootElement;
+        var accessClaims = ReadJwtPayload(root.GetProperty("access_token").GetString()!);
+        var sessionId = accessClaims.GetProperty(UserSessionKeyProtocol.SessionIdClaim).GetString();
+        Assert.False(accessClaims.TryGetProperty(UserSessionKeyProtocol.HandoffClaim, out _));
+        Guid userId;
+        await using (var scope = factory.Services.CreateAsyncScope())
+            userId = (await scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>().FindByNameAsync(Username))!.Id;
+        using (var dataKey = UserSessionKeyProtocol.TryUnwrap(root.GetProperty(UserSessionKeyProtocol.SessionKeyParameter).GetString(), root.GetProperty(UserSessionKeyProtocol.WrappedKeyParameter).GetString(), userId, sessionId))
+        {
+            Assert.NotNull(dataKey);
+            Assert.Equal("seeded before recovery", UserFieldCipher.DecryptString(seeded.Ciphertext, dataKey, "Note"));
+        }
+        Assert.Null(UserSessionKeyProtocol.TryUnwrap(root.GetProperty(UserSessionKeyProtocol.SessionKeyParameter).GetString(), root.GetProperty(UserSessionKeyProtocol.WrappedKeyParameter).GetString(), userId, "another-session"));
+
+        using var refreshed = await RedeemAsync(client, new Dictionary<string, string>
+        {
+            ["grant_type"] = "refresh_token",
+            ["refresh_token"] = root.GetProperty("refresh_token").GetString()!,
+            ["client_id"] = TestClientId
+        });
+        Assert.False(refreshed.RootElement.TryGetProperty(UserSessionKeyProtocol.SessionKeyParameter, out _));
+        Assert.Equal(sessionId, ReadJwtPayload(refreshed.RootElement.GetProperty("access_token").GetString()!).GetProperty(UserSessionKeyProtocol.SessionIdClaim).GetString());
+
+        // The pending key was used up; a second client session needs the password again even though the Identity cookie is valid.
+        var again = await client.GetAsync(AuthorizePath(CreateCodeChallenge(CreateCodeVerifier())));
+        Assert.Equal(HttpStatusCode.Redirect, again.StatusCode);
+        Assert.StartsWith("/Account/UnlockData", again.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task CodeExchange_WithoutPreparedSessionMaterial_IsRefused()
+    {
+        var seeded = await SeedUserAsync();
+        await RegisterTestClientAsync();
+        using var client = CreateClient();
+        await LoginAsync(client, Password);
+        await SubmitTwoFactorAsync(client, seeded.AuthenticatorKey);
+        var (code, verifier) = await AuthorizeAsync(client);
+        ((MemoryCache)factory.Services.GetRequiredService<IMemoryCache>()).Clear();
+
+        var response = await client.PostAsync("/connect/token", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["grant_type"] = "authorization_code",
+            ["code"] = code,
+            ["redirect_uri"] = TestRedirectUri,
+            ["client_id"] = TestClientId,
+            ["code_verifier"] = verifier
+        }));
+
+        Assert.False(response.IsSuccessStatusCode);
+        Assert.DoesNotContain(UserSessionKeyProtocol.SessionKeyParameter, await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
     public async Task DerivationLimiter_RejectsWorkWhenEverySlotStaysBusy()
     {
         using var limiter = new UserKeyDerivationLimiter(Options.Create(new AuthenticationSecurityOptions { DataKeyDerivationConcurrency = 1, DataKeyDerivationWaitSeconds = 1 }));
@@ -301,6 +375,61 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
     }
 
     private sealed record SeededUser(string AuthenticatorKey, string RecoveryKey, string Ciphertext);
+
+    private const string TestClientId = "data-key-test-client";
+    private const string TestRedirectUri = "http://localhost:5050/signin-oidc";
+
+    private async Task RegisterTestClientAsync()
+    {
+        await using var scope = factory.Services.CreateAsyncScope();
+        await scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>().CreateAsync(new OpenIddictApplicationDescriptor
+        {
+            ClientId = TestClientId,
+            ClientType = OpenIddictConstants.ClientTypes.Public,
+            ConsentType = OpenIddictConstants.ConsentTypes.Implicit,
+            RedirectUris = { new Uri(TestRedirectUri) },
+            Permissions =
+            {
+                OpenIddictConstants.Permissions.Endpoints.Authorization,
+                OpenIddictConstants.Permissions.Endpoints.Token,
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                OpenIddictConstants.Permissions.ResponseTypes.Code,
+                OpenIddictConstants.Permissions.Prefixes.Scope + "pocketledger.api"
+            },
+            Requirements = { OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange }
+        });
+    }
+
+    private static async Task<(string Code, string Verifier)> AuthorizeAsync(HttpClient client)
+    {
+        var verifier = CreateCodeVerifier();
+        var response = await client.GetAsync(AuthorizePath(CreateCodeChallenge(verifier)));
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        var location = response.Headers.Location!;
+        Assert.StartsWith(TestRedirectUri, location.OriginalString);
+        var code = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(location.Query)["code"].ToString();
+        Assert.False(string.IsNullOrEmpty(code), location.OriginalString);
+        return (code, verifier);
+    }
+
+    private static string AuthorizePath(string challenge)
+        => $"/connect/authorize?client_id={TestClientId}&response_type=code&redirect_uri={Uri.EscapeDataString(TestRedirectUri)}&scope={Uri.EscapeDataString("openid offline_access pocketledger.api")}&code_challenge={challenge}&code_challenge_method=S256&state=test-state";
+
+    private static async Task<JsonDocument> RedeemAsync(HttpClient client, Dictionary<string, string> form)
+    {
+        var response = await client.PostAsync("/connect/token", new FormUrlEncodedContent(form));
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, content);
+        return JsonDocument.Parse(content);
+    }
+
+    private static JsonElement ReadJwtPayload(string token)
+        => JsonDocument.Parse(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(token.Split('.')[1])).RootElement.Clone();
+
+    private static string CreateCodeVerifier() => Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+
+    private static string CreateCodeChallenge(string verifier) => Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(verifier)));
 
     private async Task ResetDatabaseAsync()
     {
