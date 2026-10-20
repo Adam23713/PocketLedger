@@ -22,7 +22,7 @@ public sealed class UserAccessPropagation(IHttpClientFactory clients, IConfigura
     public async Task BlockAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         await SendAsync(ApiClientName, HttpMethod.Put, $"api/v1/internal-admin/users/{userId}/access-block", null, cancellationToken);
-        await SendAsync(WebClientName, HttpMethod.Post, $"internal-admin/users/{userId}/sessions/revoke", null, cancellationToken);
+        await SendAsync(WebClientName, HttpMethod.Put, $"internal-admin/users/{userId}/sessions/revoke", null, cancellationToken);
     }
 
     public Task UnblockAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -31,7 +31,7 @@ public sealed class UserAccessPropagation(IHttpClientFactory clients, IConfigura
     public async Task SynchronizeAsync(IReadOnlyCollection<Guid> blockedUserIds, CancellationToken cancellationToken = default)
     {
         await SendAsync(ApiClientName, HttpMethod.Put, "api/v1/internal-admin/users/access-blocks", blockedUserIds, cancellationToken);
-        await SendAsync(WebClientName, HttpMethod.Post, "internal-admin/users/sessions/revoke", blockedUserIds, cancellationToken);
+        await SendAsync(WebClientName, HttpMethod.Put, "internal-admin/users/sessions/revoke", blockedUserIds, cancellationToken);
     }
 
     private async Task SendAsync(string clientName, HttpMethod method, string path, IReadOnlyCollection<Guid>? body, CancellationToken cancellationToken)

@@ -9,9 +9,7 @@ namespace PocketLedger.Controllers;
 [ApiController, AllowAnonymous, IgnoreAntiforgeryToken, Route("internal-admin/users")]
 public sealed class InternalAdminSessionsController(DatabaseTicketStore sessions, IConfiguration configuration) : ControllerBase
 {
-    [HttpPost("{userId:guid}/sessions/revoke")]
-    // This service endpoint authenticates with a dedicated secret header and never with browser cookies.
-    // codeql[cs/web/missing-token-validation]
+    [HttpPut("{userId:guid}/sessions/revoke")]
     public async Task<IActionResult> RevokeUser(Guid userId, CancellationToken cancellationToken)
     {
         if (!InternalAdminAuthentication.IsAuthorized(Request, configuration)) return Unauthorized();
@@ -20,9 +18,7 @@ public sealed class InternalAdminSessionsController(DatabaseTicketStore sessions
         return NoContent();
     }
 
-    [HttpPost("sessions/revoke")]
-    // This service endpoint authenticates with a dedicated secret header and never with browser cookies.
-    // codeql[cs/web/missing-token-validation]
+    [HttpPut("sessions/revoke")]
     public async Task<IActionResult> RevokeUsers([FromBody] Guid[] userIds, CancellationToken cancellationToken)
     {
         if (!InternalAdminAuthentication.IsAuthorized(Request, configuration)) return Unauthorized();

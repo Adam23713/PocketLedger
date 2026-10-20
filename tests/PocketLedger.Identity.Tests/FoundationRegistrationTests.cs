@@ -179,6 +179,12 @@ public sealed class FoundationRegistrationTests : IClassFixture<WebApplicationFa
             ["__RequestVerificationToken"] = ExtractAntiforgeryToken(setupHtml)
         }));
         var recoveryCodesHtml = await setupResponse.Content.ReadAsStringAsync();
+        var missingConfirmationResponse = await client.PostAsync("/Account/RecoveryCodes", Form(new Dictionary<string, string>
+        {
+            ["ReturnUrl"] = returnUrl ?? string.Empty,
+            ["__RequestVerificationToken"] = ExtractAntiforgeryToken(recoveryCodesHtml)
+        }));
+        Assert.Equal(HttpStatusCode.BadRequest, missingConfirmationResponse.StatusCode);
         var completionResponse = await client.PostAsync("/Account/RecoveryCodes", Form(new Dictionary<string, string>
         {
             ["Confirmed"] = "true",
