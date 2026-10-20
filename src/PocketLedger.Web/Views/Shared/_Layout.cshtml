@@ -2,6 +2,8 @@
     var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentProfile = User.Identity?.IsAuthenticated == true ? await MoneyFormatter.GetUserAsync() : null;
+    var themeCookieDomain = Context.RequestServices.GetRequiredService<IConfiguration>()["Theme:CookieDomain"];
+    var themeCookieSecure = !Context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
@@ -13,24 +15,34 @@
     <link rel="icon" href="~/favicon.ico" sizes="any" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/app-icons/pocketledger-32.png" asp-append-version="true" />
     <link rel="icon" type="image/png" sizes="64x64" href="~/images/app-icons/pocketledger-64.png" asp-append-version="true" />
-    <script>
-        (() => {
-            const themes = ["horizon", "banking", "glass", "material"];
-            const savedTheme = localStorage.getItem("pocketledger-theme");
-            const theme = themes.includes(savedTheme) ? savedTheme : "horizon";
-            document.documentElement.dataset.theme = theme;
-            document.documentElement.setAttribute("data-bs-theme", theme === "banking" || theme === "glass" ? "dark" : "light");
-        })();
-    </script>
+    <script>window.pocketLedgerThemeConfig = { cookieDomain: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(themeCookieDomain)), secure: @themeCookieSecure.ToString().ToLowerInvariant(), migrateLegacyStorage: true };</script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PocketLedger.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <div class="horizon-ambient" aria-hidden="true">
+        <span class="horizon-ambient-wave horizon-ambient-wave-top"></span>
+        <span class="horizon-ambient-wave horizon-ambient-wave-middle"></span>
+        <span class="horizon-ambient-wave horizon-ambient-wave-bottom"></span>
+        <span class="horizon-ambient-orb horizon-ambient-orb-left"></span>
+        <span class="horizon-ambient-orb horizon-ambient-orb-right"></span>
+        <span class="horizon-ambient-orb horizon-ambient-orb-bottom"></span>
+        <span class="horizon-ambient-bubbles"></span>
+    </div>
+    <div class="banking-ambient" aria-hidden="true">
+        <span class="banking-ambient-orb banking-ambient-orb-left"></span>
+        <span class="banking-ambient-orb banking-ambient-orb-right"></span>
+        <span class="banking-ambient-orb banking-ambient-orb-bottom"></span>
+        <span class="banking-ambient-ring"></span>
+        <span class="banking-ambient-sweep"></span>
+        <span class="banking-ambient-stars"></span>
+    </div>
     <header class="app-header">
         <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
-            <div class="container-fluid">
+            <div class="container-fluid app-navbar-shell">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" title="PocketLedger v@(applicationVersion)">
                     <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
                     <span>PocketLedger</span>
@@ -43,10 +55,10 @@
                         <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> Dashboard</a></li>
                         <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> Transactions</a></li>
                         <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> Calendar</a></li>
-                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> Monthly planner</a></li>
                         <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> Statistics</a></li>
                         <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> Recurring</a></li>
                         <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> Loans / Debts</a></li>
+                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> Monthly planner</a></li>
                     </ul>
                 </div>
                 <div class="header-actions">

@@ -1,25 +1,37 @@
 :root,
-[data-theme="apple"] {
-  --page-background: #f5f6f8;
-  --page-background-image: none;
-  --surface-background: rgba(255, 255, 255, .94);
-  --surface-background-hover: #f3f5f8;
-  --surface-raised: #fff;
-  --text-primary: #17202a;
-  --text-secondary: #66717e;
-  --border-color: #dfe3e8;
-  --accent-color: #087aff;
-  --accent-hover: #0069df;
+[data-theme="horizon"] {
+  --page-background: #edf6ff;
+  --page-background-image:
+    radial-gradient(ellipse 76% 48% at 7% 4%, rgba(153, 207, 255, .72), transparent 66%),
+    radial-gradient(ellipse 64% 44% at 92% 10%, rgba(184, 214, 255, .7), transparent 68%),
+    radial-gradient(ellipse 54% 42% at 70% 70%, rgba(183, 226, 255, .5), transparent 72%),
+    linear-gradient(145deg, #f8fcff 0%, #e7f4ff 45%, #f6faff 100%);
+  --surface-background: rgba(255, 255, 255, .76);
+  --surface-background-hover: rgba(225, 240, 255, .72);
+  --surface-raised: rgba(255, 255, 255, .94);
+  --modal-background: #fff;
+  --text-primary: #10254a;
+  --text-secondary: #5c6f8c;
+  --border-color: rgba(160, 190, 221, .4);
+  --accent-color: #1478f2;
+  --accent-hover: #0867d4;
   --accent-contrast: #fff;
   --positive-color: #16833b;
   --negative-color: #d92d3e;
-  --card-shadow: 0 5px 18px rgba(20, 35, 55, .06);
-  --card-radius: .75rem;
-  --control-radius: .55rem;
-  --header-background: rgba(255, 255, 255, .88);
-  --header-shadow: 0 1px 12px rgba(20, 35, 55, .06);
+  --card-shadow: 0 14px 38px rgba(56, 108, 158, .1), 0 2px 8px rgba(38, 73, 112, .05);
+  --card-radius: 1rem;
+  --control-radius: .75rem;
+  --header-background: rgba(255, 255, 255, .5);
+  --header-shadow: 0 16px 44px rgba(67, 118, 169, .14), inset 0 1px 0 rgba(255, 255, 255, .82);
+  --nav-active-background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(222, 239, 255, .86));
+  --nav-active-border: rgba(255, 255, 255, .94);
+  --nav-active-color: #076de5;
   --focus-ring: rgba(8, 122, 255, .28);
-  --backdrop-filter: blur(18px);
+  --icon-background: #fff;
+  --icon-border-color: #d7dce2;
+  --icon-shadow: 0 2px 6px rgba(20, 35, 55, .08);
+  --table-stripe-background: rgba(0, 0, 0, .075);
+  --backdrop-filter: blur(22px) saturate(125%);
   --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
@@ -29,6 +41,7 @@
   --surface-background: #181d22;
   --surface-background-hover: #22292f;
   --surface-raised: #1c2228;
+  --modal-background: #1c2228;
   --text-primary: #f4f7f6;
   --text-secondary: #9ba7a5;
   --border-color: #2b343a;
@@ -42,7 +55,14 @@
   --control-radius: .35rem;
   --header-background: rgba(13, 17, 21, .94);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .07);
+  --nav-active-background: #173b34;
+  --nav-active-border: #25d09b;
+  --nav-active-color: #78f0c9;
   --focus-ring: rgba(16, 191, 168, .3);
+  --icon-background: #becac7;
+  --icon-border-color: #9eada9;
+  --icon-shadow: 0 3px 8px rgba(0, 0, 0, .24);
+  --table-stripe-background: rgba(255, 255, 255, .075);
   --backdrop-filter: blur(18px);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -53,6 +73,7 @@
   --surface-background: rgba(255, 255, 255, .105);
   --surface-background-hover: rgba(255, 255, 255, .17);
   --surface-raised: rgba(255, 255, 255, .14);
+  --modal-background: #10255f;
   --text-primary: #fff;
   --text-secondary: #cbd8f6;
   --border-color: rgba(255, 255, 255, .2);
@@ -68,7 +89,14 @@
   --control-radius: .55rem;
   --header-background: rgba(7, 25, 69, .58);
   --header-shadow: 0 1px 0 rgba(255, 255, 255, .16);
+  --nav-active-background: rgba(255, 209, 102, .2);
+  --nav-active-border: #ffd166;
+  --nav-active-color: #ffe6a6;
   --focus-ring: rgba(191, 170, 255, .42);
+  --icon-background: #c1c9e2;
+  --icon-border-color: rgba(255, 255, 255, .34);
+  --icon-shadow: 0 4px 12px rgba(1, 7, 30, .3);
+  --table-stripe-background: rgba(255, 255, 255, .075);
   --backdrop-filter: blur(22px) saturate(135%);
   --font-family: Inter, "Segoe UI", sans-serif;
 }
@@ -79,6 +107,7 @@
   --surface-background: #fffbfe;
   --surface-background-hover: #f1edf8;
   --surface-raised: #fff;
+  --modal-background: #fff;
   --text-primary: #1d1b20;
   --text-secondary: #625f67;
   --border-color: #ded8e5;
@@ -90,9 +119,15 @@
   --card-shadow: 0 2px 7px rgba(45, 35, 65, .08);
   --card-radius: 1.1rem;
   --control-radius: 1.25rem;
-  --header-background: rgba(255, 251, 254, .92);
-  --header-shadow: 0 1px 5px rgba(45, 35, 65, .09);
+  --header-background: rgba(230, 220, 246, .97);
+  --header-shadow: 0 5px 16px rgba(72, 55, 105, .15);
+  --nav-active-background: #f3e1f5;
+  --nav-active-border: #a96bb2;
+  --nav-active-color: #67316f;
   --focus-ring: rgba(103, 80, 164, .28);
+  --icon-background: #f2ecf7;
+  --icon-border-color: #d8cfe2;
+  --icon-shadow: 0 2px 5px rgba(45, 35, 65, .1);
   --backdrop-filter: blur(16px);
   --font-family: Roboto, "Segoe UI", sans-serif;
 }
@@ -111,30 +146,250 @@ body {
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-family);
+  isolation: isolate;
   margin-bottom: 60px;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
   transition: background-color .2s ease, color .2s ease;
 }
 
 [data-theme="banking"] body { --bs-link-color-rgb: 16, 191, 168; }
 [data-theme="glass"] body { --bs-link-color-rgb: 190, 205, 255; }
 [data-theme="material"] body { --bs-link-color-rgb: 103, 80, 164; }
+[data-theme="horizon"] body { background-repeat: no-repeat; background-size: cover; background-position: top center; }
+body > .container { position: relative; z-index: 1; }
 
-.app-header { background: var(--header-background); border-bottom: 1px solid var(--border-color); box-shadow: var(--header-shadow); position: sticky; top: 0; z-index: 1030; }
+[data-theme="horizon"] body::before,
+[data-theme="horizon"] body::after,
+[data-theme="banking"] body::before,
+[data-theme="banking"] body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+[data-theme="horizon"] body::before {
+  background: radial-gradient(circle at 68% 30%, rgba(255, 255, 255, .98), rgba(219, 237, 255, .88) 45%, rgba(166, 209, 250, .5) 72%);
+  border: 1px solid rgba(255, 255, 255, .94);
+  border-radius: 50%;
+  box-shadow: inset 1.4rem 1rem 3rem rgba(255, 255, 255, .82), inset -1rem -1rem 3rem rgba(112, 173, 232, .16), 0 2rem 5rem rgba(80, 145, 207, .12);
+  height: 20rem;
+  left: -11rem;
+  top: 3rem;
+  width: 20rem;
+}
+
+[data-theme="horizon"] body::after {
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .96), rgba(220, 239, 255, .72) 48%, rgba(156, 203, 247, .34) 74%);
+  border: 1px solid rgba(255, 255, 255, .88);
+  border-radius: 50%;
+  box-shadow: inset 1rem 1rem 2.8rem rgba(255, 255, 255, .8), inset -1rem -1rem 3rem rgba(114, 169, 231, .14), 0 2rem 5rem rgba(70, 132, 198, .1);
+  height: 17rem;
+  right: -8rem;
+  top: 18rem;
+  width: 17rem;
+}
+
+.horizon-ambient,
+.banking-ambient { display: none; }
+
+[data-theme="horizon"] .horizon-ambient,
+[data-theme="banking"] .banking-ambient {
+  display: block;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+[data-theme="horizon"] .horizon-ambient > span,
+[data-theme="banking"] .banking-ambient > span { position: absolute; }
+
+[data-theme="horizon"] .horizon-ambient-wave {
+  border: 1px solid rgba(255, 255, 255, .72);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 2rem 5rem rgba(78, 143, 205, .08);
+}
+
+[data-theme="horizon"] .horizon-ambient-wave-top {
+  background: linear-gradient(155deg, rgba(255, 255, 255, .84), rgba(176, 217, 255, .46) 54%, rgba(143, 195, 246, .28));
+  height: 28rem;
+  left: -13%;
+  top: -18rem;
+  transform: rotate(8deg);
+  width: 116%;
+}
+
+[data-theme="horizon"] .horizon-ambient-wave-middle {
+  background: linear-gradient(145deg, rgba(255, 255, 255, .66), rgba(185, 222, 255, .36) 48%, rgba(154, 201, 250, .22));
+  height: 30rem;
+  right: -43%;
+  top: 6rem;
+  transform: rotate(-14deg);
+  width: 112%;
+}
+
+[data-theme="horizon"] .horizon-ambient-wave-bottom {
+  background: linear-gradient(150deg, rgba(171, 215, 255, .32), rgba(255, 255, 255, .68) 54%, rgba(192, 216, 255, .34));
+  bottom: -20rem;
+  height: 34rem;
+  left: -36%;
+  transform: rotate(10deg);
+  width: 118%;
+}
+
+[data-theme="horizon"] .horizon-ambient-orb {
+  border: 1px solid rgba(255, 255, 255, .88);
+  border-radius: 50%;
+  box-shadow: inset 1rem 1rem 2.5rem rgba(255, 255, 255, .82), inset -1rem -1rem 2.8rem rgba(111, 172, 230, .14), 0 1.6rem 4rem rgba(72, 137, 201, .12);
+}
+
+[data-theme="horizon"] .horizon-ambient-orb-left {
+  background: radial-gradient(circle at 65% 28%, rgba(255, 255, 255, .98), rgba(218, 238, 255, .82) 48%, rgba(153, 204, 247, .44) 74%);
+  height: 10rem;
+  left: 1.5rem;
+  top: 19rem;
+  width: 10rem;
+}
+
+[data-theme="horizon"] .horizon-ambient-orb-right {
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .96), rgba(215, 238, 255, .72) 46%, rgba(139, 202, 238, .38) 72%);
+  height: 7rem;
+  right: 6%;
+  top: 37%;
+  width: 7rem;
+}
+
+[data-theme="horizon"] .horizon-ambient-orb-bottom {
+  background: radial-gradient(circle at 66% 24%, rgba(255, 255, 255, .96), rgba(219, 238, 255, .78) 48%, rgba(161, 203, 248, .42) 74%);
+  bottom: 3rem;
+  height: 15rem;
+  left: -5rem;
+  width: 15rem;
+}
+
+[data-theme="horizon"] .horizon-ambient-bubbles {
+  background: rgba(255, 255, 255, .82);
+  border-radius: 50%;
+  box-shadow: 11vw 6rem 0 .45rem rgba(255, 255, 255, .6), 22vw 24rem 0 .7rem rgba(184, 222, 255, .54), 54vw 4rem 0 .35rem rgba(255, 255, 255, .7), 77vw 18rem 0 .9rem rgba(166, 222, 247, .5), 89vw 5rem 0 1.1rem rgba(255, 255, 255, .65), 94vw 43rem 0 .6rem rgba(184, 216, 255, .55), 63vw 51rem 0 .4rem rgba(255, 255, 255, .65), 8vw 46rem 0 .85rem rgba(176, 218, 255, .48);
+  filter: drop-shadow(0 .5rem 1rem rgba(72, 137, 201, .16));
+  height: .75rem;
+  left: 0;
+  top: 0;
+  width: .75rem;
+}
+
+[data-theme="banking"] body {
+  background: radial-gradient(ellipse 46% 32% at 76% 4%, rgba(0, 236, 220, .16), transparent 72%), radial-gradient(ellipse 40% 36% at 8% 42%, rgba(0, 133, 255, .12), transparent 74%), radial-gradient(ellipse 38% 30% at 94% 82%, rgba(74, 47, 190, .13), transparent 75%), linear-gradient(145deg, #030b16 0%, #061421 48%, #03101a 100%);
+}
+
+[data-theme="banking"] body::before {
+  background: radial-gradient(circle at 52% 52%, rgba(0, 245, 222, .28), rgba(0, 135, 181, .11) 42%, transparent 70%), radial-gradient(circle at 30% 28%, rgba(95, 255, 239, .9) 0 2px, rgba(0, 255, 231, .28) 3px 12px, transparent 30px), radial-gradient(circle at 76% 64%, rgba(77, 217, 255, .86) 0 2px, rgba(0, 190, 255, .22) 3px 11px, transparent 27px);
+  border-radius: 50%;
+  height: 32rem;
+  right: 4rem;
+  top: -10rem;
+  width: 44rem;
+}
+
+[data-theme="banking"] body::after {
+  background: radial-gradient(circle at 36% 28%, rgba(62, 235, 255, .36), rgba(38, 79, 194, .19) 45%, rgba(101, 45, 180, .09) 68%, transparent 72%);
+  border: 1px solid rgba(71, 207, 255, .48);
+  border-radius: 50%;
+  bottom: -10rem;
+  box-shadow: inset 2rem 1rem 5rem rgba(0, 235, 218, .14), inset -2rem -2rem 5rem rgba(92, 44, 190, .1), 0 0 6rem rgba(0, 156, 255, .14);
+  height: 36rem;
+  right: -7rem;
+  width: 36rem;
+}
+
+[data-theme="banking"] .banking-ambient { filter: saturate(135%); }
+
+[data-theme="banking"] .banking-ambient-orb {
+  border: 1px solid rgba(107, 237, 255, .68);
+  border-radius: 50%;
+  box-shadow: inset 1.4rem 1rem 4rem rgba(0, 245, 226, .24), inset -1rem -1rem 3rem rgba(83, 57, 216, .18), 0 0 5rem rgba(0, 183, 255, .22);
+}
+
+[data-theme="banking"] .banking-ambient-orb-left {
+  background: radial-gradient(circle at 68% 32%, rgba(115, 255, 250, .58), rgba(10, 132, 215, .33) 42%, rgba(83, 52, 198, .24) 68%, rgba(4, 14, 35, .1) 74%);
+  height: 28rem;
+  left: -8rem;
+  top: 18rem;
+  width: 28rem;
+}
+
+[data-theme="banking"] .banking-ambient-orb-right {
+  background: radial-gradient(circle at 35% 30%, rgba(126, 255, 238, .62), rgba(81, 105, 238, .42) 48%, rgba(89, 35, 158, .3) 72%);
+  height: 11rem;
+  right: 2.5rem;
+  top: 31%;
+  width: 11rem;
+}
+
+[data-theme="banking"] .banking-ambient-orb-bottom {
+  background: radial-gradient(circle at 62% 28%, rgba(89, 222, 255, .5), rgba(36, 85, 192, .31) 45%, rgba(112, 52, 203, .22) 70%);
+  bottom: -8rem;
+  height: 30rem;
+  left: 8%;
+  width: 30rem;
+}
+
+[data-theme="banking"] .banking-ambient-ring {
+  border: 1px solid rgba(82, 207, 255, .58);
+  border-radius: 50%;
+  box-shadow: inset 2rem 0 5rem rgba(0, 241, 219, .14), 0 0 4rem rgba(90, 76, 232, .14);
+  height: 40rem;
+  right: -16rem;
+  top: 50%;
+  width: 40rem;
+}
+
+[data-theme="banking"] .banking-ambient-sweep {
+  border-radius: 50%;
+  border-top: 2px solid rgba(68, 231, 248, .62);
+  height: 28rem;
+  left: -18rem;
+  top: 48%;
+  transform: rotate(13deg);
+  width: 68rem;
+}
+
+[data-theme="banking"] .banking-ambient-stars {
+  background: #7cfff4;
+  border-radius: 50%;
+  box-shadow: 17vw 21rem 0 0 rgba(67, 255, 241, .68), 46vw 5rem 0 1px rgba(43, 218, 255, .62), 72vw 28rem 0 0 rgba(148, 119, 255, .58), 88vw 12rem 0 1px rgba(64, 255, 229, .62), 93vw 46rem 0 0 rgba(49, 198, 255, .54);
+  filter: drop-shadow(0 0 .85rem rgba(0, 242, 227, 1));
+  height: 2px;
+  left: 0;
+  top: 0;
+  width: 2px;
+}
+
+.app-header { background: transparent; padding: .5rem clamp(.55rem, 2vw, 1.8rem) 0; position: sticky; top: 0; z-index: 1030; }
 .app-header, .card, .app-dropdown { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); }
-.navbar { min-height: 4.25rem; padding: .55rem 0; }
+.navbar { backdrop-filter: var(--backdrop-filter); -webkit-backdrop-filter: var(--backdrop-filter); background: var(--header-background); border: 1px solid color-mix(in srgb, var(--border-color) 70%, rgba(255, 255, 255, .65)); border-radius: 1.3rem; box-shadow: var(--header-shadow); min-height: 4rem; padding: .45rem .65rem; }
+.app-navbar-shell { max-width: none; }
+[data-theme="horizon"] .navbar { backdrop-filter: blur(28px) saturate(145%); -webkit-backdrop-filter: blur(28px) saturate(145%); border-color: rgba(255, 255, 255, .78); box-shadow: 0 16px 44px rgba(67, 118, 169, .11), inset 0 1px 0 rgba(255, 255, 255, .82); }
+[data-theme="banking"] .app-header { padding-left: clamp(.35rem, 1vw, .85rem); padding-right: clamp(.35rem, 1vw, .85rem); }
+[data-theme="banking"] .navbar { background: rgba(3, 13, 23, .82); border-color: rgba(69, 168, 190, .32); box-shadow: 0 1px 0 rgba(83, 244, 235, .14), 0 12px 38px rgba(0, 0, 0, .34); }
 .navbar-brand { align-items: center; color: var(--text-primary); display: inline-flex; font-weight: 650; gap: .55rem; letter-spacing: -.02em; margin-right: 1.35rem; }
 .navbar-brand:hover, .navbar-brand:focus { color: var(--accent-color); }
-.navbar-brand img { border-radius: .45rem; }
+.navbar-brand img { border-radius: .55rem; box-shadow: 0 .3rem .7rem rgba(27, 76, 123, .16); }
+.navbar-brand span { font-size: .9rem; }
 .navbar-nav { gap: .08rem; }
-.navbar .nav-link { border-radius: var(--control-radius); color: var(--text-secondary); font-size: 1rem; font-weight: 520; padding: .65rem .8rem; position: relative; }
+.navbar .nav-link { border: 1px solid transparent; border-radius: .8rem; color: var(--text-secondary); font-size: 1rem; font-weight: 540; padding: .65rem .8rem; position: relative; transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
 .navbar .nav-link:hover, .navbar .nav-link:focus-visible { background: var(--surface-background-hover); color: var(--text-primary); }
-.navbar .nav-link.active { color: var(--accent-color); font-weight: 650; }
-.navbar .nav-link.active::after { background: var(--accent-color); border-radius: 1rem; bottom: -.62rem; content: ""; height: 2px; left: .65rem; position: absolute; right: .65rem; }
+.navbar .nav-link.active { background: var(--nav-active-background); border-color: var(--nav-active-border); box-shadow: 0 .45rem 1.1rem color-mix(in srgb, var(--accent-color) 15%, transparent), inset 0 1px 0 rgba(255, 255, 255, .78); color: var(--nav-active-color); font-weight: 700; }
+.navbar .nav-link.active::after { content: none; }
+[data-theme="banking"] .navbar .nav-link.active { background: linear-gradient(135deg, rgba(0, 219, 199, .2), rgba(0, 128, 151, .13)); border-color: #14e4d0; box-shadow: 0 0 1.35rem rgba(0, 232, 211, .2), inset 0 1px 0 rgba(176, 255, 248, .17); color: #42f3df; }
 .navbar-toggler { border-color: var(--border-color); margin-left: auto; }
 .header-actions { align-items: center; display: flex; gap: .35rem; margin-left: .6rem; order: 3; }
 .app-menu { position: relative; }
-.header-icon-button { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 50%; color: var(--text-secondary); display: inline-flex; height: 2.5rem; justify-content: center; padding: 0; width: 2.5rem; }
+.header-icon-button { align-items: center; background: rgba(255, 255, 255, .18); border: 1px solid transparent; border-radius: 50%; color: var(--text-secondary); display: inline-flex; height: 2.5rem; justify-content: center; padding: 0; width: 2.5rem; }
 .header-icon-button:hover, .header-icon-button[aria-expanded="true"] { background: var(--surface-background-hover); color: var(--accent-color); }
 .header-icon-button svg { fill: none; height: 1.25rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.25rem; }
 .dashboard-privacy-button { align-items: center; background: transparent; border: 0; border-radius: 50%; color: var(--text-secondary); display: inline-flex; flex: 0 0 auto; height: 2.25rem; justify-content: center; padding: 0; width: 2.25rem; }
@@ -160,7 +415,7 @@ body {
 .app-dropdown a:hover, .app-dropdown button:hover, .app-dropdown a:focus-visible, .app-dropdown button:focus-visible { background: var(--surface-background-hover); color: var(--text-primary); outline: 0; }
 .app-dropdown a.active { background: var(--surface-background-hover); color: var(--accent-color); font-weight: 650; }
 .theme-swatch { border: 1px solid var(--border-color); border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(255,255,255,.38); height: 1.1rem; width: 1.1rem; }
-.apple-swatch { background: #eef1f5; }
+.horizon-swatch { background: linear-gradient(145deg, #eef5fd, #7fb2ec); }
 .banking-swatch { background: #10bfa8; }
 .glass-swatch { background: linear-gradient(135deg, #087ed0, #b329c4); }
 .material-swatch { background: #6750a4; }
@@ -169,6 +424,8 @@ body {
 [aria-checked="true"] { font-weight: 650 !important; }
 .dropdown-divider { border-top: 1px solid var(--border-color); margin: .4rem .3rem; }
 .logout-action { color: var(--negative-color) !important; }
+.navigation-icon { flex-shrink: 0; height: 1.15rem; vertical-align: -.2em; width: 1.15rem; }
+.profile-menu .navigation-icon { margin-right: .3rem; }
 
 .app-content { padding-top: 1.75rem; }
 h1 { font-size: clamp(1.65rem, 3vw, 2.15rem); font-weight: 700; letter-spacing: -.035em; }
@@ -216,8 +473,24 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .alert-success { border-left: 4px solid var(--positive-color); }
 .alert-danger { border-left: 4px solid var(--negative-color); }
 .alert-info { border-left: 4px solid var(--accent-color); }
-.modal-content { border-radius: var(--card-radius); box-shadow: var(--card-shadow); }
+.modal-content { background: var(--modal-background); border-radius: var(--card-radius); box-shadow: var(--card-shadow); }
 .modal-header, .modal-footer { border-color: var(--border-color); }
+
+[data-theme="banking"] .card,
+[data-theme="banking"] .table-responsive,
+[data-theme="banking"] .category-tree,
+[data-theme="banking"] .category-icon-group {
+  background: linear-gradient(145deg, rgba(12, 36, 49, .9), rgba(5, 20, 31, .94));
+  border-color: rgba(57, 146, 165, .4);
+  box-shadow: 0 .85rem 2.2rem rgba(0, 4, 12, .34), inset 0 1px 0 rgba(193, 249, 255, .065);
+}
+
+[data-theme="banking"] .form-control,
+[data-theme="banking"] .form-select,
+[data-theme="banking"] .input-group-text {
+  background-color: rgba(5, 19, 29, .92);
+  border-color: rgba(54, 135, 151, .42);
+}
 
 .account-card { isolation: isolate; overflow: hidden; position: relative; transition: transform .15s ease, box-shadow .15s ease; }
 .account-card::before { background: color-mix(in srgb, var(--surface-raised) 76%, transparent); content: ""; inset: 0; position: absolute; z-index: -1; }
@@ -264,18 +537,36 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder { color: var(--text-secondary); text-align: end; }
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder { text-align: start; }
 .form-narrow { max-width: 720px; }
+.request-activity-chart-container { height: 22rem; position: relative; }
+.request-activity-table-container { max-height: 28rem; overflow-y: auto; }
+
+@media (max-width: 767.98px) {
+  [data-theme="horizon"] body::before { height: 14rem; left: -8rem; width: 14rem; }
+  [data-theme="horizon"] body::after { height: 12rem; right: -7rem; width: 12rem; }
+  [data-theme="horizon"] .horizon-ambient-wave-top { left: -42%; width: 160%; }
+  [data-theme="horizon"] .horizon-ambient-wave-middle { right: -88%; width: 165%; }
+  [data-theme="horizon"] .horizon-ambient-wave-bottom { left: -75%; width: 170%; }
+  [data-theme="horizon"] .horizon-ambient-orb-left { left: -3rem; }
+  [data-theme="horizon"] .horizon-ambient-orb-right { right: -3rem; }
+  [data-theme="horizon"] .horizon-ambient-orb-bottom { bottom: -4rem; }
+  [data-theme="banking"] body::before { right: -14rem; }
+  [data-theme="banking"] .banking-ambient-orb-left { left: -15rem; }
+  [data-theme="banking"] .banking-ambient-orb-right { right: -4rem; }
+  [data-theme="banking"] .banking-ambient-orb-bottom { bottom: -14rem; left: -9rem; }
+  [data-theme="banking"] .banking-ambient-ring { right: -27rem; }
+  [data-theme="banking"] .banking-ambient-sweep { left: -34rem; opacity: .8; }
+}
 
 @media (max-width: 991.98px) {
   .navbar > .container-fluid { flex-wrap: wrap; }
   .navbar-collapse { flex-basis: 100%; order: 4; }
   .navbar-nav { border-top: 1px solid var(--border-color); margin-top: .65rem; padding-top: .55rem; }
   .navbar .nav-link { padding: .7rem .8rem; }
-  .navbar .nav-link.active::after { bottom: .25rem; left: .8rem; right: auto; top: .25rem; height: auto; width: 3px; }
   .header-actions { margin-left: .35rem; }
 }
 
 @media (max-width: 575.98px) {
-  .navbar-brand span { font-size: .95rem; }
+  .navbar-brand span { font-size: .85rem; }
   .app-content { padding-top: 1.2rem; }
   .category-icon-groups { grid-template-columns: 1fr; }
   .account-icon-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }

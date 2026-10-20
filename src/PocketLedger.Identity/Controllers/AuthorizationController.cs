@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using PocketLedger.Models.Entities;
+using PocketLedger.Security;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace PocketLedger.Controllers;
@@ -25,6 +26,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         }
         var user = await userManager.GetUserAsync(cookieResult.Principal!);
         if (user is null) return Challenge(IdentityConstants.ApplicationScheme);
+        if (user.IsAccessBlocked) return RedirectToAction("AccessBlocked", "Account");
         var principal = await signInManager.CreateUserPrincipalAsync(user);
         principal.SetClaim(Claims.Subject, user.Id.ToString());
         principal.SetClaim(Claims.Name, user.UserName);
@@ -34,7 +36,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         {
             claim.SetDestinations(claim.Type switch
             {
-                Claims.Name or Claims.Subject => [Destinations.AccessToken, Destinations.IdentityToken],
+                Claims.Name or Claims.Subject or BootstrapAdministratorAuthorization.ClaimType => [Destinations.AccessToken, Destinations.IdentityToken],
                 _ => [Destinations.AccessToken]
             });
         }
@@ -49,7 +51,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         var subject = result.Principal?.GetClaim(Claims.Subject);
         var user = subject is null ? null : await userManager.FindByIdAsync(subject);
-        if (user is null || !await signInManager.CanSignInAsync(user))
+        if (user is null || user.IsAccessBlocked || !await signInManager.CanSignInAsync(user))
         {
             return Forbid(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
@@ -62,7 +64,7 @@ public sealed class AuthorizationController(UserManager<ApplicationUser> userMan
         {
             claim.SetDestinations(claim.Type switch
             {
-                Claims.Name or Claims.Subject => [Destinations.AccessToken, Destinations.IdentityToken],
+                Claims.Name or Claims.Subject or BootstrapAdministratorAuthorization.ClaimType => [Destinations.AccessToken, Destinations.IdentityToken],
                 _ => [Destinations.AccessToken]
             });
         }

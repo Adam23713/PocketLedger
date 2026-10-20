@@ -19,7 +19,7 @@
 PocketLedger is a self-hosted personal finance manager built with ASP.NET Core and PostgreSQL. It covers accounts, categorized transactions, recurring entries, loans and debts, a calendar view, statistics, CSV import, and password‑protected Excel export and backup/restore — all behind a security design where the database is encrypted at the field level, secrets never touch plaintext storage, and the whole deployment can sit behind an edge that rate-limits and bans abuse automatically.
 
 > [!WARNING]
-> **[pocketledger.dev](https://pocketledger.dev) is a live, work-in-progress deployment.** You're welcome to look around, but public registration isn't open yet — accounts are currently created by the operator. Self-service sign-up is coming soon. If you want to use PocketLedger today, [run your own instance](#quick-start-docker-compose); that's the primary way the project is meant to be used.
+> **[pocketledger.dev](https://pocketledger.dev) is a live, work-in-progress deployment.** Public registration is currently closed; existing account holders can still sign in. You can also [run your own instance](#quick-start-docker-compose).
 
 <br>
 
@@ -42,7 +42,7 @@ PocketLedger is a self-hosted personal finance manager built with ASP.NET Core a
 - **Encrypted by default, not by configuration.** Sensitive fields — transaction notes, account and category names, debts, backups — are encrypted before they ever reach PostgreSQL. There's no "disable encryption" switch and no plaintext fallback.
 - **Security that scales with how much you care.** Start with certificate-protected local keys, or move key custody to a cloud HSM (OCI Vault/KMS) — each step is documented and neither is required to get started. Whole-disk encryption (e.g. LUKS) is also an option if you want it, though it isn't part of the reference deployment.
 - **A real edge, not just a reverse proxy.** The reference deployment puts Caddy and CrowdSec in front of everything, rate-limiting and automatically banning abusive traffic behind Cloudflare.
-- **Built to be self-hosted.** Four independently deployable services, Docker Compose from day one, and no public self-registration — accounts are bootstrapped by whoever runs the instance.
+- **Built to be self-hosted.** Four independently deployable services and Docker Compose from day one. Operators can keep public registration enabled or disable it and bootstrap accounts themselves.
 
 ## Features
 
@@ -98,7 +98,7 @@ PocketLedger is designed so that no single layer is the only thing standing betw
 | **Cloud HSM key custody (optional)** | Hands key-wrapping for all three Data Protection key rings to an OCI Vault/KMS hardware security module, with one isolated key per service, encrypted `.enc` credential files, and a manual-unlock boot sequence. | [OCI KMS guide →](docs/oci-kms.md) |
 | **Internal TLS** | Every hop to the API is encrypted with a private CA; a wrong or missing certificate fails closed. | [Internal API TLS →](docs/deployment.md#internal-api-tls) |
 | **Edge protection** | Caddy + CrowdSec behind Cloudflare: trusted-IP-only rate limiting, automatic bans on flood/abuse patterns, redacted logs. | [Edge security guide →](docs/edge-security.md) |
-| **Authentication** | TOTP-based two-factor auth and recovery codes for every account. No public self-registration — accounts are bootstrapped or managed administratively. | — |
+| **Authentication** | Optional public registration with mandatory TOTP-based two-factor auth and recovery codes for every account. Operators must explicitly enable self-service registration. | — |
 
 Whole-disk encryption (for example LUKS) is a further option worth considering on top of this, but it isn't part of the reference deployment — see [Scope and guarantees](docs/database-encryption.md#scope-and-guarantees) for why key custody via OCI KMS was chosen here instead.
 

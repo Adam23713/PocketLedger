@@ -14,6 +14,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      Identity__InternalBaseUrl: http://identity:5052/
     restart: unless-stopped
 
   web:
@@ -23,6 +24,8 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      RequestTelemetry__ConnectionString: valkey:6379
+      AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       Identity__Authority: https://${POCKETLEDGER_IDENTITY_DOMAIN}
@@ -31,6 +34,7 @@ services:
       Identity__RequireHttpsMetadata: "true"
       Identity__ClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       Authentication__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       Api__BaseUrl: https://api:5051/
       Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
       ForwardedHeaders__TrustAll: "true"
@@ -51,6 +55,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       web-database: { condition: service_healthy }
+      valkey: { condition: service_started }
       api: { condition: service_started }
       identity: { condition: service_started }
     restart: unless-stopped
@@ -62,6 +67,8 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey:6379
+      AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
       Authentication__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
@@ -85,6 +92,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       api-database: { condition: service_healthy }
+      valkey: { condition: service_started }
     restart: unless-stopped
 
   identity:
@@ -94,12 +102,23 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
+      RequestTelemetry__ConnectionString: valkey:6379
+      AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
+      Api__BaseUrl: https://api:5051/
+      Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
+      Web__InternalBaseUrl: http://web:5050/
+      CrowdSec__BaseUrl: http://crowdsec:8080/
+      CrowdSec__ApiKey: ${CROWDSEC_IDENTITY_API_KEY:?Set CROWDSEC_IDENTITY_API_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
       OpenIddict__Issuer: https://${POCKETLEDGER_IDENTITY_DOMAIN}/
       OpenIddict__WebBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
+      Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
       OpenIddict__WebClientSecret: ${POCKETLEDGER_WEB_CLIENT_SECRET}
       OpenIddict__SigningKey: ${POCKETLEDGER_SIGNING_KEY}
+      Theme__CookieDomain: ${POCKETLEDGER_THEME_COOKIE_DOMAIN:?Set POCKETLEDGER_THEME_COOKIE_DOMAIN}
       ForwardedHeaders__TrustAll: "true"
+      Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-false}
+      Registration__MaximumUserCount: ${POCKETLEDGER_PUBLIC_REGISTRATION_MAXIMUM_USERS:-}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
@@ -112,8 +131,15 @@ services:
         target: /run/pocketledger-certificates
         read_only: true
         bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
+        read_only: true
+        bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
+      valkey: { condition: service_started }
+      api: { condition: service_started }
     restart: unless-stopped
 
   caddy:
@@ -152,11 +178,13 @@ services:
       COLLECTIONS: crowdsecurity/caddy
       DISABLE_ONLINE_API: "true"
       BOUNCER_KEY_pocketledger_caddy: ${CROWDSEC_API_KEY:?Set CROWDSEC_API_KEY in .env}
+      BOUNCER_KEY_pocketledger_identity: ${CROWDSEC_IDENTITY_API_KEY:?Set CROWDSEC_IDENTITY_API_KEY in .env}
     volumes:
       - caddy-logs:/var/log/caddy:ro
       - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - ./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
       - ./crowdsec/scenarios/pocketledger-http-flood.yaml:/etc/crowdsec/scenarios/pocketledger-http-flood.yaml:ro
+      - ./crowdsec/scenarios/pocketledger-identity-abuse.yaml:/etc/crowdsec/scenarios/pocketledger-identity-abuse.yaml:ro
       - ./crowdsec/parsers/cloudflare-whitelist.yaml:/etc/crowdsec/parsers/s02-enrich/cloudflare-whitelist.yaml:ro
       - crowdsec-config:/etc/crowdsec
       - crowdsec-data:/var/lib/crowdsec/data

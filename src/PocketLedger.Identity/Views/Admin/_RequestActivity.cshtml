@@ -1,0 +1,41 @@
+@model PocketLedger.Models.ViewModels.Admin.RequestActivityViewModel
+
+<section class="mt-5" aria-labelledby="request-activity-heading">
+    <h2 class="h4 mb-2" id="request-activity-heading">Request activity</h2>
+    <p class="text-muted">Average requests per minute, calculated separately for each five-minute UTC bucket.</p>
+    <form class="row g-3 align-items-end mb-3" id="request-activity-filters" data-endpoint="@Url.Action("RequestActivity", "Admin")">
+        <div class="col-sm-4 col-lg-3">
+            <label class="form-label" for="request-activity-hours">Lookback</label>
+            <select class="form-select" id="request-activity-hours" name="hours">
+                @foreach (var hours in Model.AllowedLookbackHours)
+                {
+                    <option value="@hours" selected="@(hours == Model.SelectedLookbackHours)">@hours hours</option>
+                }
+            </select>
+        </div>
+        <div class="col-sm-5 col-lg-4">
+            <label class="form-label" for="request-activity-user">Activity owner</label>
+            <select class="form-select" id="request-activity-user" name="userId">
+                <option value="">All activity (includes anonymous/unattributed)</option>
+            </select>
+        </div>
+        <div class="col-sm-3 col-lg-2"><button class="btn btn-primary w-100" type="submit">Apply</button></div>
+    </form>
+    <div id="request-activity-state" role="status" aria-live="polite"><span class="text-muted">Loading request activity…</span></div>
+    <div id="request-activity-results" hidden>
+        <div class="request-activity-chart-container">
+            <canvas id="request-activity-chart" role="img" aria-label="Average requests per minute by five-minute UTC bucket" aria-describedby="request-activity-table-description"></canvas>
+        </div>
+        <p class="text-muted mt-2 mb-0" id="request-activity-summary"></p>
+        <details class="mt-3">
+            <summary id="request-activity-table-description">View the request activity data as a table</summary>
+            <div class="table-responsive request-activity-table-container">
+                <table class="table table-sm align-middle mt-2">
+                    <thead><tr><th scope="col">Bucket start (UTC)</th><th scope="col">Average requests/minute</th><th scope="col">Total requests</th><th scope="col">Authenticated</th><th scope="col">Anonymous/unattributed</th></tr></thead>
+                    <tbody id="request-activity-table-body"></tbody>
+                </table>
+            </div>
+        </details>
+    </div>
+    <noscript><div class="alert alert-info mt-3">JavaScript is required to load the request activity chart and its tabular alternative.</div></noscript>
+</section>

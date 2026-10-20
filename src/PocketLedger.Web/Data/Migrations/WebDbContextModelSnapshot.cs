@@ -38,9 +38,19 @@ namespace PocketLedger.Web.Data.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("protected_ticket");
 
+                    b.Property<DateTimeOffset?>("RevokedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at_utc");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("bff_sessions", (string)null);
                 });

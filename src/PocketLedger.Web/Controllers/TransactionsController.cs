@@ -82,11 +82,12 @@ public class TransactionsController(ITransactionService transactionService, IAcc
     }
 
     [HttpGet]
-    public async Task<IActionResult> Create(Guid? accountId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(Guid? accountId, Guid? targetAccountId, TransactionType? type, CancellationToken cancellationToken)
     {
         var user = await userContext.GetUserAsync(cancellationToken);
         var now = userDates.LocalTime(user.TimeZoneId);
-        var model = new TransactionFormViewModel { AccountId = accountId, TransactionDate = userDates.Today(user.TimeZoneId), TransactionHour = now.Hour, TransactionMinute = now.Minute };
+        var initialType = type is TransactionType.Income or TransactionType.Expense or TransactionType.Transfer ? type.Value : TransactionType.Expense;
+        var model = new TransactionFormViewModel { Type = initialType, AccountId = accountId, TargetAccountId = targetAccountId, TransactionDate = userDates.Today(user.TimeZoneId), TransactionHour = now.Hour, TransactionMinute = now.Minute };
         await PopulateChoicesAsync(model, cancellationToken);
         return View(model);
     }
@@ -188,6 +189,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Id = transaction.Id,
             Type = transaction.Type,
             AdjustmentDirection = transaction.AdjustmentDirection,
+            AccountId = transaction.AccountId,
             AccountName = transaction.Account?.Name,
             Currency = transaction.Account?.Currency ?? transaction.Debt?.Currency ?? string.Empty,
             CategoryName = transaction.Category?.Name ?? categoryIcon?.DisplayName,
@@ -283,6 +285,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
             Id = transaction.Id,
             Type = transaction.Type,
             AdjustmentDirection = transaction.AdjustmentDirection,
+            AccountId = transaction.AccountId,
             AccountName = transaction.Account?.Name,
             TargetAccountName = transaction.TargetAccount?.Name,
             Currency = transaction.SourceCurrency,

@@ -4,7 +4,10 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
+using PocketLedger.Security;
 
 namespace PocketLedger.Api.Tests;
 
@@ -22,6 +25,12 @@ public sealed class PlannerAuthenticationTests
             builder.UseSetting("Database:ApplyMigrationsOnStartup", "false");
             builder.UseSetting("Authentication:SigningKey", Convert.ToBase64String(key));
             builder.UseSetting("Authentication:Issuer", "https://planner-test.local/");
+            // The block check reads the database on every authenticated request; this test must not need one.
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll<IUserAccessBlockStore>();
+                services.AddSingleton<IUserAccessBlockStore>(new ActiveUserAccessStore());
+            });
         });
         var token = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
             issuer: "https://planner-test.local/", audience: "pocketledger-api",
@@ -35,5 +44,10 @@ public sealed class PlannerAuthenticationTests
         using var response = await client.PostAsync("/api/v1/planner/items", new StringContent("{", Encoding.UTF8, "application/json"));
         Assert.Equal(useBearer ? HttpStatusCode.BadRequest : HttpStatusCode.Unauthorized, response.StatusCode);
         if (useBearer) Assert.Contains("validation errors", await response.Content.ReadAsStringAsync());
+    }
+
+    private sealed class ActiveUserAccessStore : IUserAccessBlockStore
+    {
+        public Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult(UserAccessBlockState.Active);
     }
 }

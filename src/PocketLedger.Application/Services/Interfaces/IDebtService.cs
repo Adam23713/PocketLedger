@@ -24,5 +24,5 @@ public record DebtSummary(Debt Debt, decimal RemainingAmount, RecurringTransacti
 public record DebtDetails(Debt Debt, decimal RemainingAmount, IReadOnlyList<Transaction> Transactions, RecurringTransaction? AutomaticPayment, DateOnly? NextPayment);
 public record DebtDeletionSummary(int TransactionCount, int RecurringTransactionCount, int AffectedAccountCount);
 public record RecurringPaymentInput(Guid AccountId, decimal Amount, DateOnly NextOccurrence, DateOnly? LastOccurrence, RecurringFrequency Frequency, bool Enabled);
-public record DebtOperationInput(DebtOperationType Type, decimal Amount, Guid? AccountId, DateOnly Date, TimeOnly Time, string? Note);
+public record DebtOperationInput(DebtOperationType Type, decimal Amount, Guid? AccountId, DateOnly Date, TimeOnly Time, string? Note, DebtOverpaymentResolution? OverpaymentResolution = null);
 public record DebtFundingWarning(Guid DebtId, string DebtName, string DebtIcon, DateOnly Date, decimal Amount, string Currency, string AccountName, decimal AccountBalance, decimal Shortfall);
