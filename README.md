@@ -56,6 +56,7 @@ PocketLedger is a self-hosted personal finance manager built with ASP.NET Core a
 | 📥 **CSV import** | Bring in transactions from your bank's export. |
 | 🔒 **Encrypted export & backup** | Transaction exports are password-protected Excel workbooks; full backup/restore uses an encrypted `.plbackup` file. |
 | 🔐 **TOTP two-factor auth** | Every account is protected by an authenticator app and one-time recovery codes. |
+| 🗝️ **Per-user encryption** | Names, notes and planner history are encrypted with a key only the user's password or recovery key opens — not even the operator can read them passively. |
 
 ## Architecture
 
@@ -124,7 +125,7 @@ docker compose run --rm identity bootstrap-identity
 docker compose up -d
 ```
 
-On first login, set up TOTP and save your recovery codes. See the [deployment guide](docs/deployment.md) for everything this skips over: generating secrets correctly, Cloudflare and CrowdSec configuration, activating OCI KMS, and moving an existing deployment to a new domain.
+The command prints a data recovery key once; store it offline. On first login, set up TOTP and save your recovery codes. See the [deployment guide](docs/deployment.md) for everything this skips over: generating secrets correctly, Cloudflare and CrowdSec configuration, activating OCI KMS, and moving an existing deployment to a new domain.
 
 ## Demo data
 
