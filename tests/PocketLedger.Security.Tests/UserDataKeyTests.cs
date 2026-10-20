@@ -177,7 +177,7 @@ public sealed class EphemeralKeyWrapTests
 
         Assert.Throws<UserKeyException>(() => EphemeralKeyWrap.Unwrap(wrapped, sessionKey, EphemeralKeyPurpose.Session, Guid.NewGuid(), SessionId));
         Assert.Throws<UserKeyException>(() => EphemeralKeyWrap.Unwrap(wrapped, sessionKey, EphemeralKeyPurpose.Session, UserId, "another-session"));
-        Assert.Throws<UserKeyException>(() => EphemeralKeyWrap.Unwrap(wrapped, sessionKey, EphemeralKeyPurpose.SecondFactorPending, UserId, SessionId));
+        Assert.Throws<UserKeyException>(() => EphemeralKeyWrap.Unwrap(wrapped, sessionKey, EphemeralKeyPurpose.PendingSignIn, UserId, SessionId));
         Assert.Throws<UserKeyException>(() => EphemeralKeyWrap.Unwrap(wrapped, sessionKey, EphemeralKeyPurpose.Session, UserId, ""));
     }
 

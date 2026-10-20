@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Services;
 
 namespace PocketLedger;
 
@@ -28,9 +29,17 @@ public static class CommandRunner
         var users = provider.GetRequiredService<UserManager<ApplicationUser>>();
         if (await users.Users.AnyAsync()) return Fail("The Identity database already contains a user.");
         var user = ApplicationUser.CreateBootstrapAdministrator(username);
+        var db = provider.GetRequiredService<IdentityDbContext>();
+        await using var transaction = await db.Database.BeginTransactionAsync();
         var result = await users.CreateAsync(user, password);
         if (!result.Succeeded) return Fail("Initial user creation failed: " + string.Join("; ", result.Errors.Select(error => error.Description)));
+        using var created = await provider.GetRequiredService<IUserDataKeyService>().CreateAsync(user.Id, password);
+        await transaction.CommitAsync();
         Console.WriteLine("Identity bootstrap completed successfully.");
+        Console.WriteLine();
+        Console.WriteLine("Data recovery key (shown only once; store it offline, separately from the password):");
+        Console.WriteLine($"    {created.RecoveryKey}");
+        Console.WriteLine("Without the password or this key, the account's financial data cannot be recovered by anyone.");
         return 0;
     }
 

@@ -81,9 +81,11 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
             "AccountController.ExternalLogin",
             "AccountController.ExternalLoginCallback",
             "AccountController.Login",
+            "AccountController.RecoverAccount",
             "AccountController.RecoveryCode",
             "AccountController.Register",
             "AccountController.TwoFactor",
+            "AccountController.UnlockData",
             "AuthorizationController.AuthorizeEndpoint",
             "AuthorizationController.TokenEndpoint",
             "HomeController.Index",
@@ -96,6 +98,8 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     [InlineData("/Account/SetupAuthenticator")]
     [InlineData("/Account/RecoveryCodes")]
     [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/CreateDataPassword")]
+    [InlineData("/Account/RegenerateRecoveryKey")]
     [InlineData("/Account/Security")]
     [InlineData("/Account/LoginEvents")]
     [InlineData("/Admin")]

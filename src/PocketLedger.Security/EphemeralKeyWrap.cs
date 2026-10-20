@@ -6,8 +6,9 @@ namespace PocketLedger.Security;
 
 public enum EphemeralKeyPurpose : byte
 {
-    // Between the password step and the TOTP step; the wrapping key lives only in the two-factor cookie.
-    SecondFactorPending = 1,
+    // From the password (or data password) step until sign-in completes, including TOTP and authenticator setup;
+    // the wrapping key lives only in the pending sign-in cookie.
+    PendingSignIn = 1,
     // For a signed-in session; the wrapping key (SK) lives only in the browser cookie.
     Session = 2,
 }
