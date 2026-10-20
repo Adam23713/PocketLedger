@@ -118,8 +118,8 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
+app.UseRequestTelemetry(ignoredClientIds: "pocketledger-web");
 app.UseUserAccessBlocking();
-app.UseRequestTelemetry();
 app.UseAuthorization();
 app.MapOpenApi("/openapi/{documentName}.json");
 if (app.Environment.IsDevelopment())

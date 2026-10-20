@@ -95,7 +95,7 @@ jobs:
         run: docker compose build web api identity landing
 
       - name: Start stack (without Caddy or public domains in CI)
-        run: docker compose up -d valkey web api identity landing
+        run: docker compose up -d valkey valkey-security web api identity landing
 
       - name: Wait for services to actually start
         run: |

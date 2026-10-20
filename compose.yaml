@@ -24,7 +24,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
@@ -55,7 +55,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       web-database: { condition: service_healthy }
-      valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
       api: { condition: service_started }
       identity: { condition: service_started }
     restart: unless-stopped
@@ -67,7 +67,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
@@ -93,6 +93,7 @@ services:
     depends_on:
       api-database: { condition: service_healthy }
       valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
     restart: unless-stopped
 
   identity:
@@ -102,7 +103,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       Api__BaseUrl: https://api:5051/
       Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
@@ -138,7 +139,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
-      valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
       api: { condition: service_started }
     restart: unless-stopped
 
@@ -207,6 +208,11 @@ services:
   valkey:
     image: valkey/valkey:8-alpine
     command: ["valkey-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+
+  valkey-security:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--maxmemory", "64mb", "--maxmemory-policy", "noeviction", "--save", "", "--appendonly", "no"]
     restart: unless-stopped
 
   api-database:
