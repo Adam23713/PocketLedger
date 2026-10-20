@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace PocketLedger.Web.Authentication;
 
-public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHttpClientFactory clients, IConfiguration configuration, ISessionTicketReader ticketReader, SessionRefreshCoordinator refreshCoordinator) : DelegatingHandler
+public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHttpClientFactory clients, IConfiguration configuration, ISessionTicketReader ticketReader, SessionRefreshCoordinator refreshCoordinator, UserSessionKeys sessionKeys) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -14,6 +14,8 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
         var authentication = await context.AuthenticateAsync("BffCookie");
         if (!authentication.Succeeded || authentication.Principal is null) throw new InvalidOperationException("An authenticated BFF session is required.");
         var properties = authentication.Properties ?? throw new InvalidOperationException("The BFF session has no authentication properties.");
+        // Without both halves of the session's data key the API cannot read the user's data, so the user signs in again.
+        var dataKey = sessionKeys.Read(context, properties) ?? throw new BffSessionExpiredException();
         var accessToken = properties.GetTokenValue("access_token");
         var expiresAt = properties.GetTokenValue("expires_at");
         if (string.IsNullOrWhiteSpace(accessToken) || !DateTimeOffset.TryParse(expiresAt, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var expiration) || expiration <= DateTimeOffset.UtcNow.AddMinutes(1))
@@ -21,7 +23,13 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
             accessToken = await GetRefreshedAccessTokenAsync(context, authentication, cancellationToken);
         }
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        return await base.SendAsync(request, cancellationToken);
+        request.Headers.Add(PocketLedger.Security.UserSessionKeyProtocol.SessionKeyHeader, dataKey.SessionKey);
+        request.Headers.Add(PocketLedger.Security.UserSessionKeyProtocol.WrappedKeyHeader, dataKey.WrappedKey);
+        var response = await base.SendAsync(request, cancellationToken);
+        if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
+        // The API rejected the token or the session's data key; only a new sign-in can repair either.
+        response.Dispose();
+        throw new BffSessionExpiredException();
     }
 
     private async Task<string> GetRefreshedAccessTokenAsync(HttpContext context, AuthenticateResult authentication, CancellationToken cancellationToken)

@@ -89,6 +89,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<UserKeyDerivationLimiter>();
 builder.Services.AddScoped<IUserDataKeyService, UserDataKeyService>();
 builder.Services.AddSingleton<IPendingSignInKeys, PendingSignInKeys>();
+builder.Services.AddSingleton<ISessionKeyHandoff, SessionKeyHandoff>();
 builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>();
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 builder.Services.AddScoped<IRegistrationSettingsService, RegistrationSettingsService>();

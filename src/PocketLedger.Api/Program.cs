@@ -118,6 +118,7 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
+app.UseMiddleware<UserSessionKeyMiddleware>();
 app.UseRequestTelemetry(ignoredClientIds: "pocketledger-web");
 app.UseUserAccessBlocking();
 app.UseAuthorization();
