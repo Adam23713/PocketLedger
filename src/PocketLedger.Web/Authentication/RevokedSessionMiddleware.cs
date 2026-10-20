@@ -18,7 +18,7 @@ public sealed class RevokedSessionMiddleware(RequestDelegate next)
             await context.SignOutAsync("BffCookie");
             if (!context.Request.Path.Equals(BlockedPath, StringComparison.OrdinalIgnoreCase) && !context.Request.Path.Equals(StatusPath, StringComparison.OrdinalIgnoreCase))
             {
-                context.Response.Redirect($"{context.Request.PathBase}{BlockedPath}");
+                context.Response.Redirect(BlockedPath);
                 return;
             }
         }
