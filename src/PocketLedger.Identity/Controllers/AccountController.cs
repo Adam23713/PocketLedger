@@ -342,9 +342,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> RecoveryCodes(RecoveryCodesViewModel model, CancellationToken cancellationToken)
     {
-        // Confirmed is a recovery-code storage acknowledgement, not an authentication or authorization decision.
-        // codeql[cs/user-controlled-bypass]
-        if (!model.Confirmed) return BadRequest("Recovery code storage confirmation is required.");
+        if (!ModelState.IsValid) return BadRequest("Recovery code storage confirmation is required.");
         var user = await userManager.GetUserAsync(User);
         if (user is null || !user.TwoFactorEnabled) return Challenge();
         user.AuthenticatorSetupComplete = true;
