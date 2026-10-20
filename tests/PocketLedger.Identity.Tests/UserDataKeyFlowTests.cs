@@ -32,9 +32,25 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
     private const string Username = "data-key-user";
     private const string Password = "DataKey!Password#2026";
     private const string NewPassword = "DataKey!Replaced#2027";
+    // With PL_TEST_POSTGRES set (as in CI) these flows run on PostgreSQL with migrations, which exercises their transactions.
+    private static readonly string? Postgres = Environment.GetEnvironmentVariable("PL_TEST_POSTGRES");
+    private readonly string databaseName = "pl_identity_keys_" + Guid.NewGuid().ToString("N");
     private readonly WebApplicationFactory<Program> factory;
 
-    public UserDataKeyFlowTests(WebApplicationFactory<Program> factory) => this.factory = factory.WithWebHostBuilder(builder =>
+    public UserDataKeyFlowTests(WebApplicationFactory<Program> factory)
+    {
+        // The host's hosted services query the database at startup, so it must exist and be migrated first.
+        if (!string.IsNullOrWhiteSpace(Postgres))
+        {
+            using var setup = new IdentityDbContext(new DbContextOptionsBuilder<IdentityDbContext>().UseNpgsql(PostgresConnectionString).UseOpenIddict().Options);
+            setup.Database.Migrate();
+        }
+        this.factory = Configure(factory);
+    }
+
+    private string PostgresConnectionString => new Npgsql.NpgsqlConnectionStringBuilder(Postgres) { Database = databaseName }.ConnectionString;
+
+    private WebApplicationFactory<Program> Configure(WebApplicationFactory<Program> factory) => factory.WithWebHostBuilder(builder =>
     {
         builder.UseEnvironment("Development");
         builder.UseSetting("Database:ApplyMigrationsOnStartup", "false");
@@ -45,13 +61,27 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
             services.RemoveAll<IdentityDbContext>();
             services.RemoveAll<DbContextOptions<IdentityDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<IdentityDbContext>>();
-            services.AddDbContext<IdentityDbContext>(options => { options.UseInMemoryDatabase(nameof(UserDataKeyFlowTests)); options.UseOpenIddict(); });
+            services.AddDbContext<IdentityDbContext>(options =>
+            {
+                if (string.IsNullOrWhiteSpace(Postgres)) options.UseInMemoryDatabase(databaseName);
+                else options.UseNpgsql(PostgresConnectionString);
+                options.UseOpenIddict();
+            });
             services.AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, VerifiedExternalAuthenticationHandler>(VerifiedExternalAuthenticationHandler.SchemeName, "Verified provider", _ => { });
         });
     });
 
-    public void Dispose() => factory.Dispose();
+    public void Dispose()
+    {
+        factory.Dispose();
+        if (string.IsNullOrWhiteSpace(Postgres)) return;
+        Npgsql.NpgsqlConnection.ClearAllPools();
+        using var admin = new Npgsql.NpgsqlConnection(Postgres);
+        admin.Open();
+        using var drop = new Npgsql.NpgsqlCommand($"DROP DATABASE IF EXISTS {databaseName} WITH (FORCE)", admin);
+        drop.ExecuteNonQuery();
+    }
 
     [Fact]
     public async Task PasswordLogin_UnlocksTheDataKeyAndCompletesTwoFactor()
@@ -434,7 +464,20 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
     private async Task ResetDatabaseAsync()
     {
         await using var scope = factory.Services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database.EnsureDeletedAsync();
+        var database = scope.ServiceProvider.GetRequiredService<IdentityDbContext>().Database;
+        if (!database.IsRelational())
+        {
+            await database.EnsureDeletedAsync();
+            return;
+        }
+        // Empty every table but keep the migrated schema, matching a deleted in-memory database.
+        await database.ExecuteSqlRawAsync("""
+            DO $$ DECLARE item record; BEGIN
+                FOR item IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '__EFMigrationsHistory' LOOP
+                    EXECUTE 'TRUNCATE TABLE ' || quote_ident(item.tablename) || ' CASCADE';
+                END LOOP;
+            END $$;
+            """);
     }
 
     private HttpClient CreateClient() => factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });

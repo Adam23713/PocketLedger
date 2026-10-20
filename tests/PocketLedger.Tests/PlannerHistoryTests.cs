@@ -217,23 +217,25 @@ public class PlannerHistoryTests
     }
 
     [Fact]
-    public async Task WorkerClosesMonthsWithoutPageVisitInUsersTimeZone()
+    public async Task NextVisitClosesMissedMonthsInUsersTimeZone()
     {
+        // Closing needs the user's data key, so it happens on the user's next request instead of in a background worker.
         await using var fixture = new Fixture();
         await fixture.SeedAsync();
         fixture.Db.Add(new UserPreference { UserId = fixture.Owner, TimeZoneId = "Europe/Budapest" });
         await fixture.Db.SaveChangesAsync();
         await fixture.Service.CreateAsync(fixture.Input(new(2026, 9, 1)), default);
         fixture.Clock.Now = new(2026, 9, 30, 22, 1, 0, TimeSpan.Zero);
-        var services = new ServiceCollection();
-        services.AddSingleton<IRecurringTransactionProcessingDbContextFactory>(new RecurringTransactionProcessingDbContextFactory(fixture.Options));
-        await using var provider = services.BuildServiceProvider();
-        var worker = new PlannerMonthWorker(provider.GetRequiredService<IServiceScopeFactory>(), new UserDateProvider(fixture.Clock), Microsoft.Extensions.Options.Options.Create(new UserDateOptions()), NullLogger<PlannerMonthWorker>.Instance);
-        await worker.CloseDueMonthsAsync(default);
+        fixture.Db.ChangeTracker.Clear();
+        // 22:01 UTC on 30 September is already October in Budapest; the real user context applies the saved time zone.
+        var service = new PlannerService(fixture.Db, new UserContextService(new User(fixture.Owner), fixture.Db, new UserDateProvider(fixture.Clock), Microsoft.Extensions.Options.Options.Create(new UserDateOptions())));
+
+        await service.GetMonthAsync(2026, 10, default);
+
         fixture.Db.ChangeTracker.Clear();
         Assert.True((await fixture.Db.PlannerMonths.SingleAsync(item => item.Month == new DateOnly(2026, 9, 1))).IsClosed);
         Assert.Single(await fixture.Db.PlannerItems.Where(item => item.Month == new DateOnly(2026, 10, 1)).ToListAsync());
-        await worker.CloseDueMonthsAsync(default);
+        await service.GetMonthAsync(2026, 10, default);
         Assert.Equal(2, await fixture.Db.PlannerItems.CountAsync());
     }
 

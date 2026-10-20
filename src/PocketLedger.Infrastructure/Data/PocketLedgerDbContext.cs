@@ -55,17 +55,24 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
 
         if (Encryption is not null)
         {
-            Encryption.Configure(modelBuilder.Entity<Transaction>().Property(item => item.Note), "Transaction.Note", 500);
-            Encryption.Configure(modelBuilder.Entity<RecurringTransaction>().Property(item => item.Note), "RecurringTransaction.Note", 500);
-            Encryption.Configure(modelBuilder.Entity<PlannerItem>().Property(item => item.Note), "PlannerItem.Note", 500);
-            Encryption.Configure(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.SnapshotJson), "PlannerMonthRecord.SnapshotJson");
-            Encryption.Configure(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.OpeningBalancesJson), "PlannerMonthRecord.OpeningBalancesJson");
-            Encryption.Configure(modelBuilder.Entity<Account>().Property(item => item.Name), "Account.Name", 100);
-            Encryption.Configure(modelBuilder.Entity<Category>().Property(item => item.Name), "Category.Name", 100);
-            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.Name), "Debt.Name", 200);
-            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.CounterpartyName), "Debt.CounterpartyName", 200);
-            Encryption.Configure(modelBuilder.Entity<Debt>().Property(item => item.Note), "Debt.Note", 500);
-            Encryption.Configure(modelBuilder.Entity<UserPreference>().Property(item => item.DisplayName), "UserPreference.DisplayName", 100);
+            // Field groups are associated data of the per-user layer. Notes share one group so the recurring worker can copy
+            // a template's note into the transaction it creates without being able to read it.
+            void UserField(Microsoft.EntityFrameworkCore.Metadata.Builders.PropertyBuilder property, string purpose, string fieldGroup, int? maximumLength = null)
+            {
+                if (crossTenantAccess) Encryption.ConfigureUserFieldCiphertext(property, purpose);
+                else Encryption.ConfigureUserField(property, purpose, fieldGroup, maximumLength);
+            }
+            UserField(modelBuilder.Entity<Transaction>().Property(item => item.Note), "Transaction.Note", "Note", 500);
+            UserField(modelBuilder.Entity<RecurringTransaction>().Property(item => item.Note), "RecurringTransaction.Note", "Note", 500);
+            UserField(modelBuilder.Entity<PlannerItem>().Property(item => item.Note), "PlannerItem.Note", "Note", 500);
+            UserField(modelBuilder.Entity<Debt>().Property(item => item.Note), "Debt.Note", "Note", 500);
+            UserField(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.SnapshotJson), "PlannerMonthRecord.SnapshotJson", "PlannerSnapshot");
+            UserField(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.OpeningBalancesJson), "PlannerMonthRecord.OpeningBalancesJson", "PlannerOpeningBalances");
+            UserField(modelBuilder.Entity<Account>().Property(item => item.Name), "Account.Name", "AccountName", 100);
+            UserField(modelBuilder.Entity<Category>().Property(item => item.Name), "Category.Name", "CategoryName", 100);
+            UserField(modelBuilder.Entity<Debt>().Property(item => item.Name), "Debt.Name", "DebtName", 200);
+            UserField(modelBuilder.Entity<Debt>().Property(item => item.CounterpartyName), "Debt.CounterpartyName", "DebtCounterparty", 200);
+            UserField(modelBuilder.Entity<UserPreference>().Property(item => item.DisplayName), "UserPreference.DisplayName", "DisplayName", 100);
         }
 
         modelBuilder.Entity<PlannerMonthRecord>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
