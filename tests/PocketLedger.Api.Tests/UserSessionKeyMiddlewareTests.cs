@@ -93,3 +93,21 @@ public sealed class UserSessionKeyMiddlewareTests
         return context;
     }
 }
+
+public sealed class ApiExceptionMiddlewareTests
+{
+    [Fact]
+    public async Task MissingDataKey_EvenWhenWrappedByEf_AsksTheClientToSignInAgain()
+    {
+        var context = new DefaultHttpContext();
+        context.Response.Body = new MemoryStream();
+        var middleware = new ApiExceptionMiddleware(_ => throw new InvalidOperationException("An exception occurred while reading a database value.", new UserKeyUnavailableException()),
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<ApiExceptionMiddleware>.Instance);
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(StatusCodes.Status401Unauthorized, context.Response.StatusCode);
+        context.Response.Body.Position = 0;
+        Assert.Contains("data_key_required", await new StreamReader(context.Response.Body).ReadToEndAsync());
+    }
+}
