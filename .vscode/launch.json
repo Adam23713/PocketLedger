@@ -19,7 +19,8 @@
                 "Landing__BaseUrl": "http://localhost:5053",
                 "Encryption__KeyProvider": "Local",
                 "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Web/.local/encryption",
-                "Encryption__CertificatePath": ""
+                "Encryption__CertificatePath": "",
+                "AccessControl__ConnectionString": "localhost:6379"
             }
         },
         {
@@ -39,7 +40,8 @@
                 "Database__ApplyMigrationsOnStartup": "true",
                 "Encryption__KeyProvider": "Local",
                 "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Api/.local/encryption",
-                "Encryption__CertificatePath": ""
+                "Encryption__CertificatePath": "",
+                "AccessControl__ConnectionString": "localhost:6379"
             }
         },
         {
@@ -59,7 +61,8 @@
                 "Database__ApplyMigrationsOnStartup": "true",
                 "Encryption__KeyProvider": "Local",
                 "Encryption__KeyDirectory": "${workspaceFolder}/src/PocketLedger.Identity/.local/encryption",
-                "Encryption__CertificatePath": ""
+                "Encryption__CertificatePath": "",
+                "AccessControl__ConnectionString": "localhost:6379"
             }
         },
         {

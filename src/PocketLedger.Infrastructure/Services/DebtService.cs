@@ -186,7 +186,24 @@ public class DebtService(PocketLedgerDbContext dbContext, IUserContextService? u
         if (account is not null && account.Currency != debt.Currency) throw new BusinessRuleException("Debt and account currencies must match.");
         var remaining = CalculateRemaining(debt);
         var delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
-        if (remaining + delta < 0) throw new BusinessRuleException("The operation amount cannot exceed the remaining debt.");
+        if (remaining + delta < 0)
+        {
+            if (input.OverpaymentResolution == DebtOverpaymentResolution.IncreaseOriginalAmount)
+            {
+                var difference = -(remaining + delta);
+                debt.OriginalAmount += difference;
+                remaining += difference;
+            }
+            else if (input.OverpaymentResolution == DebtOverpaymentResolution.ClampOperation)
+            {
+                input = input with { Amount = remaining };
+                delta = DebtRules.GetDebtDelta(input.Type, input.Amount);
+            }
+            else
+            {
+                throw new BusinessRuleException("The operation amount exceeds the remaining debt. Choose whether to increase the original amount or limit the operation.");
+            }
+        }
         var transaction = new Transaction { Id = Guid.NewGuid(), Type = TransactionSemantics.GetDebtTransactionType(input.Type, account is not null), AccountId = account?.Id, Amount = input.Amount, SourceCurrency = debt.Currency, TransactionDate = input.Date, TransactionTime = input.Time, OccurredAtUtc = userContext is null ? default : await userContext.ToUtcAsync(input.Date, input.Time, cancellationToken), Note = string.IsNullOrWhiteSpace(input.Note) ? null : input.Note.Trim(), DebtId = debt.Id, DebtOperationType = input.Type };
         dbContext.Transactions.Add(transaction);
         ApplyAutomaticStatus(debt, remaining + delta);

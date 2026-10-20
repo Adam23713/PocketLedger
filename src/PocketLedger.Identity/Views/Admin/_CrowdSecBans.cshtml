@@ -1,0 +1,27 @@
+@model PocketLedger.Services.CrowdSecBanDecisionsResult
+
+<section class="mt-5" aria-labelledby="crowdsec-bans-heading">
+    <h2 class="h4 mb-2" id="crowdsec-bans-heading">Active CrowdSec bans</h2>
+    @if (!Model.IsAvailable)
+    {
+        <div class="alert alert-info" role="status">CrowdSec decisions are currently unavailable.</div>
+    }
+    else if (Model.Decisions.Count == 0)
+    {
+        <div class="alert alert-info" role="status">There are no active IP or range bans.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">Address / range</th><th scope="col">Scope</th><th scope="col">Scenario</th><th scope="col">Origin</th><th scope="col">Action</th><th scope="col">Remaining</th></tr></thead>
+                <tbody>
+                    @foreach (var item in Model.Decisions)
+                    {
+                        <tr><td><code>@item.Address</code></td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td><td>@(item.RemainingDuration ?? "Not available")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

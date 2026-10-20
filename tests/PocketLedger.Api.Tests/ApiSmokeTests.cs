@@ -15,6 +15,8 @@ using PocketLedger.Data;
 using PocketLedger.Contracts;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
+using PocketLedger.Security;
+using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Api.Tests;
 
@@ -54,6 +56,95 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         var response = await client.GetAsync("/api/v1/accounts");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("[]", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task AuthenticatedEndpoint_RejectsBlockedUser()
+    {
+        using var blockedFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUserAccessBlockStore>();
+            services.AddSingleton<IUserAccessBlockStore>(new BlockedUserAccessStore());
+        }));
+        using var client = blockedFactory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/accounts");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Contains("currently blocked and under review", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task InternalAccessBlock_RejectsTheUsersTokensImmediately()
+    {
+        var databaseName = $"{nameof(ApiSmokeTests)}-{Guid.NewGuid():N}";
+        using var blockingFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<PocketLedgerDbContext>();
+            services.RemoveAll<DbContextOptions<PocketLedgerDbContext>>();
+            services.RemoveAll<IDbContextOptionsConfiguration<PocketLedgerDbContext>>();
+            services.AddDbContext<PocketLedgerDbContext>(options => options.UseInMemoryDatabase(databaseName));
+        }));
+        using var client = blockingFactory.CreateClient();
+        var path = $"/api/v1/internal-admin/users/{TestAuthenticationHandler.UserId}/access-block";
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PutAsync(path, null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await client.SendAsync(AdminRequest(HttpMethod.Put, path))).StatusCode);
+        var blocked = await client.GetAsync("/api/v1/accounts");
+        Assert.Equal(HttpStatusCode.Forbidden, blocked.StatusCode);
+        Assert.Contains("currently blocked and under review", await blocked.Content.ReadAsStringAsync());
+
+        // Every request from the test client is authenticated as the blocked user, so unblock through the service.
+        await using (var scope = blockingFactory.Services.CreateAsyncScope())
+            await scope.ServiceProvider.GetRequiredService<IBlockedUserAdministration>().UnblockAsync(TestAuthenticationHandler.UserId);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/accounts")).StatusCode);
+    }
+
+    [Fact]
+    public async Task InternalAccessBlockSynchronization_BlocksListedUsers()
+    {
+        var databaseName = $"{nameof(ApiSmokeTests)}-{Guid.NewGuid():N}";
+        using var blockingFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<PocketLedgerDbContext>();
+            services.RemoveAll<DbContextOptions<PocketLedgerDbContext>>();
+            services.RemoveAll<IDbContextOptionsConfiguration<PocketLedgerDbContext>>();
+            services.AddDbContext<PocketLedgerDbContext>(options => options.UseInMemoryDatabase(databaseName));
+        }));
+        using var client = blockingFactory.CreateClient();
+        using var request = AdminRequest(HttpMethod.Put, "/api/v1/internal-admin/users/access-blocks");
+        request.Content = JsonContent.Create(new[] { TestAuthenticationHandler.UserId });
+
+        Assert.Equal(HttpStatusCode.NoContent, (await client.SendAsync(request)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/api/v1/accounts")).StatusCode);
+    }
+
+    private static HttpRequestMessage AdminRequest(HttpMethod method, string path)
+    {
+        var request = new HttpRequestMessage(method, path);
+        request.Headers.Add(InternalAdminAuthentication.HeaderName, "development-only-admin-operations-key");
+        return request;
+    }
+
+    [Fact]
+    public async Task InternalUserDeletion_RequiresCredentialAndInvokesDeletionService()
+    {
+        var deletion = new RecordingUserDataDeletionService();
+        using var deletionFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IUserDataDeletionService>();
+            services.AddSingleton<IUserDataDeletionService>(deletion);
+        }));
+        using var client = deletionFactory.CreateClient();
+        var userId = Guid.NewGuid();
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.DeleteAsync($"/api/v1/internal-admin/users/{userId}")).StatusCode);
+        using var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/internal-admin/users/{userId}");
+        request.Headers.Add(InternalAdminAuthentication.HeaderName, "development-only-admin-operations-key");
+        var authorized = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NoContent, authorized.StatusCode);
+        Assert.Equal(userId, deletion.DeletedUserId);
     }
 
     [Fact]
@@ -143,10 +234,26 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
     private sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string SchemeName = "Test";
+        public static readonly Guid UserId = Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3");
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3").ToString())], SchemeName);
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, UserId.ToString())], SchemeName);
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
+        }
+    }
+
+    private sealed class BlockedUserAccessStore : IUserAccessBlockStore
+    {
+        public Task<UserAccessBlockState> IsBlockedAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult(UserAccessBlockState.Blocked);
+    }
+
+    private sealed class RecordingUserDataDeletionService : IUserDataDeletionService
+    {
+        public Guid? DeletedUserId { get; private set; }
+        public Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            DeletedUserId = userId;
+            return Task.CompletedTask;
         }
     }
 }

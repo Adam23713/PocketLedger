@@ -27,7 +27,7 @@ public static class CommandRunner
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrEmpty(password)) return Fail("Initial username and password environment variables are required.");
         var users = provider.GetRequiredService<UserManager<ApplicationUser>>();
         if (await users.Users.AnyAsync()) return Fail("The Identity database already contains a user.");
-        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = username, CreatedAtUtc = DateTimeOffset.UtcNow };
+        var user = ApplicationUser.CreateBootstrapAdministrator(username);
         var result = await users.CreateAsync(user, password);
         if (!result.Succeeded) return Fail("Initial user creation failed: " + string.Join("; ", result.Errors.Select(error => error.Description)));
         Console.WriteLine("Identity bootstrap completed successfully.");

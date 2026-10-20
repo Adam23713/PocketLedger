@@ -94,6 +94,17 @@ try:
 \t\t}'''
         assert api_tls_proxy in local, 'Production API TLS proxy block changed; update the isolated fixture explicitly'
         local = local.replace(api_tls_proxy, '\t\treverse_proxy @api api:5051')
+        landing_route = '\t\t@landing host {$POCKETLEDGER_LANDING_DOMAIN}'
+        identity_limit_fixture = '''\t\t# Test-only response: exercise the Identity limiter without feeding accepted events to its CrowdSec scenario.
+\t\t@identity_limit_test {
+\t\t\thost {$POCKETLEDGER_IDENTITY_DOMAIN}
+\t\t\tpath /__identity-limit-test
+\t\t}
+\t\trespond @identity_limit_test 403
+
+'''
+        assert landing_route in local, 'Production landing route changed; update the isolated fixture explicitly'
+        local = local.replace(landing_route, identity_limit_fixture + landing_route)
         config.write_text(local)
         proxy = container('proxy', *env_args, '-p', '127.0.0.1::8080', '-v', str(config) + ':/etc/caddy/Caddyfile:ro', '-v', PROJECT + '_caddy-logs:/var/log/caddy', IMAGE)
         port = int(run('docker', 'port', proxy, '8080/tcp').strip().rsplit(':', 1)[1])
@@ -114,6 +125,10 @@ try:
         wait_for(lambda: request()[0] == 200)
         for service in ['landing', 'web', 'api', 'identity']:
             assert request(service + '.test') == (200, service)
+        application_entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
+        identity_entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/identity-access.log'))
+        assert application_entry['request']['host'] == 'api.test'
+        assert identity_entry['request']['host'] == 'identity.test'
         request(ip='8.8.4.4', xff='1.1.1.1')
         entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
         assert entry['request']['client_ip'] == entry['request']['remote_ip']
@@ -122,12 +137,16 @@ try:
         redacted = run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log')
         assert 'private-' not in redacted
         assert 'keep=visible' in json.loads(redacted)['request']['uri']
+        request('identity.test', path='/?code=private-identity-code&state=private-identity-state&keep=identity-visible')
+        identity_redacted = run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/identity-access.log')
+        assert 'private-identity-' not in identity_redacted
+        assert 'keep=identity-visible' in json.loads(identity_redacted)['request']['uri']
         run('docker', 'stop', PROJECT + '-api')
         assert request('api.test', path='/?code=private-error-code')[0] == 502
         assert 'private-error-code' not in run('docker', 'logs', proxy, merge_errors=True)
         run('docker', 'start', PROJECT + '-api')
         wait_for(lambda: request('api.test')[0] == 200)
-        print('PASS all four routes, untrusted spoof rejection and OIDC access/error log redaction', flush=True)
+        print('PASS split application/Identity logs, all routes, spoof rejection and OIDC redaction', flush=True)
 
         # Only the disposable fixture trusts the container gateway to simulate a CDN.
         config.write_text(local.replace('trusted_proxies static ', 'trusted_proxies static ' + entry['request']['remote_ip'] + ' '))
@@ -135,20 +154,25 @@ try:
         assert request(ip='8.8.4.4', xff='1.1.1.1')[0] == 200
         entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
         assert entry['request']['client_ip'] == '8.8.4.4'
-        for i in range(600):
+        for i in range(400):
             assert request(['landing.test', 'web.test'][i % 2], ip='11.12.13.14')[0] == 200, i
         assert request('api.test', ip='11.12.13.14', path='/?code=private-rate-limit-code')[0] == 429
         assert 'private-rate-limit-code' not in run('docker', 'logs', proxy, merge_errors=True)
-        for _ in range(30):
+        for _ in range(15):
             assert request('identity.test', 'POST', '11.12.13.15')[0] == 200
         assert request('identity.test', 'POST', '11.12.13.15')[0] == 429
         assert request('identity.test', 'GET', '11.12.13.15')[0] == 200
         assert request('web.test', 'POST', '11.12.13.15')[0] == 200
-        for i in range(30):
+        # Accepted 403s are excluded from the abuse scenario, isolating this Caddy-only boundary check from bouncer polling.
+        for i in range(100):
+            assert request('identity.test', 'GET', '11.12.13.20', path='/__identity-limit-test')[0] == 403, i
+        assert request('identity.test', 'GET', '11.12.13.20', path='/__identity-limit-test')[0] == 429
+        assert request('web.test', 'GET', '11.12.13.20')[0] == 200
+        for i in range(15):
             assert request('identity.test', 'POST', f'2001:4860:1234:5678::{i + 1:x}')[0] == 200
         assert request('identity.test', 'POST', '2001:4860:1234:5678::ffff')[0] == 429
         assert request('identity.test', 'POST', '2001:4860:1234:5679::1')[0] == 200
-        print('PASS trusted client IP, shared 600 limit, Identity 30 POST limit, IPv6 /64 isolation', flush=True)
+        print('PASS client IP, shared 400 limit, Identity 100 total/15 POST limits and IPv6 /64 isolation', flush=True)
 
         cs('decisions', 'add', '--ip', '11.12.13.16', '--duration', '1m', '--reason', 'isolated-test')
         wait_for(lambda: request(ip='11.12.13.16')[0] == 403, 35)
@@ -184,6 +208,26 @@ try:
             seconds = sum(float(value) * {'h': 3600, 'm': 60, 's': 1}[unit] for value, unit in re.findall(r'([0-9.]+)([hms])', duration))
             assert 3500 < seconds <= 3600, duration
         print('PASS cold-start/rotated log acquisition, 429 flood one-hour decision, Cloudflare edge exclusion', flush=True)
+
+        identity_records = []
+        for ip in ['11.12.13.18', '173.245.48.1']:
+            for i in range(90):
+                identity_records.append(json.dumps({'level': 'info', 'ts': time.time() + i / 10000, 'logger': 'http.log.access.identity_access', 'request': {'remote_ip': '173.245.48.1', 'client_ip': ip, 'proto': 'HTTP/1.1', 'method': 'GET', 'host': 'identity.test', 'uri': '/Account/Login', 'headers': {'User-Agent': ['PocketLedgerSecurityVerification/1.0']}}, 'status': 200, 'size': 0, 'duration': 0.001}))
+        fixture.write_text('\n'.join(identity_records) + '\n')
+        run('docker', 'cp', str(fixture), proxy + ':/tmp/identity-abuse.json')
+        run('docker', 'exec', proxy, 'sh', '-c', 'cat /tmp/identity-abuse.json >> /var/log/caddy/identity-access.log')
+        wait_for(lambda: '11.12.13.18' in cs('decisions', 'list', '-o', 'json'), 45)
+        identity_decisions = cs('decisions', 'list', '--ip', '11.12.13.18', '-o', 'json')
+        assert 'pocketledger/identity-abuse' in identity_decisions
+        assert '173.245.48.1' not in cs('decisions', 'list', '-o', 'json')
+        durations = re.findall(r'"duration": "([^"]+)"', identity_decisions)
+        assert durations, identity_decisions
+        for duration in durations:
+            seconds = sum(float(value) * {'h': 3600, 'm': 60, 's': 1}[unit] for value, unit in re.findall(r'([0-9.]+)([hms])', duration))
+            assert 14300 < seconds <= 14400, duration
+        wait_for(lambda: request('identity.test', ip='11.12.13.18')[0] == 403, 20)
+        print('PASS Identity-labelled volume abuse creates a four-hour ban and excludes Cloudflare edges', flush=True)
+
         probe_records = []
         for i in range(30):
             record = json.loads(records[0])
