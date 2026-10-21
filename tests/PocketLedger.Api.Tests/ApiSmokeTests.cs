@@ -157,6 +157,7 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
             {
                 User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, ownerId.ToString())], TestAuthenticationHandler.SchemeName))
             };
+            using var dataKey = EnterDataKey();
             var db = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
             await db.Database.EnsureDeletedAsync();
             db.Accounts.AddRange(
@@ -166,7 +167,7 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
             await db.SaveChangesAsync();
         }
 
-        using var client = factory.CreateClient();
+        using var client = CreateClientWithDataKey();
         var balances = await client.GetFromJsonAsync<IReadOnlyList<CurrencyBalanceDto>>("/api/v1/transactions/main-balance");
 
         Assert.Equal([new CurrencyBalanceDto("EUR", 100m), new CurrencyBalanceDto("HUF", 100m)], balances);
@@ -187,6 +188,7 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
             {
                 User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, ownerId.ToString())], TestAuthenticationHandler.SchemeName))
             };
+            using var dataKey = EnterDataKey();
             var db = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
             await db.Database.EnsureDeletedAsync();
             db.Accounts.AddRange(
@@ -196,7 +198,7 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
             await db.SaveChangesAsync();
         }
 
-        using var client = factory.CreateClient();
+        using var client = CreateClientWithDataKey();
         using var createResponse = await client.PostAsJsonAsync("/api/v1/transactions", new
         {
             type = TransactionType.Adjustment, accountId = hufAccountId, amount = 10m, adjustmentDirection = AdjustmentDirection.Increase, transactionDate = "2026-09-02", transactionTime = "10:30:00", note = "create",
@@ -231,13 +233,59 @@ public sealed class ApiSmokeTests : IClassFixture<WebApplicationFactory<Program>
         await cleanupScope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>().Database.EnsureDeletedAsync();
     }
 
+    [Fact]
+    public async Task UserDataWithoutTheSessionDataKey_AsksTheClientToSignInAgain()
+    {
+        using (var scope = factory.Services.CreateScope())
+        {
+            scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, TestAuthenticationHandler.UserId.ToString())], TestAuthenticationHandler.SchemeName))
+            };
+            using var dataKey = EnterDataKey();
+            var db = scope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>();
+            await db.Database.EnsureDeletedAsync();
+            db.Accounts.Add(new Account { Id = Guid.NewGuid(), OwnerId = TestAuthenticationHandler.UserId, Name = "Private", Type = AccountType.Cash, Currency = "HUF" });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = factory.CreateClient();
+        var response = await client.GetAsync("/api/v1/accounts");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Contains("data_key_required", await response.Content.ReadAsStringAsync());
+        using var cleanupScope = factory.Services.CreateScope();
+        await cleanupScope.ServiceProvider.GetRequiredService<PocketLedgerDbContext>().Database.EnsureDeletedAsync();
+    }
+
+    // The test user's data key; requests carry it the way the Web BFF does, as SK plus W bound to the token's session.
+    private static readonly UserDataKey DataKey = UserDataKey.Generate(TestAuthenticationHandler.UserId);
+    private const string DataSessionId = "api-smoke-session";
+
+    private HttpClient CreateClientWithDataKey()
+    {
+        var client = factory.CreateClient();
+        var sessionKey = EphemeralKeyWrap.GenerateWrappingKey();
+        client.DefaultRequestHeaders.Add(UserSessionKeyProtocol.SessionKeyHeader, UserSessionKeyProtocol.Encode(sessionKey));
+        client.DefaultRequestHeaders.Add(UserSessionKeyProtocol.WrappedKeyHeader, UserSessionKeyProtocol.Encode(EphemeralKeyWrap.Wrap(DataKey, sessionKey, EphemeralKeyPurpose.Session, DataSessionId)));
+        return client;
+    }
+
+    // Seeding through the DbContext needs the key in scope, as an API request has it.
+    private static IDisposable EnterDataKey()
+    {
+        var wrappingKey = EphemeralKeyWrap.GenerateWrappingKey();
+        var copy = EphemeralKeyWrap.Unwrap(EphemeralKeyWrap.Wrap(DataKey, wrappingKey, EphemeralKeyPurpose.Session, DataSessionId), wrappingKey, EphemeralKeyPurpose.Session, DataKey.UserId, DataSessionId);
+        return UserKeyContext.Enter(copy);
+    }
+
     private sealed class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string SchemeName = "Test";
         public static readonly Guid UserId = Guid.Parse("a3b4bceb-f37e-49f4-b726-b8e40d7f34d3");
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, UserId.ToString())], SchemeName);
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, UserId.ToString()), new Claim(UserSessionKeyProtocol.SessionIdClaim, DataSessionId)], SchemeName);
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
         }
     }

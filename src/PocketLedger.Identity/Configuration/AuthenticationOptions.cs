@@ -11,6 +11,9 @@ public sealed class AuthenticationSecurityOptions
 {
     [Range(1, 20)] public int RateLimitPermitCount { get; set; } = 3;
     [Range(1, 3600)] public int RateLimitWindowSeconds { get; set; } = 60;
+    // Each Argon2id derivation of a data key holds 64 MiB of memory.
+    [Range(1, 16)] public int DataKeyDerivationConcurrency { get; set; } = 2;
+    [Range(1, 60)] public int DataKeyDerivationWaitSeconds { get; set; } = 10;
 }
 
 public sealed class PublicRegistrationOptions

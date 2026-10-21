@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Services;
 using PocketLedger.Security;
 
 namespace PocketLedger.Identity.Tests;
@@ -113,6 +114,10 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
     public async Task ChangePassword_UpdatesOnlyTheCurrentUsersPasswordAndAuditsSuccess()
     {
         await SeedUserAsync();
+        string ciphertext;
+        await using (var seedScope = factory.Services.CreateAsyncScope())
+        using (var keyBefore = await seedScope.ServiceProvider.GetRequiredService<IUserDataKeyService>().UnlockAsync(CurrentUserId, CurrentPassword, UserKeySecretKind.Password))
+            ciphertext = UserFieldCipher.EncryptString("written before the change", keyBefore!, "Note");
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
         const string newPassword = "New!PocketLedger#2027";
         var token = await GetAntiforgeryTokenAsync(client, "/Account/ChangePassword");
@@ -135,6 +140,10 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
         var auditEvents = await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.ToListAsync();
         Assert.Contains(auditEvents, item => item.EventType == "PasswordChange" && item.Outcome == "Success" && item.UserId == CurrentUserId);
         Assert.Contains(auditEvents, item => item.EventType == "SecurityStampInvalidation" && item.Outcome == "Success" && item.UserId == CurrentUserId);
+        var dataKeys = scope.ServiceProvider.GetRequiredService<IUserDataKeyService>();
+        await Assert.ThrowsAsync<UserKeyException>(() => dataKeys.UnlockAsync(CurrentUserId, CurrentPassword, UserKeySecretKind.Password));
+        using var keyAfter = await dataKeys.UnlockAsync(CurrentUserId, newPassword, UserKeySecretKind.Password);
+        Assert.Equal("written before the change", UserFieldCipher.DecryptString(ciphertext, keyAfter!, "Note"));
     }
 
     [Fact]
@@ -241,6 +250,7 @@ public sealed class WaveTwoIdentityTests : IClassFixture<WebApplicationFactory<P
         var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = new ApplicationUser { Id = CurrentUserId, UserName = "wave-two-user", NormalizedUserName = "WAVE-TWO-USER", TwoFactorEnabled = true, AuthenticatorSetupComplete = true };
         Assert.True((await users.CreateAsync(user, CurrentPassword)).Succeeded);
+        (await scope.ServiceProvider.GetRequiredService<IUserDataKeyService>().CreateAsync(CurrentUserId, CurrentPassword)).Dispose();
     }
 
     private async Task SeedIncompleteUserAsync()

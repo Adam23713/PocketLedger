@@ -23,8 +23,6 @@ public sealed class RequestDetectionFactAttribute : FactAttribute
 
 public sealed class SuspiciousRequestDetectionTests
 {
-    private static int nextAddressSuffix = Random.Shared.Next(1, 200);
-
     [Fact]
     public async Task DisabledStore_IsUnavailableAndRecordingDoesNotAffectTheRequest()
     {
@@ -126,14 +124,34 @@ public sealed class SuspiciousRequestDetectionTests
         public static async Task<DetectionHarness> CreateAsync()
         {
             var connectionString = Environment.GetEnvironmentVariable("PL_TEST_VALKEY")!;
-            var options = Options.Create(new RequestTelemetryOptions { ConnectionString = connectionString });
+            var options = Options.Create(new RequestTelemetryOptions { ConnectionString = connectionString, TimeoutMilliseconds = 10_000 });
             var store = new RequestTelemetryConnection(options);
+            // The detector drops a batch when Valkey is not reachable yet, so observations are only sent once the connection works.
+            await WaitForAsync(async () =>
+            {
+                try
+                {
+                    await (await store.GetDatabaseAsync(CancellationToken.None)).PingAsync();
+                    return true;
+                }
+                catch (RedisException)
+                {
+                    return false;
+                }
+            });
             var service = new SuspiciousRequestDetectionService(options, store, NullLogger<SuspiciousRequestDetectionService>.Instance);
             var redis = await ConnectionMultiplexer.ConnectAsync(connectionString);
             return new DetectionHarness(service, store, CreateRequestServices(), redis);
         }
 
-        public IPAddress NewAddress() => IPAddress.Parse($"203.0.113.{Interlocked.Increment(ref nextAddressSuffix) % 250 + 1}");
+        // A random address in the IPv6 documentation range, so no test or earlier run against the same Valkey shares its keys.
+        public IPAddress NewAddress()
+        {
+            var bytes = new byte[16];
+            RandomNumberGenerator.Fill(bytes.AsSpan(4));
+            bytes[0] = 0x20; bytes[1] = 0x01; bytes[2] = 0x0d; bytes[3] = 0xb8;
+            return new IPAddress(bytes);
+        }
 
         public void Record(IPAddress address, Guid? userId, DateTimeOffset timestamp, string? forwardedFor = null)
             => service.TryRecord(CreateContext(requestServices, address, userId, forwardedFor), timestamp);

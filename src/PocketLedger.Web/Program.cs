@@ -23,6 +23,7 @@ builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder
 builder.Services.AddSingleton<DatabaseTicketStore>();
 builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
 builder.Services.AddSingleton<SessionRefreshCoordinator>();
+builder.Services.AddSingleton<UserSessionKeys>();
 builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, ConfigureBffCookie>();
 builder.Services.AddAuthentication(options =>
 {
@@ -58,6 +59,11 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("profile");
     options.Scope.Add("offline_access");
     options.Scope.Add("pocketledger.api");
+    options.Events.OnTokenResponseReceived = context =>
+    {
+        context.HttpContext.RequestServices.GetRequiredService<UserSessionKeys>().Accept(context);
+        return Task.CompletedTask;
+    };
     options.Events.OnRemoteFailure = context =>
     {
         context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("PocketLedger.Web.Authentication")

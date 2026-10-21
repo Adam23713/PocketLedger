@@ -76,7 +76,7 @@ The bootstrap command permanently marks this first account as the sole administr
 docker compose up -d
 ```
 
-On first login, configure TOTP and save the generated recovery codes. A finance dataset previously exported as an encrypted `.plbackup` file can be restored from **Import / Export**.
+`bootstrap-identity` prints the administrator's data recovery key once: store it offline, separately from the password. Without the password or this key, nobody can recover that account's financial data. On first login, configure TOTP and save the generated recovery codes. A finance dataset previously exported as an encrypted `.plbackup` file can be restored from **Import / Export**.
 
 If you plan to use OCI KMS for key custody instead of the local certificate provider, finish and verify this local deployment first, then follow the [Local-to-OCI activation procedure](oci-kms.md#activate-oci-kms-on-an-existing-clean-local-deployment). Don't enable the OCI Compose override during initial database creation or Identity bootstrap — the two migrations are deliberately kept separate.
 
@@ -100,7 +100,7 @@ Before completing a rollout, verify that `docker compose config --quiet` succeed
 
 PocketLedger layers several independent protections rather than relying on any single one. Each has its own detailed guide; this is the map between them.
 
-**Field-level database encryption.** Transaction notes, account and category names, debts, planner snapshots and Identity secrets (TOTP keys, recovery codes, audit metadata) are encrypted before EF Core writes them to PostgreSQL, using certificate-protected ASP.NET Core Data Protection key rings — one per service. There is no setting to disable this and no plaintext fallback on a decryption error. Amounts, dates, relationships and other low-sensitivity or necessarily-queryable columns are left as typed, indexed columns so filtering, joins and balance calculations keep working. → [Database encryption guide](database-encryption.md)
+**Field-level database encryption.** Transaction notes, account and category names, debts, planner snapshots and Identity secrets (TOTP keys, recovery codes, audit metadata) are encrypted before EF Core writes them to PostgreSQL, using certificate-protected ASP.NET Core Data Protection key rings — one per service. User data is additionally encrypted with a per-user key that only the user's password or recovery key opens, so the operator cannot read it passively either. There is no setting to disable this and no plaintext fallback on a decryption error. Amounts, dates, relationships and other low-sensitivity or necessarily-queryable columns are left as typed, indexed columns so filtering, joins and balance calculations keep working. → [Database encryption guide](database-encryption.md)
 
 **Full-disk encryption (not part of this deployment).** Field encryption alone doesn't protect a stolen disk: amounts, dates, relationships and database metadata stay readable in a raw copy. Tools like LUKS can close that gap by encrypting the block device PostgreSQL's data lives on, but this isn't something PocketLedger ships or tests — it's a reasonable addition if you want it, planned and verified independently for your own VPS and storage layout. → [Scope and guarantees](database-encryption.md#scope-and-guarantees)
 

@@ -17,6 +17,8 @@ public sealed class RequestTelemetryOptions
     public string? ConnectionString { get; set; }
     public int RetentionHours { get; set; } = 48;
     public int BucketMinutes { get; set; } = 5;
+    // Telemetry must never slow requests down, so Valkey gets very little time; integration tests on busy machines allow more.
+    internal int TimeoutMilliseconds { get; set; } = 500;
 }
 
 public sealed record RequestTelemetryBucketSnapshot(DateTimeOffset StartedAtUtc, long TotalRequests, long AuthenticatedRequests, long AnonymousRequests, long? SelectedUserRequests);
@@ -128,8 +130,8 @@ internal sealed class RequestTelemetryConnection(IOptions<RequestTelemetryOption
             if (connection is not null) return connection.GetDatabase();
             var configuration = ConfigurationOptions.Parse(options.Value.ConnectionString!);
             configuration.AbortOnConnectFail = false;
-            configuration.ConnectTimeout = 500;
-            configuration.AsyncTimeout = 500;
+            configuration.ConnectTimeout = options.Value.TimeoutMilliseconds;
+            configuration.AsyncTimeout = options.Value.TimeoutMilliseconds;
             configuration.ConnectRetry = 0;
             configuration.BacklogPolicy = BacklogPolicy.FailFast;
             connection = await ConnectionMultiplexer.ConnectAsync(configuration);

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Account;
+using PocketLedger.Security;
 using PocketLedger.Services;
 using QRCoder;
 
@@ -16,11 +17,14 @@ namespace PocketLedger.Controllers;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
-    IRegistrationSettingsService registrationSettings, IConfiguration configuration) : Controller
+    IRegistrationSettingsService registrationSettings, IConfiguration configuration, IUserDataKeyService dataKeys, IPendingSignInKeys pendingKeys) : Controller
 {
+    private const string DataUnlockFailedMessage = "Your data could not be unlocked. Contact the administrator.";
+
     [AllowAnonymous, HttpGet]
     public async Task<IActionResult> AccessBlocked()
     {
+        pendingKeys.Clear(HttpContext);
         await signInManager.SignOutAsync();
         HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
         return View();
@@ -45,6 +49,17 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         }
         var wasLocked = user is not null && await userManager.IsLockedOutAsync(user);
         var result = await signInManager.PasswordSignInAsync(model.Username.Trim(), model.Password, false, lockoutOnFailure: true);
+        if ((result.Succeeded || result.RequiresTwoFactor) && user is not null)
+        {
+            var unlock = await UnlockDataKeyAsync(user, model.Password, cancellationToken);
+            if (unlock != DataKeyUnlock.Unlocked)
+            {
+                await signInManager.SignOutAsync();
+                if (unlock == DataKeyUnlock.Busy) return TooManyRequests();
+                ModelState.AddModelError(string.Empty, DataUnlockFailedMessage);
+                return View(await BuildLoginModelAsync(model.ReturnUrl, model));
+            }
+        }
         if (result.RequiresTwoFactor) return RedirectToAction(nameof(TwoFactor), new { returnUrl = model.ReturnUrl });
         if (result.Succeeded && user is not null)
         {
@@ -103,14 +118,35 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         }
 
         var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false };
-        IdentityResult result;
+        IdentityResult? result = null;
+        CreatedUserDataKey? created = null;
         try
         {
-            result = await userManager.CreateAsync(user, model.Password);
+            // The account and its data key are created together, so no user can exist without a data key.
+            await using (var transaction = await BeginTransactionAsync(cancellationToken))
+            {
+                try
+                {
+                    result = await userManager.CreateAsync(user, model.Password);
+                }
+                catch (DbUpdateException)
+                {
+                    dbContext.Entry(user).State = EntityState.Detached;
+                }
+                if (result?.Succeeded == true)
+                {
+                    created = await dataKeys.CreateAsync(user.Id, model.Password, cancellationToken);
+                    if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+                }
+            }
         }
-        catch (DbUpdateException)
+        catch (UserKeyDerivationBusyException)
         {
             dbContext.Entry(user).State = EntityState.Detached;
+            return TooManyRequests();
+        }
+        if (result is null)
+        {
             await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "EmailCollision", cancellationToken: cancellationToken);
             ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
@@ -122,9 +158,14 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
         }
 
-        await signInManager.SignInAsync(user, false);
-        await audit.WriteAsync("Registration", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
-        return RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
+        using (created)
+        {
+            await signInManager.SignInAsync(user, false);
+            pendingKeys.Issue(HttpContext, created!.Key);
+            await audit.WriteAsync("Registration", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+            await audit.WriteAsync("DataKeyCreated", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+            return View("DataRecoveryKey", new DataRecoveryKeyViewModel(created.RecoveryKey, Url.Action(nameof(SetupAuthenticator))!, model.ReturnUrl));
+        }
     }
 
     [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
@@ -168,16 +209,17 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                 return RedirectToAction(nameof(AccessBlocked));
             }
             var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false, bypassTwoFactor: false);
+            // External providers prove identity but supply no secret, so the data password unlocks the data key next.
             if (result.RequiresTwoFactor)
             {
                 await audit.WriteAsync("ExternalLoginTotpRequired", "Success", linkedUser.Id, linkedUser.NormalizedUserName, cancellationToken: cancellationToken);
-                return RedirectToAction(nameof(TwoFactor), new { returnUrl });
+                return RedirectToAction(nameof(UnlockData), new { returnUrl });
             }
             if (result.Succeeded)
             {
                 await RecordSuccessfulLoginAsync(linkedUser);
                 await audit.WriteAsync(linkedUser.AuthenticatorSetupComplete ? "ExternalLoginSucceeded" : "ExternalLoginAcceptedSetupRequired", "Success", linkedUser.Id, linkedUser.NormalizedUserName, cancellationToken: cancellationToken);
-                return linkedUser.AuthenticatorSetupComplete ? ContinueAfterAuthentication(returnUrl) : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
+                return RedirectToAction(await dataKeys.ExistsAsync(linkedUser.Id, cancellationToken) ? nameof(UnlockData) : nameof(CreateDataPassword), new { returnUrl });
             }
 
             await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, result.IsLockedOut ? "LockedOut" : "SignInRejected", cancellationToken: cancellationToken);
@@ -238,7 +280,83 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
 
         await signInManager.SignInAsync(user, false, info.LoginProvider);
         await audit.WriteAsync("ExternalRegistration", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
-        return RedirectToAction(nameof(SetupAuthenticator), new { returnUrl });
+        return RedirectToAction(nameof(CreateDataPassword), new { returnUrl });
+    }
+
+    [AllowAnonymous, HttpGet]
+    public async Task<IActionResult> UnlockData(string? returnUrl = null, CancellationToken cancellationToken = default)
+    {
+        var user = await GetSigningInUserAsync();
+        if (user is null) return RedirectToAction(nameof(Login), new { returnUrl });
+        if (user.IsAccessBlocked) return RedirectToAction(nameof(AccessBlocked));
+        if (!await dataKeys.ExistsAsync(user.Id, cancellationToken))
+            return User.Identity?.IsAuthenticated == true ? RedirectToAction(nameof(CreateDataPassword), new { returnUrl }) : RedirectToAction(nameof(Login), new { returnUrl });
+        return View(new UnlockDataViewModel { ReturnUrl = returnUrl, IsDataPassword = !await userManager.HasPasswordAsync(user) });
+    }
+
+    [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnlockData(UnlockDataViewModel model, CancellationToken cancellationToken)
+    {
+        var pending = await signInManager.GetTwoFactorAuthenticationUserAsync();
+        var user = pending ?? (User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null);
+        if (user is null) return RedirectToAction(nameof(Login), new { returnUrl = model.ReturnUrl });
+        if (user.IsAccessBlocked) return RedirectToAction(nameof(AccessBlocked));
+        if (!await AllowRequestAsync($"data-unlock:{user.Id}", cancellationToken)) return TooManyRequests();
+        model.IsDataPassword = !await userManager.HasPasswordAsync(user);
+        if (!ModelState.IsValid) return View(model);
+        if (await userManager.IsLockedOutAsync(user)) return await SignInStoppedAsync("Login is temporarily unavailable.", model.ReturnUrl);
+
+        var unlock = await UnlockDataKeyAsync(user, model.Password, cancellationToken);
+        if (unlock == DataKeyUnlock.Busy) return TooManyRequests();
+        if (unlock != DataKeyUnlock.Unlocked)
+        {
+            // Wrong data passwords count toward the same lockout as wrong login passwords.
+            await userManager.AccessFailedAsync(user);
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                await audit.WriteAsync("LoginLockout", "Failure", user.Id, user.NormalizedUserName, "LockedOut", cancellationToken: cancellationToken);
+                return await SignInStoppedAsync("Login is temporarily unavailable.", model.ReturnUrl);
+            }
+            ModelState.AddModelError(nameof(model.Password), model.IsDataPassword ? "Incorrect data password." : "Incorrect password.");
+            return View(model);
+        }
+        await userManager.ResetAccessFailedCountAsync(user);
+        if (pending is not null) return RedirectToAction(nameof(TwoFactor), new { returnUrl = model.ReturnUrl });
+        return user.AuthenticatorSetupComplete ? ContinueAfterAuthentication(model.ReturnUrl) : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
+    }
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> CreateDataPassword(string? returnUrl = null, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (await dataKeys.ExistsAsync(user.Id, cancellationToken)) return RedirectToAction(nameof(UnlockData), new { returnUrl });
+        return View(new CreateDataPasswordViewModel { ReturnUrl = returnUrl });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateDataPassword(CreateDataPasswordViewModel model, CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (await dataKeys.ExistsAsync(user.Id, cancellationToken)) return RedirectToAction(nameof(UnlockData), new { returnUrl = model.ReturnUrl });
+        if (!await AllowRequestAsync($"data-password:{user.Id}", cancellationToken)) return TooManyRequests();
+        if (!ModelState.IsValid || !await ValidateNewPasswordAsync(user, model.Password, nameof(model.Password))) return View(model);
+        CreatedUserDataKey created;
+        try
+        {
+            created = await dataKeys.CreateAsync(user.Id, model.Password, cancellationToken);
+        }
+        catch (UserKeyDerivationBusyException)
+        {
+            return TooManyRequests();
+        }
+        using (created)
+        {
+            pendingKeys.Issue(HttpContext, created.Key);
+            await audit.WriteAsync("DataKeyCreated", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+            return View("DataRecoveryKey", new DataRecoveryKeyViewModel(created.RecoveryKey, Url.Action(nameof(SetupAuthenticator))!, model.ReturnUrl));
+        }
     }
 
     [AllowAnonymous, HttpGet]
@@ -252,6 +370,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var key = pending?.NormalizedUserName ?? "UNKNOWN";
         if (!await AllowRequestAsync(key, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);
+        if (pending is not null && !pendingKeys.Has(HttpContext, pending.Id)) return await SignInStoppedAsync("Your sign-in expired. Please sign in again.", model.ReturnUrl);
         var result = await signInManager.TwoFactorAuthenticatorSignInAsync(model.Code.Replace(" ", string.Empty).Replace("-", string.Empty), false, false);
         await audit.WriteAsync("TotpChallenge", result.Succeeded ? "Success" : "Failure", pending?.Id, pending?.NormalizedUserName, result.Succeeded ? null : "InvalidCode", cancellationToken: cancellationToken);
         if (result.Succeeded)
@@ -281,6 +400,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var key = user?.NormalizedUserName ?? "UNKNOWN";
         if (!await AllowRequestAsync(key, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid) return View(model);
+        if (pending is not null && !pendingKeys.Has(HttpContext, pending.Id)) return await SignInStoppedAsync("Your sign-in expired. Please sign in again.", model.ReturnUrl);
         var succeeded = pending is not null
             ? (await signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code)).Succeeded
             : user is not null && (await userManager.RedeemTwoFactorRecoveryCodeAsync(user, model.Code)).Succeeded;
@@ -353,13 +473,23 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize, HttpGet]
-    public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+    public async Task<IActionResult> ChangePassword()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        ViewData["IsDataPassword"] = !await userManager.HasPasswordAsync(user);
+        return View(new ChangePasswordViewModel());
+    }
 
+    // For password users this changes the login password; for external-login users it changes the data password.
+    // Either way the data key itself is unchanged and only re-wrapped, so no data has to be re-encrypted.
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model, CancellationToken cancellationToken)
     {
         var user = await userManager.GetUserAsync(User);
         if (user is null) return Challenge();
+        var hasPassword = await userManager.HasPasswordAsync(user);
+        ViewData["IsDataPassword"] = !hasPassword;
         if (!await AllowPasswordChangeRequestAsync(user, cancellationToken)) return TooManyRequests();
         if (!ModelState.IsValid)
         {
@@ -367,20 +497,71 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return View(model);
         }
 
-        var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-        if (!result.Succeeded)
+        IActionResult InvalidCurrentPassword()
         {
-            var invalidCurrentPassword = result.Errors.Any(error => error.Code == "PasswordMismatch");
-            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, invalidCurrentPassword ? "InvalidCurrentPassword" : "InvalidNewPassword", cancellationToken: cancellationToken);
-            if (invalidCurrentPassword)
-            {
-                ModelState.AddModelError(nameof(model.CurrentPassword), "Password change was not completed. Check your current password and try again.");
-            }
-            else
-            {
-                foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
-            }
+            ModelState.AddModelError(nameof(model.CurrentPassword), "Password change was not completed. Check your current password and try again.");
             return View(model);
+        }
+        if (hasPassword && !await userManager.CheckPasswordAsync(user, model.CurrentPassword))
+        {
+            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, "InvalidCurrentPassword", cancellationToken: cancellationToken);
+            return InvalidCurrentPassword();
+        }
+        if (!hasPassword && !await ValidateNewPasswordAsync(user, model.NewPassword, nameof(model.NewPassword)))
+        {
+            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, "InvalidNewPassword", cancellationToken: cancellationToken);
+            return View(model);
+        }
+
+        UserDataKey? key;
+        try
+        {
+            key = await dataKeys.UnlockAsync(user.Id, model.CurrentPassword, UserKeySecretKind.Password, cancellationToken);
+        }
+        catch (UserKeyException)
+        {
+            key = null;
+        }
+        catch (UserKeyDerivationBusyException)
+        {
+            return TooManyRequests();
+        }
+        if (key is null)
+        {
+            await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, hasPassword ? "DataKeyUnavailable" : "InvalidCurrentPassword", cancellationToken: cancellationToken);
+            if (hasPassword)
+            {
+                ModelState.AddModelError(string.Empty, DataUnlockFailedMessage);
+                return View(model);
+            }
+            return InvalidCurrentPassword();
+        }
+
+        using (key)
+        {
+            IdentityResult result;
+            try
+            {
+                await using var transaction = await BeginTransactionAsync(cancellationToken);
+                result = hasPassword ? await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword) : await userManager.UpdateSecurityStampAsync(user);
+                if (result.Succeeded)
+                {
+                    await dataKeys.ReplacePasswordAsync(key, model.NewPassword, cancellationToken);
+                    if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+                }
+            }
+            catch (UserKeyDerivationBusyException)
+            {
+                return TooManyRequests();
+            }
+            if (!result.Succeeded)
+            {
+                var invalidCurrentPassword = result.Errors.Any(error => error.Code == "PasswordMismatch");
+                await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, invalidCurrentPassword ? "InvalidCurrentPassword" : "InvalidNewPassword", cancellationToken: cancellationToken);
+                if (invalidCurrentPassword) return InvalidCurrentPassword();
+                foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                return View(model);
+            }
         }
 
         await signInManager.RefreshSignInAsync(user);
@@ -388,6 +569,134 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         await audit.WriteAsync("SecurityStampInvalidation", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
         TempData["PasswordChangeStatus"] = "Your password has been changed.";
         return RedirectToAction(nameof(ChangePassword));
+    }
+
+    [AllowAnonymous, HttpGet]
+    public IActionResult RecoverAccount() => User.Identity?.IsAuthenticated == true ? RedirectToAction(nameof(Security)) : View(new RecoverAccountViewModel());
+
+    // The recovery key is the only way back to the data after a forgotten password; nobody else can reset it.
+    // It replaces the password (or data password) only: signing in afterwards still requires the authenticator.
+    [AllowAnonymous, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> RecoverAccount(RecoverAccountViewModel model, CancellationToken cancellationToken)
+    {
+        if (User.Identity?.IsAuthenticated == true) return RedirectToAction(nameof(Security));
+        if (!await AllowRequestAsync($"recover:{model.Username}", cancellationToken)) return TooManyRequests();
+        if (!ModelState.IsValid) return View(model);
+        var normalized = userManager.NormalizeName(model.Username.Trim());
+        var user = await userManager.FindByNameAsync(model.Username.Trim());
+        IActionResult Rejected()
+        {
+            ModelState.AddModelError(string.Empty, "Account recovery was not completed. Check the username and recovery key and try again.");
+            return View(model);
+        }
+        if (user is null || user.IsAccessBlocked || await userManager.IsLockedOutAsync(user))
+        {
+            await audit.WriteAsync("AccountRecovery", "Failure", user?.Id, normalized, user is null ? "UnknownUser" : user.IsAccessBlocked ? "AccessBlocked" : "LockedOut", cancellationToken: cancellationToken);
+            return Rejected();
+        }
+
+        UserDataKey? key;
+        try
+        {
+            key = await dataKeys.UnlockAsync(user.Id, model.RecoveryKey, UserKeySecretKind.RecoveryKey, cancellationToken);
+        }
+        catch (UserKeyException)
+        {
+            key = null;
+        }
+        catch (UserKeyDerivationBusyException)
+        {
+            return TooManyRequests();
+        }
+        if (key is null)
+        {
+            await userManager.AccessFailedAsync(user);
+            await audit.WriteAsync("AccountRecovery", "Failure", user.Id, normalized, "InvalidRecoveryKey", cancellationToken: cancellationToken);
+            return Rejected();
+        }
+
+        string newRecoveryKey;
+        using (key)
+        {
+            var hasPassword = await userManager.HasPasswordAsync(user);
+            if (!hasPassword && !await ValidateNewPasswordAsync(user, model.NewPassword, nameof(model.NewPassword))) return View(model);
+            IdentityResult result;
+            try
+            {
+                await using var transaction = await BeginTransactionAsync(cancellationToken);
+                result = hasPassword
+                    ? await userManager.ResetPasswordAsync(user, await userManager.GeneratePasswordResetTokenAsync(user), model.NewPassword)
+                    : await userManager.UpdateSecurityStampAsync(user);
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    return View(model);
+                }
+                await dataKeys.ReplacePasswordAsync(key, model.NewPassword, cancellationToken);
+                // The used recovery key has been typed into a browser, so a fresh one replaces it.
+                newRecoveryKey = await dataKeys.ReplaceRecoveryKeyAsync(key, cancellationToken);
+                if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+            }
+            catch (UserKeyDerivationBusyException)
+            {
+                return TooManyRequests();
+            }
+        }
+        await userManager.ResetAccessFailedCountAsync(user);
+        await audit.WriteAsync("AccountRecovery", "Success", user.Id, normalized, cancellationToken: cancellationToken);
+        await audit.WriteAsync("SecurityStampInvalidation", "Success", user.Id, normalized, cancellationToken: cancellationToken);
+        return View("DataRecoveryKey", new DataRecoveryKeyViewModel(newRecoveryKey, Url.Action(nameof(Login))!, null, AfterAccountRecovery: true));
+    }
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> RegenerateRecoveryKey()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        return View(new RegenerateRecoveryKeyViewModel { IsDataPassword = !await userManager.HasPasswordAsync(user) });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegenerateRecoveryKey(RegenerateRecoveryKeyViewModel model, CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        model.IsDataPassword = !await userManager.HasPasswordAsync(user);
+        if (!await AllowRequestAsync($"recovery-key:{user.Id}", cancellationToken)) return TooManyRequests();
+        if (!ModelState.IsValid) return View(model);
+        UserDataKey? key;
+        try
+        {
+            key = await dataKeys.UnlockAsync(user.Id, model.CurrentPassword, UserKeySecretKind.Password, cancellationToken);
+        }
+        catch (UserKeyException)
+        {
+            key = null;
+        }
+        catch (UserKeyDerivationBusyException)
+        {
+            return TooManyRequests();
+        }
+        if (key is null)
+        {
+            await audit.WriteAsync("DataRecoveryKeyRegenerated", "Failure", user.Id, user.NormalizedUserName, "InvalidCurrentPassword", cancellationToken: cancellationToken);
+            ModelState.AddModelError(nameof(model.CurrentPassword), "The recovery key was not replaced. Check your current password and try again.");
+            return View(model);
+        }
+        string recoveryKey;
+        using (key)
+        {
+            try
+            {
+                recoveryKey = await dataKeys.ReplaceRecoveryKeyAsync(key, cancellationToken);
+            }
+            catch (UserKeyDerivationBusyException)
+            {
+                return TooManyRequests();
+            }
+        }
+        await audit.WriteAsync("DataRecoveryKeyRegenerated", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
+        return View("DataRecoveryKey", new DataRecoveryKeyViewModel(recoveryKey, Url.Action(nameof(Security))!, null));
     }
 
     [Authorize, HttpGet]
@@ -418,6 +727,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     {
         var user = await userManager.GetUserAsync(User);
         await audit.WriteAsync("Logout", "Success", user?.Id, user?.NormalizedUserName, cancellationToken: cancellationToken);
+        pendingKeys.Clear(HttpContext);
         await signInManager.SignOutAsync();
         var webBaseUrl = configuration["OpenIddict:WebBaseUrl"] ?? throw new InvalidOperationException("OpenIddict:WebBaseUrl is required.");
         return Redirect($"{webBaseUrl.TrimEnd('/')}/Session/CompleteLogout");
@@ -458,6 +768,61 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "RateLimited", cancellationToken: cancellationToken);
         return false;
     }
+
+    private enum DataKeyUnlock { Unlocked, Failed, Busy }
+
+    // Opens the user's data key with the password (or data password) and keeps it for the rest of this sign-in.
+    private async Task<DataKeyUnlock> UnlockDataKeyAsync(ApplicationUser user, string password, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var key = await dataKeys.UnlockAsync(user.Id, password, UserKeySecretKind.Password, cancellationToken);
+            if (key is null)
+            {
+                await audit.WriteAsync("DataKeyUnlock", "Failure", user.Id, user.NormalizedUserName, "DataKeyMissing", cancellationToken: cancellationToken);
+                return DataKeyUnlock.Failed;
+            }
+            pendingKeys.Issue(HttpContext, key);
+            return DataKeyUnlock.Unlocked;
+        }
+        catch (UserKeyException)
+        {
+            await audit.WriteAsync("DataKeyUnlock", "Failure", user.Id, user.NormalizedUserName, "InvalidSecret", cancellationToken: cancellationToken);
+            return DataKeyUnlock.Failed;
+        }
+        catch (UserKeyDerivationBusyException)
+        {
+            await audit.WriteAsync("DataKeyUnlock", "Failure", user.Id, user.NormalizedUserName, "Busy", cancellationToken: cancellationToken);
+            return DataKeyUnlock.Busy;
+        }
+    }
+
+    private async Task<ApplicationUser?> GetSigningInUserAsync()
+        => await signInManager.GetTwoFactorAuthenticationUserAsync() ?? (User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null);
+
+    private async Task<IActionResult> SignInStoppedAsync(string message, string? returnUrl)
+    {
+        pendingKeys.Clear(HttpContext);
+        await signInManager.SignOutAsync();
+        TempData["LoginMessage"] = message;
+        return RedirectToAction(nameof(Login), new { returnUrl });
+    }
+
+    private async Task<bool> ValidateNewPasswordAsync(ApplicationUser user, string password, string field)
+    {
+        var valid = true;
+        foreach (var validator in userManager.PasswordValidators)
+        {
+            var result = await validator.ValidateAsync(userManager, user, password);
+            if (result.Succeeded) continue;
+            valid = false;
+            foreach (var error in result.Errors) ModelState.AddModelError(field, error.Description);
+        }
+        return valid;
+    }
+
+    private async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction?> BeginTransactionAsync(CancellationToken cancellationToken)
+        => dbContext.Database.IsRelational() ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
 
     private async Task<LoginViewModel> BuildLoginModelAsync(string? returnUrl, LoginViewModel? model = null)
     {
