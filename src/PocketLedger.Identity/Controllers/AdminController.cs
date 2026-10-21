@@ -213,11 +213,13 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
             await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
             await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
             await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+            await dbContext.UserDataKeys.Where(item => item.UserId == userId).ExecuteDeleteAsync(cancellationToken);
             return;
         }
 
         dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
         dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
         dbContext.RemoveRange(await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ToListAsync(cancellationToken));
+        dbContext.RemoveRange(await dbContext.UserDataKeys.Where(item => item.UserId == userId).ToListAsync(cancellationToken));
     }
 }

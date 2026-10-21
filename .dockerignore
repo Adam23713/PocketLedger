@@ -6,6 +6,8 @@ tests/
 tools/**
 !tools/PocketLedger.Security.Cli/
 !tools/PocketLedger.Security.Cli/**
+tools/PocketLedger.Security.Cli/bin/
+tools/PocketLedger.Security.Cli/obj/
 *.user
 *.suo
 
