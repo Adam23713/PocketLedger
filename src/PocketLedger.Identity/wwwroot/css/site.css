@@ -584,3 +584,9 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .avatar-selector label:has(input:checked) { border-color: var(--bs-primary); background: color-mix(in srgb, var(--bs-primary) 10%, transparent); }
 .avatar-selector input { position: absolute; opacity: 0; }
 .avatar-selector img { width: 72px; height: 72px; object-fit: contain; }
+.security-row { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; padding: 1.25rem 1.5rem; }
+.security-row-text { flex: 1 1 20rem; min-width: 0; }
+.security-icon { align-items: center; background: color-mix(in srgb, var(--accent-color) 12%, transparent); border-radius: .75rem; color: var(--accent-color); display: inline-flex; flex: 0 0 auto; height: 2.75rem; justify-content: center; width: 2.75rem; }
+.security-icon svg { fill: none; height: 1.35rem; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; width: 1.35rem; }
+.security-option { background: var(--surface-background-hover); border-radius: calc(var(--card-radius) * .75); padding: 1rem 1.15rem; }
+.security-outcome { font-weight: 650; }
