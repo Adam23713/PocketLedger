@@ -23,6 +23,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     {
         builder.UseEnvironment("Development");
         builder.UseSetting("Database:ApplyMigrationsOnStartup", "false");
+        builder.UseSetting("Registration:Enabled", "false");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<IdentityDbContext>();
