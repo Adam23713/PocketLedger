@@ -120,6 +120,8 @@ services:
       ForwardedHeaders__TrustAll: "true"
       Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-false}
       Registration__MaximumUserCount: ${POCKETLEDGER_PUBLIC_REGISTRATION_MAXIMUM_USERS:-}
+      Authentication__Google__ClientId: ${POCKETLEDGER_GOOGLE_CLIENT_ID:-}
+      Authentication__Google__ClientSecret: ${POCKETLEDGER_GOOGLE_CLIENT_SECRET:-}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:

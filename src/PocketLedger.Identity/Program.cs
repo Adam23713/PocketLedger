@@ -1,5 +1,8 @@
 using System.Net;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +47,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(78);
 }).AddEntityFrameworkStores<IdentityDbContext>().AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>().AddDefaultTokenProviders();
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    builder.Services.AddAuthentication().AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("email");
+        options.ClaimActions.MapJsonKey("email_verified", "email_verified", ClaimValueTypes.Boolean);
+    });
+}
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "PocketLedger.Identity";

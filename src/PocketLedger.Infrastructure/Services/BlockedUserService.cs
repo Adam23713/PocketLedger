@@ -44,13 +44,26 @@ public sealed class BlockedUserService(PocketLedgerDbContext dbContext, TimeProv
     public async Task SynchronizeAsync(IReadOnlyCollection<Guid> blockedUserIds, CancellationToken cancellationToken = default)
     {
         var desired = blockedUserIds.ToHashSet();
-        var existing = await dbContext.BlockedUsers.ToListAsync(cancellationToken);
-        var now = timeProvider.GetUtcNow();
-        var removableBefore = now - SynchronizationGracePeriod;
-        foreach (var item in existing.Where(item => !desired.Contains(item.UserId) && item.BlockedAtUtc <= removableBefore))
-            dbContext.BlockedUsers.Remove(item);
-        foreach (var userId in desired.Except(existing.Select(item => item.UserId)))
-            dbContext.BlockedUsers.Add(new BlockedUser { UserId = userId, BlockedAtUtc = now });
-        await dbContext.SaveChangesAsync(cancellationToken);
+        for (var attempt = 0; ; attempt++)
+        {
+            var existing = await dbContext.BlockedUsers.ToListAsync(cancellationToken);
+            var now = timeProvider.GetUtcNow();
+            var removableBefore = now - SynchronizationGracePeriod;
+            foreach (var item in existing.Where(item => !desired.Contains(item.UserId) && item.BlockedAtUtc <= removableBefore))
+                dbContext.BlockedUsers.Remove(item);
+            foreach (var userId in desired.Except(existing.Select(item => item.UserId)))
+                dbContext.BlockedUsers.Add(new BlockedUser { UserId = userId, BlockedAtUtc = now });
+            try
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return;
+            }
+            catch (DbUpdateException) when (attempt < 2)
+            {
+                // An immediate admin action can change the same rows after the snapshot was read. Reload the
+                // database state and converge again instead of surfacing an idempotent primary-key race.
+                dbContext.ChangeTracker.Clear();
+            }
+        }
     }
 }
