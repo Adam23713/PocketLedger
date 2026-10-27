@@ -1,0 +1,36 @@
+@page "/api"
+@{
+    ViewData["Title"] = "API";
+}
+<div class="docs-layout shell">
+    <aside class="sidebar" aria-label="API navigation">
+        <p class="sidebar-title">API</p>
+        <a href="#overview" aria-current="page">Overview</a>
+        <span>Authentication <small>Coming soon</small></span>
+        <span>Endpoints <small>Coming soon</small></span>
+        <span>Errors <small>Coming soon</small></span>
+    </aside>
+    <article class="docs-content" id="overview">
+        <p class="eyebrow">DEVELOPER DOCUMENTATION</p>
+        <h1>PocketLedger API</h1>
+        <p class="lead">The API documentation will cover authentication, request and response formats, endpoints and practical examples for client developers.</p>
+        <div class="notice">
+            <strong>The API reference is not published yet.</strong>
+            <p>Endpoint details and executable examples will be added once the public API contract is documented.</p>
+        </div>
+        <h2>Example format</h2>
+        <p>Examples will be ready to copy and will clearly mark the values that need to be replaced.</p>
+        <div class="code-block">
+            <button type="button" class="copy-button" data-copy-code aria-live="polite">Copy</button>
+            <pre aria-label="Placeholder curl example"><code>curl https://api.example.com/resource \
+  --header "Authorization: Bearer &lt;access-token&gt;"</code></pre>
+        </div>
+        <h2>Planned topics</h2>
+        <ul class="topic-list">
+            <li><strong>Authentication</strong><span>Obtain and use access tokens safely.</span></li>
+            <li><strong>API conventions</strong><span>Understand formats, pagination, validation and errors.</span></li>
+            <li><strong>Endpoint reference</strong><span>See inputs, outputs and copyable curl requests.</span></li>
+            <li><strong>Client integration</strong><span>Follow a practical path from the first request to a working client.</span></li>
+        </ul>
+    </article>
+</div>
