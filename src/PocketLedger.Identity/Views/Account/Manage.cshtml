@@ -1,0 +1,75 @@
+@model PocketLedger.Models.ViewModels.Account.AccountManagementViewModel
+@{ ViewData["Title"] = "Account"; }
+
+<div class="mb-4">
+    <h1 class="mb-1">Account</h1>
+    <p class="text-muted mb-0">Review your account details and manage your PocketLedger account.</p>
+</div>
+
+@if (TempData["AccountWarning"] is string warning)
+{
+    <div class="alert alert-warning" role="alert">@warning</div>
+}
+
+<section class="card mb-4" aria-labelledby="account-details-heading">
+    <div class="card-header"><h2 class="h5 mb-0" id="account-details-heading">Account details</h2></div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Username</dt><dd class="col-sm-9">@Model.Username</dd>
+            <dt class="col-sm-3">Email</dt><dd class="col-sm-9 mb-0">@(Model.Email ?? "Not available")</dd>
+        </dl>
+    </div>
+</section>
+
+<section class="card border-danger" aria-labelledby="delete-account-heading">
+    <div class="card-header text-bg-danger"><h2 class="h5 mb-0" id="delete-account-heading">Danger zone</h2></div>
+    <div class="card-body">
+        @if (Model.CanDelete)
+        {
+            <p>Deleting your account permanently removes your PocketLedger identity and all financial data. This action cannot be undone.</p>
+            <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#delete-account-modal">Delete account</button>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0" role="status">The bootstrap administrator account is protected and cannot delete itself.</div>
+        }
+    </div>
+</section>
+
+@section Modals {
+    @if (Model.CanDelete)
+    {
+        <div class="modal fade" id="delete-account-modal" tabindex="-1" aria-labelledby="delete-account-modal-title" aria-describedby="delete-account-warning" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form asp-action="DeleteAccount" method="post" class="modal-content" id="delete-account-form">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="delete-account-modal-title">Permanently delete your account?</h2>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="delete-account-warning">This permanently deletes your PocketLedger account and all financial data. This action cannot be undone.</p>
+                        <div class="alert alert-info">
+                            <strong>Keep your financial data if you may return later.</strong>
+                            <p class="mb-2">Download a password-protected backup before deleting your account. The backup does not contain your login, social account connection, password, authenticator, or recovery key.</p>
+                            <a class="btn btn-outline-primary" href="@Model.BackupUrl" target="_blank" rel="noopener">Download encrypted backup</a>
+                        </div>
+                        <p class="small text-muted">To restore the backup later, create a new PocketLedger account and upload the file from Import / Export.</p>
+                        <label class="form-label" for="delete-account-confirmation">Type <strong>DELETE</strong> to confirm</label>
+                        <input class="form-control" id="delete-account-confirmation" name="confirmation" type="text" autocomplete="off" spellcheck="false" required />
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-danger" type="submit" data-delete-account-submit disabled>Permanently delete account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    @if (Model.CanDelete)
+    {
+        <script src="~/js/account-deletion.js" asp-append-version="true"></script>
+    }
+}
