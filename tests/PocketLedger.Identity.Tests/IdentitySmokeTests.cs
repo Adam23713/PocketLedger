@@ -101,6 +101,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     [InlineData("/Account/ChangePassword")]
     [InlineData("/Account/CreateDataPassword")]
     [InlineData("/Account/RegenerateRecoveryKey")]
+    [InlineData("/Account/Manage")]
     [InlineData("/Account/Security")]
     [InlineData("/Account/LoginEvents")]
     [InlineData("/Admin")]
@@ -120,6 +121,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     [InlineData("/Account/SetupAuthenticator")]
     [InlineData("/Account/RecoveryCodes")]
     [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/DeleteAccount")]
     [InlineData("/Account/Logout")]
     public async Task AnonymousUser_IsRejectedBeforeProtectedPostActionRuns(string path)
     {

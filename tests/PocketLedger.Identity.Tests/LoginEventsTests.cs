@@ -83,7 +83,7 @@ public sealed class LoginEventsTests : IClassFixture<WebApplicationFactory<Progr
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("<h1 class=\"mb-1\">Security</h1>", content);
+        Assert.Contains("<h1 class=\"mb-1\">Sign-in &amp; security</h1>", content);
         Assert.Contains("href=\"/Account/LoginEvents\"", content);
         Assert.Contains("href=\"/Account/ChangePassword\"", content);
         Assert.Contains("href=\"/Account/RecoveryCode\"", content);
