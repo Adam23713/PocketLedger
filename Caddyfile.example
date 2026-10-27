@@ -110,6 +110,20 @@
 				ipv6_prefix 64
 			}
 
+			# The contact form sends email, so repeated submissions are cut off at the edge
+			# before they reach the landing service, which applies its own stricter limits.
+			zone pocketledger_contact_post {
+				match {
+					host {$POCKETLEDGER_LANDING_DOMAIN}
+					method POST
+					path /contact
+				}
+				key {client_ip}
+				events 5
+				window 10m
+				ipv6_prefix 64
+			}
+
 			log_key
 		}
 
@@ -119,7 +133,10 @@
 		respond @internal_admin 404
 
 		@landing host {$POCKETLEDGER_LANDING_DOMAIN}
-		reverse_proxy @landing landing:5053
+		reverse_proxy @landing landing:5053 {
+			# Overwrite any client-supplied value with the Cloudflare-verified client address.
+			header_up X-PocketLedger-Client-IP {client_ip}
+		}
 
 		@web host {$POCKETLEDGER_WEB_DOMAIN}
 		reverse_proxy @web web:5050

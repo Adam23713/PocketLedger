@@ -1,6 +1,7 @@
 (() => {
     const gallery = [...document.querySelectorAll('[data-gallery-image]')];
     const viewer = document.querySelector('.image-viewer');
+    if (!viewer) return;
     const viewerImage = viewer.querySelector('img');
     const caption = viewer.querySelector('#viewer-caption');
     const position = viewer.querySelector('[data-viewer-position]');
@@ -53,6 +54,27 @@
         document.body.classList.remove('viewer-open');
         opener?.focus();
     });
+})();
+
+(() => {
+    const field = document.querySelector('[data-character-counter]');
+    const output = document.querySelector('[data-character-count]');
+    if (!field || !output) return;
+    const update = () => {
+        const remaining = field.maxLength - field.value.length;
+        output.textContent = remaining < 500 ? `${remaining} characters left` : '';
+    };
+    field.addEventListener('input', update);
+    update();
+    // Prevent accidental double submissions while the server verifies and sends the message.
+    field.form.addEventListener('submit', () => {
+        const button = field.form.querySelector('button[type="submit"]');
+        if (button) setTimeout(() => { button.disabled = true; }, 0);
+    });
+    window.addEventListener('pageshow', () => field.form.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = false; }));
+})();
+
+(() => {
 
     const appUrl = document.body.dataset.appUrl;
     const links = document.querySelectorAll('[data-app-link]');
