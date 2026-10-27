@@ -60,10 +60,11 @@ PocketLedger is a self-hosted personal finance manager built with ASP.NET Core a
 
 ## Architecture
 
-PocketLedger runs as four independently deployed services, each with its own PostgreSQL database:
+PocketLedger runs as five independently deployed services. Web, API and Identity each own a separate PostgreSQL database; the public Landing and Docs services need no database:
 
 ```text
 PocketLedger.Landing    Public marketing site. No database, no auth.
+PocketLedger.Docs       Public user and API documentation. No database, no auth.
 PocketLedger.Web        Server-side Razor MVC app and browser-facing BFF.
                          The browser only ever sees an encrypted session cookie.
 PocketLedger.Api        Owns all financial data. Accepts bearer tokens issued
@@ -80,6 +81,7 @@ The Web process never touches the API or Identity database, and the API process 
 
 ```text
 https://pocketledger.dev           Public landing page
+https://docs.pocketledger.dev      User guides and API documentation
 https://app.pocketledger.dev       Web / BFF — what the browser talks to
 https://api.pocketledger.dev       API — reserved for future first-party clients
 https://identity.pocketledger.dev  Identity / OIDC
@@ -163,7 +165,7 @@ dotnet run --project src/PocketLedger.Api
 dotnet run --project src/PocketLedger.Web
 ```
 
-Development uses one checked-in signing key for interoperability — it is **not** a production secret. Run the landing page separately with `ASPNETCORE_ENVIRONMENT=Development dotnet run --project src/PocketLedger.Landing --urls http://localhost:5053`; it needs no database.
+Development uses one checked-in signing key for interoperability — it is **not** a production secret. Run the public sites separately with `ASPNETCORE_ENVIRONMENT=Development dotnet run --project src/PocketLedger.Landing --urls http://localhost:5053` and `ASPNETCORE_ENVIRONMENT=Development dotnet run --project src/PocketLedger.Docs --urls http://localhost:5054`; neither needs a database.
 
 Build and test the whole solution with:
 

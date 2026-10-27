@@ -22,7 +22,7 @@ This is the complete walkthrough for running PocketLedger in production on your 
 - A domain with DNS records proxied through Cloudflare (PocketLedger's reference edge setup assumes this — see [Edge security](edge-security.md))
 - A TOTP authenticator app for the first login
 
-PocketLedger runs as four services — `landing`, `web`, `api`, `identity` — each built from the same `Dockerfile` with a different target, plus `caddy`, `crowdsec`, two Valkey instances (`valkey` for the financial cache, `valkey-security` for request telemetry and suspicious request detection) and three isolated PostgreSQL databases. See the [architecture overview](../README.md#architecture) for how they relate.
+PocketLedger runs as five services — `landing`, `docs`, `web`, `api`, `identity` — each built from the same `Dockerfile` with a different target, plus `caddy`, `crowdsec`, two Valkey instances (`valkey` for the financial cache, `valkey-security` for request telemetry and suspicious request detection) and three isolated PostgreSQL databases. See the [architecture overview](../README.md#architecture) for how they relate.
 
 ## 1. Domains and secrets
 
@@ -33,7 +33,7 @@ cp .env.example .env
 cp Caddyfile.example Caddyfile
 ```
 
-In `.env`, set all four domain names and replace every placeholder secret:
+In `.env`, set all five domain names and replace every placeholder secret. The reference documentation hostname is `docs.pocketledger.dev`:
 
 - `POCKETLEDGER_WEB_CLIENT_SECRET` — a long random string.
 - `POCKETLEDGER_ADMIN_OPERATIONS_KEY` — a separate long random string used only for authenticated Identity-to-API and Identity-to-Web admin requests (user blocking, session termination and user deletion).
@@ -72,7 +72,7 @@ docker compose up -d identity-database
 docker compose run --rm identity bootstrap-identity
 ```
 
-This builds all four application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is disabled by default. The administrator opens or closes it and sets the maximum number of accounts on the Identity admin dashboard (`/Admin`), which also shows the registered and free account counts. `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED` and `POCKETLEDGER_PUBLIC_REGISTRATION_MAXIMUM_USERS` only provide the initial defaults: once the settings are saved on the dashboard, they are stored in the Identity database and take precedence over the environment.
+This builds all five application images and creates the first Identity account from `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD`. Public self-registration is disabled by default. The administrator opens or closes it and sets the maximum number of accounts on the Identity admin dashboard (`/Admin`), which also shows the registered and free account counts. `POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED` and `POCKETLEDGER_PUBLIC_REGISTRATION_MAXIMUM_USERS` only provide the initial defaults: once the settings are saved on the dashboard, they are stored in the Identity database and take precedence over the environment.
 
 The bootstrap command permanently marks this first account as the sole administrator. The flag cannot be granted, revoked, or transferred through the UI, API, or account commands, and the database rejects a second administrator. When upgrading an existing deployment, the Identity migration assigns the flag to the oldest user by `CreatedAtUtc`, using the user ID as a deterministic tie-breaker. Existing sessions must sign in again to receive the administrator claim. Review the selected account before exposing future administrator endpoints; changing the designation is intentionally unsupported.
 
@@ -114,7 +114,7 @@ PocketLedger layers several independent protections rather than relying on any s
 
 **Internal TLS.** Covered [above](#internal-api-tls) — every hop between Web, Caddy and the API is encrypted with a private CA, independent of the public-facing TLS terminated by Caddy/Cloudflare.
 
-**Edge protection.** Caddy and CrowdSec sit in front of all four public hosts, behind Cloudflare. Only Cloudflare's published IP ranges are trusted for client-IP headers, a shared rate limiter caps requests per client across all hosts (with a stricter limit on Identity's authentication endpoints), and CrowdSec bans IPs that match flood or abuse patterns using only local detection — no data is shared with CrowdSec's community service. → [Edge security guide](edge-security.md)
+**Edge protection.** Caddy and CrowdSec sit in front of all five public hosts, behind Cloudflare. Only Cloudflare's published IP ranges are trusted for client-IP headers, a shared rate limiter caps requests per client across all hosts (with a stricter limit on Identity's authentication endpoints), and CrowdSec bans IPs that match flood or abuse patterns using only local detection — no data is shared with CrowdSec's community service. → [Edge security guide](edge-security.md)
 
 **Authentication.** Every account requires TOTP-based two-factor authentication plus recovery codes. Public self-registration is disabled by default and can be opened, closed and capped to a maximum number of accounts from the Identity admin dashboard.
 

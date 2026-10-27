@@ -74,7 +74,7 @@ try:
         internal_key = Path(directory) / 'ca.key'
         run('openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-sha256', '-days', '1', '-nodes', '-subj', '/CN=PocketLedger edge test CA/', '-keyout', str(internal_key), '-out', str(internal_ca))
         production = (ROOT / 'Caddyfile.example').read_text()
-        domains = {'LANDING': 'landing.test', 'WEB': 'web.test', 'API': 'api.test', 'IDENTITY': 'identity.test'}
+        domains = {'LANDING': 'landing.test', 'DOCS': 'docs.test', 'WEB': 'web.test', 'API': 'api.test', 'IDENTITY': 'identity.test'}
         env_args = ['-e', 'CROWDSEC_API_KEY=' + ENV['CROWDSEC_API_KEY']]
         for key, value in domains.items():
             env_args += ['-e', 'POCKETLEDGER_' + key + '_DOMAIN=' + value]
@@ -83,9 +83,9 @@ try:
         run('docker', 'run', '--rm', *common, IMAGE, 'caddy', 'validate', '--config', '/etc/caddy/Caddyfile')
         print('PASS production Caddyfile validation with actual custom image', flush=True)
 
-        for service, port in [('landing', 5053), ('web', 5050), ('api', 5051), ('identity', 5052)]:
+        for service, port in [('landing', 5053), ('docs', 5054), ('web', 5050), ('api', 5051), ('identity', 5052)]:
             container(service, '--network-alias', service, IMAGE, 'caddy', 'respond', '--listen', ':' + str(port), '--body', service)
-        site = '{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN}'
+        site = '{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_DOCS_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN}'
         local = production.replace(site + ' {', ':8080 {').replace('{\n', '{\n\tauto_https off\n', 1).replace('roll_size 100MiB', 'roll_size 1MiB')
         api_tls_proxy = '''\t\treverse_proxy @api https://api:5051 {
 \t\t\ttransport http {
@@ -123,7 +123,7 @@ try:
             return result
 
         wait_for(lambda: request()[0] == 200)
-        for service in ['landing', 'web', 'api', 'identity']:
+        for service in ['landing', 'docs', 'web', 'api', 'identity']:
             assert request(service + '.test') == (200, service)
         application_entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
         identity_entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/identity-access.log'))
@@ -146,7 +146,7 @@ try:
         assert 'private-error-code' not in run('docker', 'logs', proxy, merge_errors=True)
         run('docker', 'start', PROJECT + '-api')
         wait_for(lambda: request('api.test')[0] == 200)
-        print('PASS split application/Identity logs, all routes, spoof rejection and OIDC redaction', flush=True)
+        print('PASS split application/Identity logs, all five routes, spoof rejection and OIDC redaction', flush=True)
 
         # Only the disposable fixture trusts the container gateway to simulate a CDN.
         config.write_text(local.replace('trusted_proxies static ', 'trusted_proxies static ' + entry['request']['remote_ip'] + ' '))
@@ -155,7 +155,7 @@ try:
         entry = json.loads(run('docker', 'exec', proxy, 'tail', '-n', '1', '/var/log/caddy/access.log'))
         assert entry['request']['client_ip'] == '8.8.4.4'
         for i in range(400):
-            assert request(['landing.test', 'web.test'][i % 2], ip='11.12.13.14')[0] == 200, i
+            assert request(['landing.test', 'docs.test', 'web.test'][i % 3], ip='11.12.13.14')[0] == 200, i
         assert request('api.test', ip='11.12.13.14', path='/?code=private-rate-limit-code')[0] == 429
         assert 'private-rate-limit-code' not in run('docker', 'logs', proxy, merge_errors=True)
         for _ in range(15):
