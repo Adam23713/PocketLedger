@@ -38,13 +38,7 @@
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
     @await Html.PartialAsync("_DevelopmentBanner", registration)
-    <header class="header">
-        <nav class="shell nav" aria-label="Main navigation">
-            <a class="brand" href="#"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>
-            <div class="nav-links"><a href="#features">Features</a><a href="#open-source">Open source</a><a href="#self-hosting">Self-hosting</a><a href="/contact">Contact</a><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a></div>
-            <a class="button button-login button-small" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a>
-        </nav>
-    </header>
+    @await Html.PartialAsync("_Header", "home")
     <main id="main">
         <section class="hero shell" aria-labelledby="hero-title">
             <div class="eyebrow"><span class="status-dot" aria-hidden="true"></span> PERSONAL FINANCE. FREE & OPEN SOURCE.</div>
@@ -85,7 +79,7 @@
                 }
             </ol>
         </section>
-        <section class="security section shell" aria-labelledby="security-title">
+        <section class="security section shell" id="security" aria-labelledby="security-title">
             <div class="security-panel">
                 <div class="security-intro">
                     <div><p class="eyebrow">YOUR DATA, PROTECTED BY DESIGN</p><h2 id="security-title">Your finances stay yours.</h2></div>
