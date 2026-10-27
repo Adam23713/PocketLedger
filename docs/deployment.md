@@ -41,10 +41,13 @@ In `.env`, set all four domain names and replace every placeholder secret:
 - `POSTGRES_PASSWORD` — a strong database password.
 - `POCKETLEDGER_INITIAL_USERNAME` / `POCKETLEDGER_INITIAL_PASSWORD` — the first account, created at bootstrap.
 - `POCKETLEDGER_GOOGLE_CLIENT_ID` / `POCKETLEDGER_GOOGLE_CLIENT_SECRET` — optional Google OAuth web-client credentials. Leave both values empty to keep Google login disabled; never commit the production secret.
+- `POCKETLEDGER_FACEBOOK_APP_ID` / `POCKETLEDGER_FACEBOOK_APP_SECRET` — optional Meta app credentials for Facebook Login. Leave both values empty to keep Facebook login disabled; never commit the app secret.
 - `CROWDSEC_API_KEY` — `openssl rand -hex 32`. Review the [edge security guide](edge-security.md) for the rest of the Cloudflare and CrowdSec setup, including verification, monitoring, key rotation and rollback.
 - `CROWDSEC_IDENTITY_API_KEY` — a second `openssl rand -hex 32` value used only by the Identity Admin dashboard for read-only LAPI decision queries. Never reuse `CROWDSEC_API_KEY`.
 
 For Google login, create a **Web application** OAuth client in Google Auth Platform and register the exact callbacks `https://<identity-domain>/signin-google` for production and `http://localhost:5052/signin-google` for direct local development. PocketLedger requests only the `openid` and `email` scopes, accepts a new external account only when Google reports its e-mail as verified, and links returning users by Google's stable subject rather than by e-mail address. Configure both credential values to enable the provider; a missing value keeps it hidden from the login and registration pages.
+
+For Facebook login, create a Meta app with the **Facebook Login** use case and register the exact callbacks `https://<identity-domain>/signin-facebook` for production and `https://localhost:5052/signin-facebook` for direct local development. PocketLedger requests only the `email` permission and the `id` and `email` fields, rejects responses without a syntactically valid primary e-mail address, and links returning users by Meta's stable user ID. Configure both credential values to enable the provider; a missing value keeps it hidden from the login and registration pages. Use the HTTPS launch profile for local testing because Meta enforces HTTPS redirect URIs. While the Meta app is unpublished, only app roles and test users can sign in.
 
 Keep `COMPOSE_PROJECT_NAME` stable for the lifetime of the deployment. Renaming a checkout without an explicit project name can select a different set of Compose-managed database volumes — Compose uses the project name to identify its containers, networks and named volumes, not the directory path.
 

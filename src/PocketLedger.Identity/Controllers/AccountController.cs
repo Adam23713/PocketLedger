@@ -17,7 +17,8 @@ namespace PocketLedger.Controllers;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
-    IRegistrationSettingsService registrationSettings, IConfiguration configuration, IUserDataKeyService dataKeys, IPendingSignInKeys pendingKeys) : Controller
+    IRegistrationSettingsService registrationSettings, IConfiguration configuration, IUserDataKeyService dataKeys, IPendingSignInKeys pendingKeys,
+    IUserAccountDeletionService accountDeletion) : Controller
 {
     private const string DataUnlockFailedMessage = "Your data could not be unlocked. Contact the administrator.";
 
@@ -697,6 +698,36 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         }
         await audit.WriteAsync("DataRecoveryKeyRegenerated", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
         return View("DataRecoveryKey", new DataRecoveryKeyViewModel(recoveryKey, Url.Action(nameof(Security))!, null));
+    }
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> Manage()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        var webBaseUrl = configuration["OpenIddict:WebBaseUrl"] ?? throw new InvalidOperationException("OpenIddict:WebBaseUrl is required.");
+        return View(new AccountManagementViewModel(user.UserName ?? "Unavailable", user.Email, !user.IsBootstrapAdministrator,
+            $"{webBaseUrl.TrimEnd('/')}/ImportExport#encrypted-backup"));
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAccount(string? confirmation, CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+        if (user.IsBootstrapAdministrator) return Forbid();
+        if (!string.Equals(confirmation, "DELETE", StringComparison.Ordinal))
+        {
+            TempData["AccountWarning"] = "Your account was not deleted because the confirmation text did not match DELETE.";
+            return RedirectToAction(nameof(Manage));
+        }
+
+        await accountDeletion.DeleteAsync(user, cancellationToken);
+        pendingKeys.Clear(HttpContext);
+        await signInManager.SignOutAsync();
+        HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+        TempData["LoginSuccessMessage"] = "Your account and all PocketLedger data have been permanently deleted.";
+        return RedirectToAction(nameof(Login));
     }
 
     [Authorize, HttpGet]
