@@ -16,8 +16,9 @@ namespace PocketLedger.Controllers;
 [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class AdminController(UserManager<ApplicationUser> userManager, IRequestTelemetryReader requestTelemetry, ISuspiciousRequestEventReader suspiciousRequestEvents,
-    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessPropagation accessPropagation, IAdminUserDataClient userDataClient,
-    IdentityDbContext dbContext, IRegistrationSettingsService registrationSettings, IAuthenticationAuditService audit, ILogger<AdminController> logger) : Controller
+    ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessPropagation accessPropagation,
+    IdentityDbContext dbContext, IRegistrationSettingsService registrationSettings, IAuthenticationAuditService audit, IUserAccountDeletionService accountDeletion,
+    ILogger<AdminController> logger) : Controller
 {
     private const int PageSize = 10;
     private const int BucketMinutes = 5;
@@ -112,17 +113,7 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         }
         var user = await FindManageableUserAsync(userId);
         if (user is null) return NotFound();
-        await BlockInIdentityAsync(user, cancellationToken);
-        // Deletion only continues once the API rejects the user's tokens and every web session is gone.
-        await accessPropagation.BlockAsync(user.Id, cancellationToken);
-
-        await userDataClient.DeleteAsync(user.Id, cancellationToken);
-        await using var transaction = dbContext.Database.IsRelational() ? await dbContext.Database.BeginTransactionAsync(cancellationToken) : null;
-        await DeleteIdentityHistoryAsync(user.Id, cancellationToken);
-        dbContext.DeletedUserTombstones.Add(new DeletedUserTombstone { UserId = user.Id, DeletedAtUtc = timeProvider.GetUtcNow() });
-        var deleteResult = await userManager.DeleteAsync(user);
-        if (!deleteResult.Succeeded) throw new InvalidOperationException("The user identity could not be deleted.");
-        if (transaction is not null) await transaction.CommitAsync(cancellationToken);
+        await accountDeletion.DeleteAsync(user, cancellationToken);
 
         TempData["AdminMessage"] = $"{user.UserName} has been deleted.";
         return RedirectToAction(nameof(Index), new { page });
@@ -205,21 +196,4 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task DeleteIdentityHistoryAsync(Guid userId, CancellationToken cancellationToken)
-    {
-        var subject = userId.ToString();
-        if (dbContext.Database.IsRelational())
-        {
-            await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
-            await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ExecuteDeleteAsync(cancellationToken);
-            await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ExecuteDeleteAsync(cancellationToken);
-            await dbContext.UserDataKeys.Where(item => item.UserId == userId).ExecuteDeleteAsync(cancellationToken);
-            return;
-        }
-
-        dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreToken>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
-        dbContext.RemoveRange(await dbContext.Set<OpenIddictEntityFrameworkCoreAuthorization>().Where(item => item.Subject == subject).ToListAsync(cancellationToken));
-        dbContext.RemoveRange(await dbContext.AuthenticationAuditEvents.Where(item => item.UserId == userId).ToListAsync(cancellationToken));
-        dbContext.RemoveRange(await dbContext.UserDataKeys.Where(item => item.UserId == userId).ToListAsync(cancellationToken));
-    }
 }

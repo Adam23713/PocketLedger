@@ -56,7 +56,8 @@
                     </button>
                     <div class="navbar-collapse collapse" id="identity-navigation">
                         <ul class="navbar-nav me-auto">
-                            <li class="nav-item"><a class="@NavClass("Account", "Security")" asp-controller="Account" asp-action="Security" aria-current="@(string.Equals(currentAction, "Security", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Security</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Manage")" asp-controller="Account" asp-action="Manage" aria-current="@(string.Equals(currentAction, "Manage", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Account</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Security")" asp-controller="Account" asp-action="Security" aria-current="@(string.Equals(currentAction, "Security", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Sign-in &amp; security</a></li>
                             <li class="nav-item"><a class="@NavClass("Account", "LoginEvents")" asp-controller="Account" asp-action="LoginEvents" aria-current="@(string.Equals(currentAction, "LoginEvents", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Login Events</a></li>
                             @if (isBootstrapAdministrator)
                             {
