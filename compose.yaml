@@ -15,6 +15,16 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
       Identity__InternalBaseUrl: http://identity:5052/
+      Contact__ClientIpHeader: X-PocketLedger-Client-IP
+      Contact__RecipientAddress: ${POCKETLEDGER_CONTACT_RECIPIENT:-info@pocketledger.dev}
+      Contact__Smtp__Host: ${POCKETLEDGER_CONTACT_SMTP_HOST:-}
+      Contact__Smtp__Port: ${POCKETLEDGER_CONTACT_SMTP_PORT:-587}
+      Contact__Smtp__Security: ${POCKETLEDGER_CONTACT_SMTP_SECURITY:-StartTls}
+      Contact__Smtp__Username: ${POCKETLEDGER_CONTACT_SMTP_USERNAME:-}
+      Contact__Smtp__Password: ${POCKETLEDGER_CONTACT_SMTP_PASSWORD:-}
+      Contact__Smtp__FromAddress: ${POCKETLEDGER_CONTACT_SMTP_FROM:-}
+      Contact__Turnstile__SiteKey: ${POCKETLEDGER_TURNSTILE_SITE_KEY:-}
+      Contact__Turnstile__SecretKey: ${POCKETLEDGER_TURNSTILE_SECRET_KEY:-}
     restart: unless-stopped
 
   web:

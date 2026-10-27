@@ -17,8 +17,8 @@
     <meta name="color-scheme" content="dark" />
     <title>Privacy Policy — PocketLedger</title>
     <link rel="icon" type="image/png" href="/images/logo.png" />
-    <link rel="stylesheet" href="/site.css" />
-    <script src="/site.js" defer></script>
+    <link rel="stylesheet" href="/site.css" asp-append-version="true" />
+    <script src="/site.js" asp-append-version="true" defer></script>
 </head>
 <body data-app-url="@appUrl">
     <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="0" height="0">
@@ -28,13 +28,7 @@
     </svg>
     <a class="skip-link" href="#main">Skip to content</a>
     @await Html.PartialAsync("_DevelopmentBanner", registration)
-    <header class="header">
-        <nav class="shell nav" aria-label="Main navigation">
-            <a class="brand" href="/"><img src="/images/logo.png" width="34" height="34" alt="" />PocketLedger</a>
-            <div class="nav-links"><a href="/">Home</a><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a></div>
-            <a class="button button-login button-small" data-app-link href="@(appUrl + "/Session/Login")"><span data-app-label>Log in</span><span class="login-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M4 12h11m-4-4 4 4-4 4" /></svg></span></a>
-        </nav>
-    </header>
+    @await Html.PartialAsync("_Header", "privacy")
     <main id="main">
         <section class="legal shell" aria-labelledby="legal-title">
             <p class="eyebrow">LEGAL</p>
@@ -78,6 +72,7 @@
                         <tr><td>Financial data you enter</td><td>Accounts, transactions and their notes, categories, recurring entries, loans and debts, planner/budget entries, your display name, and preferences such as currency, timezone, icons and colours</td><td>You, directly, as you use the Service</td></tr>
                         <tr><td>Security &amp; activity data</td><td>Sign-in timestamps and outcomes, the IP address and browser/device identifier (user agent) of your most recent successful login, and security audit events such as password or 2FA changes</td><td>Generated automatically as you use the Service</td></tr>
                         <tr><td>Technical &amp; connection data</td><td>IP address, requested URL, timestamp and response status for each request to our servers</td><td>Generated automatically by our edge infrastructure for every request, including from visitors who are not registered users</td></tr>
+                        <tr><td>Contact form messages</td><td>The email address you give us to reply to and the text of your message. The website itself does not store them: they are forwarded straight to our mailbox at our email provider (see <a href="#who-we-share-it-with">section 4</a>)</td><td>You, when you use the <a class="text-link" href="/contact">contact form</a></td></tr>
                         <tr><td>Backup files you create</td><td>An encrypted, password-protected export of your finance data, generated only if and when you use the Import/Export feature. It never includes your password, TOTP secret, recovery codes or session data</td><td>You, on request</td></tr>
                     </tbody>
                 </table>
@@ -104,11 +99,12 @@
                 <p>We keep the list of parties who can see your data short and deliberately:</p>
                 <ul>
                     <li><strong>Our hosting provider</strong>, who runs the physical servers your data is stored and processed on, located within the European Economic Area (EEA).</li>
-                    <li><strong>Cloudflare, Inc.</strong>, which sits in front of our servers to provide content delivery, DDoS protection and bot/abuse filtering. As part of this, Cloudflare sees connection-level metadata — such as your IP address and the host and path you're requesting — for every request to the Service. Cloudflare's data processing terms are built into its standard customer agreement; see <a class="text-link" href="https://www.cloudflare.com/trust-hub/gdpr/" target="_blank" rel="noopener noreferrer">Cloudflare's GDPR information ↗</a>.</li>
+                    <li><strong>Forpsi (BlazeArts Kft.)</strong>, our email provider, which hosts our mailboxes on servers within the EEA. Emails you send us — including messages from the <a class="text-link" href="/contact">contact form</a>, which is delivered through its mail servers — and our replies are stored there.</li>
+                    <li><strong>Cloudflare, Inc.</strong>, which sits in front of our servers to provide content delivery, DDoS protection and bot/abuse filtering. As part of this, Cloudflare sees connection-level metadata — such as your IP address and the host and path you're requesting — for every request to the Service. Cloudflare's data processing terms are built into its standard customer agreement; see <a class="text-link" href="https://www.cloudflare.com/trust-hub/gdpr/" target="_blank" rel="noopener noreferrer">Cloudflare's GDPR information ↗</a>. On the contact form, Cloudflare Turnstile checks that the message is sent by a person rather than a bot; to do so it evaluates signals from your browser for that page only, without setting advertising or tracking cookies.</li>
                     <li><strong>Google LLC</strong> and <strong>Meta Platforms, Inc.</strong> (Facebook), only if you choose to sign in with them. When you do, the provider learns that you signed in to PocketLedger, and sends us the limited data listed in <a href="#data-we-collect">section 2</a>. We never send them your financial data. Their own handling of your data is covered by <a class="text-link" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy ↗</a> and <a class="text-link" href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener noreferrer">Meta's Privacy Policy ↗</a>.</li>
                 </ul>
                 <p>Our automated abuse-detection system (CrowdSec) runs entirely on our own servers, and its optional community threat-sharing feature is switched off — it does not send your data anywhere outside our infrastructure.</p>
-                <p>We currently use no third-party email delivery service and no analytics or advertising partners. We do not sell your data, rent it out, or share it with data brokers. We may disclose data where required by law, or to protect the rights, property or safety of PocketLedger, our users, or others.</p>
+                <p>Apart from the email provider above, we use no third-party email delivery service, and we have no analytics or advertising partners. We do not sell your data, rent it out, or share it with data brokers. We may disclose data where required by law, or to protect the rights, property or safety of PocketLedger, our users, or others.</p>
             </article>
 
             <article class="legal-section" id="international-transfers">
@@ -119,6 +115,7 @@
             <article class="legal-section" id="how-long-we-keep-it">
                 <h2>6. How long we keep it</h2>
                 <p>When you delete your account, your account, authentication, and financial data is deleted immediately — we don't keep a separate retention window "just in case." An encrypted backup you've exported yourself is yours to keep or delete; we don't retain a copy of it after you download it.</p>
+                <p>Contact form messages are kept in our mailbox only as long as needed to answer you and handle any follow-up, and you can ask us to delete them at any time.</p>
                 <h3 id="delete-account">How to delete your account</h3>
                 <p>Sign in, open the profile menu, choose <strong>Account &amp; security</strong>, then go to <strong>Account</strong> and use <strong>Delete account</strong>. Before you confirm, you can download an encrypted backup of your financial data. Deletion removes your account, your financial data, any connected Google or Facebook sign-in, your sign-in history and your encryption keys, and ends all of your active sessions. The only thing we keep is your account's random internal identifier and the time of deletion, with no name, email or other personal data attached, so that any session still open elsewhere is refused.</p>
                 <p>Deleting your PocketLedger account doesn't change anything in your Google or Facebook account. To also remove PocketLedger from the apps connected there, use <a class="text-link" href="https://myaccount.google.com/connections" target="_blank" rel="noopener noreferrer">Google's third-party connections ↗</a> or <a class="text-link" href="https://www.facebook.com/settings/?tab=business_tools" target="_blank" rel="noopener noreferrer">Facebook's Apps and Websites settings ↗</a>. If you can't sign in, contact us using the details in <a href="#contact">section 13</a> and we'll delete your account for you.</p>
@@ -195,7 +192,7 @@
             </article>
         </section>
     </main>
-    <footer class="shell footer"><a class="brand" href="/"><img src="/images/logo.png" width="28" height="28" alt="" />PocketLedger</a><a href="/privacy">Privacy</a><p>Made by <a href="https://www.linkedin.com/in/%C3%A1d%C3%A1m-kert%C3%A9sz-b6a541149/" target="_blank" rel="noopener noreferrer">Ádám Kertész</a></p><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a><span>AGPL-3.0-only</span></footer>
+    <footer class="shell footer"><a class="brand" href="/"><img src="/images/logo.png" width="28" height="28" alt="" />PocketLedger</a><a href="/privacy">Privacy</a><a href="/contact">Contact</a><p>Made by <a href="https://www.linkedin.com/in/%C3%A1d%C3%A1m-kert%C3%A9sz-b6a541149/" target="_blank" rel="noopener noreferrer">Ádám Kertész</a></p><a class="github-link" href="@repository" target="_blank" rel="noopener noreferrer"><svg class="github-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#github-mark"></use></svg>GitHub ↗</a><span>AGPL-3.0-only</span></footer>
     <dialog class="image-viewer" aria-label="PocketLedger screenshots">
         <div class="viewer-toolbar">
             <p id="viewer-caption" aria-live="polite"></p>
