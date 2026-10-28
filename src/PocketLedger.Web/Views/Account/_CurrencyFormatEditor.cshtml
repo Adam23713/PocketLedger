@@ -1,0 +1,27 @@
+@model PocketLedger.Models.ViewModels.Account.CurrencyFormatEditorViewModel
+@using PocketLedger.Models.Enums
+@{
+    // The client-side template is rendered with placeholders that settings.js replaces when a currency is added.
+    var definition = Model.Key == "__key__" ? new CurrencyDefinition("__code__", "__name__", "__symbol__", 2) : Currencies.Get(Model.Format.CurrencyCode);
+    var prefix = $"CurrencyFormats[{Model.Key}]";
+    var id = $"currency-format-{Model.Key}";
+}
+<div class="currency-format-editor" data-currency-format data-currency="@definition.Code" data-symbol="@definition.Symbol" hidden>
+    <input type="hidden" name="CurrencyFormats.Index" value="@Model.Key" />
+    <input type="hidden" name="@(prefix).CurrencyCode" value="@definition.Code" />
+    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+        <div><h3 class="h6 mb-0">@definition.Code — @definition.DisplayName</h3><small class="text-muted">Symbol: @definition.Symbol</small></div>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-currency-remove>Remove</button>
+    </div>
+    <div class="mb-2"><label class="form-label" for="@(id)-decimals">Decimal places</label><select class="form-select" id="@(id)-decimals" name="@(prefix).DecimalPlaces" data-format-field="decimals">@for (var n = 0; n <= 4; n++) { <option value="@n" selected="@(n == Model.Format.DecimalPlaces)">@n</option> }</select></div>
+    <div class="row g-2">
+        <div class="col"><label class="form-label" for="@(id)-decimal-separator">Decimal separator</label><input class="form-control" id="@(id)-decimal-separator" name="@(prefix).DecimalSeparator" value="@Model.Format.DecimalSeparator" maxlength="1" data-format-field="decimal-separator" /></div>
+        <div class="col"><label class="form-label" for="@(id)-thousands-separator">Thousands separator</label><input class="form-control" id="@(id)-thousands-separator" name="@(prefix).ThousandsSeparator" value="@Model.Format.ThousandsSeparator" maxlength="1" data-format-field="thousands-separator" /></div>
+    </div>
+    <div class="row g-2 mt-1">
+        <div class="col"><label class="form-label" for="@(id)-display">Show</label><select class="form-select" id="@(id)-display" name="@(prefix).CurrencyDisplay" data-format-field="display">@foreach (var value in Enum.GetValues<CurrencyDisplay>()) { <option value="@value" selected="@(value == Model.Format.CurrencyDisplay)">@value</option> }</select></div>
+        <div class="col"><label class="form-label" for="@(id)-position">Position</label><select class="form-select" id="@(id)-position" name="@(prefix).CurrencyPosition" data-format-field="position">@foreach (var value in Enum.GetValues<CurrencyPosition>()) { <option value="@value" selected="@(value == Model.Format.CurrencyPosition)">@value</option> }</select></div>
+    </div>
+    <div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="@(id)-space" name="@(prefix).UseSpace" value="true" checked="@Model.Format.UseSpace" data-format-field="space" /><input type="hidden" name="@(prefix).UseSpace" value="false" /><label class="form-check-label" for="@(id)-space">Space between value and currency</label></div>
+    <div class="mt-3"><small class="text-muted">Preview</small><div class="h5 mb-0" data-format-preview></div></div>
+</div>

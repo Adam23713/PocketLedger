@@ -15,6 +15,7 @@ public sealed class UserDataDeletionService(PocketLedgerDbContext dbContext) : I
         await dbContext.Transactions.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);
         await dbContext.RecurringTransactions.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);
         await dbContext.Debts.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);
+        await dbContext.Goals.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);
         await dbContext.Categories.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteUpdateAsync(update => update.SetProperty(item => item.ParentCategoryId, (Guid?)null), cancellationToken);
         await dbContext.Categories.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);
         await dbContext.Accounts.IgnoreQueryFilters().Where(item => item.OwnerId == userId).ExecuteDeleteAsync(cancellationToken);

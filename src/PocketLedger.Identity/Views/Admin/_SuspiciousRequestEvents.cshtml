@@ -14,12 +14,13 @@
     {
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th scope="col">Detected (UTC)</th><th scope="col">Client address</th><th scope="col">Requests during burst</th><th scope="col">Detection window</th><th scope="col">Users</th><th scope="col">Application / host</th></tr></thead>
+                <thead><tr><th scope="col">Detected (UTC)</th><th scope="col">Reason</th><th scope="col">Client address</th><th scope="col">Requests / attempts</th><th scope="col">Detection window</th><th scope="col">Users</th><th scope="col">Application / host</th></tr></thead>
                 <tbody>
                     @foreach (var item in Model.Events)
                     {
                         <tr>
                             <td>@item.DetectedAtUtc.ToString("u")</td>
+                            <td>@(item.Reason ?? "Request burst")</td>
                             <td><code>@item.ClientIpAddress</code></td>
                             <td>@item.RequestCount</td>
                             <td>@item.Window.TotalMinutes.ToString("0") minutes</td>

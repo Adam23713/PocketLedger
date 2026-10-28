@@ -16,7 +16,10 @@ public sealed record TransactionCreateRequest(TransactionType Type, Guid? Accoun
 public sealed record TransactionUpdateRequest(TransactionType Type, Guid? AccountId, Guid? TargetAccountId, decimal Amount, decimal? TargetAmount, decimal? ExchangeRate, AdjustmentDirection? AdjustmentDirection, DateOnly TransactionDate, TimeOnly TransactionTime, Guid? CategoryId, string? Note);
 public sealed record DebtSummaryResponse(DebtDto Debt, decimal RemainingAmount, RecurringTransactionDto? AutomaticPayment, DateOnly? NextPayment);
 public sealed record DebtDetailsResponse(DebtDto Debt, decimal RemainingAmount, IReadOnlyList<TransactionDto> Transactions, RecurringTransactionDto? AutomaticPayment, DateOnly? NextPayment);
-public sealed record UserPreferenceResponse(string? DisplayName, int AvatarId, string DefaultCurrency, string TimeZoneId, IReadOnlyList<UserCurrencyFormatDto> CurrencyFormats);
+public sealed record UserPreferenceResponse(string? DisplayName, int AvatarId, string DefaultCurrency, string TimeZoneId, IReadOnlyList<UserCurrencyFormatDto> CurrencyFormats, string? LastSeenChangelogVersion = null);
+public sealed record ChangelogSeenRequest(string Version);
+public sealed record GoalDto(Guid Id, string Name, decimal TargetAmount, decimal SavedAmount, string Currency, DateOnly? TargetDate, string BannerColor, string? BannerImage, string? Note, DateTimeOffset CreatedAt);
+public sealed record GoalContributionRequest(decimal Amount);
 public sealed record UserPreferenceUpdateRequest(string? DisplayName, int AvatarId, string DefaultCurrency, string TimeZoneId, IReadOnlyList<UserCurrencyFormatDto> CurrencyFormats);
 
 public sealed record AccountDto(Guid Id, string Name, AccountType Type, string Currency, decimal InitialBalance, string? Icon, string Color, int DisplayOrder, bool IncludeInMainBalance, bool IncludeInNetWorth, bool IncludeInStatistics);

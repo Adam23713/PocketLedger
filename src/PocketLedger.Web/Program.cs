@@ -96,6 +96,7 @@ AddApiClient<IStatisticsService, StatisticsApiClient>();
 AddApiClient<IImportExportService, ImportExportApiClient>();
 AddApiClient<IEncryptedBackupService, ImportExportApiClient>();
 AddApiClient<IDebtService, DebtsApiClient>();
+AddApiClient<IGoalService, GoalsApiClient>();
 AddApiClient<IPreferencesApiClient, PreferencesApiClient>();
 
 builder.Services.CompleteDatabaseEncryptionRegistration(builder.Configuration);

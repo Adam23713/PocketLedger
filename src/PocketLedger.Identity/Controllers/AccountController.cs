@@ -18,8 +18,9 @@ namespace PocketLedger.Controllers;
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
     IRegistrationSettingsService registrationSettings, IConfiguration configuration, IUserDataKeyService dataKeys, IPendingSignInKeys pendingKeys,
-    IUserAccountDeletionService accountDeletion) : Controller
+    IUserAccountDeletionService accountDeletion, ISuspiciousActivityRecorder suspiciousActivity, TimeProvider timeProvider) : Controller
 {
+    private static readonly TimeSpan RepeatedLockoutWindow = TimeSpan.FromHours(24);
     private const string DataUnlockFailedMessage = "Your data could not be unlocked. Contact the administrator.";
 
     [AllowAnonymous, HttpGet]
@@ -74,6 +75,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return user.AuthenticatorSetupComplete ? ContinueAfterAuthentication(model.ReturnUrl) : RedirectToAction(nameof(SetupAuthenticator), new { returnUrl = model.ReturnUrl });
         }
         var nowLocked = user is not null && await userManager.IsLockedOutAsync(user);
+        if (!wasLocked && nowLocked) await ReportRepeatedLockoutAsync(user!, cancellationToken);
         var reason = result.IsLockedOut || wasLocked || nowLocked ? "LockedOut" : "InvalidCredentials";
         await audit.WriteAsync(reason == "LockedOut" ? "LoginLockout" : "LoginFailed", "Failure", user?.Id, normalized, reason, cancellationToken: cancellationToken);
         ModelState.AddModelError(string.Empty, reason == "LockedOut" ? "Login is temporarily unavailable." : "Invalid login attempt.");
@@ -118,7 +120,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return status.IsOpen ? View("RegistrationFull") : NotFound();
         }
 
-        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false };
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false, RegistrationProvider = "Password" };
         IdentityResult? result = null;
         CreatedUserDataKey? created = null;
         try
@@ -250,7 +252,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
 
-        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = email, Email = email, EmailConfirmed = true };
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = email, Email = email, EmailConfirmed = true, RegistrationProvider = info.LoginProvider };
         IdentityResult createResult;
         try
         {
@@ -315,6 +317,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             await userManager.AccessFailedAsync(user);
             if (await userManager.IsLockedOutAsync(user))
             {
+                await ReportRepeatedLockoutAsync(user, cancellationToken);
                 await audit.WriteAsync("LoginLockout", "Failure", user.Id, user.NormalizedUserName, "LockedOut", cancellationToken: cancellationToken);
                 return await SignInStoppedAsync("Login is temporarily unavailable.", model.ReturnUrl);
             }
@@ -741,17 +744,24 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize, HttpGet]
-    public async Task<IActionResult> LoginEvents(int page = 1, CancellationToken cancellationToken = default)
+    public IActionResult Changelog() => View(PocketLedger.Models.Changelog.All);
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> LoginEvents(int page = 1, string? sort = null, bool desc = true, CancellationToken cancellationToken = default)
     {
         var user = await userManager.GetUserAsync(User);
         if (user is null) return Challenge();
-        const int pageSize = 30;
-        page = Math.Max(page, 1);
-        var query = dbContext.AuthenticationAuditEvents.AsNoTracking().Where(item => item.UserId == user.Id).OrderByDescending(item => item.TimestampUtc);
-        var count = await query.CountAsync(cancellationToken);
-        var events = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-        return View(new AuditLogViewModel(events, page, Math.Max(1, (int)Math.Ceiling(count / (double)pageSize))));
+        // Addresses and user agents are encrypted, so sorting happens after the user's events are loaded.
+        var events = await dbContext.AuthenticationAuditEvents.AsNoTracking().Where(item => item.UserId == user.Id).ToListAsync(cancellationToken);
+        var table = PocketLedger.Models.ViewModels.TablePaging.Apply(events, sort, desc, LoginEventSortKeys, "time", page, 30);
+        return View(new AuditLogViewModel(table));
     }
+
+    private static readonly IReadOnlyDictionary<string, Func<Models.Entities.AuthenticationAuditEvent, IComparable?>> LoginEventSortKeys = new Dictionary<string, Func<Models.Entities.AuthenticationAuditEvent, IComparable?>>(StringComparer.Ordinal)
+    {
+        ["time"] = item => item.TimestampUtc, ["event"] = item => item.EventType, ["result"] = item => item.Outcome,
+        ["address"] = item => item.ForwardedClientIpAddress ?? item.RemoteIpAddress, ["agent"] = item => item.UserAgent, ["reason"] = item => item.FailureReason
+    };
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
@@ -765,6 +775,25 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     }
 
     [Authorize] public IActionResult AccessDenied() => View();
+
+    // The first lockout is a short cool-down; a second one within the window is reported as suspicious activity.
+    // Must run before the current lockout is written to the audit log.
+    private async Task ReportRepeatedLockoutAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        var since = timeProvider.GetUtcNow() - RepeatedLockoutWindow;
+        var previousLockouts = await dbContext.AuthenticationAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == user.Id && item.EventType == "LoginLockout" && item.TimestampUtc >= since)
+            .Select(item => item.TimestampUtc).ToListAsync(cancellationToken);
+        // Attempts made while already locked are logged as lockouts too, so only lockouts at least one lockout period apart count separately.
+        var distinctLockouts = previousLockouts.Order().Aggregate(new List<DateTimeOffset>(), (starts, timestamp) =>
+        {
+            if (starts.Count == 0 || timestamp - starts[^1] >= userManager.Options.Lockout.DefaultLockoutTimeSpan) starts.Add(timestamp);
+            return starts;
+        }).Count;
+        if (distinctLockouts == 0) return;
+        await suspiciousActivity.RecordAsync(clientIpAddressResolver.GetClientIpAddress(HttpContext) ?? "Unavailable", user.Id, "Repeated login lockout",
+            (distinctLockouts + 1) * userManager.Options.Lockout.MaxFailedAccessAttempts, RepeatedLockoutWindow, "PocketLedger.Identity", Request.Host.Value ?? string.Empty, cancellationToken);
+    }
 
     private async Task<bool> AllowRequestAsync(string username, CancellationToken cancellationToken)
     {

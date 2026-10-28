@@ -13,7 +13,7 @@ using StackExchange.Redis;
 namespace PocketLedger.Security;
 
 public sealed record SuspiciousRequestEvent(DateTimeOffset DetectedAtUtc, DateTimeOffset LastObservedAtUtc, string ClientIpAddress, long RequestCount, TimeSpan Window,
-    IReadOnlyList<Guid> UserIds, IReadOnlyList<string> Applications, IReadOnlyList<string> Hosts);
+    IReadOnlyList<Guid> UserIds, IReadOnlyList<string> Applications, IReadOnlyList<string> Hosts, string? Reason = null);
 
 public sealed record SuspiciousRequestEventsResult(bool IsAvailable, IReadOnlyList<SuspiciousRequestEvent> Events);
 
@@ -22,10 +22,16 @@ public interface ISuspiciousRequestEventReader
     Task<SuspiciousRequestEventsResult> GetRecentAsync(int limit = 20, CancellationToken cancellationToken = default);
 }
 
+public interface ISuspiciousActivityRecorder
+{
+    // Records an incident that was detected by the application rather than by request volume, such as repeated login lockouts.
+    Task RecordAsync(string clientIpAddress, Guid? userId, string reason, long attemptCount, TimeSpan window, string application, string host, CancellationToken cancellationToken = default);
+}
+
 internal readonly record struct SuspiciousRequestObservation(DateTimeOffset TimestampUtc, string ClientIpAddress, Guid? UserId, string Application, string Host);
 
 internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetryOptions> telemetryOptions, RequestTelemetryConnection store, ILogger<SuspiciousRequestDetectionService> logger)
-    : ISuspiciousRequestEventReader
+    : ISuspiciousRequestEventReader, ISuspiciousActivityRecorder
 {
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan IncidentRetention = TimeSpan.FromHours(48);
@@ -107,6 +113,33 @@ internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetr
         }
     }
 
+    public async Task RecordAsync(string clientIpAddress, Guid? userId, string reason, long attemptCount, TimeSpan window, string application, string host, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(telemetryOptions.Value.ConnectionString)) return;
+        try
+        {
+            var database = await store.GetDatabaseAsync(cancellationToken);
+            var incidentId = Guid.NewGuid().ToString("N");
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            await database.HashSetAsync(IncidentKey(incidentId), [
+                new HashEntry("detectedAt", now), new HashEntry("lastObservedAt", now), new HashEntry("address", clientIpAddress),
+                new HashEntry("windowSeconds", (long)window.TotalSeconds), new HashEntry("requestCount", attemptCount), new HashEntry("reason", reason)]).WaitAsync(cancellationToken);
+            await Task.WhenAll(
+                database.KeyExpireAsync(IncidentKey(incidentId), IncidentRetention),
+                database.SortedSetAddAsync(IncidentsKey(), incidentId, now),
+                database.KeyExpireAsync(IncidentsKey(), IncidentRetention)).WaitAsync(cancellationToken);
+            await UpdateIncidentContextAsync(database, incidentId, [new SuspiciousRequestObservation(DateTimeOffset.FromUnixTimeMilliseconds(now), clientIpAddress, userId, application, host)], cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            LogFailure(exception, "A suspicious activity incident could not be recorded.");
+        }
+    }
+
     public async Task RunAsync(CancellationToken stoppingToken)
     {
         var batch = new List<SuspiciousRequestObservation>(BatchSize);
@@ -183,7 +216,8 @@ internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetr
         var contextReads = await Task.WhenAll(database.SetMembersAsync(IncidentUsersKey(incidentId)), database.SetMembersAsync(IncidentApplicationsKey(incidentId)), database.SetMembersAsync(IncidentHostsKey(incidentId))).WaitAsync(cancellationToken);
         var users = contextReads[0].Select(value => Guid.TryParse(value.ToString(), out var parsed) ? parsed : (Guid?)null).Where(value => value is not null).Select(value => value!.Value).Order().ToArray();
         return new SuspiciousRequestEvent(DateTimeOffset.FromUnixTimeMilliseconds(detectedAt), DateTimeOffset.FromUnixTimeMilliseconds(lastObservedAt), values.GetValueOrDefault("address") ?? "Unavailable",
-            count, TimeSpan.FromSeconds(windowSeconds), users, contextReads[1].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray(), contextReads[2].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray());
+            count, TimeSpan.FromSeconds(windowSeconds), users, contextReads[1].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray(), contextReads[2].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray(),
+            values.GetValueOrDefault("reason"));
     }
 
     private static string ObservationMember(SuspiciousRequestObservation observation)

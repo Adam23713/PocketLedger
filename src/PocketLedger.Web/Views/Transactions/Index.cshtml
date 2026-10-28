@@ -20,7 +20,7 @@
         <div class="col-md-8 d-flex flex-wrap align-items-end gap-2">
             <button class="btn btn-primary" type="submit">Filter</button>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#advanced-transaction-filters" aria-expanded="@hasAdvancedFilters.ToString().ToLowerInvariant()" aria-controls="advanced-transaction-filters">More filters</button>
-            <a class="btn btn-link" asp-action="Index">Reset</a>
+            <a class="btn btn-outline-secondary" asp-action="Index">Reset</a>
         </div>
     </div>
     <div class="collapse @(hasAdvancedFilters ? "show" : null)" id="advanced-transaction-filters">
@@ -63,7 +63,7 @@
         <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" asp-action="Details" asp-route-id="@transaction.Id">
             <span class="d-flex align-items-center gap-2">
                 @if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }
-                <span><strong>@transaction.Type</strong> · @(transaction.DebtOperationType is not null ? $"{transaction.DebtOperationType} · {transaction.DebtName}" : transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")<br /><small class="text-muted">@transaction.TransactionTime.ToString("HH:mm") · @(transaction.AccountName ?? "No account movement")@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note)</small></span>
+                <span><strong>@(transaction.DebtOperationType is not null ? $"{transaction.DebtOperationType} · {transaction.DebtName}" : transaction.Type == TransactionType.Transfer ? $"{transaction.AccountName} → {transaction.TargetAccountName}" : transaction.CategoryName ?? "No category")</strong><br /><small class="text-muted">@transaction.Type@(string.IsNullOrWhiteSpace(transaction.Note) ? "" : " · " + transaction.Note) · @transaction.TransactionTime.ToString("HH:mm") · @(transaction.AccountName ?? "No account movement")</small></span>
             </span>
             <span class="@(transfer ? null : negative ? "text-danger" : "text-success")">@(transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</span>
         </a>

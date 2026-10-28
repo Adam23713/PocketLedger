@@ -1,0 +1,8 @@
+@model PocketLedger.Models.ViewModels.Goals.GoalViewModel
+<div class="d-flex justify-content-between align-items-baseline gap-2 flex-wrap">
+    <span><strong class="goal-saved">@MoneyFormatter.Format(Model.SavedAmount, Model.Currency)</strong> <span class="text-muted">of @MoneyFormatter.Format(Model.TargetAmount, Model.Currency)</span></span>
+    <span class="text-muted">@Model.ProgressPercent%</span>
+</div>
+<div class="progress goal-progress mt-2" role="progressbar" aria-label="Goal progress" aria-valuenow="@Model.ProgressPercent" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" style="width: @(Model.ProgressPercent)%; background-color: @Model.BannerColor"></div>
+</div>

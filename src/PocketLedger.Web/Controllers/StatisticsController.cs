@@ -33,11 +33,8 @@ public class StatisticsController(IStatisticsService statisticsService, IUserCon
                 Balance = summary.Balance,
                 IncomeByCategory = summary.IncomeByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
                 ExpenseByCategory = summary.ExpenseByCategory.Select(item => ToCategoryViewModel(item)).ToList(),
-                ExpenseMainCategories = summary.ExpenseMainCategories.Select(item =>
-                {
-                    var icon = TransactionIcons.ResolveCategoryIcon(item.Icon, Models.Enums.CategoryType.Expense);
-                    return new StatisticsMainCategoryViewModel(item.CategoryId, item.Name, item.Amount, icon.WebPath, icon.DisplayName, item.Subcategories.Select(subcategory => new StatisticsSubcategoryViewModel(subcategory.CategoryId, subcategory.Name, subcategory.Amount)).ToList());
-                }).ToList(),
+                ExpenseMainCategories = summary.ExpenseMainCategories.Select(item => ToMainCategoryViewModel(item, Models.Enums.CategoryType.Expense)).ToList(),
+                IncomeMainCategories = summary.IncomeMainCategories.Select(item => ToMainCategoryViewModel(item, Models.Enums.CategoryType.Income)).ToList(),
                 AccountBalances = summary.AccountBalances.Select(item => new StatisticsAccountViewModel(item.AccountId, item.Name, item.Currency, item.Balance)).ToList(),
                 MonthlyTrend = summary.MonthlyTrend.Select(item => new StatisticsTrendViewModel(item.Year, item.Month, item.Income, item.Expenses, item.Savings, item.Balance)).ToList(),
                 RecurringExpenses = summary.RecurringExpenses.Select(item =>
@@ -51,6 +48,12 @@ public class StatisticsController(IStatisticsService statisticsService, IUserCon
         {
             return RedirectToAction(nameof(Index));
         }
+    }
+
+    private static StatisticsMainCategoryViewModel ToMainCategoryViewModel(StatisticsMainCategoryTotal item, Models.Enums.CategoryType categoryType)
+    {
+        var icon = TransactionIcons.ResolveCategoryIcon(item.Icon, categoryType);
+        return new StatisticsMainCategoryViewModel(item.CategoryId, item.Name, item.Amount, icon.WebPath, icon.DisplayName, item.Subcategories.Select(subcategory => new StatisticsSubcategoryViewModel(subcategory.CategoryId, subcategory.Name, subcategory.Amount)).ToList());
     }
 
     private static StatisticsCategoryViewModel ToCategoryViewModel(StatisticsCategoryTotal item)

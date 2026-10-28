@@ -1,0 +1,4 @@
+@model PocketLedger.Models.ViewModels.SortableHeaderViewModel
+<th scope="col" aria-sort="@(Model.IsActive ? (Model.Descending ? "descending" : "ascending") : "none")">
+    <a class="sortable-header" href="@Model.Url">@Model.Label@if (Model.IsActive) { <span aria-hidden="true">@(Model.Descending ? " ▼" : " ▲")</span> }</a>
+</th>

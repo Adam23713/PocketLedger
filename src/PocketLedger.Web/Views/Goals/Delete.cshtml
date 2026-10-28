@@ -1,0 +1,8 @@
+@model PocketLedger.Models.ViewModels.Goals.GoalViewModel
+@{ ViewData["Title"] = "Delete goal"; }
+<h1>Delete goal</h1>
+<div class="alert alert-danger"><strong>This action cannot be undone.</strong> Deleting <strong>@Model.Name</strong> removes the goal and its saved amount (@MoneyFormatter.Format(Model.SavedAmount, Model.Currency)). Your accounts and transactions are not affected.</div>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button class="btn btn-danger" type="submit">Delete goal</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+</form>

@@ -60,7 +60,7 @@ public sealed class FinancialCache(PocketLedgerDbContext dbContext, ICurrentUser
         // A fill racing a commit stays under the old revision and cannot poison subsequent reads.
         var revision = await dbContext.Database.SqlQuery<Guid>($"SELECT revision AS \"Value\" FROM financial_cache_revisions WHERE owner_id = {currentUser.UserId}").SingleOrDefaultAsync(cancellationToken);
         var dimensionHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dimensions))));
-        var key = $"pocketledger:finance:v3:{currentUser.UserId:N}:{revision:N}:{operation}:{dimensionHash}";
+        var key = $"pocketledger:finance:v4:{currentUser.UserId:N}:{revision:N}:{operation}:{dimensionHash}";
         var protector = dbContext.Encryption?.CreateProtector($"FinancialCache.{currentUser.UserId:N}.{operation}");
         try
         {

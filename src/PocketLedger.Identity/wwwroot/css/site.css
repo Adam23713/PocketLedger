@@ -159,6 +159,10 @@ body {
 [data-theme="material"] body { --bs-link-color-rgb: 103, 80, 164; }
 [data-theme="horizon"] body { background-repeat: no-repeat; background-size: cover; background-position: top center; }
 body > .container { position: relative; z-index: 1; }
+/* Keeps the footer at the bottom of short pages. */
+body { display: flex; flex-direction: column; margin-bottom: 0; }
+body > .container { flex: 1 0 auto; }
+.identity-footer { flex-shrink: 0; position: relative; z-index: 1; }
 
 [data-theme="horizon"] body::before,
 [data-theme="horizon"] body::after,
@@ -532,6 +536,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .calendar-day.has-transactions { background: var(--surface-background); }
 .pagination { --bs-pagination-bg: var(--surface-background); --bs-pagination-border-color: var(--border-color); --bs-pagination-color: var(--accent-color); --bs-pagination-hover-bg: var(--surface-background-hover); --bs-pagination-active-bg: var(--accent-color); --bs-pagination-active-border-color: var(--accent-color); }
 .footer { border-top: 1px solid var(--border-color); color: var(--text-secondary) !important; }
+.footer-link { color: var(--text-secondary); text-decoration: none; }
+.footer-link:hover, .footer-link:focus { color: var(--accent-color); text-decoration: underline; }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible { box-shadow: 0 0 0 .22rem var(--focus-ring) !important; outline: 2px solid transparent; }
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder { color: var(--text-secondary); text-align: end; }
@@ -611,3 +617,5 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .external-login-google:hover { background: #f2f6fc; }
 .external-login-facebook { background: #1877f2; border-color: #1877f2; color: #fff; }
 .external-login-facebook:hover { background: #166fe5; }
+.sortable-header { color: inherit; text-decoration: none; white-space: nowrap; }
+.sortable-header:hover, .sortable-header:focus { color: var(--accent-color); text-decoration: underline; }

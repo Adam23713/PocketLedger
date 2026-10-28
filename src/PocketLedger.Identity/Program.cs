@@ -46,7 +46,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Password.RequiredUniqueChars = 8;
     options.Lockout.AllowedForNewUsers = true;
     options.Lockout.MaxFailedAccessAttempts = 3;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(78);
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 }).AddEntityFrameworkStores<IdentityDbContext>().AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>().AddDefaultTokenProviders();
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];

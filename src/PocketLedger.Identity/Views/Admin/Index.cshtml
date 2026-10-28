@@ -71,15 +71,17 @@
     {
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th scope="col">Username</th><th scope="col">Email</th><th scope="col">Last successful login (UTC)</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                <thead><tr><th scope="col">Username</th><th scope="col">Email</th><th scope="col">Registered with</th><th scope="col">Last successful login (UTC)</th><th scope="col">Status</th><th scope="col">Locked out until (UTC)</th><th scope="col">Actions</th></tr></thead>
                 <tbody>
                     @foreach (var user in Model.Users)
                     {
                         <tr>
                             <td>@user.Username</td>
                             <td>@(user.Email ?? "Not available")</td>
+                            <td>@(user.RegistrationProvider ?? "Unknown")</td>
                             <td>@(user.LastSuccessfulLoginAtUtc?.ToString("u") ?? "Never signed in")</td>
-                            <td>@(user.IsAccessBlocked ? "Blocked" : "Active")</td>
+                            <td>@(user.IsAccessBlocked ? "Blocked" : user.LockoutEndUtc is not null ? "Locked out" : "Active")</td>
+                            <td>@(user.LockoutEndUtc?.ToString("u") ?? "—")</td>
                             <td>
                                 @if (user.IsBootstrapAdministrator)
                                 {
@@ -92,6 +94,11 @@
                                             <input name="userId" type="hidden" value="@user.Id" />
                                             <input name="page" type="hidden" value="@Model.Page" />
                                             <button class="btn btn-sm @(user.IsAccessBlocked ? "btn-outline-success" : "btn-outline-warning")" type="submit">@(user.IsAccessBlocked ? "Unblock" : "Block")</button>
+                                        </form>
+                                        <form asp-action="Unlock" method="post">
+                                            <input name="userId" type="hidden" value="@user.Id" />
+                                            <input name="page" type="hidden" value="@Model.Page" />
+                                            <button class="btn btn-sm btn-outline-primary" type="submit" disabled="@(user.LockoutEndUtc is null)" title="@(user.LockoutEndUtc is null ? "The user is not locked out." : "End the failed-login lockout so the user can sign in again now.")">Clear lockout</button>
                                         </form>
                                         <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#delete-user-modal"
                                                 data-delete-user-id="@user.Id" data-delete-username="@user.Username">Delete</button>

@@ -96,3 +96,20 @@
     window.addEventListener('pageshow', updateSession);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) updateSession(); });
 })();
+
+(() => {
+    document.querySelectorAll('[data-video-frame]').forEach(frame => {
+        const placeholder = frame.querySelector('[data-video-src]');
+        placeholder?.addEventListener('click', event => {
+            if (event.target.closest('a')) return;
+            const iframe = document.createElement('iframe');
+            iframe.src = placeholder.dataset.videoSrc;
+            iframe.title = 'PocketLedger video';
+            iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+            iframe.allowFullscreen = true;
+            frame.replaceChildren(iframe);
+            iframe.focus();
+        });
+    });
+})();

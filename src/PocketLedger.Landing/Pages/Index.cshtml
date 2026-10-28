@@ -3,6 +3,7 @@
 @inject PocketLedger.Landing.IRegistrationStatusProvider RegistrationStatusProvider
 @{
     var appUrl = Configuration["Landing:AppBaseUrl"]!;
+    var videoEmbedUrl = Configuration["Landing:YouTubeEmbedUrl"];
     var registration = await RegistrationStatusProvider.GetAsync(HttpContext.RequestAborted);
     var registrationEnabled = registration.AcceptsRegistrations;
     ViewData["AppUrl"] = appUrl;
@@ -53,6 +54,22 @@
                 <figcaption><span>ONE APP. YOUR CHOICE OF THEME.</span><span>Explore the details ↗</span></figcaption>
             </figure>
         </section>
+        @if (!string.IsNullOrEmpty(videoEmbedUrl))
+        {
+            <section class="section shell video-section" id="video" aria-labelledby="video-title">
+                <div class="video-layout">
+                <div><p class="eyebrow">SEE IT IN ACTION</p><h2 id="video-title">A quick tour of PocketLedger.</h2><p>Watch a short walkthrough, and switch to full screen if you'd like a closer look.</p></div>
+                @* Nothing is requested from YouTube until the visitor chooses to play the video. *@
+                <div class="video-frame" data-video-frame>
+                    <button class="video-placeholder" type="button" data-video-src="@(videoEmbedUrl)?autoplay=1">
+                        <span class="video-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M8 5v14l11-7Z" fill="currentColor" /></svg></span>
+                        <span class="video-placeholder-title">Play the video</span>
+                        <span class="video-placeholder-note">The video is loaded from YouTube (Google) only after you click. See our <a class="text-link" href="/privacy#who-we-share-it-with">Privacy Policy</a>.</span>
+                    </button>
+                </div>
+                </div>
+            </section>
+        }
         <section class="section shell" id="features" aria-labelledby="features-title">
             <div class="section-heading"><div><p class="eyebrow">THE EVERYDAY ESSENTIALS</p><h2 id="features-title">Less guesswork.<br />More understanding.</h2></div><p>From your morning coffee to the bigger picture, keep the details together and the overview clear.</p></div>
             <div class="features">

@@ -1,12 +1,10 @@
 (() => {
-    const categoryDataElement = document.getElementById("expense-main-category-data");
     const trendDataElement = document.getElementById("monthly-trend-data");
 
     if (!trendDataElement || typeof Chart === "undefined") {
         return;
     }
 
-    const categories = categoryDataElement ? JSON.parse(categoryDataElement.textContent) : [];
     const trend = JSON.parse(trendDataElement.textContent);
     const colors = ["#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed", "#0891b2", "#db2777", "#4d7c0f", "#9333ea", "#ea580c"];
     const moneyFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 });
@@ -48,11 +46,17 @@
         }
     };
 
-    if (categories.length > 0) {
-        const selector = document.getElementById("expense-category-selector");
-        const breakdownHeading = document.getElementById("expense-breakdown-heading");
-        const breakdownTotal = document.getElementById("expense-breakdown-total");
-        const breakdownBody = document.getElementById("expense-breakdown-body");
+    const setupCategoryChart = kind => {
+        const categoryDataElement = document.getElementById(`${kind}-main-category-data`);
+        const categories = categoryDataElement ? JSON.parse(categoryDataElement.textContent) : [];
+        if (categories.length === 0 || !document.getElementById(`${kind}-category-chart`)) {
+            return;
+        }
+
+        const selector = document.getElementById(`${kind}-category-selector`);
+        const breakdownHeading = document.getElementById(`${kind}-breakdown-heading`);
+        const breakdownTotal = document.getElementById(`${kind}-breakdown-total`);
+        const breakdownBody = document.getElementById(`${kind}-breakdown-body`);
         let selectedCategoryIndex = null;
 
         const selectCategory = index => {
@@ -75,8 +79,8 @@
             }));
 
             selector.querySelectorAll("button").forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
-            expenseChart.options.plugins.categoryCenterText.amount = category.amount;
-            expenseChart.update();
+            categoryChart.options.plugins.categoryCenterText.amount = category.amount;
+            categoryChart.update();
         };
 
         const resetSelection = () => {
@@ -84,18 +88,18 @@
             const message = document.createElement("td");
             selectedCategoryIndex = null;
             breakdownHeading.textContent = "All main categories";
-            breakdownTotal.textContent = `${formatMoney(totalExpenses)} total`;
+            breakdownTotal.textContent = `${formatMoney(total)} total`;
             message.className = "text-muted";
             message.colSpan = 3;
             message.textContent = "Select a category to see the breakdown.";
             row.append(message);
             breakdownBody.replaceChildren(row);
             selector.querySelectorAll("button").forEach(button => button.setAttribute("aria-pressed", "false"));
-            expenseChart.options.plugins.categoryCenterText.amount = totalExpenses;
-            expenseChart.update();
+            categoryChart.options.plugins.categoryCenterText.amount = total;
+            categoryChart.update();
         };
 
-        const totalExpenses = categories.reduce((total, category) => total + category.amount, 0);
+        const total = categories.reduce((total, category) => total + category.amount, 0);
 
         categories.forEach((category, index) => {
             const button = document.createElement("button");
@@ -104,12 +108,12 @@
             swatch.style.backgroundColor = colors[index % colors.length];
             button.type = "button";
             button.setAttribute("aria-pressed", "false");
-            button.append(swatch, document.createTextNode(`${category.name} ${percentFormatter.format(totalExpenses === 0 ? 0 : category.amount / totalExpenses * 100)}%`));
+            button.append(swatch, document.createTextNode(`${category.name} ${percentFormatter.format(total === 0 ? 0 : category.amount / total * 100)}%`));
             button.addEventListener("click", () => selectCategory(index));
             selector.append(button);
         });
 
-        const expenseChart = new Chart(document.getElementById("expense-category-chart"), {
+        const categoryChart = new Chart(document.getElementById(`${kind}-category-chart`), {
             type: "doughnut",
             plugins: [categoryCenterText],
             data: {
@@ -137,15 +141,18 @@
                 }
             }
         });
-        charts.push(expenseChart);
+        charts.push(categoryChart);
         resetSelection();
 
         document.addEventListener("click", event => {
-            if (selectedCategoryIndex !== null && !expenseChart.canvas.contains(event.target) && !selector.contains(event.target)) {
+            if (selectedCategoryIndex !== null && !categoryChart.canvas.contains(event.target) && !selector.contains(event.target)) {
                 resetSelection();
             }
         });
-    }
+    };
+
+    setupCategoryChart("expense");
+    setupCategoryChart("income");
 
     const trendChart = new Chart(document.getElementById("monthly-trend-chart"), {
         type: "bar",

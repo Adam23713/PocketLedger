@@ -41,6 +41,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
     public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
     public DbSet<RecurringTransactionOccurrence> RecurringTransactionOccurrences => Set<RecurringTransactionOccurrence>();
     public DbSet<Debt> Debts => Set<Debt>();
+    public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<UserCurrencyFormat> UserCurrencyFormats => Set<UserCurrencyFormat>();
     public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
@@ -73,6 +74,8 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
             UserField(modelBuilder.Entity<Debt>().Property(item => item.Name), "Debt.Name", "DebtName", 200);
             UserField(modelBuilder.Entity<Debt>().Property(item => item.CounterpartyName), "Debt.CounterpartyName", "DebtCounterparty", 200);
             UserField(modelBuilder.Entity<UserPreference>().Property(item => item.DisplayName), "UserPreference.DisplayName", "DisplayName", 100);
+            UserField(modelBuilder.Entity<Goal>().Property(item => item.Name), "Goal.Name", "GoalName", 200);
+            UserField(modelBuilder.Entity<Goal>().Property(item => item.Note), "Goal.Note", "Note", 500);
         }
 
         modelBuilder.Entity<PlannerMonthRecord>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
@@ -83,6 +86,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
         modelBuilder.Entity<RecurringTransaction>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<RecurringTransactionOccurrence>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
         modelBuilder.Entity<Debt>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
+        modelBuilder.Entity<Goal>().HasQueryFilter(entity => crossTenantAccess || hasTenantContext && entity.OwnerId == tenantId);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -171,12 +175,12 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
     }
 
     private IEnumerable<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry> FinanceEntries() => ChangeTracker.Entries().Where(entry => IsFinanceEntity(entry.Entity) && entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
-    private static bool IsFinanceEntity(object entity) => entity is PlannerMonthRecord or PlannerItem or Account or Category or Transaction or RecurringTransaction or RecurringTransactionOccurrence or Debt;
-    private static Guid GetOwnerId(object entity) => entity switch { PlannerMonthRecord value => value.OwnerId, PlannerItem value => value.OwnerId, Account value => value.OwnerId, Category value => value.OwnerId, Transaction value => value.OwnerId, RecurringTransaction value => value.OwnerId, RecurringTransactionOccurrence value => value.OwnerId, Debt value => value.OwnerId, _ => throw new InvalidOperationException() };
-    private static Guid GetEntityId(object entity) => entity switch { PlannerMonthRecord value => value.Id, PlannerItem value => value.Id, Account value => value.Id, Category value => value.Id, Transaction value => value.Id, RecurringTransaction value => value.Id, RecurringTransactionOccurrence value => value.Id, Debt value => value.Id, _ => Guid.Empty };
+    private static bool IsFinanceEntity(object entity) => entity is PlannerMonthRecord or PlannerItem or Account or Category or Transaction or RecurringTransaction or RecurringTransactionOccurrence or Debt or Goal;
+    private static Guid GetOwnerId(object entity) => entity switch { PlannerMonthRecord value => value.OwnerId, PlannerItem value => value.OwnerId, Account value => value.OwnerId, Category value => value.OwnerId, Transaction value => value.OwnerId, RecurringTransaction value => value.OwnerId, RecurringTransactionOccurrence value => value.OwnerId, Debt value => value.OwnerId, Goal value => value.OwnerId, _ => throw new InvalidOperationException() };
+    private static Guid GetEntityId(object entity) => entity switch { PlannerMonthRecord value => value.Id, PlannerItem value => value.Id, Account value => value.Id, Category value => value.Id, Transaction value => value.Id, RecurringTransaction value => value.Id, RecurringTransactionOccurrence value => value.Id, Debt value => value.Id, Goal value => value.Id, _ => Guid.Empty };
     private static void SetOwnerId(object entity, Guid ownerId)
     {
-        switch (entity) { case PlannerMonthRecord value: value.OwnerId = ownerId; break; case PlannerItem value: value.OwnerId = ownerId; break; case Account value: value.OwnerId = ownerId; break; case Category value: value.OwnerId = ownerId; break; case Transaction value: value.OwnerId = ownerId; break; case RecurringTransaction value: value.OwnerId = ownerId; break; case RecurringTransactionOccurrence value: value.OwnerId = ownerId; break; case Debt value: value.OwnerId = ownerId; break; }
+        switch (entity) { case PlannerMonthRecord value: value.OwnerId = ownerId; break; case PlannerItem value: value.OwnerId = ownerId; break; case Account value: value.OwnerId = ownerId; break; case Category value: value.OwnerId = ownerId; break; case Transaction value: value.OwnerId = ownerId; break; case RecurringTransaction value: value.OwnerId = ownerId; break; case RecurringTransactionOccurrence value: value.OwnerId = ownerId; break; case Debt value: value.OwnerId = ownerId; break; case Goal value: value.OwnerId = ownerId; break; }
     }
 
     private static IEnumerable<(Type Type, Guid Id)> GetReferences(object entity) => entity switch
@@ -212,6 +216,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
         RecurringTransaction value => RecurringTransactions.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         RecurringTransactionOccurrence value => RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         Debt value => Debts.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
+        Goal value => Goals.IgnoreQueryFilters().AsNoTracking().Any(item => item.Id == value.Id && item.OwnerId == ownerId),
         _ => false
     };
 
@@ -225,6 +230,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
         RecurringTransaction value => RecurringTransactions.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         RecurringTransactionOccurrence value => RecurringTransactionOccurrences.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         Debt value => Debts.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
+        Goal value => Goals.IgnoreQueryFilters().AsNoTracking().AnyAsync(item => item.Id == value.Id && item.OwnerId == ownerId, cancellationToken),
         _ => Task.FromResult(false)
     };
 

@@ -15,26 +15,45 @@
         }
         </div>
         <div class="row g-3">
-            <div class="col-md-6"><label asp-for="DefaultCurrency" class="form-label">Default currency</label><select asp-for="DefaultCurrency" class="form-select">@foreach (var currency in Currencies.All) { <option value="@currency.Code">@currency.Code — @currency.DisplayName</option> }</select></div>
-            <div class="col-md-6"><label asp-for="TimeZoneId" class="form-label">Time zone (IANA)</label><input asp-for="TimeZoneId" class="form-control" list="time-zones" /><datalist id="time-zones"><option>Europe/Budapest</option><option>Europe/London</option><option>America/New_York</option><option>Asia/Tokyo</option></datalist></div>
+            <div class="col-md-6"><label asp-for="DefaultCurrency" class="form-label">Default currency</label><select asp-for="DefaultCurrency" class="form-select" data-default-currency>@foreach (var currency in Currencies.All.OrderBy(item => item.Code)) { <option value="@currency.Code">@currency.Code — @currency.DisplayName</option> }</select><div class="form-text">Used for new accounts and as the preselected currency in forms.</div></div>
+            <div class="col-md-6"><label asp-for="TimeZoneId" class="form-label">Time zone</label><select asp-for="TimeZoneId" class="form-select">@if (!UserTimeZones.All.Any(zone => zone.Id == Model.TimeZoneId)) { <option value="@Model.TimeZoneId">@Model.TimeZoneId</option> }@foreach (var zone in UserTimeZones.All) { <option value="@zone.Id">@zone.DisplayName</option> }</select></div>
         </div>
     </section>
     <section class="card card-body mb-4">
-        <h2 class="h5">Currency formatting</h2>
-        <p class="text-muted">Each currency has its own display rules.</p>
-        <div class="row g-3">
-        @for (var index = 0; index < Model.CurrencyFormats.Count; index++)
-        {
-            <div class="col-lg-4"><div class="border rounded p-3 currency-format-card" data-currency-format data-symbol="@Currencies.Get(Model.CurrencyFormats[index].CurrencyCode).Symbol">
-                <h3 class="h6">@Model.CurrencyFormats[index].CurrencyCode</h3><input asp-for="CurrencyFormats[index].CurrencyCode" type="hidden" />
-                <div class="mb-2"><label asp-for="CurrencyFormats[index].DecimalPlaces" class="form-label">Decimal places</label><select asp-for="CurrencyFormats[index].DecimalPlaces" class="form-select" data-format-field>@for (var n = 0; n <= 4; n++) { <option value="@n">@n</option> }</select></div>
-                <div class="row g-2"><div class="col"><label class="form-label">Decimal separator</label><input asp-for="CurrencyFormats[index].DecimalSeparator" class="form-control" maxlength="1" data-format-field /></div><div class="col"><label class="form-label">Thousands separator</label><input asp-for="CurrencyFormats[index].ThousandsSeparator" class="form-control" maxlength="1" data-format-field /></div></div>
-                <div class="row g-2 mt-1"><div class="col"><label class="form-label">Show</label><select asp-for="CurrencyFormats[index].CurrencyDisplay" asp-items="Html.GetEnumSelectList<CurrencyDisplay>()" class="form-select" data-format-field></select></div><div class="col"><label class="form-label">Position</label><select asp-for="CurrencyFormats[index].CurrencyPosition" asp-items="Html.GetEnumSelectList<CurrencyPosition>()" class="form-select" data-format-field></select></div></div>
-                <div class="form-check mt-2"><input asp-for="CurrencyFormats[index].UseSpace" class="form-check-input" data-format-field /><label asp-for="CurrencyFormats[index].UseSpace" class="form-check-label">Space between value and currency</label></div>
-                <div class="mt-3"><small class="text-muted">Preview</small><div class="h5 mb-0" data-format-preview></div></div>
-            </div></div>
-        }
+        <h2 class="h5">Currencies</h2>
+        <p class="text-muted">Select a currency to adjust how its amounts are displayed. Currencies that are not in the list use the standard format.</p>
+        <div class="currency-settings">
+            <div class="currency-settings-list">
+                <div class="list-group" data-currency-list>
+                @for (var index = 0; index < Model.CurrencyFormats.Count; index++)
+                {
+                    var definition = Currencies.Get(Model.CurrencyFormats[index].CurrencyCode);
+                    <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2" data-currency-item="@definition.Code">
+                        <span><strong>@definition.Code</strong> <small class="text-muted">@definition.DisplayName</small></span>
+                        <span class="badge text-bg-primary" data-default-badge hidden="@(definition.Code != Model.DefaultCurrency)">Default</span>
+                    </button>
+                }
+                </div>
+                <div class="input-group mt-3">
+                    <select class="form-select" aria-label="Currency to add" data-currency-add>
+                        <option value="">Add a currency…</option>
+                        @foreach (var currency in Currencies.All.OrderBy(item => item.Code))
+                        {
+                            <option value="@currency.Code" data-name="@currency.DisplayName" data-symbol="@currency.Symbol" data-decimals="@currency.DecimalDigits" hidden="@Model.CurrencyFormats.Any(item => item.CurrencyCode == currency.Code)">@currency.Code — @currency.DisplayName</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-outline-primary" data-currency-add-button>Add</button>
+                </div>
+            </div>
+            <div class="currency-settings-editor border rounded p-3" data-currency-editors>
+                <p class="text-muted mb-0" data-currency-empty hidden>No currency selected.</p>
+                @for (var index = 0; index < Model.CurrencyFormats.Count; index++)
+                {
+                    <partial name="~/Views/Account/_CurrencyFormatEditor.cshtml" model="new PocketLedger.Models.ViewModels.Account.CurrencyFormatEditorViewModel(index.ToString(System.Globalization.CultureInfo.InvariantCulture), Model.CurrencyFormats[index])" />
+                }
+            </div>
         </div>
+        <template id="currency-format-template"><partial name="~/Views/Account/_CurrencyFormatEditor.cshtml" model='new PocketLedger.Models.ViewModels.Account.CurrencyFormatEditorViewModel("__key__", new PocketLedger.Models.ViewModels.Account.CurrencyFormatViewModel())' /></template>
     </section>
     <button class="btn btn-primary" type="submit">Save settings</button>
 </form>

@@ -1,0 +1,9 @@
+@model PocketLedger.Models.ViewModels.Goals.GoalViewModel
+@{ var large = ViewData["Large"] as bool? == true; }
+<div class="goal-banner @(large ? "goal-banner-large" : null)" style="--goal-banner-color: @Model.BannerColor">
+    @if (Model.BannerImagePath is not null) { <img class="goal-banner-image" src="@Model.BannerImagePath" alt="" /> }
+    <div class="goal-banner-title">
+        @if (large) { <h1 class="mb-0">@Model.Name</h1> } else { <h2 class="h5 mb-0">@Model.Name</h2> }
+        @if (Model.IsReached) { <span class="badge text-bg-success">Reached</span> }
+    </div>
+</div>

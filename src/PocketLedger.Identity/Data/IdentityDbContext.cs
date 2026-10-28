@@ -30,6 +30,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
         encryption?.Configure(builder.Entity<ApplicationUser>().Property(item => item.PhoneNumber), "ApplicationUser.PhoneNumber");
         builder.Entity<ApplicationUser>().Property(item => item.LastSuccessfulLoginIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
         encryption?.Configure(builder.Entity<ApplicationUser>().Property(item => item.LastSuccessfulLoginIpAddress), "ApplicationUser.LastSuccessfulLoginIpAddress");
+        builder.Entity<ApplicationUser>().Property(item => item.RegistrationProvider).HasMaxLength(64);
         builder.Entity<ApplicationUser>().HasIndex(item => item.NormalizedEmail).IsUnique().HasFilter("\"NormalizedEmail\" IS NOT NULL");
         builder.Entity<ApplicationUser>().HasIndex(item => item.IsBootstrapAdministrator).IsUnique().HasFilter("\"IsBootstrapAdministrator\" = TRUE");
         builder.Entity<DeletedUserTombstone>(entity =>

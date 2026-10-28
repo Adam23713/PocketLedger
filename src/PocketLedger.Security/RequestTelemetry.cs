@@ -74,6 +74,7 @@ public static class RequestTelemetryRegistration
         services.AddSingleton<IHostedService>(services => services.GetRequiredService<RequestTelemetryService>());
         services.AddSingleton<SuspiciousRequestDetectionService>();
         services.AddSingleton<ISuspiciousRequestEventReader>(services => services.GetRequiredService<SuspiciousRequestDetectionService>());
+        services.AddSingleton<ISuspiciousActivityRecorder>(services => services.GetRequiredService<SuspiciousRequestDetectionService>());
         return services;
     }
 

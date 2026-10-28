@@ -1,4 +1,14 @@
-@model PocketLedger.Services.CrowdSecBanDecisionsResult
+@model PocketLedger.Models.ViewModels.Admin.CrowdSecBansViewModel
+@using PocketLedger.Models.ViewModels
+@{
+    var table = Model.Table;
+    string BansUrl(string? sort = null, bool? descending = null, int? page = null, bool? merge = null) => Url.Action("Index", "Admin", new
+    {
+        page = Model.UsersPage, bansSort = sort ?? table.Sort, bansDesc = descending ?? table.Descending,
+        bansMerge = merge ?? Model.Merge, bansPage = page ?? table.Page
+    }) + "#crowdsec-bans-heading";
+    SortableHeaderViewModel Header(string label, string column) => new(label, BansUrl(column, table.Sort == column ? !table.Descending : false, 1), table.Sort == column, table.Descending);
+}
 
 <section class="mt-5" aria-labelledby="crowdsec-bans-heading">
     <h2 class="h4 mb-2" id="crowdsec-bans-heading">Active CrowdSec bans</h2>
@@ -6,22 +16,48 @@
     {
         <div class="alert alert-info" role="status">CrowdSec decisions are currently unavailable.</div>
     }
-    else if (Model.Decisions.Count == 0)
+    else if (Model.TotalBans == 0)
     {
         <div class="alert alert-info" role="status">There are no active IP or range bans.</div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead><tr><th scope="col">Address / range</th><th scope="col">Scope</th><th scope="col">Scenario</th><th scope="col">Origin</th><th scope="col">Action</th><th scope="col">Remaining</th></tr></thead>
-                <tbody>
-                    @foreach (var item in Model.Decisions)
-                    {
-                        <tr><td><code>@item.Address</code></td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td><td>@(item.RemainingDuration ?? "Not available")</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <form method="get" asp-action="Index" asp-fragment="crowdsec-bans-heading" class="row g-2 align-items-center mb-3">
+            <input type="hidden" name="page" value="@Model.UsersPage" />
+            <input type="hidden" name="bansSort" value="@table.Sort" />
+            <input type="hidden" name="bansDesc" value="@table.Descending.ToString().ToLowerInvariant()" />
+            <div class="col-auto"><div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="bans-merge" name="bansMerge" value="true" checked="@Model.Merge" /><label class="form-check-label" for="bans-merge">Merge identical addresses</label></div></div>
+            <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Apply</button></div>
+        </form>
+        <p class="text-muted small mb-2">@table.TotalCount rows from @Model.TotalBans bans@(Model.Merge ? " (merged by address; remaining time shows the ban that expires first)" : "")</p>
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr>
+                        <partial name="_SortableHeader" model='Header("Address / range", "address")' />
+                        <partial name="_SortableHeader" model='Header("Scope", "scope")' />
+                        <partial name="_SortableHeader" model='Header("Scenario", "scenario")' />
+                        <partial name="_SortableHeader" model='Header("Origin", "origin")' />
+                        <partial name="_SortableHeader" model='Header("Action", "action")' />
+                        @if (Model.Merge) { <partial name="_SortableHeader" model='Header("Bans", "count")' /> }
+                        <partial name="_SortableHeader" model='Header("Remaining", "remaining")' />
+                    </tr></thead>
+                    <tbody>
+                        @foreach (var item in table.Items)
+                        {
+                            <tr><td><code>@item.Address</code></td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td>@if (Model.Merge) { <td>@item.BanCount</td> }<td>@(item.RemainingText ?? "Not available")</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (table.TotalPages > 1)
+            {
+                <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="CrowdSec ban pages">
+                    @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page - 1)" rel="prev">Previous</a> } else { <span></span> }
+                    <span class="text-muted">Page @table.Page of @table.TotalPages</span>
+                    @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page + 1)" rel="next">Next</a> } else { <span></span> }
+                </nav>
+            }
+        }
     }
 </section>

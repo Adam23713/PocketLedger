@@ -4,6 +4,8 @@ using PocketLedger.Landing.Contact;
 var builder = WebApplication.CreateBuilder(args);
 var appUri = GetOrigin(builder.Configuration["Landing:AppBaseUrl"] ?? "https://app.pocketledger.dev", "Landing:AppBaseUrl", builder.Environment);
 builder.Configuration["Landing:AppBaseUrl"] = appUri.GetLeftPart(UriPartial.Authority);
+var youTubeEmbedUrl = YouTubeVideo.GetEmbedUrl(builder.Configuration["Landing:YouTubeVideoUrl"]);
+builder.Configuration["Landing:YouTubeEmbedUrl"] = youTubeEmbedUrl;
 builder.Services.AddRazorPages();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IRegistrationStatusProvider, RegistrationStatusProvider>(client =>
@@ -32,7 +34,10 @@ app.Use(async (context, next) =>
     var contactPage = context.Request.Path.Equals("/contact", StringComparison.OrdinalIgnoreCase);
     var turnstile = contactPage ? " https://challenges.cloudflare.com" : string.Empty;
     var formAction = contactPage ? "'self'" : "'none'";
-    context.Response.Headers["Content-Security-Policy"] = $"default-src 'self'; script-src 'self'{turnstile}; frame-src{(contactPage ? turnstile : " 'none'")}; style-src 'self'; img-src 'self'; connect-src 'self' {appUri.GetLeftPart(UriPartial.Authority)}; frame-ancestors 'none'; base-uri 'self'; form-action {formAction}";
+    // The home page may embed the configured YouTube video; no other page loads frames from YouTube.
+    var homePage = context.Request.Path == "/" || context.Request.Path.Equals("/index", StringComparison.OrdinalIgnoreCase);
+    var frameSources = contactPage ? turnstile : homePage && youTubeEmbedUrl is not null ? " " + YouTubeVideo.EmbedOrigin : " 'none'";
+    context.Response.Headers["Content-Security-Policy"] = $"default-src 'self'; script-src 'self'{turnstile}; frame-src{frameSources}; style-src 'self'; img-src 'self'; connect-src 'self' {appUri.GetLeftPart(UriPartial.Authority)}; frame-ancestors 'none'; base-uri 'self'; form-action {formAction}";
     await next();
 });
 app.UseStaticFiles();

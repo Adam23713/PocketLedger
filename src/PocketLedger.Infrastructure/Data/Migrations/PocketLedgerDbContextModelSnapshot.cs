@@ -96,7 +96,6 @@ namespace PocketLedger.Infrastructure.Data.Migrations
             modelBuilder.Entity("PocketLedger.Models.Entities.BlockedUser", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .ValueGeneratedNever()
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
@@ -258,6 +257,74 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                             t.HasCheckConstraint("ck_debts_original_amount_positive", "original_amount > 0");
 
                             t.HasCheckConstraint("ck_debts_receivable_type", "direction <> 'Receivable' OR type = 'PrivatePerson'");
+                        });
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.Goal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BannerColor")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("banner_color");
+
+                    b.Property<string>("BannerImage")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("banner_image");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("OwnerId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("owner_id");
+
+                    b.Property<decimal>("SavedAmount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("saved_amount");
+
+                    b.Property<decimal>("TargetAmount")
+                        .HasPrecision(19, 4)
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("target_amount");
+
+                    b.Property<DateOnly?>("TargetDate")
+                        .HasColumnType("date")
+                        .HasColumnName("target_date");
+
+                    b.HasKey("Id")
+                        .HasName("pk_goals");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_goals_owner_id");
+
+                    b.ToTable("goals", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_goals_amounts", "target_amount > 0 AND saved_amount >= 0");
                         });
                 });
 
@@ -747,6 +814,11 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("text")
                         .HasColumnName("display_name");
+
+                    b.Property<string>("LastSeenChangelogVersion")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("last_seen_changelog_version");
 
                     b.Property<string>("TimeZoneId")
                         .IsRequired()

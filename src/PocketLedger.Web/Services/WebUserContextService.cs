@@ -14,7 +14,7 @@ public sealed class WebUserContextService(IPreferencesApiClient preferences, IUs
     {
         if (cachedUser is not null) return cachedUser;
         var response = await preferences.GetAsync(cancellationToken);
-        cachedUser = new UserPreference { DisplayName = response.DisplayName, AvatarId = response.AvatarId, DefaultCurrency = response.DefaultCurrency, TimeZoneId = response.TimeZoneId, CurrencyFormats = response.CurrencyFormats.Select(item => new UserCurrencyFormat { CurrencyCode = item.CurrencyCode, DecimalPlaces = item.DecimalPlaces, DecimalSeparator = item.DecimalSeparator, ThousandsSeparator = item.ThousandsSeparator, CurrencyDisplay = item.CurrencyDisplay, CurrencyPosition = item.CurrencyPosition, UseSpace = item.UseSpace }).ToList() };
+        cachedUser = new UserPreference { DisplayName = response.DisplayName, AvatarId = response.AvatarId, DefaultCurrency = response.DefaultCurrency, TimeZoneId = response.TimeZoneId, LastSeenChangelogVersion = response.LastSeenChangelogVersion, CurrencyFormats = response.CurrencyFormats.Select(item => new UserCurrencyFormat { CurrencyCode = item.CurrencyCode, DecimalPlaces = item.DecimalPlaces, DecimalSeparator = item.DecimalSeparator, ThousandsSeparator = item.ThousandsSeparator, CurrencyDisplay = item.CurrencyDisplay, CurrencyPosition = item.CurrencyPosition, UseSpace = item.UseSpace }).ToList() };
         return cachedUser;
     }
 

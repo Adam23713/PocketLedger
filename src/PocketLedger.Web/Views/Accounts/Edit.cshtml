@@ -12,16 +12,19 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         (() => {
-            const amount = document.getElementById("InitialBalance");
+            const amount = document.getElementById("initial-balance");
+            const display = document.getElementById("initial-balance-display");
             const original = Number(document.getElementById("OriginalInitialBalance").value);
             const option = document.getElementById("initial-balance-adjustment-option");
             const difference = document.getElementById("initial-balance-difference");
             function update() {
                 const delta = Number(amount.value) - original;
                 option.hidden = !Number.isFinite(delta) || delta === 0;
-                difference.textContent = Number.isFinite(delta) ? delta.toString() : "";
+                const decimals = Number(display.dataset.decimalPlaces);
+                const [integer, fraction = ""] = Math.abs(delta).toFixed(decimals).split(".");
+                difference.textContent = Number.isFinite(delta) ? (delta < 0 ? "-" : "+") + integer.replace(/\B(?=(\d{3})+(?!\d))/g, display.dataset.thousandsSeparator) + (fraction ? display.dataset.decimalSeparator + fraction : "") : "";
             }
-            amount.addEventListener("input", update);
+            amount.addEventListener("change", update);
             update();
         })();
     </script>

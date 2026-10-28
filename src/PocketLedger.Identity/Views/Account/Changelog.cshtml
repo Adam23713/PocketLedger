@@ -1,0 +1,14 @@
+@model IReadOnlyList<PocketLedger.Models.ChangelogEntry>
+@{ ViewData["Title"] = "What's new"; }
+<h1>What's new</h1>
+<p class="text-muted">Release notes for every PocketLedger version, newest first.</p>
+@foreach (var entry in Model)
+{
+    <section class="card card-body mb-3 changelog-entry">
+        <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+            <h2 class="h5 mb-0">@entry.Version · @entry.Title</h2>
+            <small class="text-muted">@entry.ReleasedOn.ToString("yyyy-MM-dd")</small>
+        </div>
+        <ul class="mt-3 mb-0">@foreach (var change in entry.Changes) { <li>@change</li> }</ul>
+    </section>
+}
