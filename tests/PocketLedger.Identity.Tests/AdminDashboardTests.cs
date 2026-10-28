@@ -164,6 +164,46 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
+    public async Task Unlock_ClearsLockoutAndRejectsUsersWhoAreNotLockedOut()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        var userId = await FindUserIdAsync("user-03");
+
+        var notLockedResponse = await PostAdminActionAsync(client, "Unlock", userId);
+        Assert.Equal(HttpStatusCode.BadRequest, notLockedResponse.StatusCode);
+
+        await using (var lockScope = factory.Services.CreateAsyncScope())
+        {
+            var users = lockScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var user = (await users.FindByIdAsync(userId.ToString()))!;
+            user.SecurityStamp = Guid.NewGuid().ToString("N");
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(10);
+            Assert.True((await users.UpdateAsync(user)).Succeeded);
+        }
+        var page = await (await SendAsAdministratorAsync(client, "/Admin?page=1")).Content.ReadAsStringAsync();
+        Assert.Contains("Locked out", page);
+
+        var unlockResponse = await PostAdminActionAsync(client, "Unlock", userId);
+        Assert.Equal(HttpStatusCode.Redirect, unlockResponse.StatusCode);
+        await using var unlockedScope = factory.Services.CreateAsyncScope();
+        var unlockedUsers = unlockedScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        Assert.False(await unlockedUsers.IsLockedOutAsync((await unlockedUsers.FindByIdAsync(userId.ToString()))!));
+    }
+
+    [Fact]
+    public async Task Unlock_RejectsAuthenticatedUserWithoutBootstrapAdministratorClaim()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.PostAsync("/Admin/Unlock", new FormUrlEncodedContent(new Dictionary<string, string> { ["userId"] = (await FindUserIdAsync("user-03")).ToString() }));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateRegistration_StoresSettingsAndShowsRegisteredAndFreeAccounts()
     {
         await SeedUsersAsync();

@@ -9,6 +9,8 @@
     var webBaseUrl = configuration["OpenIddict:WebBaseUrl"]!.TrimEnd('/');
     var landingBaseUrl = configuration["Landing:BaseUrl"]!.TrimEnd('/');
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    // The avatar is chosen in the web app and shared through a cookie, like the theme.
+    var avatarId = int.TryParse(Context.Request.Cookies["pocketledger-avatar"], out var parsedAvatarId) && parsedAvatarId is >= 1 and <= 5 ? parsedAvatarId : (int?)null;
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     string NavClass(string controller, string action) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
         && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
@@ -58,6 +60,7 @@
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item"><a class="@NavClass("Account", "Manage")" asp-controller="Account" asp-action="Manage" aria-current="@(string.Equals(currentAction, "Manage", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Account</a></li>
                             <li class="nav-item"><a class="@NavClass("Account", "Security")" asp-controller="Account" asp-action="Security" aria-current="@(string.Equals(currentAction, "Security", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Sign-in &amp; security</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Changelog")" asp-controller="Account" asp-action="Changelog" aria-current="@(string.Equals(currentAction, "Changelog", StringComparison.OrdinalIgnoreCase) ? "page" : null)">What's new</a></li>
                             <li class="nav-item"><a class="@NavClass("Account", "LoginEvents")" asp-controller="Account" asp-action="LoginEvents" aria-current="@(string.Equals(currentAction, "LoginEvents", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Login Events</a></li>
                             @if (isBootstrapAdministrator)
                             {
@@ -80,10 +83,11 @@
                         </div>
                         <div class="app-menu">
                             <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
-                                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg>
+                                @if (avatarId is not null) { <img class="header-avatar" src="~/images/avatars/@($"avatar-{avatarId}.png")" alt="" /> }
+                                else { <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg> }
                             </button>
                             <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
-                                <div class="profile-menu-header"><div><strong>@User.Identity?.Name</strong></div></div>
+                                <div class="profile-menu-header">@if (avatarId is not null) { <img src="~/images/avatars/@($"avatar-{avatarId}.png")" alt="" /> }<div><strong>@User.Identity?.Name</strong></div></div>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <a role="menuitem" href="@webBaseUrl"><partial name="_NavigationIcon" model='"App"' /> PocketLedger app</a>
                                 <a role="menuitem" href="@landingBaseUrl"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
@@ -101,6 +105,7 @@
             @RenderBody()
         </main>
     </div>
+    <footer class="footer identity-footer text-muted py-3"><div class="container d-flex flex-wrap gap-3"><span>&copy; 2026 - PocketLedger</span><a class="footer-link" href="@(landingBaseUrl)/privacy">Privacy</a><a class="footer-link" href="@(landingBaseUrl)/contact">Contact</a></div></footer>
     @await RenderSectionAsync("Modals", required: false)
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -3,6 +3,7 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentProfile = User.Identity?.IsAuthenticated == true ? await MoneyFormatter.GetUserAsync() : null;
     var themeCookieDomain = Context.RequestServices.GetRequiredService<IConfiguration>()["Theme:CookieDomain"];
+    var landingBaseUrl = (Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev").TrimEnd('/');
     var themeCookieSecure = !Context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
@@ -17,6 +18,11 @@
     <link rel="icon" type="image/png" sizes="64x64" href="~/images/app-icons/pocketledger-64.png" asp-append-version="true" />
     <script>window.pocketLedgerThemeConfig = { cookieDomain: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(themeCookieDomain)), secure: @themeCookieSecure.ToString().ToLowerInvariant(), migrateLegacyStorage: true };</script>
     <script src="~/js/theme.js" asp-append-version="true"></script>
+    @if (currentProfile is not null)
+    {
+        @* Shares the selected avatar with the Identity site the same way the theme cookie is shared. *@
+        <script>(() => { const config = window.pocketLedgerThemeConfig ?? {}; const attributes = ["pocketledger-avatar=@(currentProfile.AvatarId)", "Path=/", "SameSite=Lax", "Max-Age=31536000"]; if (config.cookieDomain) attributes.push(`Domain=${config.cookieDomain}`); if (config.secure) attributes.push("Secure"); document.cookie = attributes.join("; "); })();</script>
+    }
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -59,6 +65,7 @@
                         <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> Recurring</a></li>
                         <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> Loans / Debts</a></li>
                         <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> Monthly planner</a></li>
+                        <li class="nav-item"><a class="@NavClass("Goals")" asp-controller="Goals" asp-action="Index" aria-current="@(currentController == "Goals" ? "page" : null)"><partial name="_NavigationIcon" model='"Goals"' /> Goals</a></li>
                     </ul>
                 </div>
                 <div class="header-actions">
@@ -118,10 +125,14 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="footer text-muted"><div class="container">&copy; 2026 - PocketLedger · v@(applicationVersion)</div></footer>
+    <footer class="footer text-muted"><div class="container d-flex gap-3"><span><span class="d-none d-sm-inline">&copy; 2026 - </span>PocketLedger · v@(applicationVersion)</span><a class="footer-link" href="@(landingBaseUrl)/privacy">Privacy</a><a class="footer-link" href="@(landingBaseUrl)/contact">Contact</a></div></footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (currentProfile is not null && PocketLedger.Models.Changelog.Since(currentProfile.LastSeenChangelogVersion) is { Count: > 0 } unseenReleases)
+    {
+        <partial name="_ChangelogModal" model="unseenReleases" />
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

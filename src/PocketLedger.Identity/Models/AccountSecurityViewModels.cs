@@ -12,7 +12,7 @@ public sealed class RecoveryCodesViewModel { public string[] Codes { get; set; }
 public sealed class ChangePasswordViewModel { [Required, DataType(DataType.Password), Display(Name = "Current password")] public string CurrentPassword { get; set; } = string.Empty; [Required, DataType(DataType.Password), Display(Name = "New password")] public string NewPassword { get; set; } = string.Empty; [Required, Compare(nameof(NewPassword)), DataType(DataType.Password), Display(Name = "Confirm new password")] public string ConfirmPassword { get; set; } = string.Empty; }
 public sealed record AccountManagementViewModel(string Username, string? Email, bool CanDelete, string BackupUrl);
 public sealed record SecurityDashboardViewModel(IReadOnlyList<AuthenticationAuditEvent> RecentEvents);
-public sealed record AuditLogViewModel(IReadOnlyList<AuthenticationAuditEvent> Events, int Page, int TotalPages);
+public sealed record AuditLogViewModel(PocketLedger.Models.ViewModels.TablePage<AuthenticationAuditEvent> Table);
 public sealed record DataRecoveryKeyViewModel(string RecoveryKey, string ContinuePath, string? ReturnUrl, bool AfterAccountRecovery = false);
 public sealed class UnlockDataViewModel { [Required, DataType(DataType.Password)] public string Password { get; set; } = string.Empty; public string? ReturnUrl { get; set; } public bool IsDataPassword { get; set; } }
 public sealed class CreateDataPasswordViewModel { [Required, MinLength(14), DataType(DataType.Password), Display(Name = "Data password")] public string Password { get; set; } = string.Empty; [Required, Compare(nameof(Password)), DataType(DataType.Password), Display(Name = "Confirm data password")] public string ConfirmPassword { get; set; } = string.Empty; public string? ReturnUrl { get; set; } }

@@ -15,5 +15,6 @@ public sealed class UserPreferenceConfiguration : IEntityTypeConfiguration<UserP
         builder.Property(item => item.AvatarId).HasColumnName("avatar_id");
         builder.Property(item => item.DefaultCurrency).HasColumnName("default_currency").HasMaxLength(3).IsFixedLength();
         builder.Property(item => item.TimeZoneId).HasColumnName("time_zone_id").HasMaxLength(100);
+        builder.Property(item => item.LastSeenChangelogVersion).HasColumnName("last_seen_changelog_version").HasMaxLength(20);
     }
 }

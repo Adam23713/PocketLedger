@@ -15,6 +15,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
       Landing__DocsBaseUrl: https://${POCKETLEDGER_DOCS_DOMAIN}
+      Landing__YouTubeVideoUrl: ${POCKETLEDGER_LANDING_YOUTUBE_URL:-}
       Identity__InternalBaseUrl: http://identity:5052/
       Contact__ClientIpHeader: X-PocketLedger-Client-IP
       Contact__RecipientAddress: ${POCKETLEDGER_CONTACT_RECIPIENT:-info@pocketledger.dev}

@@ -7,6 +7,7 @@ using OpenIddict.EntityFrameworkCore.Models;
 using PocketLedger.Configuration;
 using PocketLedger.Data;
 using PocketLedger.Models.Entities;
+using PocketLedger.Models.ViewModels;
 using PocketLedger.Models.ViewModels.Admin;
 using PocketLedger.Security;
 using PocketLedger.Services;
@@ -26,22 +27,54 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     private static readonly IReadOnlyList<int> AllowedLookbackHours = [3, 6, 12, 24, 48];
 
     [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName), HttpGet]
-    public async Task<IActionResult> Index(int page = 1, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(int page = 1, string? bansSort = null, bool bansDesc = false, bool bansMerge = false, int bansPage = 1,
+        CancellationToken cancellationToken = default)
     {
         var query = userManager.Users.AsNoTracking();
+        var now = timeProvider.GetUtcNow();
         var totalUsers = await query.CountAsync(cancellationToken);
         var totalPages = Math.Max(1, (int)Math.Ceiling(totalUsers / (double)PageSize));
         page = Math.Clamp(page, 1, totalPages);
         var users = await query.OrderBy(user => user.LastSuccessfulLoginAtUtc == null).ThenByDescending(user => user.LastSuccessfulLoginAtUtc)
             .ThenBy(user => user.NormalizedUserName).ThenBy(user => user.Id).Skip((page - 1) * PageSize).Take(PageSize)
             .Select(user => new AdminUserOverviewItem(user.Id, user.UserName ?? "Unavailable", user.Email, user.LastSuccessfulLoginAtUtc, user.IsAccessBlocked,
-                user.IsBootstrapAdministrator)).ToListAsync(cancellationToken);
+                user.IsBootstrapAdministrator, user.LockoutEnd > now ? user.LockoutEnd : null, user.RegistrationProvider)).ToListAsync(cancellationToken);
         var suspiciousRequestsTask = suspiciousRequestEvents.GetRecentAsync(cancellationToken: cancellationToken);
         var crowdSecBansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
         await Task.WhenAll(suspiciousRequestsTask, crowdSecBansTask);
         var registration = await registrationSettings.GetStatusAsync(cancellationToken);
         return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, registration, new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours),
-            await suspiciousRequestsTask, await crowdSecBansTask));
+            await suspiciousRequestsTask, BuildCrowdSecBans(await crowdSecBansTask, page, bansSort, bansDesc, bansMerge, bansPage)));
+    }
+
+    private const int BansPageSize = 15;
+
+    private static readonly IReadOnlyDictionary<string, Func<CrowdSecBanRow, IComparable?>> BanSortKeys = new Dictionary<string, Func<CrowdSecBanRow, IComparable?>>(StringComparer.Ordinal)
+    {
+        ["address"] = row => row.Address, ["scope"] = row => row.Scope, ["scenario"] = row => row.Scenario, ["origin"] = row => row.Origin,
+        ["action"] = row => row.Action, ["remaining"] = row => row.Remaining, ["count"] = row => row.BanCount
+    };
+
+    private static CrowdSecBansViewModel BuildCrowdSecBans(CrowdSecBanDecisionsResult result, int usersPage, string? sort, bool descending, bool merge, int page)
+    {
+        var rows = result.Decisions.Select(item =>
+        {
+            var remaining = CrowdSecDuration.Parse(item.RemainingDuration);
+            return new CrowdSecBanRow(item.Address, item.Scope, item.Scenario, item.Origin, item.Action, remaining, remaining is { } value ? CrowdSecDuration.Format(value) : item.RemainingDuration, 1);
+        });
+        if (merge)
+        {
+            // One row per address; the remaining time is the ban that expires first.
+            rows = rows.GroupBy(row => row.Address, StringComparer.OrdinalIgnoreCase).Select(group =>
+            {
+                var first = group.OrderBy(row => row.Remaining is null).ThenBy(row => row.Remaining).First();
+                static string Join(IEnumerable<string> values) => string.Join(", ", values.Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.OrdinalIgnoreCase));
+                return new CrowdSecBanRow(group.Key, Join(group.Select(row => row.Scope)), Join(group.Select(row => row.Scenario)), Join(group.Select(row => row.Origin)),
+                    Join(group.Select(row => row.Action)), first.Remaining, first.RemainingText, group.Count());
+            });
+        }
+        var table = TablePaging.Apply(rows, sort, descending, BanSortKeys, "address", page, BansPageSize);
+        return new CrowdSecBansViewModel(result.IsAvailable, result.Decisions.Count, merge, usersPage, table);
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -100,6 +133,21 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
             logger.LogError(exception, "Unblocking user {UserId} could not be propagated to the API.", user.Id);
             TempData["AdminWarning"] = $"{user.UserName} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes.";
         }
+        return RedirectToAction(nameof(Index), new { page });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Unlock(Guid userId, int page = 1, CancellationToken cancellationToken = default)
+    {
+        var user = await FindManageableUserAsync(userId);
+        if (user is null) return NotFound();
+        if (!await userManager.IsLockedOutAsync(user)) return BadRequest("The user is not locked out.");
+        var result = await userManager.SetLockoutEndDateAsync(user, null);
+        if (result.Succeeded) result = await userManager.ResetAccessFailedCountAsync(user);
+        if (!result.Succeeded) throw new InvalidOperationException("The user could not be unlocked.");
+        await audit.WriteAsync("LoginLockoutCleared", "Success", user.Id, user.NormalizedUserName,
+            metadata: $"ClearedBy={userManager.GetUserId(User)}", cancellationToken: cancellationToken);
+        TempData["AdminMessage"] = $"{user.UserName} can sign in again.";
         return RedirectToAction(nameof(Index), new { page });
     }
 

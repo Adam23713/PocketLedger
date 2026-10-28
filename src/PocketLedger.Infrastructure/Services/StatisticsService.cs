@@ -103,10 +103,11 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             selectedTotals.Balance,
             CategoryTotals(selected, TransactionType.Income),
             CategoryTotals(selected, TransactionType.Expense),
-            ExpenseMainCategoryTotals(selected),
+            MainCategoryTotals(selected, TransactionType.Expense),
             accounts.Select(account => new StatisticsAccountBalance(account.Id, account.Name, account.Currency, balances[account.Id])).ToList(),
             trend,
-            recurringExpenses);
+            recurringExpenses,
+            MainCategoryTotals(selected, TransactionType.Income));
     }
 
     private static IReadOnlyList<StatisticsCategoryTotal> CategoryTotals(IEnumerable<StatisticsTransactionRow> transactions, TransactionType type)
@@ -118,9 +119,9 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
             .ToList();
     }
 
-    private static IReadOnlyList<StatisticsMainCategoryTotal> ExpenseMainCategoryTotals(IEnumerable<StatisticsTransactionRow> transactions)
+    private static IReadOnlyList<StatisticsMainCategoryTotal> MainCategoryTotals(IEnumerable<StatisticsTransactionRow> transactions, TransactionType type)
     {
-        return transactions.Where(item => IsCategoryType(item, TransactionType.Expense))
+        return transactions.Where(item => IsCategoryType(item, type))
             .GroupBy(item => new
             {
                 CategoryId = item.ParentCategoryId ?? item.CategoryId,

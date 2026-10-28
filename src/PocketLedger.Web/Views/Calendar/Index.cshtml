@@ -27,10 +27,17 @@
     <div class="card dashboard-metric dashboard-metric-month calendar-month-summary">
         <div class="card-body">
             <div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>Monthly overview</span></div>
-            <div class="dashboard-period">
-                <span><small>Income</small><strong class="text-success">+@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Income, Model.ActiveCurrency)</strong></span>
-                <span><small>Expenses</small><strong class="text-danger">−@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Expenses, Model.ActiveCurrency)</strong></span>
-                <span><small>Result</small><strong>@MoneyFormatter.Format(Model.ActiveMonthlyTotal.Balance, Model.ActiveCurrency)</strong></span>
+            @{
+                var monthlyIncome = MoneyFormatter.Format(Model.ActiveMonthlyTotal.Income, Model.ActiveCurrency);
+                var monthlyExpenses = MoneyFormatter.Format(Model.ActiveMonthlyTotal.Expenses, Model.ActiveCurrency);
+                var monthlyResult = MoneyFormatter.Format(Model.ActiveMonthlyTotal.Balance, Model.ActiveCurrency);
+                // Long amounts do not fit three columns, so they are listed under each other instead.
+                var stackMonthlyTotals = new[] { monthlyIncome, monthlyExpenses, monthlyResult }.Max(value => value.Length) > 12;
+            }
+            <div class="dashboard-period @(stackMonthlyTotals ? "dashboard-period-stacked" : null)">
+                <span><small>Income</small><strong class="text-success">+@monthlyIncome</strong></span>
+                <span><small>Expenses</small><strong class="text-danger">−@monthlyExpenses</strong></span>
+                <span><small>Result</small><strong>@monthlyResult</strong></span>
             </div>
         </div>
     </div>

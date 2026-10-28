@@ -1,0 +1,47 @@
+@model PocketLedger.Models.ViewModels.Goals.GoalDetailsViewModel
+@{
+    ViewData["Title"] = Model.Goal.Name;
+    var goal = Model.Goal;
+    var moneyFormat = MoneyFormatter.GetMoneyInputFormat(goal.Currency);
+}
+<partial name="_GoalBanner" model="goal" view-data='new ViewDataDictionary(ViewData) { ["Large"] = true }' />
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <section class="card card-body h-100">
+            <partial name="_Progress" model="goal" />
+            <dl class="row mt-4 mb-0">
+                <dt class="col-sm-5">Saved so far</dt><dd class="col-sm-7">@MoneyFormatter.Format(goal.SavedAmount, goal.Currency)</dd>
+                <dt class="col-sm-5">Target</dt><dd class="col-sm-7">@MoneyFormatter.Format(goal.TargetAmount, goal.Currency)</dd>
+                <dt class="col-sm-5">Still needed</dt><dd class="col-sm-7">@MoneyFormatter.Format(goal.RemainingAmount, goal.Currency)</dd>
+                <dt class="col-sm-5">Target date</dt><dd class="col-sm-7">@(goal.TargetDate?.ToString("yyyy-MM-dd") ?? "—")</dd>
+            </dl>
+            <h2 class="h6 mt-3">Note</h2>
+            @if (string.IsNullOrWhiteSpace(goal.Note)) { <p class="text-muted mb-0">No note.</p> } else { <p class="goal-note mb-0">@goal.Note</p> }
+        </section>
+    </div>
+    <div class="col-lg-5">
+        <section class="card card-body">
+            <h2 class="h5">Update savings</h2>
+            <form asp-action="Contribute" asp-route-id="@goal.Id" method="post">
+                <div class="btn-group w-100 mb-3" role="group" aria-label="Contribution direction">
+                    <input type="radio" class="btn-check" name="Withdraw" id="goal-add" value="false" checked />
+                    <label class="btn btn-outline-success" for="goal-add">Add</label>
+                    <input type="radio" class="btn-check" name="Withdraw" id="goal-withdraw" value="true" />
+                    <label class="btn btn-outline-danger" for="goal-withdraw">Withdraw</label>
+                </div>
+                <label class="form-label" for="goal-contribution-display">Amount</label>
+                <input type="hidden" name="Amount" id="goal-contribution" />
+                <div class="input-group mb-3">
+                    <input class="form-control" id="goal-contribution-display" type="text" inputmode="decimal" autocomplete="off" required data-money-value="goal-contribution" data-decimal-places="@moneyFormat.DecimalPlaces" data-decimal-separator="@moneyFormat.DecimalSeparator" data-thousands-separator="@moneyFormat.ThousandsSeparator" />
+                    <span class="input-group-text">@moneyFormat.CurrencyMarker</span>
+                </div>
+                <button class="btn btn-primary w-100" type="submit">Add</button>
+            </form>
+        </section>
+        <div class="d-flex gap-2 mt-3">
+            <a class="btn btn-outline-secondary btn-opaque" asp-action="Edit" asp-route-id="@goal.Id">Edit goal</a>
+            <a class="btn btn-outline-danger btn-opaque" asp-action="Delete" asp-route-id="@goal.Id">Delete</a>
+        </div>
+    </div>
+</div>
+@section Scripts { <script src="~/js/money-input.js" asp-append-version="true"></script> }

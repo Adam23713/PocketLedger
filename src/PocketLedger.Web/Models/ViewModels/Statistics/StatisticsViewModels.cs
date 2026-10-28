@@ -2,7 +2,7 @@ namespace PocketLedger.Models.ViewModels.Statistics;
 
 public class StatisticsViewModel
 {
-    public string Currency { get; init; } = "HUF";
+    public string Currency { get; init; } = "EUR";
     public int Year { get; init; }
     public int Month { get; init; }
     public IReadOnlyList<CurrencyDefinition> AvailableCurrencies { get; init; } = [];
@@ -13,6 +13,7 @@ public class StatisticsViewModel
     public IReadOnlyList<StatisticsCategoryViewModel> IncomeByCategory { get; init; } = [];
     public IReadOnlyList<StatisticsCategoryViewModel> ExpenseByCategory { get; init; } = [];
     public IReadOnlyList<StatisticsMainCategoryViewModel> ExpenseMainCategories { get; init; } = [];
+    public IReadOnlyList<StatisticsMainCategoryViewModel> IncomeMainCategories { get; init; } = [];
     public IReadOnlyList<StatisticsAccountViewModel> AccountBalances { get; init; } = [];
     public IReadOnlyList<StatisticsTrendViewModel> MonthlyTrend { get; init; } = [];
     public IReadOnlyList<StatisticsRecurringExpenseViewModel> RecurringExpenses { get; init; } = [];

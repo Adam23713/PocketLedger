@@ -29,6 +29,9 @@ public static class BackupValidator
         }
         foreach (var category in backup.Categories) ValidateCategory(category, categories, errors);
         foreach (var debt in debts) ValidateDebt(debt, accounts, errors);
+        AddDuplicates(errors, "Goal", (backup.Goals ?? []).Select(item => item.Id));
+        foreach (var goal in backup.Goals ?? [])
+            TryRule(errors, "Goal", goal.Id, "goal", () => GoalRules.Validate(new Goal { Name = goal.Name, TargetAmount = goal.TargetAmount, SavedAmount = goal.SavedAmount, Currency = goal.Currency, BannerColor = goal.BannerColor, BannerImage = goal.BannerImage, Note = goal.Note }));
         foreach (var transaction in backup.Transactions) ValidateTransaction(transaction, accounts, categories, debtLookup, errors);
         ValidateDebtBalances(debts, backup.Transactions, errors);
         foreach (var recurring in backup.RecurringTransactions) ValidateRecurring(recurring, accounts, categories, debtLookup, errors);

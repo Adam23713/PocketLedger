@@ -53,7 +53,7 @@ public class AccountFormViewModel
     public AccountType Type { get; set; }
 
     [Required, RegularExpression("^[A-Za-z]{3}$", ErrorMessage = "Currency must contain exactly three letters.")]
-    public string Currency { get; set; } = "HUF";
+    public string Currency { get; set; } = "EUR";
 
     [Display(Name = "Initial balance")]
     public decimal InitialBalance { get; set; }
