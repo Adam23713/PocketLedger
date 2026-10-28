@@ -1,0 +1,30 @@
+@page "/"
+@{
+    ViewData["Title"] = "Documentation";
+}
+<section class="hero shell">
+    <p class="eyebrow">DOCUMENTATION</p>
+    <h1>Build confidence with PocketLedger.</h1>
+    <p class="lead">Learn how to use PocketLedger or integrate a client with its API. This documentation is being built alongside the project.</p>
+</section>
+
+<section class="section shell" aria-labelledby="explore-title">
+    <div class="section-heading">
+        <p class="eyebrow">START HERE</p>
+        <h2 id="explore-title">Explore the documentation</h2>
+    </div>
+    <div class="cards">
+        <a class="card" asp-page="/Guide/Index">
+            <span class="card-index">01 / GUIDE</span>
+            <h3>User guide</h3>
+            <p>Step-by-step help for setting up and using PocketLedger in everyday life.</p>
+            <span class="card-link">Open the guide <span aria-hidden="true">→</span></span>
+        </a>
+        <a class="card" asp-page="/Api/Index">
+            <span class="card-index">02 / API</span>
+            <h3>API reference</h3>
+            <p>Concepts, endpoints and copyable curl examples for developers building PocketLedger clients.</p>
+            <span class="card-link">Explore the API <span aria-hidden="true">→</span></span>
+        </a>
+    </div>
+</section>

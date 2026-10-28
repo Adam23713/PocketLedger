@@ -2,9 +2,9 @@
 
 ## Architecture and limits
 
-Cloudflare → Caddy (trusted client IP → CrowdSec HTTP bouncer → rate limiter) → existing landing:5053, web:5050, api:5051 and identity:5052 upstreams. Caddy JSON access logs feed CrowdSec's `crowdsecurity/caddy` collection, the shared `pocketledger/http-flood` scenario and the Identity-specific `pocketledger/identity-abuse` scenario. There is no host firewall bouncer: at that layer the peer is a Cloudflare edge, not the visitor.
+Cloudflare → Caddy (trusted client IP → CrowdSec HTTP bouncer → rate limiter) → existing landing:5053, docs:5054, web:5050, api:5051 and identity:5052 upstreams. Caddy JSON access logs feed CrowdSec's `crowdsecurity/caddy` collection, the shared `pocketledger/http-flood` scenario and the Identity-specific `pocketledger/identity-abuse` scenario. There is no host firewall bouncer: at that layer the peer is a Cloudflare edge, not the visitor.
 
-One shared sliding-window limiter allows 400 requests per 60 seconds across all four HTTPS hosts. Identity traffic additionally has a 100-per-60-second total limit and Identity POST requests have a 15-per-60-second limit. Rejection is HTTP 429 with Retry-After. IPv4 is grouped per address, IPv6 per /64, using Caddy's `{client_ip}`. Shared NATs and IPv6 household networks share these budgets; tune only after inspecting legitimate traffic, especially login/refresh activity. Limits are in-memory for this single Caddy instance and reset on restart. They do not protect bandwidth, TLS handshakes or the automatic HTTP→HTTPS redirect. Keep Cloudflare's edge protection enabled.
+One shared sliding-window limiter allows 400 requests per 60 seconds across all five HTTPS hosts. Identity traffic additionally has a 100-per-60-second total limit and Identity POST requests have a 15-per-60-second limit. Rejection is HTTP 429 with Retry-After. IPv4 is grouped per address, IPv6 per /64, using Caddy's `{client_ip}`. Shared NATs and IPv6 household networks share these budgets; tune only after inspecting legitimate traffic, especially login/refresh activity. Limits are in-memory for this single Caddy instance and reset on restart. They do not protect bandwidth, TLS handshakes or the automatic HTTP→HTTPS redirect. Keep Cloudflare's edge protection enabled.
 
 The shared flood detector groups parsed `evt.Meta.source_ip` (Caddy `request.client_ip`) across hosts, includes 429s, and excludes 403s to avoid extending bans from already rejected requests. Its leaky bucket holds 1000 events and leaks one every 60 ms: **1000/minute is the sustained drain rate, not a fixed-window threshold**. A burst above capacity can trigger immediately; 2000/minute fills an empty bucket in about one minute, 1100/minute in about ten minutes. Traffic at or below 1000/minute does not steadily fill it. Rate-limited requests are still logged, so the 400 limiter does not prevent flood detection. Overflow creates a one-hour IP ban.
 
@@ -57,7 +57,7 @@ CrowdSec's online API is disabled: this deployment uses local detections, withou
    docker compose exec crowdsec cscli decisions list
    ```
 
-   Expect the Caddy collection, both `pocketledger_caddy` and `pocketledger_identity`, recent API pulls, parsed access logs and acquisition counters increasing. Exercise all four routes, the bootstrap administrator dashboard and a normal login/refresh flow. An empty alerts/decisions list is normal without attacks. CrowdSec downtime must show an unavailable state on the Admin dashboard without affecting login.
+   Expect the Caddy collection, both `pocketledger_caddy` and `pocketledger_identity`, recent API pulls, parsed access logs and acquisition counters increasing. Exercise all five routes, the bootstrap administrator dashboard and a normal login/refresh flow. An empty alerts/decisions list is normal without attacks. CrowdSec downtime must show an unavailable state on the Admin dashboard without affecting login.
 
 ## Safe verification and troubleshooting
 
@@ -68,7 +68,7 @@ docker compose --env-file .env.example build caddy
 python3 tools/verify-edge-security.py
 ```
 
-Set `PL_CADDY_TEST_IMAGE` if the build uses a different project/image name. The script uses a unique Compose project, isolated volumes and mock upstreams, publishes only a random loopback port, and removes only its own test containers/volumes. It validates the production Caddyfile before substituting a local HTTP listener. Only the test fixture additionally trusts its container gateway to simulate Cloudflare; the production trust list is unchanged. It checks split application/Identity logging, all three limits, IPv6 grouping, spoofing, four upstream routes, decision enforcement/removal, bounded synthetic shared and Identity floods (including valid-looking Identity responses and 429s), edge exclusion, OIDC query redaction, accelerated log rotation, one-/four-hour ban durations and CrowdSec recreation. It does not test production TLS, Cloudflare connectivity, real application authentication, or origin firewall rules. CI runs the same script.
+Set `PL_CADDY_TEST_IMAGE` if the build uses a different project/image name. The script uses a unique Compose project, isolated volumes and mock upstreams, publishes only a random loopback port, and removes only its own test containers/volumes. It validates the production Caddyfile before substituting a local HTTP listener. Only the test fixture additionally trusts its container gateway to simulate Cloudflare; the production trust list is unchanged. It checks split application/Identity logging, all three limits, IPv6 grouping, spoofing, five upstream routes, decision enforcement/removal, bounded synthetic shared and Identity floods (including valid-looking Identity responses and 429s), edge exclusion, OIDC query redaction, accelerated log rotation, one-/four-hour ban durations and CrowdSec recreation. It does not test production TLS, Cloudflare connectivity, real application authentication, or origin firewall rules. CI runs the same script.
 
 For a production ban check, use only an IP you control and retain an alternate administrative path:
 
@@ -86,7 +86,7 @@ Rotate the Identity credential independently: update only `CROWDSEC_IDENTITY_API
 
 ## Rollback
 
-Restore the saved Caddyfile and Compose configuration and the previous Caddy image, then recreate only Caddy with `docker compose up -d --no-deps caddy`. Ensure the restored Compose selects the saved image rather than building the security image. Verify all four HTTPS routes. Stop CrowdSec using the security Compose configuration if removing the feature; preserve its volumes for diagnosis. Never use `down --volumes` on the deployment: that also deletes PocketLedger databases and certificate storage. Rolling back removes this additional protection, so retain Cloudflare and origin firewall controls.
+Restore the saved Caddyfile and Compose configuration and the previous Caddy image, then recreate only Caddy with `docker compose up -d --no-deps caddy`. Ensure the restored Compose selects the saved image rather than building the security image. Verify all five HTTPS routes. Stop CrowdSec using the security Compose configuration if removing the feature; preserve its volumes for diagnosis. Never use `down --volumes` on the deployment: that also deletes PocketLedger databases and certificate storage. Rolling back removes this additional protection, so retain Cloudflare and origin firewall controls.
 
 ## Upstream references
 
