@@ -30,9 +30,9 @@
 	}
 }
 
-{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN} {
+{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_DOCS_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN} {
 	log {
-		hostnames {$POCKETLEDGER_LANDING_DOMAIN} {$POCKETLEDGER_WEB_DOMAIN} {$POCKETLEDGER_API_DOMAIN}
+		hostnames {$POCKETLEDGER_LANDING_DOMAIN} {$POCKETLEDGER_DOCS_DOMAIN} {$POCKETLEDGER_WEB_DOMAIN} {$POCKETLEDGER_API_DOMAIN}
 		output file /var/log/caddy/access.log {
 			roll_size 100MiB
 			roll_keep 5
@@ -137,6 +137,9 @@
 			# Overwrite any client-supplied value with the Cloudflare-verified client address.
 			header_up X-PocketLedger-Client-IP {client_ip}
 		}
+
+		@docs host {$POCKETLEDGER_DOCS_DOMAIN}
+		reverse_proxy @docs docs:5054
 
 		@web host {$POCKETLEDGER_WEB_DOMAIN}
 		reverse_proxy @web web:5050

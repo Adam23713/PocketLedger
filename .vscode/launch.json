@@ -85,6 +85,27 @@
                 "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
                 "uriFormat": "http://localhost:%s"
             }
+        },
+        {
+            "name": "PocketLedger Docs (5054)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/PocketLedger.Docs/bin/Debug/net10.0/PocketLedger.Docs.dll",
+            "cwd": "${workspaceFolder}/src/PocketLedger.Docs",
+            "stopAtEntry": false,
+            "justMyCode": true,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE": "false",
+                "DOTNET_USE_POLLING_FILE_WATCHER": "1",
+                "ASPNETCORE_URLS": "http://localhost:5054",
+                "Docs__LandingBaseUrl": "http://localhost:5053"
+            },
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
+                "uriFormat": "http://localhost:%s"
+            }
         }
     ],
     "compounds": [
@@ -94,7 +115,8 @@
                 "PocketLedger Identity (5052)",
                 "PocketLedger API (5051)",
                 "PocketLedger Web (5050)",
-                "PocketLedger Landing (5053)"
+                "PocketLedger Landing (5053)",
+                "PocketLedger Docs (5054)"
             ],
             "preLaunchTask": "prepare PocketLedger development",
             "stopAll": true

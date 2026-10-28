@@ -5,6 +5,7 @@
     <Project Path="src/PocketLedger.Application/PocketLedger.Application.csproj" />
     <Project Path="src/PocketLedger.Contracts/PocketLedger.Contracts.csproj" />
     <Project Path="src/PocketLedger.Domain/PocketLedger.Domain.csproj" />
+    <Project Path="src/PocketLedger.Docs/PocketLedger.Docs.csproj" />
     <Project Path="src/PocketLedger.Infrastructure/PocketLedger.Infrastructure.csproj" />
     <Project Path="src/PocketLedger.Identity/PocketLedger.Identity.csproj" />
     <Project Path="src/PocketLedger.Landing/PocketLedger.Landing.csproj" />
