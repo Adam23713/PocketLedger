@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,6 +85,27 @@ public sealed class RequestTelemetryTests
         var worker = provider.GetServices<IHostedService>().Single();
 
         Assert.Same(reader, worker);
+    }
+
+    [Theory]
+    [InlineData("client_id", "pocketledger-web", true, true)]
+    [InlineData("azp", "pocketledger-web", true, true)]
+    [InlineData("client_id", "pocketledger-swagger", true, false)]
+    [InlineData("client_id", "pocketledger-web", false, false)]
+    public void ClientFilter_IgnoresOnlyAuthenticatedRequestsFromListedClients(string claimType, string clientId, bool authenticated, bool expected)
+    {
+        var filter = new RequestTelemetryClientFilter(["pocketledger-web"]);
+        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(claimType, clientId)], authenticated ? "Bearer" : null));
+
+        Assert.Equal(expected, filter.IsIgnored(principal));
+    }
+
+    [Fact]
+    public void ClientFilter_WithoutListedClientsIgnoresNothing()
+    {
+        var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("client_id", "pocketledger-web")], "Bearer"));
+
+        Assert.False(RequestTelemetryClientFilter.None.IsIgnored(principal));
     }
 
     private static ServiceProvider CreateProvider(Dictionary<string, string?> settings)

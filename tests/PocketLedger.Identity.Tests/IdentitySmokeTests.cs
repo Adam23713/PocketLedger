@@ -23,6 +23,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     {
         builder.UseEnvironment("Development");
         builder.UseSetting("Database:ApplyMigrationsOnStartup", "false");
+        builder.UseSetting("Registration:Enabled", "false");
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<IdentityDbContext>();
@@ -81,9 +82,11 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
             "AccountController.ExternalLogin",
             "AccountController.ExternalLoginCallback",
             "AccountController.Login",
+            "AccountController.RecoverAccount",
             "AccountController.RecoveryCode",
             "AccountController.Register",
             "AccountController.TwoFactor",
+            "AccountController.UnlockData",
             "AuthorizationController.AuthorizeEndpoint",
             "AuthorizationController.TokenEndpoint",
             "HomeController.Index",
@@ -96,6 +99,9 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     [InlineData("/Account/SetupAuthenticator")]
     [InlineData("/Account/RecoveryCodes")]
     [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/CreateDataPassword")]
+    [InlineData("/Account/RegenerateRecoveryKey")]
+    [InlineData("/Account/Manage")]
     [InlineData("/Account/Security")]
     [InlineData("/Account/LoginEvents")]
     [InlineData("/Admin")]
@@ -115,6 +121,7 @@ public sealed class IdentitySmokeTests : IClassFixture<WebApplicationFactory<Pro
     [InlineData("/Account/SetupAuthenticator")]
     [InlineData("/Account/RecoveryCodes")]
     [InlineData("/Account/ChangePassword")]
+    [InlineData("/Account/DeleteAccount")]
     [InlineData("/Account/Logout")]
     public async Task AnonymousUser_IsRejectedBeforeProtectedPostActionRuns(string path)
     {

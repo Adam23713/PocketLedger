@@ -23,6 +23,7 @@ builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder
 builder.Services.AddSingleton<DatabaseTicketStore>();
 builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
 builder.Services.AddSingleton<SessionRefreshCoordinator>();
+builder.Services.AddSingleton<UserSessionKeys>();
 builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, ConfigureBffCookie>();
 builder.Services.AddAuthentication(options =>
 {
@@ -48,7 +49,7 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = builder.Configuration.GetValue("Identity:RequireHttpsMetadata", true);
     options.ClientId = builder.Configuration["Identity:ClientId"] ?? "pocketledger-web";
     options.ClientSecret = builder.Configuration["Identity:ClientSecret"] ?? throw new InvalidOperationException("Identity:ClientSecret is required.");
-    options.TokenValidationParameters = new TokenValidationParameters { IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Authentication:SigningKey"] ?? throw new InvalidOperationException("Authentication:SigningKey is required."))) };
+    options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name", IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(builder.Configuration["Authentication:SigningKey"] ?? throw new InvalidOperationException("Authentication:SigningKey is required."))) };
     options.ResponseType = OpenIdConnectResponseType.Code;
     options.UsePkce = true;
     options.SaveTokens = true;
@@ -58,6 +59,11 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("profile");
     options.Scope.Add("offline_access");
     options.Scope.Add("pocketledger.api");
+    options.Events.OnTokenResponseReceived = context =>
+    {
+        context.HttpContext.RequestServices.GetRequiredService<UserSessionKeys>().Accept(context);
+        return Task.CompletedTask;
+    };
     options.Events.OnRemoteFailure = context =>
     {
         context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("PocketLedger.Web.Authentication")

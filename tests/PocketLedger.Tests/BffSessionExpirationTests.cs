@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.DataProtection;
+using PocketLedger.Security;
 using PocketLedger.Web.Authentication;
 
 namespace PocketLedger.Tests;
@@ -39,7 +41,8 @@ public class BffSessionExpirationTests
         using var secondClient = new HttpClient(secondHandler);
 
         var firstRequest = firstClient.GetAsync("https://api.test/accounts");
-        await refreshStarted.Task;
+        // Surface a failure of the first request instead of waiting forever for a refresh that never starts.
+        if (await Task.WhenAny(refreshStarted.Task, firstRequest) == firstRequest) await firstRequest;
         var secondRequest = secondClient.GetAsync("https://api.test/accounts");
         await secondAuthenticated.Task;
         releaseRefresh.TrySetResult();
@@ -113,13 +116,53 @@ public class BffSessionExpirationTests
         Assert.Equal("/Statistics?month=8", authentication.ChallengeProperties?.RedirectUri);
     }
 
-    private static AccessTokenHandler CreateAccessTokenHandler(HttpStatusCode statusCode, string tokenResponse, string sessionKey, StubSessionTicketReader? ticketReader = null, SessionRefreshCoordinator? coordinator = null, HttpClient? tokenClient = null, Action? onAuthenticate = null)
+    [Fact]
+    public async Task AccessTokenHandler_SendsBothHalvesOfTheSessionDataKeyToTheApi()
+    {
+        HttpRequestMessage? sent = null;
+        using var handler = CreateAccessTokenHandler(HttpStatusCode.OK, """{"access_token":"token","expires_in":3600}""", "session", apiResponse: request => { sent = request; return new HttpResponseMessage(HttpStatusCode.OK); });
+        using var client = new HttpClient(handler);
+
+        await client.GetAsync("https://api.test/accounts");
+
+        Assert.Equal(TestSessionKey, Assert.Single(sent!.Headers.GetValues(UserSessionKeyProtocol.SessionKeyHeader)));
+        Assert.Equal(TestWrappedKey, Assert.Single(sent.Headers.GetValues(UserSessionKeyProtocol.WrappedKeyHeader)));
+    }
+
+    [Fact]
+    public async Task AccessTokenHandler_WithoutTheBrowsersDataKeyCookie_ExpiresTheSession()
+    {
+        var apiCalled = false;
+        using var handler = CreateAccessTokenHandler(HttpStatusCode.OK, "{}", "session", withDataKeyCookie: false, apiResponse: _ => { apiCalled = true; return new HttpResponseMessage(HttpStatusCode.OK); });
+        using var client = new HttpClient(handler);
+
+        await Assert.ThrowsAsync<BffSessionExpiredException>(() => client.GetAsync("https://api.test/accounts"));
+        Assert.False(apiCalled);
+    }
+
+    [Fact]
+    public async Task AccessTokenHandler_TreatsAnUnauthorizedApiResponseAsAnExpiredSession()
+    {
+        using var handler = CreateAccessTokenHandler(HttpStatusCode.OK, """{"access_token":"token","expires_in":3600}""", "session", apiResponse: _ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = new HttpClient(handler);
+
+        await Assert.ThrowsAsync<BffSessionExpiredException>(() => client.GetAsync("https://api.test/accounts"));
+    }
+
+    // HttpContextAccessor keeps the context in a shared AsyncLocal, so handlers created in one test see the latest context;
+    // a single provider keeps every test cookie readable by every handler.
+    private static readonly EphemeralDataProtectionProvider Protection = new();
+    private const string TestSessionKey = "test-session-key";
+    private const string TestWrappedKey = "test-wrapped-key";
+
+    private static AccessTokenHandler CreateAccessTokenHandler(HttpStatusCode statusCode, string tokenResponse, string sessionKey, StubSessionTicketReader? ticketReader = null, SessionRefreshCoordinator? coordinator = null, HttpClient? tokenClient = null, Action? onAuthenticate = null, bool withDataKeyCookie = true, Func<HttpRequestMessage, HttpResponseMessage>? apiResponse = null)
     {
         var ticket = CreateTicket("expired-refresh-token", sessionKey);
         ticketReader ??= new StubSessionTicketReader();
         ticketReader.Set(sessionKey, ticket);
         var authentication = new StubAuthenticationService(AuthenticateResult.Success(ticket), signedInTicket => ticketReader.Set(sessionKey, signedInTicket), onAuthenticate);
         var context = CreateHttpContext(authentication);
+        if (withDataKeyCookie) context.Request.Headers.Cookie = $"{UserSessionKeys.CookieName}={Protection.CreateProtector(UserSessionKeys.ProtectorPurpose).Protect(TestSessionKey)}";
         tokenClient ??= new HttpClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(statusCode)
         {
             Content = new StringContent(tokenResponse, Encoding.UTF8, "application/json")
@@ -133,9 +176,9 @@ public class BffSessionExpirationTests
             ["Identity:ClientSecret"] = "secret",
             ["Identity:TokenEndpoint"] = "connect/token"
         }).Build();
-        return new AccessTokenHandler(new HttpContextAccessor { HttpContext = context }, new StubHttpClientFactory(tokenClient), configuration, ticketReader, coordinator ?? new SessionRefreshCoordinator())
+        return new AccessTokenHandler(new HttpContextAccessor { HttpContext = context }, new StubHttpClientFactory(tokenClient), configuration, ticketReader, coordinator ?? new SessionRefreshCoordinator(), new UserSessionKeys(Protection, new TestHostEnvironment()))
         {
-            InnerHandler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK))
+            InnerHandler = new StubHttpMessageHandler(apiResponse ?? (_ => new HttpResponseMessage(HttpStatusCode.OK)))
         };
     }
 
@@ -143,6 +186,7 @@ public class BffSessionExpirationTests
     {
         var properties = new AuthenticationProperties();
         properties.Items[DatabaseTicketStore.SessionKeyProperty] = sessionKey;
+        properties.Items[UserSessionKeys.WrappedKeyItem] = TestWrappedKey;
         properties.StoreTokens([new AuthenticationToken { Name = "refresh_token", Value = refreshToken }]);
         var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "user-id")], "BffCookie"));
         return new AuthenticationTicket(principal, properties, "BffCookie");
@@ -157,6 +201,14 @@ public class BffSessionExpirationTests
     {
         var services = new ServiceCollection().AddSingleton(authentication).BuildServiceProvider();
         return new DefaultHttpContext { RequestServices = services };
+    }
+
+    private sealed class TestHostEnvironment : Microsoft.Extensions.Hosting.IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = "Development";
+        public string ApplicationName { get; set; } = "PocketLedger.Tests";
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
     }
 
     private sealed class StubHttpClientFactory(HttpClient client) : IHttpClientFactory

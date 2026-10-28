@@ -1,5 +1,9 @@
 using System.Net;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +48,38 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromHours(78);
 }).AddEntityFrameworkStores<IdentityDbContext>().AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>().AddDefaultTokenProviders();
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    builder.Services.AddAuthentication().AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("email");
+        options.ClaimActions.MapJsonKey("email_verified", "email_verified", ClaimValueTypes.Boolean);
+    });
+}
+var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
+var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret))
+{
+    builder.Services.AddAuthentication().AddFacebook(options =>
+    {
+        options.AppId = facebookAppId;
+        options.AppSecret = facebookAppSecret;
+        options.Scope.Clear();
+        options.Scope.Add("email");
+        options.Fields.Clear();
+        options.Fields.Add("id");
+        options.Fields.Add("email");
+        options.ClaimActions.Clear();
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.Add(new FacebookVerifiedEmailClaimAction());
+    });
+}
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "PocketLedger.Identity";
@@ -85,9 +121,15 @@ builder.Services.AddOpenIddict()
         if (builder.Environment.IsDevelopment()) aspNetCore.DisableTransportSecurityRequirement();
     });
 builder.Services.AddSingleton<IAuthenticationRateLimiter, AuthenticationRateLimiter>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<UserKeyDerivationLimiter>();
+builder.Services.AddScoped<IUserDataKeyService, UserDataKeyService>();
+builder.Services.AddSingleton<IPendingSignInKeys, PendingSignInKeys>();
+builder.Services.AddSingleton<ISessionKeyHandoff, SessionKeyHandoff>();
 builder.Services.AddSingleton<IClientIpAddressResolver, ClientIpAddressResolver>();
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 builder.Services.AddScoped<IRegistrationSettingsService, RegistrationSettingsService>();
+builder.Services.AddScoped<IUserAccountDeletionService, UserAccountDeletionService>();
 builder.Services.AddHostedService<OpenIddictClientSeeder>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);

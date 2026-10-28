@@ -23,12 +23,12 @@ public sealed class RequestDetectionFactAttribute : FactAttribute
 
 public sealed class SuspiciousRequestDetectionTests
 {
-    private static int nextAddressSuffix = Random.Shared.Next(1, 200);
-
     [Fact]
     public async Task DisabledStore_IsUnavailableAndRecordingDoesNotAffectTheRequest()
     {
-        var service = new SuspiciousRequestDetectionService(Options.Create(new RequestTelemetryOptions()), NullLogger<SuspiciousRequestDetectionService>.Instance);
+        var options = Options.Create(new RequestTelemetryOptions());
+        await using var store = new RequestTelemetryConnection(options);
+        var service = new SuspiciousRequestDetectionService(options, store, NullLogger<SuspiciousRequestDetectionService>.Instance);
         using var services = CreateRequestServices();
         var context = CreateContext(services, IPAddress.Parse("203.0.113.10"), Guid.NewGuid());
 
@@ -37,7 +37,6 @@ public sealed class SuspiciousRequestDetectionTests
 
         Assert.False(result.IsAvailable);
         Assert.Empty(result.Events);
-        await service.DisposeAsync();
     }
 
     [RequestDetectionFact]
@@ -86,6 +85,21 @@ public sealed class SuspiciousRequestDetectionTests
         Assert.DoesNotContain((await harness.Reader.GetRecentAsync(100)).Events, item => item.ClientIpAddress == address.ToString());
     }
 
+    [RequestDetectionFact]
+    public async Task ActiveIncidentKeepsCountingWhileTheRollingWindowStaysBounded()
+    {
+        await using var harness = await DetectionHarness.CreateAsync();
+        var address = harness.NewAddress();
+        var timestamp = DateTimeOffset.UtcNow;
+
+        for (var index = 0; index < 1000; index++) harness.Record(address, null, timestamp.AddMilliseconds(index));
+        var incident = await harness.WaitForIncidentAsync(address, 1000);
+
+        Assert.Equal(1000, incident.RequestCount);
+        Assert.Equal(201, await harness.RollingCountAsync(address));
+        Assert.Single((await harness.Reader.GetRecentAsync(100)).Events, item => item.ClientIpAddress == address.ToString());
+    }
+
     private sealed class DetectionHarness : IAsyncDisposable
     {
         private readonly SuspiciousRequestDetectionService service;
@@ -93,10 +107,12 @@ public sealed class SuspiciousRequestDetectionTests
         private readonly Task worker;
         private readonly ServiceProvider requestServices;
         private readonly IConnectionMultiplexer redis;
+        private readonly RequestTelemetryConnection store;
 
-        private DetectionHarness(SuspiciousRequestDetectionService service, ServiceProvider requestServices, IConnectionMultiplexer redis)
+        private DetectionHarness(SuspiciousRequestDetectionService service, RequestTelemetryConnection store, ServiceProvider requestServices, IConnectionMultiplexer redis)
         {
             this.service = service;
+            this.store = store;
             this.requestServices = requestServices;
             this.redis = redis;
             Reader = service;
@@ -108,17 +124,41 @@ public sealed class SuspiciousRequestDetectionTests
         public static async Task<DetectionHarness> CreateAsync()
         {
             var connectionString = Environment.GetEnvironmentVariable("PL_TEST_VALKEY")!;
-            var service = new SuspiciousRequestDetectionService(Options.Create(new RequestTelemetryOptions { ConnectionString = connectionString }), NullLogger<SuspiciousRequestDetectionService>.Instance);
+            var options = Options.Create(new RequestTelemetryOptions { ConnectionString = connectionString, TimeoutMilliseconds = 10_000 });
+            var store = new RequestTelemetryConnection(options);
+            // The detector drops a batch when Valkey is not reachable yet, so observations are only sent once the connection works.
+            await WaitForAsync(async () =>
+            {
+                try
+                {
+                    await (await store.GetDatabaseAsync(CancellationToken.None)).PingAsync();
+                    return true;
+                }
+                catch (RedisException)
+                {
+                    return false;
+                }
+            });
+            var service = new SuspiciousRequestDetectionService(options, store, NullLogger<SuspiciousRequestDetectionService>.Instance);
             var redis = await ConnectionMultiplexer.ConnectAsync(connectionString);
-            return new DetectionHarness(service, CreateRequestServices(), redis);
+            return new DetectionHarness(service, store, CreateRequestServices(), redis);
         }
 
-        public IPAddress NewAddress() => IPAddress.Parse($"203.0.113.{Interlocked.Increment(ref nextAddressSuffix) % 250 + 1}");
+        // A random address in the IPv6 documentation range, so no test or earlier run against the same Valkey shares its keys.
+        public IPAddress NewAddress()
+        {
+            var bytes = new byte[16];
+            RandomNumberGenerator.Fill(bytes.AsSpan(4));
+            bytes[0] = 0x20; bytes[1] = 0x01; bytes[2] = 0x0d; bytes[3] = 0xb8;
+            return new IPAddress(bytes);
+        }
 
         public void Record(IPAddress address, Guid? userId, DateTimeOffset timestamp, string? forwardedFor = null)
             => service.TryRecord(CreateContext(requestServices, address, userId, forwardedFor), timestamp);
 
-        public Task WaitForRollingCountAsync(IPAddress address, long expected) => WaitForAsync(async () => await redis.GetDatabase().SortedSetLengthAsync(RollingKey(address)) == expected);
+        public Task<long> RollingCountAsync(IPAddress address) => redis.GetDatabase().SortedSetLengthAsync(RollingKey(address));
+
+        public Task WaitForRollingCountAsync(IPAddress address, long expected) => WaitForAsync(async () => await RollingCountAsync(address) == expected);
 
         public async Task<SuspiciousRequestEvent> WaitForIncidentAsync(IPAddress address, long expectedCount, int expectedUserCount = 0)
         {
@@ -136,7 +176,7 @@ public sealed class SuspiciousRequestDetectionTests
             service.Complete();
             cancellation.Cancel();
             try { await worker; } catch (OperationCanceledException) { }
-            await service.DisposeAsync();
+            await store.DisposeAsync();
             await redis.DisposeAsync();
             await requestServices.DisposeAsync();
             cancellation.Dispose();

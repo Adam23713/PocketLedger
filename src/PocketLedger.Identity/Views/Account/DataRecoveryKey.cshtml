@@ -1,0 +1,21 @@
+@model PocketLedger.Models.ViewModels.Account.DataRecoveryKeyViewModel
+@{ ViewData["Title"] = "Data recovery key"; ViewData["HideAuthenticatedNavigation"] = true; }
+<h1>Data recovery key</h1>
+@if (Model.AfterAccountRecovery)
+{
+    <div class="alert alert-success" role="status">Your password has been replaced. Your previous recovery key no longer works.</div>
+}
+<div class="alert alert-warning">
+    Your financial data is encrypted with a key that only your password and this recovery key can open.
+    If you forget your password, this key is the <strong>only</strong> way to get your data back. Nobody, including the administrator, can recover it for you.
+    Save it somewhere safe and offline now. It will not be shown again.
+</div>
+<p class="fs-4"><code data-recovery-key>@Model.RecoveryKey</code></p>
+<form action="@Model.ContinuePath" method="get">
+    @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+    {
+        <input name="returnUrl" type="hidden" value="@Model.ReturnUrl" />
+    }
+    <div><input id="recovery-key-saved" name="saved" type="checkbox" value="true" required /> <label for="recovery-key-saved">I saved the recovery key</label></div>
+    <button class="btn btn-primary mt-3">Continue</button>
+</form>

@@ -15,6 +15,16 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Landing__AppBaseUrl: https://${POCKETLEDGER_WEB_DOMAIN}
       Identity__InternalBaseUrl: http://identity:5052/
+      Contact__ClientIpHeader: X-PocketLedger-Client-IP
+      Contact__RecipientAddress: ${POCKETLEDGER_CONTACT_RECIPIENT:-info@pocketledger.dev}
+      Contact__Smtp__Host: ${POCKETLEDGER_CONTACT_SMTP_HOST:-}
+      Contact__Smtp__Port: ${POCKETLEDGER_CONTACT_SMTP_PORT:-587}
+      Contact__Smtp__Security: ${POCKETLEDGER_CONTACT_SMTP_SECURITY:-StartTls}
+      Contact__Smtp__Username: ${POCKETLEDGER_CONTACT_SMTP_USERNAME:-}
+      Contact__Smtp__Password: ${POCKETLEDGER_CONTACT_SMTP_PASSWORD:-}
+      Contact__Smtp__FromAddress: ${POCKETLEDGER_CONTACT_SMTP_FROM:-}
+      Contact__Turnstile__SiteKey: ${POCKETLEDGER_TURNSTILE_SITE_KEY:-}
+      Contact__Turnstile__SecretKey: ${POCKETLEDGER_TURNSTILE_SECRET_KEY:-}
     restart: unless-stopped
 
   web:
@@ -24,7 +34,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__WebConnection: Host=web-database;Port=5432;Database=pocketledger_web;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       Database__ApplyMigrationsOnStartup: "true"
       Landing__BaseUrl: https://${POCKETLEDGER_LANDING_DOMAIN}
@@ -55,7 +65,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       web-database: { condition: service_healthy }
-      valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
       api: { condition: service_started }
       identity: { condition: service_started }
     restart: unless-stopped
@@ -67,7 +77,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       FinancialCache__ConnectionString: valkey:6379
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       ConnectionStrings__ApiConnection: Host=api-database;Port=5432;Database=pocketledger_api;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
       Database__ApplyMigrationsOnStartup: "true"
@@ -93,6 +103,7 @@ services:
     depends_on:
       api-database: { condition: service_healthy }
       valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
     restart: unless-stopped
 
   identity:
@@ -102,7 +113,7 @@ services:
       Encryption__KeyDirectory: /var/lib/pocketledger/keys
       Encryption__CertificatePath: /run/pocketledger-certificates/active.pfx
       ConnectionStrings__IdentityConnection: Host=identity-database;Port=5432;Database=pocketledger_identity;Username=${POSTGRES_USER:-pocketledger};Password=${POSTGRES_PASSWORD:-pocketledger}
-      RequestTelemetry__ConnectionString: valkey:6379
+      RequestTelemetry__ConnectionString: valkey-security:6379
       AdminOperations__Key: ${POCKETLEDGER_ADMIN_OPERATIONS_KEY:?Set POCKETLEDGER_ADMIN_OPERATIONS_KEY in .env}
       Api__BaseUrl: https://api:5051/
       Api__TlsTrustedRootCertificatePath: /run/pocketledger-internal-tls/ca.crt
@@ -119,6 +130,10 @@ services:
       ForwardedHeaders__TrustAll: "true"
       Registration__Enabled: ${POCKETLEDGER_PUBLIC_REGISTRATION_ENABLED:-false}
       Registration__MaximumUserCount: ${POCKETLEDGER_PUBLIC_REGISTRATION_MAXIMUM_USERS:-}
+      Authentication__Google__ClientId: ${POCKETLEDGER_GOOGLE_CLIENT_ID:-}
+      Authentication__Google__ClientSecret: ${POCKETLEDGER_GOOGLE_CLIENT_SECRET:-}
+      Authentication__Facebook__AppId: ${POCKETLEDGER_FACEBOOK_APP_ID:-}
+      Authentication__Facebook__AppSecret: ${POCKETLEDGER_FACEBOOK_APP_SECRET:-}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
@@ -138,7 +153,7 @@ services:
         bind: { create_host_path: false }
     depends_on:
       identity-database: { condition: service_healthy }
-      valkey: { condition: service_started }
+      valkey-security: { condition: service_started }
       api: { condition: service_started }
     restart: unless-stopped
 
@@ -207,6 +222,11 @@ services:
   valkey:
     image: valkey/valkey:8-alpine
     command: ["valkey-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+
+  valkey-security:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--maxmemory", "64mb", "--maxmemory-policy", "noeviction", "--save", "", "--appendonly", "no"]
     restart: unless-stopped
 
   api-database:

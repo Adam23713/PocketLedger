@@ -1,0 +1,12 @@
+@model PocketLedger.Models.ViewModels.Account.RegenerateRecoveryKeyViewModel
+@{ ViewData["Title"] = "New recovery key"; }
+<h1>New recovery key</h1>
+<p>Create a new data recovery key if you lost the previous one or think someone else has seen it. The previous key stops working immediately.</p>
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="CurrentPassword">@(Model.IsDataPassword ? "Current data password" : "Current password")</label>
+        <input asp-for="CurrentPassword" class="form-control" autocomplete="current-password" autofocus />
+    </div>
+    <button class="btn btn-primary">Create new recovery key</button>
+</form>

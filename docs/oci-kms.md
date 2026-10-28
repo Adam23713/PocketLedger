@@ -69,7 +69,7 @@ For a brand-new installation, establish that Local baseline first:
    docker compose up -d
    ```
 
-4. Log in, configure TOTP and save the recovery codes. If this is a legacy-data transition, restore and validate the encrypted finance backup now. Do not add an OCI Compose override yet.
+4. Save the data recovery key printed by `bootstrap-identity`, log in, configure TOTP and save the recovery codes. If this is a legacy-data transition, restore and validate the encrypted finance backup now. Do not add an OCI Compose override yet.
 5. Confirm that all three services are healthy and have created their own Local key-ring XML. Back up the databases and the complete `/opt/pocketledger-security` directory. This is the starting point for OCI activation.
 
 ## Create encrypted OCI credentials

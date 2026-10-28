@@ -1,7 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using Konscious.Security.Cryptography;
 
 namespace PocketLedger.Security;
 
@@ -24,7 +23,6 @@ public static class OciCredentialProtection
     internal const int DefaultIterations = 3;
     internal const int DefaultParallelism = 1;
     internal const int MaximumFileBytes = 1024 * 1024;
-    private const int KeySize = 32;
     private const int MaximumStringBytes = 16 * 1024;
     private const string AuthenticationError = "The OCI credential cannot be decrypted because the passphrase is incorrect or the file is damaged.";
 
@@ -165,19 +163,7 @@ public static class OciCredentialProtection
     private static byte[] DeriveKey(ReadOnlySpan<char> passphrase, ReadOnlySpan<byte> salt, int memoryKiB, int iterations, int parallelism)
     {
         if (passphrase.IsEmpty) throw new OciCredentialException(AuthenticationError);
-        var passwordBytes = new byte[Encoding.UTF8.GetByteCount(passphrase)];
-        Encoding.UTF8.GetBytes(passphrase, passwordBytes);
-        var saltCopy = salt.ToArray();
-        try
-        {
-            using var argon2 = new Argon2id(passwordBytes) { Salt = saltCopy, MemorySize = memoryKiB, Iterations = iterations, DegreeOfParallelism = parallelism };
-            return argon2.GetBytes(KeySize);
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(passwordBytes);
-            CryptographicOperations.ZeroMemory(saltCopy);
-        }
+        return Argon2idKeyDerivation.DeriveKey(passphrase, salt, memoryKiB, iterations, parallelism);
     }
 
     private static byte[] Serialize(OciCredential credential)
@@ -264,7 +250,7 @@ public static class OciCredentialProtection
 
     private static void ValidateKdfParameters(int memoryKiB, int iterations, int parallelism)
     {
-        if (memoryKiB is < 32 * 1024 or > 256 * 1024 || iterations is < 2 or > 10 || parallelism is < 1 or > 8)
+        if (!Argon2idKeyDerivation.AreParametersSupported(memoryKiB, iterations, parallelism))
             throw new OciCredentialException("The OCI credential contains unsafe or unsupported KDF parameters.");
     }
 

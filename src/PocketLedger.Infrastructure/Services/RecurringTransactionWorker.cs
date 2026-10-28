@@ -42,6 +42,9 @@ public sealed class RecurringTransactionWorker(IServiceScopeFactory scopeFactory
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContextFactory = scope.ServiceProvider.GetRequiredService<IRecurringTransactionProcessingDbContextFactory>();
         await using var dbContext = dbContextFactory.CreateDbContext();
+        // The worker has no user's data key: notes are copied as per-user ciphertext, and the planner snapshot,
+        // which needs readable names and notes, is brought up to date on the user's next request.
+        dbContext.SkipPlannerHistory = true;
         var templates = await dbContext.RecurringTransactions.AsNoTracking()
             .Include(template => template.Account)
             .Where(template => template.Enabled && (template.LastOccurrence == null || template.LastOccurrence >= template.AutomationStartsOn))
