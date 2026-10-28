@@ -554,6 +554,33 @@ namespace PocketLedger.Identity.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PocketLedger.Models.Entities.UserDataKeyRecord", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("KeyVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PasswordWrap")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecoveryWrap")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserDataKeys", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -637,6 +664,15 @@ namespace PocketLedger.Identity.Data.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PocketLedger.Models.Entities.UserDataKeyRecord", b =>
+                {
+                    b.HasOne("PocketLedger.Models.Entities.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("PocketLedger.Models.Entities.UserDataKeyRecord", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>

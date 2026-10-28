@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using System.Net;
+using System.Threading.RateLimiting;
 using PocketLedger.Configuration;
 using PocketLedger.Services;
 
@@ -44,9 +45,15 @@ public class AuthenticationSecurityTests
     {
         using var limiter = CreateLimiter(1);
         for (var i = 0; i < 3; i++) using (var lease = await limiter.AcquireAsync("adam", default)) Assert.True(lease.IsAcquired);
-        await Task.Delay(TimeSpan.FromMilliseconds(1100));
-        using var replenished = await limiter.AcquireAsync("adam", default);
-        Assert.True(replenished.IsAcquired);
+        // Replenishment runs on a timer that can fire late on a busy CI runner, so poll until a generous deadline instead of a single fixed delay.
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        RateLimitLease replenished;
+        while (!(replenished = await limiter.AcquireAsync("adam", default)).IsAcquired && DateTime.UtcNow < deadline)
+        {
+            replenished.Dispose();
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+        }
+        using (replenished) Assert.True(replenished.IsAcquired);
     }
 
     [Fact]

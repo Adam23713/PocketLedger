@@ -80,7 +80,6 @@ builder.Services.AddScoped<BlockedUserService>();
 builder.Services.AddScoped<IUserAccessBlockStore>(services => services.GetRequiredService<BlockedUserService>());
 builder.Services.AddScoped<IBlockedUserAdministration>(services => services.GetRequiredService<BlockedUserService>());
 builder.Services.AddHostedService<RecurringTransactionWorker>();
-builder.Services.AddHostedService<PlannerMonthWorker>();
 var signingKey = builder.Configuration["Authentication:SigningKey"] ?? throw new InvalidOperationException("Authentication:SigningKey is required.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -118,8 +117,9 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
+app.UseMiddleware<UserSessionKeyMiddleware>();
+app.UseRequestTelemetry(ignoredClientIds: "pocketledger-web");
 app.UseUserAccessBlocking();
-app.UseRequestTelemetry();
 app.UseAuthorization();
 app.MapOpenApi("/openapi/{documentName}.json");
 if (app.Environment.IsDevelopment())

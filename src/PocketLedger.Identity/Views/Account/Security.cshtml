@@ -1,31 +1,64 @@
 @model PocketLedger.Models.ViewModels.Account.SecurityDashboardViewModel
-@{ ViewData["Title"] = "Security"; }
+@{ ViewData["Title"] = "Sign-in & security"; }
 
 <div class="mb-4">
-    <h1 class="mb-1">Security</h1>
+    <h1 class="mb-1">Sign-in &amp; security</h1>
     <p class="text-muted mb-0">Review recent account activity and manage your sign-in security.</p>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-12 col-md-6">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5">Password</h2>
-                <p class="text-muted">Change your password while keeping your current signed-in session active.</p>
-                <a class="btn btn-primary" asp-action="ChangePassword">Change password</a>
+<section class="mb-4" aria-labelledby="sign-in-heading">
+    <h2 class="h4 mb-3" id="sign-in-heading">Sign-in</h2>
+    <div class="card">
+        <div class="list-group list-group-flush">
+            <div class="list-group-item security-row">
+                <span class="security-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg></span>
+                <div class="security-row-text">
+                    <h3 class="h6 mb-1">Password</h3>
+                    <p class="text-muted mb-0">Change your password while keeping your current signed-in session active. Your data stays readable; only its key is re-wrapped.</p>
+                </div>
+                <a class="btn btn-outline-primary" asp-action="ChangePassword">Change password</a>
             </div>
-        </section>
-    </div>
-    <div class="col-12 col-md-6">
-        <section class="card h-100">
-            <div class="card-body">
-                <h2 class="h5">Authenticator recovery</h2>
-                <p class="text-muted">Use a recovery code to replace the authenticator registered to your account.</p>
-                <a class="btn btn-primary" asp-action="RecoveryCode">Use a recovery code</a>
+            <div class="list-group-item security-row">
+                <span class="security-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2" /><path d="M11 18h2" /></svg></span>
+                <div class="security-row-text">
+                    <h3 class="h6 mb-1">Authenticator recovery</h3>
+                    <p class="text-muted mb-0">Use a recovery code to replace the authenticator registered to your account.</p>
+                </div>
+                <a class="btn btn-outline-primary" asp-action="RecoveryCode">Use a recovery code</a>
             </div>
-        </section>
+        </div>
     </div>
-</div>
+</section>
+
+<section class="mb-4" aria-labelledby="data-encryption-heading">
+    <h2 class="h4 mb-3" id="data-encryption-heading">Data encryption</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <span class="security-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4" /><path d="M10.8 12.2 20 3" /><path d="m16 7 3 3" /></svg></span>
+                <div>
+                    <h3 class="h6 mb-1">Data recovery key</h3>
+                    <p class="text-muted mb-0">Your financial data is encrypted with your password. The recovery key is the only way back to it if you forget the password.</p>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="security-option h-100">
+                        <h4 class="h6 mb-1">Forgot your password?</h4>
+                        <p class="text-muted mb-0">Sign out and choose "Use your recovery key" on the sign-in page. You'll set a new password there.</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="security-option h-100">
+                        <h4 class="h6 mb-1">Lost the key, or someone saw it?</h4>
+                        <p class="text-muted">Create a new one. You'll need your current password, and the old key stops working.</p>
+                        <a class="btn btn-primary" asp-action="RegenerateRecoveryKey">Create a new recovery key</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <section aria-labelledby="recent-login-events-heading">
     <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
@@ -44,7 +77,7 @@
                 <tbody>
                     @foreach (var item in Model.RecentEvents)
                     {
-                        <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress ?? "Not available")</td></tr>
+                        <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td><span class="security-outcome @(item.Outcome == "Success" ? "text-success" : "text-danger")">@item.Outcome</span></td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress ?? "Not available")</td></tr>
                     }
                 </tbody>
             </table>

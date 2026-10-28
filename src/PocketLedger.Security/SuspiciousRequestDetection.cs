@@ -24,17 +24,50 @@ public interface ISuspiciousRequestEventReader
 
 internal readonly record struct SuspiciousRequestObservation(DateTimeOffset TimestampUtc, string ClientIpAddress, Guid? UserId, string Application, string Host);
 
-internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetryOptions> telemetryOptions, ILogger<SuspiciousRequestDetectionService> logger)
+internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetryOptions> telemetryOptions, RequestTelemetryConnection store, ILogger<SuspiciousRequestDetectionService> logger)
     : ISuspiciousRequestEventReader
 {
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(3);
     private static readonly TimeSpan IncidentRetention = TimeSpan.FromHours(48);
     private const int Threshold = 200;
     private const string KeyPrefix = "pocketledger:suspicious-requests:v1:";
-    private const string DetectionScript = "local removed = redis.call('ZRANGEBYSCORE', KEYS[1], '-inf', ARGV[2]); redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', ARGV[2]); redis.call('ZADD', KEYS[1], ARGV[1], ARGV[3]); redis.call('PEXPIRE', KEYS[1], ARGV[4]); local count = redis.call('ZCARD', KEYS[1]); if count <= tonumber(ARGV[5]) then return {'', count, 0}; end; local id = redis.call('GET', KEYS[2]); local created = 0; if not id then id = ARGV[6]; created = 1; redis.call('SET', KEYS[2], id, 'PX', ARGV[4]); redis.call('ZADD', KEYS[3], ARGV[1], id); else redis.call('PEXPIRE', KEYS[2], ARGV[4]); end; local incident = ARGV[7] .. id; if created == 1 then redis.call('HSET', incident, 'detectedAt', ARGV[1], 'address', ARGV[8], 'windowSeconds', ARGV[9]); end; redis.call('HSET', incident, 'lastObservedAt', ARGV[1], 'requestCount', count); redis.call('PEXPIRE', incident, ARGV[10]); redis.call('PEXPIRE', KEYS[3], ARGV[10]); return {id, count, created};";
+    private const int BatchSize = 1024;
+    // Adds a batch of observations for one address. The rolling set keeps at most Threshold + 1 entries, which is enough to decide
+    // whether the threshold is exceeded; once an incident is active its request count grows by the batch size instead of the set size,
+    // so memory per address stays bounded during a flood. The window entries are returned when an incident is created so its context can be filled.
+    private const string DetectionScript = """
+        local count = tonumber(ARGV[10])
+        for index = 0, count - 1 do redis.call('ZADD', KEYS[1], ARGV[11 + index * 2], ARGV[12 + index * 2]) end
+        redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', ARGV[2])
+        redis.call('PEXPIRE', KEYS[1], ARGV[3])
+        local threshold = tonumber(ARGV[4])
+        local windowCount = redis.call('ZCARD', KEYS[1])
+        if windowCount <= threshold then return {'', windowCount, 0, {}} end
+        local id = redis.call('GET', KEYS[2])
+        local created = 0
+        local members = {}
+        if not id then
+            id = ARGV[5]
+            created = 1
+            redis.call('SET', KEYS[2], id, 'PX', ARGV[3])
+            redis.call('ZADD', KEYS[3], ARGV[1], id)
+            members = redis.call('ZRANGE', KEYS[1], 0, -1)
+        else
+            redis.call('PEXPIRE', KEYS[2], ARGV[3])
+        end
+        local incident = ARGV[6] .. id
+        if created == 1 then
+            redis.call('HSET', incident, 'detectedAt', ARGV[1], 'address', ARGV[7], 'windowSeconds', ARGV[8], 'requestCount', windowCount)
+        else
+            redis.call('HINCRBY', incident, 'requestCount', count)
+        end
+        redis.call('HSET', incident, 'lastObservedAt', ARGV[1])
+        redis.call('PEXPIRE', incident, ARGV[9])
+        redis.call('PEXPIRE', KEYS[3], ARGV[9])
+        redis.call('ZREMRANGEBYRANK', KEYS[1], 0, -(threshold + 2))
+        return {id, windowCount, created, members}
+        """;
     private readonly Channel<SuspiciousRequestObservation> queue = Channel.CreateBounded<SuspiciousRequestObservation>(new BoundedChannelOptions(8192) { FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true, SingleWriter = false });
-    private readonly SemaphoreSlim connectionLock = new(1, 1);
-    private IConnectionMultiplexer? connection;
     private long lastFailureLogUtcTicks;
 
     public void TryRecord(HttpContext context, DateTimeOffset timestamp)
@@ -57,7 +90,7 @@ internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetr
         if (string.IsNullOrWhiteSpace(telemetryOptions.Value.ConnectionString)) return new SuspiciousRequestEventsResult(false, []);
         try
         {
-            var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
+            var database = await store.GetDatabaseAsync(cancellationToken);
             var ids = await database.SortedSetRangeByRankAsync(IncidentsKey(), -limit, -1, Order.Descending).WaitAsync(cancellationToken);
             var reads = ids.Select(id => ReadEventAsync(database, id.ToString(), cancellationToken)).ToArray();
             var events = (await Task.WhenAll(reads)).Where(item => item is not null).Cast<SuspiciousRequestEvent>().ToArray();
@@ -76,55 +109,51 @@ internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetr
 
     public async Task RunAsync(CancellationToken stoppingToken)
     {
+        var batch = new List<SuspiciousRequestObservation>(BatchSize);
         while (await queue.Reader.WaitToReadAsync(stoppingToken))
         {
-            while (queue.Reader.TryRead(out var observation))
+            batch.Clear();
+            while (batch.Count < BatchSize && queue.Reader.TryRead(out var observation)) batch.Add(observation);
+            try
             {
-                try
-                {
-                    await RecordAsync(observation, stoppingToken);
-                }
-                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                {
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    LogFailure(exception, "Suspicious request detection failed; request processing was not affected.");
-                }
+                var database = await store.GetDatabaseAsync(stoppingToken);
+                await Task.WhenAll(batch.GroupBy(item => item.ClientIpAddress).Select(group => RecordAsync(database, group.Key, group.ToArray(), stoppingToken)));
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                LogFailure(exception, "Suspicious request detection failed; request processing was not affected.");
             }
         }
     }
 
     public void Complete() => queue.Writer.TryComplete();
 
-    public async ValueTask DisposeAsync()
+    private static async Task RecordAsync(IDatabase database, string clientIpAddress, SuspiciousRequestObservation[] observations, CancellationToken cancellationToken)
     {
-        if (connection is not null) await connection.DisposeAsync();
-    }
-
-    private async Task RecordAsync(SuspiciousRequestObservation observation, CancellationToken cancellationToken)
-    {
-        var database = (await GetConnectionAsync(cancellationToken)).GetDatabase();
-        var addressKey = AddressKey(observation.ClientIpAddress);
-        var now = observation.TimestampUtc.ToUnixTimeMilliseconds();
-        var incidentId = Guid.NewGuid().ToString("N");
-        RedisResult result = await database.ScriptEvaluateAsync(DetectionScript,
-            [RollingKey(addressKey), ActiveIncidentKey(addressKey), IncidentsKey()],
-            [now, now - (long)Window.TotalMilliseconds, ObservationMember(observation), (long)Window.TotalMilliseconds, Threshold, incidentId, IncidentKeyPrefix(),
-                observation.ClientIpAddress, (long)Window.TotalSeconds, (long)IncidentRetention.TotalMilliseconds]).WaitAsync(cancellationToken);
+        var addressKey = AddressKey(clientIpAddress);
+        var now = observations.Max(item => item.TimestampUtc).ToUnixTimeMilliseconds();
+        var arguments = new List<RedisValue>(10 + observations.Length * 2)
+        {
+            now, now - (long)Window.TotalMilliseconds, (long)Window.TotalMilliseconds, Threshold, Guid.NewGuid().ToString("N"), IncidentKeyPrefix(),
+            clientIpAddress, (long)Window.TotalSeconds, (long)IncidentRetention.TotalMilliseconds, observations.Length
+        };
+        foreach (var observation in observations)
+        {
+            arguments.Add(observation.TimestampUtc.ToUnixTimeMilliseconds());
+            arguments.Add(ObservationMember(observation));
+        }
+        var result = await database.ScriptEvaluateAsync(DetectionScript, [RollingKey(addressKey), ActiveIncidentKey(addressKey), IncidentsKey()], [.. arguments]).WaitAsync(cancellationToken);
         var values = (RedisResult[]?)result ?? throw new InvalidOperationException("The suspicious request detection script returned an invalid result.");
         var activeIncidentId = values[0].ToString();
         if (string.IsNullOrEmpty(activeIncidentId)) return;
-        if ((long)values[2] == 1)
-        {
-            var members = await database.SortedSetRangeByScoreAsync(RollingKey(addressKey), now - Window.TotalMilliseconds, now, Exclude.None, Order.Ascending).WaitAsync(cancellationToken);
-            await UpdateIncidentContextAsync(database, activeIncidentId, members.Select(value => ParseObservation(value.ToString())).Where(value => value is not null).Select(value => value!.Value), cancellationToken);
-        }
-        else
-        {
-            await UpdateIncidentContextAsync(database, activeIncidentId, [observation], cancellationToken);
-        }
+        var context = (long)values[2] == 1
+            ? ((RedisResult[]?)values[3] ?? []).Select(value => ParseObservation(value.ToString())).Where(value => value is not null).Select(value => value!.Value)
+            : observations;
+        await UpdateIncidentContextAsync(database, activeIncidentId, context, cancellationToken);
     }
 
     private static async Task UpdateIncidentContextAsync(IDatabase database, string incidentId, IEnumerable<SuspiciousRequestObservation> observations, CancellationToken cancellationToken)
@@ -155,28 +184,6 @@ internal sealed class SuspiciousRequestDetectionService(IOptions<RequestTelemetr
         var users = contextReads[0].Select(value => Guid.TryParse(value.ToString(), out var parsed) ? parsed : (Guid?)null).Where(value => value is not null).Select(value => value!.Value).Order().ToArray();
         return new SuspiciousRequestEvent(DateTimeOffset.FromUnixTimeMilliseconds(detectedAt), DateTimeOffset.FromUnixTimeMilliseconds(lastObservedAt), values.GetValueOrDefault("address") ?? "Unavailable",
             count, TimeSpan.FromSeconds(windowSeconds), users, contextReads[1].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray(), contextReads[2].Select(value => value.ToString()).Order(StringComparer.Ordinal).ToArray());
-    }
-
-    private async Task<IConnectionMultiplexer> GetConnectionAsync(CancellationToken cancellationToken)
-    {
-        if (connection is not null) return connection;
-        await connectionLock.WaitAsync(cancellationToken);
-        try
-        {
-            if (connection is not null) return connection;
-            var configuration = ConfigurationOptions.Parse(telemetryOptions.Value.ConnectionString!);
-            configuration.AbortOnConnectFail = false;
-            configuration.ConnectTimeout = 500;
-            configuration.AsyncTimeout = 500;
-            configuration.ConnectRetry = 0;
-            configuration.BacklogPolicy = BacklogPolicy.FailFast;
-            connection = await ConnectionMultiplexer.ConnectAsync(configuration);
-            return connection;
-        }
-        finally
-        {
-            connectionLock.Release();
-        }
     }
 
     private static string ObservationMember(SuspiciousRequestObservation observation)

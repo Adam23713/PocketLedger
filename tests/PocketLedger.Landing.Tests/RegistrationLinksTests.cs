@@ -64,6 +64,20 @@ public sealed class RegistrationLinksTests
         Assert.DoesNotContain("/Session/Register", privacyHtml);
     }
 
+    [Fact]
+    public async Task PrivacyPage_ExposesAccountDeletionInstructionsAnchor()
+    {
+        await using var factory = CreateFactory(RegistrationStatus.Closed);
+        using var client = factory.CreateClient();
+
+        var privacyHtml = await client.GetStringAsync("/privacy");
+
+        // Facebook Login requires a stable data deletion instructions URL, which points at this anchor.
+        Assert.Contains("id=\"delete-account\"", privacyHtml);
+        Assert.Contains("Google LLC", privacyHtml);
+        Assert.Contains("Meta Platforms, Inc.", privacyHtml);
+    }
+
     private static WebApplicationFactory<Program> CreateFactory(RegistrationStatus status) => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
     {
         builder.UseEnvironment("Development");

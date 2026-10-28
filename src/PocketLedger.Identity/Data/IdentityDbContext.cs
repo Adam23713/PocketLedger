@@ -17,6 +17,7 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
     public DbSet<AuthenticationAuditEvent> AuthenticationAuditEvents => Set<AuthenticationAuditEvent>();
     public DbSet<DeletedUserTombstone> DeletedUserTombstones => Set<DeletedUserTombstone>();
     public DbSet<RegistrationSettings> RegistrationSettings => Set<RegistrationSettings>();
+    public DbSet<UserDataKeyRecord> UserDataKeys => Set<UserDataKeyRecord>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -43,6 +44,16 @@ public sealed class IdentityDbContext(DbContextOptions<IdentityDbContext> option
             entity.Property(item => item.UpdatedAtUtc).IsRequired();
             entity.ToTable(table => table.HasCheckConstraint("CK_RegistrationSettings_Singleton", "\"Id\" = 1"));
         });
+        builder.Entity<UserDataKeyRecord>(entity =>
+        {
+            entity.ToTable("UserDataKeys");
+            entity.HasKey(item => item.UserId);
+            entity.HasOne<ApplicationUser>().WithOne().HasForeignKey<UserDataKeyRecord>(item => item.UserId).OnDelete(DeleteBehavior.Cascade);
+            entity.Property(item => item.PasswordWrap).HasColumnType("text").IsRequired();
+            entity.Property(item => item.RecoveryWrap).HasColumnType("text").IsRequired();
+        });
+        encryption?.Configure(builder.Entity<UserDataKeyRecord>().Property(item => item.PasswordWrap), "UserDataKey.PasswordWrap");
+        encryption?.Configure(builder.Entity<UserDataKeyRecord>().Property(item => item.RecoveryWrap), "UserDataKey.RecoveryWrap");
         builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
         encryption?.Configure(builder.Entity<AuthenticationAuditEvent>().Property(item => item.RemoteIpAddress), "AuthenticationAuditEvent.RemoteIpAddress", 64);
         builder.Entity<AuthenticationAuditEvent>().Property(item => item.ForwardedClientIpAddress).HasColumnType("text").Metadata.SetMaxLength(null);
