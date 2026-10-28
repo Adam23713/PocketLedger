@@ -31,7 +31,7 @@ public sealed class LoggingContactMailSender(ILogger<LoggingContactMailSender> l
 {
     public Task SendAsync(ContactSubmission submission, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Contact form message from {Email} ({Length} characters) was not sent because SMTP is not configured.", submission.Email, submission.Message.Length);
+        logger.LogInformation("Contact form message ({Length} characters) was not sent because SMTP is not configured.", submission.Message.Length);
         return Task.CompletedTask;
     }
 }
