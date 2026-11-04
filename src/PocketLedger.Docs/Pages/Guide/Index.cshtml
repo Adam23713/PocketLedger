@@ -3,27 +3,28 @@
     ViewData["Title"] = "Guide";
 }
 <div class="docs-layout shell">
-    <aside class="sidebar" aria-label="Guide navigation">
-        <p class="sidebar-title">Guide</p>
-        <a href="#overview" aria-current="page">Overview</a>
-        <span>Getting started <small>Coming soon</small></span>
-        <span>Accounts <small>Coming soon</small></span>
-        <span>Transactions <small>Coming soon</small></span>
-    </aside>
+    <partial name="_GuideNavigation" />
     <article class="docs-content" id="overview">
         <p class="eyebrow">USER GUIDE</p>
-        <h1>Learn PocketLedger</h1>
-        <p class="lead">The guide will explain how to set up PocketLedger, record financial activity and understand the information shown by the application.</p>
-        <div class="notice">
-            <strong>The guide is taking shape.</strong>
-            <p>This is the foundation of the documentation site. Detailed walkthroughs and screenshots will be added later.</p>
+        <h1>Your money, clearly organized.</h1>
+        <p class="lead">This guide takes you from your first account to planning, reporting and encrypted backups. Follow it in order for a complete tour, or jump directly to the task you need.</p>
+        <figure class="guide-figure guide-figure-hero">
+            <img src="~/images/guide/dashboard.jpg" alt="PocketLedger dashboard showing balances in several currencies, account cards and quick transaction actions" />
+            <figcaption>The dashboard brings balances, monthly activity and everyday actions into one place.</figcaption>
+        </figure>
+        <div class="guide-path" aria-label="Recommended learning path">
+            <span>01 · Set up</span><span>02 · Record</span><span>03 · Understand</span><span>04 · Protect</span>
         </div>
-        <h2>Planned topics</h2>
-        <ul class="topic-list">
-            <li><strong>Getting started</strong><span>Create an account and configure the essentials.</span></li>
-            <li><strong>Daily use</strong><span>Manage accounts, transactions, categories and recurring entries.</span></li>
-            <li><strong>Understanding your finances</strong><span>Use the dashboard, calendar, planner and statistics.</span></li>
-            <li><strong>Data and settings</strong><span>Customize PocketLedger and keep your data portable.</span></li>
-        </ul>
+        <h2>Choose a chapter</h2>
+        <div class="guide-chapter-grid">
+            <a class="guide-chapter" asp-page="/Guide/GettingStarted"><span>01</span><h3>Getting started</h3><p>Register securely, learn the navigation and read the dashboard.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/AccountsAndCategories"><span>02</span><h3>Accounts &amp; categories</h3><p>Build the structure that keeps balances and spending meaningful.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/Transactions"><span>03</span><h3>Transactions</h3><p>Record income, expenses, transfers and balance corrections.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/Planning"><span>04</span><h3>Planning &amp; insights</h3><p>Automate entries, review trends and plan the months ahead.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/DebtsAndGoals"><span>05</span><h3>Debts &amp; goals</h3><p>Track what is owed and make progress towards savings targets.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/DataAndSettings"><span>06</span><h3>Data &amp; settings</h3><p>Personalize PocketLedger and keep portable encrypted copies.</p></a>
+        </div>
+        <div class="guide-callout tip"><strong>New to PocketLedger?</strong><p>Start with Getting started, then create your accounts before recording transactions. Most reports become useful as soon as a few categorized entries exist.</p></div>
+        <nav class="chapter-pager chapter-pager-end" aria-label="Chapter navigation"><span></span><a asp-page="/Guide/GettingStarted">Start the guide <span aria-hidden="true">→</span></a></nav>
     </article>
 </div>

@@ -1,0 +1,44 @@
+@page "/guide/planning"
+@{ ViewData["Title"] = "Planning and insights"; }
+<div class="docs-layout shell">
+    <partial name="_GuideNavigation" />
+    <article class="docs-content guide-article">
+        <p class="eyebrow">CHAPTER 04</p>
+        <h1>Planning &amp; insights</h1>
+        <p class="lead">Turn repeated activity into automation, then use calendar, statistics and the monthly planner to understand what happened and what comes next.</p>
+
+        <h2 id="recurring">Automate repeating entries</h2>
+        <p>Create a recurring template for salaries, subscriptions, rent and other predictable items. Choose the account, category, amount, frequency and next date. Active templates generate transactions according to their schedule.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/recurring-form.jpg" alt="Recurring transaction form with type, account, amount, category, schedule and note" />
+            <figcaption>A recurring template describes future activity; generated transactions remain visible in the normal history.</figcaption>
+        </figure>
+        <figure class="guide-figure">
+            <img src="~/images/guide/recurring.jpg" alt="Recurring transaction list showing income, expenses and a loan-related recurring payment" />
+            <figcaption>The list separates editable templates from loan-related schedules managed by the debt feature.</figcaption>
+        </figure>
+
+        <h2 id="calendar">Read the calendar</h2>
+        <p>Choose a month and currency to see daily income, expenses and running totals. Summary cards at the top highlight the month’s overall movement.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/calendar.jpg" alt="Monthly calendar with daily income, expense and running balance information" />
+            <figcaption>Calendar is ideal for spotting clusters, timing effects and unusually expensive days.</figcaption>
+        </figure>
+
+        <h2 id="statistics">Understand the patterns</h2>
+        <p>Statistics combines monthly totals, category distribution, recurring expenses, account balances and longer-term trends. Select the same month and currency you want to compare elsewhere.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/statistics.jpg" alt="Statistics dashboard with income, expenses, balance and category distribution charts" />
+            <figcaption>Main-category charts reveal the broad shape of spending before you drill into subcategories.</figcaption>
+        </figure>
+
+        <h2 id="planner">Plan a future month</h2>
+        <p>The Monthly planner combines planned income, expenses and transfers with active recurring entries and expected loan payments. Add items for the selected month, pause optional plans, and adjust opening balances when planning from a different starting point.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/planner.jpg" alt="Monthly planner with expected totals, planned items and projected balances for several currencies" />
+            <figcaption>Each currency is calculated separately. Accounts marked Include contribute to the available-to-spend total.</figcaption>
+        </figure>
+        <div class="guide-callout tip"><strong>Plans are estimates, not posted transactions.</strong><p>Use the planner to test a future month. Record the real event as a transaction when it actually happens.</p></div>
+        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/Transactions"><span aria-hidden="true">←</span> Transactions</a><a asp-page="/Guide/DebtsAndGoals">Debts &amp; goals <span aria-hidden="true">→</span></a></nav>
+    </article>
+</div>

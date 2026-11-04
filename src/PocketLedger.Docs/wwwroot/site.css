@@ -58,6 +58,9 @@ h2 { margin-bottom:20px; font-size:clamp(2rem,4vw,3.1rem); letter-spacing:-.045e
 .sidebar a { color:var(--accent); font-weight:700; }
 .sidebar span { display:flex; justify-content:space-between; gap:8px; }
 .sidebar small { color:var(--text-muted); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; }
+.guide-sidebar a { padding:8px 12px; border-left:2px solid transparent; border-radius:0 8px 8px 0; color:var(--text-muted); font-weight:650; line-height:1.35; }
+.guide-sidebar a:hover { background:var(--surface); color:var(--text-primary); text-decoration:none; }
+.guide-sidebar a[aria-current="page"] { border-left-color:var(--accent); background:var(--surface); color:var(--accent); }
 .docs-content h1 { font-size:clamp(2.9rem,6vw,4.8rem); }
 .docs-content h2 { margin-top:58px; font-size:2rem; }
 .notice { margin-block:42px; padding:24px 26px; border-left:4px solid var(--secondary); background:var(--surface); }
@@ -72,6 +75,46 @@ h2 { margin-bottom:20px; font-size:clamp(2rem,4vw,3.1rem); letter-spacing:-.045e
 .copy-button:hover { border-color:var(--secondary); background:var(--surface); }
 .copy-button:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
 .copy-button.copied { border-color:var(--secondary); color:var(--secondary); }
+.guide-article > p:not(.eyebrow):not(.lead), .guide-article li p { color:var(--text-secondary); }
+.guide-figure { margin:30px 0 44px; }
+.guide-figure img { display:block; width:100%; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:0 24px 70px rgb(0 0 0 / .24); }
+.guide-figure figcaption { padding:12px 4px 0; color:var(--text-muted); font-size:.84rem; line-height:1.5; }
+.guide-figure-hero { margin-top:42px; }
+.guide-path { display:grid; grid-template-columns:repeat(4,1fr); margin:50px 0 68px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); }
+.guide-path span { padding:15px 18px; color:var(--text-secondary); font-size:.76rem; font-weight:800; letter-spacing:.08em; text-align:center; }
+.guide-path span + span { border-left:1px solid var(--line); }
+.guide-chapter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.guide-chapter { min-height:220px; display:flex; flex-direction:column; padding:25px; border:1px solid var(--line); border-radius:14px; background:var(--surface); transition:border-color .18s ease,transform .18s ease; }
+.guide-chapter:hover { transform:translateY(-2px); border-color:var(--secondary); text-decoration:none; }
+.guide-chapter > span { margin-bottom:30px; color:var(--secondary); font-size:.72rem; font-weight:850; letter-spacing:.14em; }
+.guide-chapter h3 { margin-bottom:10px; font-size:1.35rem; letter-spacing:-.025em; }
+.guide-chapter p { margin:0; color:var(--text-secondary); font-size:.93rem; }
+.guide-steps { display:grid; gap:14px; padding:0; list-style:none; }
+.guide-steps li { display:grid; grid-template-columns:42px minmax(0,1fr); gap:16px; padding:21px 22px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.guide-steps li > span { width:36px; height:36px; display:grid; place-items:center; border-radius:50%; background:color-mix(in srgb,var(--accent) 18%,var(--surface)); color:var(--accent); font-size:.8rem; font-weight:850; }
+.guide-steps strong { display:block; margin:2px 0 4px; }
+.guide-steps p { margin:0; }
+.guide-feature-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; margin:28px 0 44px; padding:1px; border:1px solid var(--line); border-radius:13px; overflow:hidden; background:var(--line); }
+.guide-feature-list > div { padding:20px 22px; background:var(--surface); }
+.guide-feature-list strong { display:block; margin-bottom:5px; }
+.guide-feature-list p { margin:0; color:var(--text-secondary); font-size:.9rem; }
+.guide-callout { margin:34px 0; padding:22px 24px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.guide-callout strong { display:block; margin-bottom:5px; }
+.guide-callout p { margin:0; color:var(--text-secondary); }
+.guide-callout.tip { border-left:4px solid var(--secondary); }
+.guide-callout.warning { border-left:4px solid var(--accent); }
+.transaction-types { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:30px 0; }
+.transaction-types > div { position:relative; padding:20px 22px 20px 46px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.transaction-types strong { display:block; margin-bottom:4px; }
+.transaction-types p { margin:0; color:var(--text-secondary); font-size:.9rem; }
+.type-dot { position:absolute; top:25px; left:22px; width:10px; height:10px; border-radius:50%; }
+.type-dot.expense { background:#ef6c6c; }
+.type-dot.income { background:#63b98b; }
+.type-dot.transfer { background:#6d9de8; }
+.type-dot.adjustment { background:#b989d6; }
+.chapter-pager { display:flex; justify-content:space-between; gap:24px; margin-top:74px; padding-top:26px; border-top:1px solid var(--line); }
+.chapter-pager a { color:var(--accent); font-size:.9rem; font-weight:750; }
+.chapter-pager-end { justify-content:flex-end; }
 .footer { display:flex; justify-content:space-between; gap:24px; padding-block:30px 50px; border-top:1px solid var(--line); color:var(--text-muted); font-size:.85rem; }
 
 @media (max-width:760px) {
@@ -84,4 +127,13 @@ h2 { margin-bottom:20px; font-size:clamp(2rem,4vw,3.1rem); letter-spacing:-.045e
     .docs-layout { grid-template-columns:1fr; gap:42px; padding-top:48px; }
     .sidebar { position:static; padding-bottom:28px; border-bottom:1px solid var(--line); }
     .topic-list li { grid-template-columns:1fr; gap:4px; }
+    .guide-sidebar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; }
+    .guide-sidebar .sidebar-title { grid-column:1/-1; }
+    .guide-sidebar a { padding:8px 10px; border-left:0; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; }
+    .guide-sidebar a[aria-current="page"] { border-left-color:transparent; border-bottom-color:var(--accent); }
+    .guide-path { grid-template-columns:repeat(2,1fr); }
+    .guide-path span:nth-child(3) { border-left:0; border-top:1px solid var(--line); }
+    .guide-path span:nth-child(4) { border-top:1px solid var(--line); }
+    .guide-chapter-grid,.guide-feature-list,.transaction-types { grid-template-columns:1fr; }
+    .chapter-pager { align-items:flex-start; }
 }

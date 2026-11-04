@@ -1,0 +1,35 @@
+@page "/guide/getting-started"
+@{ ViewData["Title"] = "Getting started"; }
+<div class="docs-layout shell">
+    <partial name="_GuideNavigation" />
+    <article class="docs-content guide-article">
+        <p class="eyebrow">CHAPTER 01</p>
+        <h1>Getting started</h1>
+        <p class="lead">Create a protected account, learn the main navigation and understand what the dashboard is telling you.</p>
+
+        <h2 id="registration">Create your account</h2>
+        <ol class="guide-steps">
+            <li><span>1</span><div><strong>Open registration</strong><p>Choose a username, provide your email address and create a password of at least 14 characters.</p></div></li>
+            <li><span>2</span><div><strong>Save the data recovery key</strong><p>Store it offline. It is the only recovery path if you forget your password, and PocketLedger shows it only once.</p></div></li>
+            <li><span>3</span><div><strong>Configure an authenticator</strong><p>Scan the QR code with an authenticator app, enter the six-digit code, then save the single-use recovery codes.</p></div></li>
+        </ol>
+        <div class="guide-callout warning"><strong>Keep secrets out of screenshots and cloud notes.</strong><p>Your password, authenticator key, recovery codes and data recovery key protect different parts of the account. Store them securely and separately.</p></div>
+
+        <h2 id="dashboard">Meet the dashboard</h2>
+        <p>The top row summarizes total balance, net worth, account count and this month’s movement. Account cards show the current balance and provide shortcuts for expenses, income and transfers.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/dashboard.jpg" alt="Dashboard with multi-currency totals and four account cards" />
+            <figcaption>Use the quick actions on an account card when you already know which account should change.</figcaption>
+        </figure>
+        <div class="guide-feature-list">
+            <div><strong>Total balance</strong><p>Accounts included in your main balance, grouped by currency.</p></div>
+            <div><strong>Net worth</strong><p>Accounts marked for net-worth reporting, also grouped by currency.</p></div>
+            <div><strong>This month</strong><p>Income, expenses and the resulting change for the current month.</p></div>
+            <div><strong>Privacy toggle</strong><p>Temporarily hides monetary amounts when somebody else can see your screen.</p></div>
+        </div>
+
+        <h2 id="navigation">Find your way around</h2>
+        <p>The main navigation contains daily-use features. Open your avatar menu for Accounts, Categories, Settings, Account &amp; security, Import / Export and Logout. The appearance button lets you switch between the available themes without changing your data.</p>
+        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/Index"><span aria-hidden="true">←</span> Guide overview</a><a asp-page="/Guide/AccountsAndCategories">Accounts &amp; categories <span aria-hidden="true">→</span></a></nav>
+    </article>
+</div>
