@@ -1,0 +1,42 @@
+@page "/guide/data-and-settings"
+@{ ViewData["Title"] = "Data and settings"; }
+<div class="docs-layout shell">
+    <partial name="_GuideNavigation" />
+    <article class="docs-content guide-article">
+        <p class="eyebrow">CHAPTER 06</p>
+        <h1>Data &amp; settings</h1>
+        <p class="lead">Make the interface feel local, move transaction data in or out, and keep an encrypted copy of everything that matters.</p>
+
+        <h2 id="settings">Personalize PocketLedger</h2>
+        <p>Open your avatar menu and choose <strong>Settings</strong>. Set a display name and avatar, choose your default currency and time zone, then configure how each currency should display decimal places, separators, symbols and spacing.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/settings.jpg" alt="Settings page with profile, avatar, default currency, time zone and currency formatting controls" />
+            <figcaption>Formatting changes presentation only; stored monetary values remain unchanged.</figcaption>
+        </figure>
+
+        <h2 id="import-export">Import, export and back up</h2>
+        <figure class="guide-figure">
+            <img src="~/images/guide/import-export.jpg" alt="Import and Export page with encrypted Excel export, CSV import, encrypted backup and restore actions" />
+            <figcaption>Transaction exchange and full-database backup serve different purposes.</figcaption>
+        </figure>
+        <div class="guide-feature-list">
+            <div><strong>Excel export</strong><p>Downloads filtered transactions as a password-protected workbook.</p></div>
+            <div><strong>CSV import</strong><p>Previews bank-exported rows and imports only entries that pass validation.</p></div>
+            <div><strong>Encrypted backup</strong><p>Creates a password-protected copy of all PocketLedger financial data.</p></div>
+            <div><strong>Restore</strong><p>Previews an encrypted backup, then replaces the signed-in user’s current finance data after explicit confirmation.</p></div>
+        </div>
+        <div class="guide-callout warning"><strong>Backup passwords cannot be recovered.</strong><p>Use a unique password and store it separately from the backup file. Restoring replaces current finance data, so review the preview before confirming.</p></div>
+
+        <h2 id="security">Manage account security</h2>
+        <p>Choose <strong>Account &amp; security</strong> from the avatar menu to manage password access, authenticator settings, recovery material, login events and active security options. Never share QR codes, one-time codes, recovery codes or the data recovery key.</p>
+
+        <h2 id="workflow">A practical routine</h2>
+        <ol class="guide-steps">
+            <li><span>1</span><div><strong>During the week</strong><p>Record activity and check recurring entries.</p></div></li>
+            <li><span>2</span><div><strong>At month end</strong><p>Review Transactions, Calendar and Statistics for missing or unusual entries.</p></div></li>
+            <li><span>3</span><div><strong>Before the next month</strong><p>Update the Monthly planner, debts and goals.</p></div></li>
+            <li><span>4</span><div><strong>Regularly</strong><p>Create an encrypted backup and verify that you still have its password.</p></div></li>
+        </ol>
+        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/DebtsAndGoals"><span aria-hidden="true">←</span> Debts &amp; goals</a><a asp-page="/Guide/Index">Back to overview <span aria-hidden="true">↑</span></a></nav>
+    </article>
+</div>

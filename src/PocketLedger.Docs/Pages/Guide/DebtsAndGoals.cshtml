@@ -1,0 +1,35 @@
+@page "/guide/debts-and-goals"
+@{ ViewData["Title"] = "Debts and goals"; }
+<div class="docs-layout shell">
+    <partial name="_GuideNavigation" />
+    <article class="docs-content guide-article">
+        <p class="eyebrow">CHAPTER 05</p>
+        <h1>Debts &amp; goals</h1>
+        <p class="lead">Keep obligations separate from ordinary spending, and give long-term savings a visible destination.</p>
+
+        <h2 id="debts">Track money owed</h2>
+        <p>Create a debt as either <strong>Payable</strong> when you owe money or <strong>Receivable</strong> when somebody owes you. Link an account when operations should affect a real balance, and configure a payment schedule for predictable repayments.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/debts.jpg" alt="Loans and debts grouped by currency with payable and receivable totals" />
+            <figcaption>Currency groups keep obligations comparable without hidden conversion.</figcaption>
+        </figure>
+        <p>Open a debt to add payments, borrowing, lending or corrections. PocketLedger maintains the remaining amount and records linked account activity. Close the debt when it is settled; closed items remain available for history.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/debt-details.jpg" alt="Debt details with remaining balance, repayment schedule and operation history" />
+            <figcaption>Debt operations are the source of truth for how the outstanding amount changed.</figcaption>
+        </figure>
+
+        <h2 id="goals">Save towards a goal</h2>
+        <p>Create a goal with a name, currency, target amount and optional target date. Choose a banner, record what is already saved, then add contributions or withdrawals as the plan changes.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/goals.jpg" alt="Savings goals overview with a visual progress card" />
+            <figcaption>The goals page turns a distant target into a visible progress indicator.</figcaption>
+        </figure>
+        <figure class="guide-figure">
+            <img src="~/images/guide/goal-details.jpg" alt="Goal details with saved amount, target, remaining amount, date and contribution form" />
+            <figcaption>Goal contributions track progress but do not change an account balance automatically.</figcaption>
+        </figure>
+        <div class="guide-callout tip"><strong>Keep the ledger and motivation separate.</strong><p>Use an actual savings account and transfers for real money movement. Use Goals to visualize the purpose and progress of those savings.</p></div>
+        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/Planning"><span aria-hidden="true">←</span> Planning &amp; insights</a><a asp-page="/Guide/DataAndSettings">Data &amp; settings <span aria-hidden="true">→</span></a></nav>
+    </article>
+</div>

@@ -1,0 +1,43 @@
+@page "/guide/accounts-and-categories"
+@{ ViewData["Title"] = "Accounts and categories"; }
+<div class="docs-layout shell">
+    <partial name="_GuideNavigation" />
+    <article class="docs-content guide-article">
+        <p class="eyebrow">CHAPTER 02</p>
+        <h1>Accounts &amp; categories</h1>
+        <p class="lead">Accounts hold balances. Categories explain where money came from or where it went. Set up both before entering day-to-day activity.</p>
+
+        <h2 id="accounts">Create an account</h2>
+        <p>Open your avatar menu, choose <strong>Accounts</strong>, then select <strong>New account</strong>. Give it a clear name, choose its type and currency, and enter the opening balance as of the selected date.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/account-form.jpg" alt="New account form with name, type, currency, opening balance and account display options" />
+            <figcaption>The reporting switches decide where an account contributes; they do not change its real balance.</figcaption>
+        </figure>
+        <div class="guide-feature-list">
+            <div><strong>Main balance</strong><p>Includes the account in the headline balance used across the app.</p></div>
+            <div><strong>Net worth</strong><p>Includes the account in the dashboard net-worth figure.</p></div>
+            <div><strong>Statistics</strong><p>Allows activity on the account to contribute to reports.</p></div>
+            <div><strong>Display order</strong><p>Controls where the account appears in lists and on the dashboard.</p></div>
+        </div>
+
+        <h2 id="account-list">Manage account balances</h2>
+        <figure class="guide-figure">
+            <img src="~/images/guide/accounts.jpg" alt="Accounts list with bank, credit card, savings and cash accounts in multiple currencies" />
+            <figcaption>Each currency keeps its own balance; PocketLedger does not silently convert amounts between currencies.</figcaption>
+        </figure>
+        <p>Select an account name to open its balance history, recent transactions and quick actions. Use <strong>Edit</strong> to change presentation and reporting options. Deletion is available only when related financial data does not make it unsafe.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/account-details.jpg" alt="Account details with current balance, account properties and recent transactions" />
+            <figcaption>Account details connect the current balance to the entries that produced it.</figcaption>
+        </figure>
+
+        <h2 id="categories">Organize with categories</h2>
+        <p>Open <strong>Categories</strong> from the avatar menu. Income and expense categories are separate. Add a main category for a broad purpose, then use subcategories when you need more detail.</p>
+        <figure class="guide-figure">
+            <img src="~/images/guide/categories.jpg" alt="Income and expense category trees with icons and nested subcategories" />
+            <figcaption>A compact tree keeps transaction entry fast while preserving meaningful reporting detail.</figcaption>
+        </figure>
+        <div class="guide-callout tip"><strong>Start broad.</strong><p>A short category list is easier to use consistently. Add subcategories only when the distinction will help a decision or report.</p></div>
+        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/GettingStarted"><span aria-hidden="true">←</span> Getting started</a><a asp-page="/Guide/Transactions">Transactions <span aria-hidden="true">→</span></a></nav>
+    </article>
+</div>

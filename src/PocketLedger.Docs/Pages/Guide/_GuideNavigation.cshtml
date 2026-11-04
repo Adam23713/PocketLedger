@@ -1,0 +1,14 @@
+@{
+    var path = Context.Request.Path.Value ?? string.Empty;
+    string? Current(string target) => path.Equals(target, StringComparison.OrdinalIgnoreCase) ? "page" : null;
+}
+<aside class="sidebar guide-sidebar" aria-label="User guide navigation">
+    <p class="sidebar-title">User guide</p>
+    <a asp-page="/Guide/Index" aria-current="@Current("/guide")">Overview</a>
+    <a asp-page="/Guide/GettingStarted" aria-current="@Current("/guide/getting-started")">Getting started</a>
+    <a asp-page="/Guide/AccountsAndCategories" aria-current="@Current("/guide/accounts-and-categories")">Accounts &amp; categories</a>
+    <a asp-page="/Guide/Transactions" aria-current="@Current("/guide/transactions")">Transactions</a>
+    <a asp-page="/Guide/Planning" aria-current="@Current("/guide/planning")">Planning &amp; insights</a>
+    <a asp-page="/Guide/DebtsAndGoals" aria-current="@Current("/guide/debts-and-goals")">Debts &amp; goals</a>
+    <a asp-page="/Guide/DataAndSettings" aria-current="@Current("/guide/data-and-settings")">Data &amp; settings</a>
+</aside>
