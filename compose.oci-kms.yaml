@@ -83,3 +83,8 @@ services:
         target: /run/pocketledger-oci
         read_only: true
         bind: { create_host_path: false }
+      - type: bind
+        source: ${POCKETLEDGER_SECURITY_DIRECTORY:?Set POCKETLEDGER_SECURITY_DIRECTORY}/internal-tls/ca.crt
+        target: /run/pocketledger-internal-tls/ca.crt
+        read_only: true
+        bind: { create_host_path: false }
