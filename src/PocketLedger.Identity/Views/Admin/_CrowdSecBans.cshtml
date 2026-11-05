@@ -41,11 +41,24 @@
                         <partial name="_SortableHeader" model='Header("Action", "action")' />
                         @if (Model.Merge) { <partial name="_SortableHeader" model='Header("Bans", "count")' /> }
                         <partial name="_SortableHeader" model='Header("Remaining", "remaining")' />
+                        @if (Model.CanManageBans) { <th scope="col"><span class="visually-hidden">Actions</span></th> }
                     </tr></thead>
                     <tbody>
                         @foreach (var item in table.Items)
                         {
-                            <tr><td><code>@item.Address</code></td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td>@if (Model.Merge) { <td>@item.BanCount</td> }<td>@(item.RemainingText ?? "Not available")</td></tr>
+                            <tr>
+                                <td>@if (item.Address.Contains('/')) { <code>@item.Address</code> } else { <a href="@Url.Action("Index", "Admin", new { ip = item.Address }, null, null, "request-activity-heading")" title="Inspect this address"><code>@item.Address</code></a> }</td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td>@if (Model.Merge) { <td>@item.BanCount</td> }<td>@(item.RemainingText ?? "Not available")</td>
+                                @if (Model.CanManageBans)
+                                {
+                                    <td>
+                                        <form asp-action="UnbanIp" method="post">
+                                            <input type="hidden" name="address" value="@item.Address" />
+                                            <input type="hidden" name="page" value="@Model.UsersPage" />
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">Remove</button>
+                                        </form>
+                                    </td>
+                                }
+                            </tr>
                         }
                     </tbody>
                 </table>

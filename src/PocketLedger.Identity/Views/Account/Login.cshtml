@@ -15,6 +15,10 @@
         {
             <div class="alert alert-warning" role="status">@loginMessage</div>
         }
+        @if (Model.LockedUntilUtc is { } lockedUntil)
+        {
+            <div class="alert alert-danger" role="alert">Too many failed sign-in attempts. Sign-in is blocked until <time datetime="@lockedUntil.UtcDateTime.ToString("O")" data-local-time>@lockedUntil.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss") UTC</time>.</div>
+        }
         @if (Model.ExternalProviders.Count > 0)
         {
             <partial name="_ExternalLoginButtons" model="(Model.ExternalProviders, Model.ReturnUrl)" />

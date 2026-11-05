@@ -141,18 +141,25 @@
 		@docs host {$POCKETLEDGER_DOCS_DOMAIN}
 		reverse_proxy @docs docs:5054
 
+		# By default Caddy sends "visitor, Cloudflare edge" in X-Forwarded-For, and the applications take the
+		# last entry. Overwriting it makes them see the Cloudflare-verified visitor address instead.
 		@web host {$POCKETLEDGER_WEB_DOMAIN}
-		reverse_proxy @web web:5050
+		reverse_proxy @web web:5050 {
+			header_up X-Forwarded-For {client_ip}
+		}
 
 		@api host {$POCKETLEDGER_API_DOMAIN}
 		reverse_proxy @api https://api:5051 {
+			header_up X-Forwarded-For {client_ip}
 			transport http {
 				tls_trust_pool file /run/pocketledger-internal-tls/ca.crt
 			}
 		}
 
 		@identity host {$POCKETLEDGER_IDENTITY_DOMAIN}
-		reverse_proxy @identity identity:5052
+		reverse_proxy @identity identity:5052 {
+			header_up X-Forwarded-For {client_ip}
+		}
 
 		respond 404
 	}

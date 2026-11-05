@@ -18,6 +18,14 @@ Cloudflare must preserve CF-Connecting-IP. Disable **Pseudo IPv4 / Overwrite Hea
 
 Keep VPS firewall / `DOCKER-USER` rules restricted to Cloudflare origin-facing ranges on 80/443, including IPv6 and UDP/443 if used. Check Docker's published-port rules, not just a host INPUT policy. Consider Cloudflare Authenticated Origin Pulls to restrict origin access further. No host-firewall configuration exists in this repository, so this integration changes none. Compare both Caddy's trust list and the CrowdSec whitelist with the official ranges when maintaining them.
 
+Caddy forwards `X-Forwarded-For` to Web, API and Identity as exactly `{client_ip}`. Without that override it would send `visitor, Cloudflare edge`, and the applications, which take the last entry, would record the edge. Landing receives the same address through `X-PocketLedger-Client-IP`.
+
+## Banning from the Admin dashboard
+
+The bootstrap administrator can ban a single IP address for 1 hour to 30 days from **Request activity** and remove bans from there or from **Active CrowdSec bans**. Each action is written to the authentication audit log. Caddy enforces changes on all five hosts within its five-second polling interval. The dashboard refuses Cloudflare ranges (kept in `ClientAddressPolicy`, which a test compares with `Caddyfile.example`), internal addresses and the administrator's own current address.
+
+Bouncer keys cannot create decisions, so this uses a separate CrowdSec machine account, `pocketledger-identity`, registered at CrowdSec startup from `CROWDSEC_IDENTITY_MACHINE_PASSWORD`. A machine account can change every decision in LAPI, so a compromised Identity container could add or remove bans; leave the password empty to keep Identity read-only. Removing the password later does not delete the account: also run `docker compose exec crowdsec cscli machines delete pocketledger-identity`. To rotate the password, change it in `.env` and run `docker compose up -d --no-deps --force-recreate crowdsec identity`. Removing a ban deletes every decision with exactly that value, including automatic ones, but not a range that contains it.
+
 ## Versions and storage
 
 Caddy 2.11.4 builder/runtime and CrowdSec 1.8.1 images are pinned by multi-platform digest. `xcaddy build v2.11.4` explicitly pins the binary too. The rate limiter is pinned to `5625512f24f6f59d6f64fb3aafe5eecff0b286db`, the HTTP bouncer to v0.14.0. Update version and image digest together, rebuild, and rerun verification. Hub collections and enrichment data are downloaded at bootstrap and are **not immutable dependency locks**; first startup needs outbound access. Persistent `crowdsec-config` preserves installed Hub items. Review and test explicit Hub upgrades separately.

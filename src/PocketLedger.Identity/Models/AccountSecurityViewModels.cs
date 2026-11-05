@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using PocketLedger.Models.Entities;
 
 namespace PocketLedger.Models.ViewModels.Account;
 
-public sealed class LoginViewModel { [Required] public string Username { get; set; } = string.Empty; [Required, DataType(DataType.Password)] public string Password { get; set; } = string.Empty; public string? ReturnUrl { get; set; } public bool RegistrationEnabled { get; set; } public IReadOnlyList<ExternalLoginProviderViewModel> ExternalProviders { get; set; } = []; }
+public sealed class LoginViewModel { [Required] public string Username { get; set; } = string.Empty; [Required, DataType(DataType.Password)] public string Password { get; set; } = string.Empty; public string? ReturnUrl { get; set; } public bool RegistrationEnabled { get; set; } public IReadOnlyList<ExternalLoginProviderViewModel> ExternalProviders { get; set; } = []; [BindNever] public DateTimeOffset? LockedUntilUtc { get; set; } }
 public sealed class RegisterViewModel { [Required, StringLength(256)] public string Username { get; set; } = string.Empty; [Required, EmailAddress, StringLength(256)] public string Email { get; set; } = string.Empty; [Required, MinLength(14), DataType(DataType.Password)] public string Password { get; set; } = string.Empty; [Required, Compare(nameof(Password)), DataType(DataType.Password)] public string ConfirmPassword { get; set; } = string.Empty; public string? ReturnUrl { get; set; } public IReadOnlyList<ExternalLoginProviderViewModel> ExternalProviders { get; set; } = []; }
 public sealed record ExternalLoginProviderViewModel(string Name, string DisplayName);
 public sealed class TwoFactorViewModel { [Required] public string Code { get; set; } = string.Empty; public string? ReturnUrl { get; set; } }

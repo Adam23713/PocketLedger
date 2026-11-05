@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,17 +20,19 @@ namespace PocketLedger.Controllers;
 public sealed class AdminController(UserManager<ApplicationUser> userManager, IRequestTelemetryReader requestTelemetry, ISuspiciousRequestEventReader suspiciousRequestEvents,
     ICrowdSecDecisionReader crowdSecDecisions, TimeProvider timeProvider, IUserAccessPropagation accessPropagation,
     IdentityDbContext dbContext, IRegistrationSettingsService registrationSettings, IAuthenticationAuditService audit, IUserAccountDeletionService accountDeletion,
-    ILogger<AdminController> logger) : Controller
+    IRequestClientActivityReader clientActivity, ICrowdSecBanManager banManager, IClientIpAddressResolver clientIpAddresses, ILogger<AdminController> logger) : Controller
 {
     private const int PageSize = 10;
     private const int BucketMinutes = 5;
     private const int DefaultLookbackHours = 24;
     private static readonly IReadOnlyList<int> AllowedLookbackHours = [3, 6, 12, 24, 48];
+    private static readonly IReadOnlyList<int> AllowedBanHours = [1, 24, 168, 720];
 
     [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName), HttpGet]
-    public async Task<IActionResult> Index(int page = 1, string? bansSort = null, bool bansDesc = false, bool bansMerge = false, int bansPage = 1,
+    public async Task<IActionResult> Index(int page = 1, string? bansSort = null, bool bansDesc = false, bool bansMerge = false, int bansPage = 1, string? ip = null,
         CancellationToken cancellationToken = default)
     {
+        RequestClientAddress.TryNormalize(ip, out var selectedClientIpAddress);
         var query = userManager.Users.AsNoTracking();
         var now = timeProvider.GetUtcNow();
         var totalUsers = await query.CountAsync(cancellationToken);
@@ -43,8 +46,9 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         var crowdSecBansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
         await Task.WhenAll(suspiciousRequestsTask, crowdSecBansTask);
         var registration = await registrationSettings.GetStatusAsync(cancellationToken);
-        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, registration, new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours),
-            await suspiciousRequestsTask, BuildCrowdSecBans(await crowdSecBansTask, page, bansSort, bansDesc, bansMerge, bansPage)));
+        return View(new AdminDashboardViewModel(users, page, totalPages, totalUsers, registration,
+            new RequestActivityViewModel(AllowedLookbackHours, DefaultLookbackHours, selectedClientIpAddress, page, banManager.IsConfigured, AllowedBanHours),
+            await suspiciousRequestsTask, BuildCrowdSecBans(await crowdSecBansTask, page, bansSort, bansDesc, bansMerge, bansPage, banManager.IsConfigured)));
     }
 
     private const int BansPageSize = 15;
@@ -55,7 +59,7 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         ["action"] = row => row.Action, ["remaining"] = row => row.Remaining, ["count"] = row => row.BanCount
     };
 
-    private static CrowdSecBansViewModel BuildCrowdSecBans(CrowdSecBanDecisionsResult result, int usersPage, string? sort, bool descending, bool merge, int page)
+    private static CrowdSecBansViewModel BuildCrowdSecBans(CrowdSecBanDecisionsResult result, int usersPage, string? sort, bool descending, bool merge, int page, bool canManageBans)
     {
         var rows = result.Decisions.Select(item =>
         {
@@ -74,7 +78,71 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
             });
         }
         var table = TablePaging.Apply(rows, sort, descending, BanSortKeys, "address", page, BansPageSize);
-        return new CrowdSecBansViewModel(result.IsAvailable, result.Decisions.Count, merge, usersPage, table);
+        return new CrowdSecBansViewModel(result.IsAvailable, result.Decisions.Count, merge, usersPage, table, canManageBans);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> BanIp(string? ip, int durationHours, int page = 1, CancellationToken cancellationToken = default)
+    {
+        if (!RequestClientAddress.TryNormalize(ip, out var address))
+        {
+            TempData["AdminWarning"] = "No ban was created because the address is not a complete IPv4 or IPv6 address.";
+            return RedirectToAction(nameof(Index), new { page });
+        }
+        var refusal = ClientAddressPolicy.GetBanRefusal(address!, IsCurrentAdministratorAddress(address!));
+        if (refusal is null && !AllowedBanHours.Contains(durationHours)) refusal = "The selected ban duration is not supported.";
+        if (refusal is null && !banManager.IsConfigured) refusal = "Banning is not configured: set CROWDSEC_IDENTITY_MACHINE_PASSWORD on the server.";
+        if (refusal is not null)
+        {
+            TempData["AdminWarning"] = $"No ban was created. {refusal}";
+            return RedirectToAction(nameof(Index), null, new { page, ip = address }, "request-activity-heading");
+        }
+
+        if (await banManager.BanAsync(address!, TimeSpan.FromHours(durationHours), cancellationToken))
+        {
+            await audit.WriteAsync("ClientAddressBanned", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
+                metadata: $"Address={address};DurationHours={durationHours}", cancellationToken: cancellationToken);
+            TempData["AdminMessage"] = $"{address} is banned for {FormatBanDuration(durationHours)}. Every PocketLedger site starts refusing it within a few seconds.";
+        }
+        else
+        {
+            TempData["AdminWarning"] = $"{address} was not banned because CrowdSec could not be reached or refused the request.";
+        }
+        return RedirectToAction(nameof(Index), null, new { page, ip = address }, "request-activity-heading");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnbanIp(string? address, int page = 1, CancellationToken cancellationToken = default)
+    {
+        var text = address?.Trim();
+        var isValid = RequestClientAddress.TryNormalize(text, out _) || (text?.Contains('/') == true && IPNetwork.TryParse(text, out _));
+        if (!isValid)
+        {
+            TempData["AdminWarning"] = "No ban was removed because the address is not valid.";
+            return RedirectToAction(nameof(Index), new { page });
+        }
+
+        if (await banManager.RemoveAsync(text!, cancellationToken))
+        {
+            await audit.WriteAsync("ClientAddressBanRemoved", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
+                metadata: $"Address={text}", cancellationToken: cancellationToken);
+            TempData["AdminMessage"] = $"The bans on {text} were removed. Every PocketLedger site accepts it again within a few seconds.";
+        }
+        else
+        {
+            TempData["AdminWarning"] = $"The bans on {text} were not removed because CrowdSec could not be reached or refused the request.";
+        }
+        return RedirectToAction(nameof(Index), new { page });
+    }
+
+    private static string FormatBanDuration(int hours) => hours switch { 1 => "1 hour", < 24 => $"{hours} hours", 24 => "1 day", _ => $"{hours / 24} days" };
+
+    private bool IsCurrentAdministratorAddress(string address)
+    {
+        // Both views of the caller count: the forwarded headers Identity trusts for audit data and the connection address after forwarded-header processing.
+        RequestClientAddress.TryNormalize(clientIpAddresses.GetClientIpAddress(HttpContext), out var forwarded);
+        var connection = HttpContext.Connection.RemoteIpAddress is { } remote ? RequestClientAddress.Normalize(remote) : null;
+        return address == forwarded || address == connection;
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -168,11 +236,14 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     }
 
     [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName), HttpGet]
-    public async Task<IActionResult> RequestActivity(int hours = DefaultLookbackHours, Guid? userId = null, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> RequestActivity(int hours = DefaultLookbackHours, Guid? userId = null, string? ip = null, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid || !AllowedLookbackHours.Contains(hours)) return BadRequest(new { Error = "The lookback must be 3, 6, 12, 24, or 48 hours." });
+        string? clientAddress = null;
+        if (!string.IsNullOrWhiteSpace(ip) && !RequestClientAddress.TryNormalize(ip, out clientAddress)) return BadRequest(new { Error = "Enter a complete IPv4 or IPv6 address." });
+        if (clientAddress is not null && userId is not null) return BadRequest(new { Error = "Filter by an activity owner or a client address, not both." });
 
-        string seriesLabel = "All activity";
+        string seriesLabel = clientAddress ?? "All activity";
         if (userId is { } selectedUserId)
         {
             var selectedUser = await userManager.Users.AsNoTracking().Where(user => user.Id == selectedUserId)
@@ -183,11 +254,25 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
 
         var toUtc = timeProvider.GetUtcNow();
         var fromUtc = toUtc.AddHours(-hours);
-        var statistics = await requestTelemetry.QueryAsync(fromUtc, toUtc, userId, cancellationToken);
-        var points = statistics.Buckets.Select(bucket => new RequestActivityPoint(bucket.StartedAtUtc,
-            (userId is null ? bucket.TotalRequests : bucket.SelectedUserRequests ?? 0) / (double)BucketMinutes,
-            bucket.TotalRequests, bucket.AuthenticatedRequests, bucket.AnonymousRequests, bucket.SelectedUserRequests)).ToArray();
-        var selectedRequestCount = userId is null ? statistics.TotalRequests : statistics.SelectedUserRequests ?? 0;
+        var statisticsTask = requestTelemetry.QueryAsync(fromUtc, toUtc, userId, cancellationToken);
+        var clientsTask = clientActivity.QueryAsync(fromUtc, toUtc, clientAddress, cancellationToken);
+        var bansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
+        await Task.WhenAll(statisticsTask, clientsTask, bansTask);
+        var statistics = await statisticsTask;
+        var clients = await clientsTask;
+        var bans = await bansTask;
+        var clientBuckets = clients.Buckets.ToDictionary(bucket => bucket.StartedAtUtc);
+        var points = statistics.Buckets.Select(bucket =>
+        {
+            var client = clientBuckets.GetValueOrDefault(bucket.StartedAtUtc);
+            var series = clientAddress is not null ? client?.SelectedClientRequests ?? 0 : userId is null ? bucket.TotalRequests : bucket.SelectedUserRequests ?? 0;
+            var failed = clientAddress is not null ? client?.SelectedClientFailedRequests ?? 0 : client?.FailedRequests ?? 0;
+            return new RequestActivityPoint(bucket.StartedAtUtc, series / (double)BucketMinutes, bucket.TotalRequests, bucket.AuthenticatedRequests, bucket.AnonymousRequests, bucket.SelectedUserRequests,
+                series, failed, client?.DistinctClients ?? 0, client?.TopClientIpAddress, client?.TopClientRequests ?? 0);
+        }).ToArray();
+        var selectedRequestCount = points.Sum(point => point.SeriesRequests);
+        var clientRows = clients.Clients.Select(item => new RequestActivityClient(item.ClientIpAddress, ClientAddressPolicy.Classify(item.ClientIpAddress).ToString(), item.TotalRequests, item.FailedRequests,
+            item.FirstSeenUtc, item.LastSeenUtc, bans.Decisions.Any(ban => ClientAddressPolicy.IsCoveredBy(item.ClientIpAddress, ban.Address)), IsCurrentAdministratorAddress(item.ClientIpAddress))).ToArray();
         var expectedFromUtc = RequestTelemetryBuckets.Start(fromUtc, BucketMinutes);
         var expectedToUtc = RequestTelemetryBuckets.Start(toUtc.AddMinutes(BucketMinutes).AddTicks(-1), BucketMinutes);
         var isPartial = IsPartial(statistics, userId, expectedFromUtc, expectedToUtc);
@@ -195,7 +280,31 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
             .Select(user => new RequestActivityUserOption(user.Id, user.UserName ?? "Unavailable")).ToListAsync(cancellationToken);
 
         return Json(new RequestActivityDataViewModel(statistics.IsAvailable, isPartial, selectedRequestCount == 0, hours, userId, seriesLabel, selectedRequestCount,
-            statistics.TotalRequests, statistics.AnonymousRequests, users, points));
+            statistics.TotalRequests, statistics.AnonymousRequests, users, points, clientAddress, clients.IsAvailable, clients.TotalClients, points.Sum(point => point.FailedRequests), clients.OmittedRequests, clientRows));
+    }
+
+    [Authorize(Policy = BootstrapAdministratorAuthorization.PolicyName), HttpGet]
+    public async Task<IActionResult> RequestClient(string? ip, int hours = DefaultLookbackHours, CancellationToken cancellationToken = default)
+    {
+        if (!AllowedLookbackHours.Contains(hours)) return BadRequest(new { Error = "The lookback must be 3, 6, 12, 24, or 48 hours." });
+        if (!RequestClientAddress.TryNormalize(ip, out var address)) return BadRequest(new { Error = "Enter a complete IPv4 or IPv6 address." });
+
+        var toUtc = timeProvider.GetUtcNow();
+        var detailsTask = clientActivity.GetDetailsAsync(address!, toUtc.AddHours(-hours), toUtc, cancellationToken);
+        var bansTask = crowdSecDecisions.GetActiveBansAsync(cancellationToken);
+        await Task.WhenAll(detailsTask, bansTask);
+        var details = await detailsTask;
+        var bans = await bansTask;
+
+        var userIds = details.UserIds.ToArray();
+        var usernames = userIds.Length == 0 ? [] : await userManager.Users.AsNoTracking().Where(user => userIds.Contains(user.Id))
+            .Select(user => new { user.Id, user.UserName }).ToDictionaryAsync(user => user.Id, user => user.UserName, cancellationToken);
+        var isCurrentAdministrator = IsCurrentAdministratorAddress(address!);
+        return Json(new RequestClientDetailsViewModel(details.IsAvailable, address!, ClientAddressPolicy.Classify(address!).ToString(), isCurrentAdministrator, bans.IsAvailable,
+            bans.Decisions.Where(ban => ClientAddressPolicy.IsCoveredBy(address!, ban.Address))
+                .Select(ban => new RequestClientBan(ban.Address, ban.Scenario, ban.Origin, CrowdSecDuration.Parse(ban.RemainingDuration) is { } remaining ? CrowdSecDuration.Format(remaining) : ban.RemainingDuration)).ToArray(),
+            ClientAddressPolicy.GetBanRefusal(address!, isCurrentAdministrator),
+            userIds.Select(id => new RequestClientUser(id, usernames.GetValueOrDefault(id) ?? "Deleted account")).ToArray(), details.Endpoints, details.OmittedRequests, details.IsPossiblyIncomplete));
     }
 
     private static bool IsPartial(RequestTelemetryStatistics statistics, Guid? requestedUserId, DateTimeOffset expectedFromUtc, DateTimeOffset expectedToUtc)

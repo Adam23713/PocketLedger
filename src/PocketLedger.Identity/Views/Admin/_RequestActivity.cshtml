@@ -2,9 +2,9 @@
 
 <section class="mt-5" aria-labelledby="request-activity-heading">
     <h2 class="h4 mb-2" id="request-activity-heading">Request activity</h2>
-    <p class="text-muted">Average requests per minute, calculated separately for each five-minute UTC bucket.</p>
-    <form class="row g-3 align-items-end mb-3" id="request-activity-filters" data-endpoint="@Url.Action("RequestActivity", "Admin")">
-        <div class="col-sm-4 col-lg-3">
+    <p class="text-muted">Requests reaching the web app, API and Identity, in five-minute UTC intervals. Filter by account or client address to see who generated the traffic.</p>
+    <form class="row g-3 align-items-end mb-3" id="request-activity-filters" data-endpoint="@Url.Action("RequestActivity", "Admin")" data-client-endpoint="@Url.Action("RequestClient", "Admin")">
+        <div class="col-sm-6 col-lg-2">
             <label class="form-label" for="request-activity-hours">Lookback</label>
             <select class="form-select" id="request-activity-hours" name="hours">
                 @foreach (var hours in Model.AllowedLookbackHours)
@@ -13,25 +13,95 @@
                 }
             </select>
         </div>
-        <div class="col-sm-5 col-lg-4">
+        <div class="col-sm-6 col-lg-4">
             <label class="form-label" for="request-activity-user">Activity owner</label>
             <select class="form-select" id="request-activity-user" name="userId">
                 <option value="">All activity (includes anonymous/unattributed)</option>
             </select>
         </div>
-        <div class="col-sm-3 col-lg-2"><button class="btn btn-primary w-100" type="submit">Apply</button></div>
+        <div class="col-sm-6 col-lg-3">
+            <label class="form-label" for="request-activity-ip">Client IP address</label>
+            <input class="form-control" id="request-activity-ip" name="ip" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="e.g. 203.0.113.10" value="@Model.SelectedClientIpAddress" />
+        </div>
+        <div class="col-sm-6 col-lg-3 d-flex gap-2">
+            <button class="btn btn-primary flex-grow-1" type="submit">Apply</button>
+            <button class="btn btn-outline-secondary" type="button" id="request-activity-clear">Clear</button>
+        </div>
     </form>
     <div id="request-activity-state" role="status" aria-live="polite"><span class="text-muted">Loading request activity…</span></div>
     <div id="request-activity-results" hidden>
+        <dl class="row g-3 text-center mb-4" id="request-activity-stats"></dl>
         <div class="request-activity-chart-container">
-            <canvas id="request-activity-chart" role="img" aria-label="Average requests per minute by five-minute UTC bucket" aria-describedby="request-activity-table-description"></canvas>
+            <canvas id="request-activity-chart" role="img" aria-label="Requests per minute by five-minute UTC interval" aria-describedby="request-activity-table-description"></canvas>
         </div>
         <p class="text-muted mt-2 mb-0" id="request-activity-summary"></p>
-        <details class="mt-3">
-            <summary id="request-activity-table-description">View the request activity data as a table</summary>
+
+        <div class="mt-4" id="request-client-details" tabindex="-1" hidden>
+            <h3 class="h5 mb-2">Address <code id="request-client-address"></code> <span id="request-client-badges"></span></h3>
+            <div id="request-client-state" role="status" aria-live="polite"></div>
+            <div id="request-client-ban-area" class="border rounded-3 p-3 mb-3">
+                <p class="mb-2" id="request-client-ban-status"></p>
+                <ul class="small mb-2" id="request-client-ban-list"></ul>
+                @if (Model.CanManageBans)
+                {
+                    <form asp-action="BanIp" method="post" class="row g-2 align-items-end" id="request-client-ban-form" hidden>
+                        <input type="hidden" name="ip" />
+                        <input type="hidden" name="page" value="@Model.UsersPage" />
+                        <div class="col-auto">
+                            <label class="form-label" for="request-client-ban-duration">Ban for</label>
+                            <select class="form-select" id="request-client-ban-duration" name="durationHours">
+                                @foreach (var hours in Model.AllowedBanHours ?? [])
+                                {
+                                    <option value="@hours" selected="@(hours == 24)">@(hours == 1 ? "1 hour" : hours < 24 ? $"{hours} hours" : hours == 24 ? "1 day" : $"{hours / 24} days")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-auto"><button class="btn btn-danger" type="submit">Ban address</button></div>
+                    </form>
+                    <form asp-action="UnbanIp" method="post" id="request-client-unban-form" hidden>
+                        <input type="hidden" name="address" />
+                        <input type="hidden" name="page" value="@Model.UsersPage" />
+                        <button class="btn btn-outline-secondary" type="submit">Remove ban on this address</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Banning from this page is off because no CrowdSec machine account is configured (<code>CROWDSEC_IDENTITY_MACHINE_PASSWORD</code>).</p>
+                }
+            </div>
+            <p class="mb-2" id="request-client-users"></p>
+            <h4 class="h6">Endpoints requested</h4>
+            <div class="table-responsive request-activity-table-container">
+                <table class="table table-sm align-middle">
+                    <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Application</th><th scope="col">Status</th><th scope="col">Requests</th><th scope="col">Last seen (UTC hour)</th></tr></thead>
+                    <tbody id="request-client-endpoints"></tbody>
+                </table>
+            </div>
+            <p class="text-muted small mt-2 mb-0" id="request-client-note"></p>
+        </div>
+
+        <div class="mt-4" id="request-clients">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
+                <h3 class="h5 mb-0">Client addresses</h3>
+                <div>
+                    <label class="visually-hidden" for="request-clients-filter">Find an address in this list</label>
+                    <input class="form-control form-control-sm" id="request-clients-filter" type="text" autocomplete="off" spellcheck="false" placeholder="Find an address…" />
+                </div>
+            </div>
+            <div class="table-responsive request-activity-table-container">
+                <table class="table table-sm align-middle">
+                    <thead><tr><th scope="col">Address</th><th scope="col">Requests</th><th scope="col">Failed (4xx/5xx)</th><th scope="col">First seen (UTC)</th><th scope="col">Last seen (UTC)</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+                    <tbody id="request-clients-body"></tbody>
+                </table>
+            </div>
+            <p class="text-muted small mt-2 mb-0" id="request-clients-note"></p>
+        </div>
+
+        <details class="mt-4">
+            <summary id="request-activity-table-description">Timeline: intervals with traffic, newest first</summary>
             <div class="table-responsive request-activity-table-container">
                 <table class="table table-sm align-middle mt-2">
-                    <thead><tr><th scope="col">Bucket start (UTC)</th><th scope="col">Average requests/minute</th><th scope="col">Total requests</th><th scope="col">Authenticated</th><th scope="col">Anonymous/unattributed</th></tr></thead>
+                    <thead><tr><th scope="col">Interval start (UTC)</th><th scope="col">Requests/minute</th><th scope="col">Requests</th><th scope="col">Failed (4xx/5xx)</th><th scope="col">Signed in</th><th scope="col">Anonymous</th><th scope="col">Addresses</th><th scope="col">Busiest address</th></tr></thead>
                     <tbody id="request-activity-table-body"></tbody>
                 </table>
             </div>

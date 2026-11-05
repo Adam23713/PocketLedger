@@ -44,6 +44,7 @@ In `.env`, set all five domain names and replace every placeholder secret. The r
 - `POCKETLEDGER_FACEBOOK_APP_ID` / `POCKETLEDGER_FACEBOOK_APP_SECRET` — optional Meta app credentials for Facebook Login. Leave both values empty to keep Facebook login disabled; never commit the app secret.
 - `CROWDSEC_API_KEY` — `openssl rand -hex 32`. Review the [edge security guide](edge-security.md) for the rest of the Cloudflare and CrowdSec setup, including verification, monitoring, key rotation and rollback.
 - `CROWDSEC_IDENTITY_API_KEY` — a second `openssl rand -hex 32` value used only by the Identity Admin dashboard for read-only LAPI decision queries. Never reuse `CROWDSEC_API_KEY`.
+- `CROWDSEC_IDENTITY_MACHINE_PASSWORD` — optional, a third `openssl rand -hex 32` value that lets the Identity Admin dashboard ban and unban addresses. Leave it empty to keep the dashboard read-only.
 
 For Google login, create a **Web application** OAuth client in Google Auth Platform and register the exact callbacks `https://<identity-domain>/signin-google` for production and `http://localhost:5052/signin-google` for direct local development. PocketLedger requests only the `openid` and `email` scopes, accepts a new external account only when Google reports its e-mail as verified, and links returning users by Google's stable subject rather than by e-mail address. Configure both credential values to enable the provider; a missing value keeps it hidden from the login and registration pages.
 
@@ -165,7 +166,7 @@ dotnet test tests/PocketLedger.Tests --filter FullyQualifiedName~FinancialCacheT
 
 ## Request telemetry (Valkey)
 
-Web, API and Identity aggregate relevant dynamic requests into five-minute Valkey hashes for the security dashboard. Each hash stores only counters: total, anonymous/unattributed and authenticated user ID counts. Paths, query strings, headers, cookies, tokens and request or response bodies are never stored. Health endpoints, static assets, OpenAPI/Swagger and OpenID Connect discovery requests are excluded by the shared classifier.
+Web, API and Identity aggregate relevant dynamic requests into five-minute Valkey hashes for the security dashboard. Each hash stores only counters: total, anonymous/unattributed and authenticated user ID counts. The per-address data described under [Client activity](#client-activity-and-stored-paths) is kept separately. Query strings, headers, cookies, tokens and request or response bodies are never stored. Health endpoints, static assets, OpenAPI/Swagger, OpenID Connect discovery and the `internal-admin` service-to-service endpoints are excluded by the shared classifier. Identity calls two of those endpoints every 30 seconds, which would otherwise appear as a constant 4 anonymous requests per minute.
 
 Production Compose configures all three applications with `RequestTelemetry__ConnectionString=valkey-security:6379`. For applications run directly on the host, start it with `docker compose -f compose.yaml -f compose.development.yaml up -d valkey-security` and set the connection string to `localhost:6380`; leaving it unset disables collection and makes queries return empty results. `RequestTelemetry__RetentionHours` defaults to and cannot exceed 48, while `RequestTelemetry__BucketMinutes` is fixed at 5 so later dashboard consumers can reuse the same bucket contract.
 
@@ -174,6 +175,15 @@ Telemetry and detection use their own Valkey instance (64 MB, `noeviction`, no p
 Recording is placed after authentication in every pipeline; in the API it also precedes user access blocking, so requests rejected for blocked users still appear in the statistics and in detection. Requests enqueue an in-memory observation and never wait for Valkey; a background worker coalesces observations before incrementing bucket counters. Buckets receive an absolute expiry at their start time plus the configured retention, so no bucket remains queryable after 48 hours. A full queue or a Valkey connection/write failure drops telemetry and logs a rate-limited warning without affecting the application request.
 
 The API skips both request telemetry and suspicious request detection for requests whose validated access token was issued to the `pocketledger-web` client (`client_id`, or `azp` as a fallback). The Web BFF calls the API directly over the internal network without forwarding the browser's address, so every user's BFF traffic would otherwise arrive from the Web container's IP: detection would treat the combined load of all users as one high-volume client, and every page view would be counted once by the Web and again for each API call it makes. The Web already records those requests with the real client address and user ID, so dashboard counts represent requests received from outside the internal network. API requests authenticated by any other client, as well as unauthenticated or invalid-token requests, are still recorded.
+
+### Client activity and stored paths
+
+The Admin dashboard's address filter and endpoint list use two more key families, written by the same worker after each request has finished so the response status is known:
+
+- `pocketledger:request-clients:v1:<bucket>`: per five-minute bucket, request and 4xx/5xx counts per client IP. At most 240 fields per bucket; requests beyond that only increase an `omitted` counter.
+- `pocketledger:request-endpoints:v1:<hour>`: per hour and client IP, the counts per method, path, application and status, plus the user IDs seen from that address. At most 1000 fields per hour and 200 per address, with counters for what was left out.
+
+Paths never include the query string; GUID and numeric segments become `{id}`, and paths are cut at 120 characters. Non-standard HTTP methods are stored as `OTHER`. Keys expire 48 hours after their bucket starts. These are client IP addresses and browsing paths, so they count as personal data; the landing privacy notice describes them and must be updated when the stored fields or retention change. The limits bound this data to about 20 MB even if both families stay full for the whole 48 hours. Landing and Docs do not record telemetry, so requests to those hosts appear only in Caddy's access logs.
 
 ### Suspicious request detection and stored IP addresses
 
@@ -184,7 +194,7 @@ The same `RequestTelemetry__ConnectionString` also enables suspicious request de
 
 A single background worker drains the in-memory queue (8192 observations) in batches of up to 1024, groups them by address and sends one script call per address, all pipelined over the multiplexer shared with request telemetry. If the queue still fills up, new observations are dropped without affecting requests.
 
-The detection uses the address resolved by `UseForwardedHeaders`. Configure `ForwardedHeaders__KnownProxies` for the reverse proxy so detection sees the client's address instead of the proxy's. The landing privacy notice describes this retention; update it whenever the window, threshold or stored fields change.
+The detection uses the address resolved by `UseForwardedHeaders`. Production Caddy must overwrite `X-Forwarded-For` with `{client_ip}` on the Web, API and Identity routes, as `Caddyfile.example` does: by default it sends `visitor, Cloudflare edge`, and `UseForwardedHeaders` would resolve the edge. Configure `ForwardedHeaders__KnownProxies` for other reverse proxies so detection sees the client's address instead of the proxy's. The landing privacy notice describes this retention; update it whenever the window, threshold or stored fields change.
 
 Query intervals use an inclusive start and exclusive end. Inputs are expanded to whole five-minute UTC buckets, and the returned `FromUtc`/`ToUtc` expose those effective aligned boundaries. `AverageRequestsPerMinute` uses the selected user's count when a user filter is present, otherwise total volume, divided by the complete aligned interval in minutes. `IsAvailable` distinguishes a successful zero-count query from disabled configuration or a Valkey read failure.
 

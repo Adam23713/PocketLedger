@@ -545,6 +545,7 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .form-narrow { max-width: 720px; }
 .request-activity-chart-container { height: 22rem; position: relative; }
 .request-activity-table-container { max-height: 28rem; overflow-y: auto; }
+#request-activity-heading, #request-client-details, #crowdsec-bans-heading { scroll-margin-top: 6rem; }
 
 @media (max-width: 767.98px) {
   [data-theme="horizon"] body::before { height: 14rem; left: -8rem; width: 14rem; }

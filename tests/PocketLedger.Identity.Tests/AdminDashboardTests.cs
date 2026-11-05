@@ -33,6 +33,8 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     private readonly TestRequestTelemetryReader requestTelemetry = new();
     private readonly TestAdminUserDataClient userDataClient = new();
     private readonly RecordingUserAccessPropagation accessPropagation = new();
+    private readonly TestClientActivityReader clientActivity = new();
+    private readonly RecordingBanManager banManager = new();
 
     public AdminDashboardTests(WebApplicationFactory<Program> factory)
     {
@@ -59,6 +61,10 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
                 services.AddSingleton<TimeProvider>(new FixedTimeProvider(CurrentTimeUtc));
                 services.RemoveAll<ICrowdSecDecisionReader>();
                 services.AddSingleton<ICrowdSecDecisionReader>(new TestCrowdSecDecisionReader());
+                services.RemoveAll<IRequestClientActivityReader>();
+                services.AddSingleton<IRequestClientActivityReader>(clientActivity);
+                services.RemoveAll<ICrowdSecBanManager>();
+                services.AddSingleton<ICrowdSecBanManager>(banManager);
                 services.RemoveAll<IAdminUserDataClient>();
                 services.AddSingleton<IAdminUserDataClient>(userDataClient);
                 services.RemoveAll<IUserAccessPropagation>();
@@ -401,6 +407,203 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
         Assert.True(partial.RootElement.GetProperty("isPartial").GetBoolean());
     }
 
+    [Fact]
+    public async Task RequestActivity_FiltersByClientAddressAndListsBannedAddresses()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await SendAsAdministratorAsync(client, "/Admin/RequestActivity?hours=3&ip=%20203.0.113.99%20");
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = document.RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("203.0.113.99", clientActivity.LastSelectedAddress);
+        Assert.Equal("203.0.113.99", root.GetProperty("seriesLabel").GetString());
+        Assert.Equal(5, root.GetProperty("seriesRequests").GetInt64());
+        Assert.Equal(3, root.GetProperty("seriesFailedRequests").GetInt64());
+        Assert.Equal(1d, root.GetProperty("points")[0].GetProperty("averageRequestsPerMinute").GetDouble());
+        var clients = root.GetProperty("clients").EnumerateArray().ToArray();
+        Assert.True(clients.Single(item => item.GetProperty("address").GetString() == "203.0.113.99").GetProperty("isBanned").GetBoolean());
+        var edge = clients.Single(item => item.GetProperty("address").GetString() == "173.245.48.1");
+        Assert.False(edge.GetProperty("isBanned").GetBoolean());
+        Assert.Equal("CloudflareEdge", edge.GetProperty("kind").GetString());
+    }
+
+    [Theory]
+    [InlineData("/Admin/RequestActivity?ip=1.2.3")]
+    [InlineData("/Admin/RequestActivity?ip=203.0.113.0/24")]
+    [InlineData("/Admin/RequestClient?ip=nonsense")]
+    [InlineData("/Admin/RequestClient")]
+    [InlineData("/Admin/RequestClient?ip=203.0.113.99&hours=4")]
+    public async Task ClientQueries_RejectInvalidInput(string path)
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await SendAsAdministratorAsync(client, path)).StatusCode);
+    }
+
+    [Fact]
+    public async Task RequestActivity_RejectsCombiningOwnerAndAddressFilters()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await SendAsAdministratorAsync(client, $"/Admin/RequestActivity?userId={CurrentUserId}&ip=203.0.113.99");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task RequestClient_ReturnsEndpointsUsersAndBanState()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var deletedUserId = Guid.NewGuid();
+        clientActivity.UserIds = [CurrentUserId, deletedUserId];
+
+        var response = await SendAsAdministratorAsync(client, "/Admin/RequestClient?ip=203.0.113.99&hours=6");
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = document.RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(CurrentTimeUtc.AddHours(-6), clientActivity.LastDetailsFromUtc);
+        Assert.Equal("/wp-login.php", root.GetProperty("endpoints")[0].GetProperty("path").GetString());
+        Assert.Equal(404, root.GetProperty("endpoints")[0].GetProperty("statusCode").GetInt32());
+        Assert.Equal(1, root.GetProperty("omittedRequests").GetInt64());
+        var usernames = root.GetProperty("users").EnumerateArray().Select(item => item.GetProperty("username").GetString()).ToArray();
+        Assert.Contains("user-01", usernames);
+        Assert.Contains("Deleted account", usernames);
+        Assert.Equal("pocketledger/http-flood", root.GetProperty("bans")[0].GetProperty("scenario").GetString());
+        Assert.Equal("30m 0s", root.GetProperty("bans")[0].GetProperty("remainingText").GetString());
+    }
+
+    [Theory]
+    [InlineData("/Admin/RequestClient?ip=203.0.113.99")]
+    public async Task RequestClient_RejectsAuthenticatedUserWithoutBootstrapAdministratorClaim(string path)
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync(path)).StatusCode);
+    }
+
+    [Theory]
+    [InlineData("BanIp")]
+    [InlineData("UnbanIp")]
+    public async Task BanActions_RejectAuthenticatedUserWithoutBootstrapAdministratorClaim(string action)
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.PostAsync($"/Admin/{action}", new FormUrlEncodedContent(new Dictionary<string, string> { ["ip"] = "203.0.113.10", ["address"] = "203.0.113.10", ["durationHours"] = "24" }));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Empty(banManager.Bans);
+        Assert.Empty(banManager.Removals);
+    }
+
+    [Fact]
+    public async Task BanIp_CreatesTheBanAndWritesAnAuditEvent()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+
+        var response = await PostAdminFormAsync(client, "BanIp", new Dictionary<string, string> { ["ip"] = "203.0.113.10", ["durationHours"] = "168", ["page"] = "1" });
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Contains("ip=203.0.113.10", response.Headers.Location!.ToString());
+        Assert.Equal(("203.0.113.10", TimeSpan.FromHours(168)), Assert.Single(banManager.Bans));
+        await using var scope = factory.Services.CreateAsyncScope();
+        var audit = await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.SingleAsync(item => item.EventType == "ClientAddressBanned");
+        Assert.Equal(CurrentUserId, audit.UserId);
+        Assert.Contains("Address=203.0.113.10;DurationHours=168", audit.Metadata);
+    }
+
+    [Theory]
+    [InlineData("173.245.48.1", "24")]
+    [InlineData("10.1.2.3", "24")]
+    [InlineData("::1", "24")]
+    [InlineData("1.2.3", "24")]
+    [InlineData("203.0.113.0/24", "24")]
+    [InlineData("198.51.100.77", "24")]
+    [InlineData("203.0.113.10", "2")]
+    [InlineData("203.0.113.10", "8760")]
+    public async Task BanIp_RefusesProtectedAddressesAndUnsupportedDurations(string address, string hours)
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        client.DefaultRequestHeaders.Add("CF-Connecting-IP", "198.51.100.77");
+
+        var response = await PostAdminFormAsync(client, "BanIp", new Dictionary<string, string> { ["ip"] = address, ["durationHours"] = hours, ["page"] = "1" });
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Empty(banManager.Bans);
+    }
+
+    [Fact]
+    public async Task BanIp_ReportsCrowdSecFailureWithoutAuditEvent()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+        banManager.Succeed = false;
+
+        var response = await PostAdminFormAsync(client, "BanIp", new Dictionary<string, string> { ["ip"] = "203.0.113.10", ["durationHours"] = "24", ["page"] = "1" });
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        await using var scope = factory.Services.CreateAsyncScope();
+        Assert.False(await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.AnyAsync(item => item.EventType == "ClientAddressBanned"));
+    }
+
+    [Theory]
+    [InlineData("203.0.113.99")]
+    [InlineData("2001:db8::/64")]
+    public async Task UnbanIp_RemovesAddressesAndRanges(string address)
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+
+        var response = await PostAdminFormAsync(client, "UnbanIp", new Dictionary<string, string> { ["address"] = address, ["page"] = "1" });
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal(address, Assert.Single(banManager.Removals));
+        await using var scope = factory.Services.CreateAsyncScope();
+        Assert.True(await scope.ServiceProvider.GetRequiredService<IdentityDbContext>().AuthenticationAuditEvents.AnyAsync(item => item.EventType == "ClientAddressBanRemoved"));
+    }
+
+    [Fact]
+    public async Task UnbanIp_IgnoresInvalidAddress()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, HandleCookies = true });
+
+        await PostAdminFormAsync(client, "UnbanIp", new Dictionary<string, string> { ["address"] = "everything", ["page"] = "1" });
+
+        Assert.Empty(banManager.Removals);
+    }
+
+    [Fact]
+    public async Task Index_PrefillsAValidAddressAndOffersBanControlsOnlyWhenConfigured()
+    {
+        await SeedUsersAsync();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var configured = await (await SendAsAdministratorAsync(client, "/Admin?ip=203.0.113.10")).Content.ReadAsStringAsync();
+        Assert.Contains("value=\"203.0.113.10\"", configured);
+        Assert.Contains("id=\"request-client-ban-form\"", configured);
+        Assert.Contains("action=\"/Admin/UnbanIp\"", configured);
+
+        var invalid = await (await SendAsAdministratorAsync(client, "/Admin?ip=%22%3E%3Cscript%3E")).Content.ReadAsStringAsync();
+        Assert.DoesNotContain("<script>\"", invalid);
+
+        banManager.IsConfigured = false;
+        var readOnly = await (await SendAsAdministratorAsync(client, "/Admin")).Content.ReadAsStringAsync();
+        Assert.DoesNotContain("id=\"request-client-ban-form\"", readOnly);
+        Assert.DoesNotContain("action=\"/Admin/UnbanIp\"", readOnly);
+        Assert.Contains("CROWDSEC_IDENTITY_MACHINE_PASSWORD", readOnly);
+    }
+
     private async Task SeedUsersAsync()
     {
         await using var scope = factory.Services.CreateAsyncScope();
@@ -468,6 +671,50 @@ public sealed class AdminDashboardTests : IClassFixture<WebApplicationFactory<Pr
     {
         public Task<CrowdSecBanDecisionsResult> GetActiveBansAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(new CrowdSecBanDecisionsResult(true, [new CrowdSecBanDecision("203.0.113.99", "Ip", "pocketledger/http-flood", "crowdsec", "ban", "30m")]));
+    }
+
+    private sealed class TestClientActivityReader : IRequestClientActivityReader
+    {
+        public string? LastSelectedAddress { get; private set; }
+        public DateTimeOffset? LastDetailsFromUtc { get; private set; }
+        public IReadOnlyList<Guid> UserIds { get; set; } = [];
+
+        public Task<RequestClientActivityResult> QueryAsync(DateTimeOffset fromUtc, DateTimeOffset toUtc, string? selectedClientIpAddress = null, CancellationToken cancellationToken = default)
+        {
+            LastSelectedAddress = selectedClientIpAddress;
+            var starts = RequestTelemetryBuckets.Range(fromUtc, toUtc);
+            var buckets = starts.Select((start, index) => index == 0
+                ? new RequestClientBucket(start, 3, 2, "203.0.113.99", 5, selectedClientIpAddress is null ? 0 : 5, selectedClientIpAddress is null ? 0 : 3)
+                : new RequestClientBucket(start, 0, 0, null, 0, 0, 0)).ToArray();
+            return Task.FromResult(new RequestClientActivityResult(true, 2, 0,
+                [new RequestClientSummary("203.0.113.99", 5, 3, starts[0], starts[0]), new RequestClientSummary("173.245.48.1", 1, 0, starts[0], starts[0])], buckets));
+        }
+
+        public Task<RequestClientDetails> GetDetailsAsync(string clientIpAddress, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken cancellationToken = default)
+        {
+            LastDetailsFromUtc = fromUtc;
+            return Task.FromResult(new RequestClientDetails(true, clientIpAddress, 1, false, [new RequestClientEndpoint("GET", "/wp-login.php", "Web", 404, 5, fromUtc)], UserIds));
+        }
+    }
+
+    private sealed class RecordingBanManager : ICrowdSecBanManager
+    {
+        public bool IsConfigured { get; set; } = true;
+        public bool Succeed { get; set; } = true;
+        public List<(string Address, TimeSpan Duration)> Bans { get; } = [];
+        public List<string> Removals { get; } = [];
+
+        public Task<bool> BanAsync(string ipAddress, TimeSpan duration, CancellationToken cancellationToken = default)
+        {
+            if (Succeed) Bans.Add((ipAddress, duration));
+            return Task.FromResult(Succeed);
+        }
+
+        public Task<bool> RemoveAsync(string addressOrRange, CancellationToken cancellationToken = default)
+        {
+            if (Succeed) Removals.Add(addressOrRange);
+            return Task.FromResult(Succeed);
+        }
     }
 
     private sealed class TestAdminUserDataClient : IAdminUserDataClient
