@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Api;
@@ -6,7 +7,8 @@ using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Api.Controllers;
 
-[ApiController, Authorize, Route("api/v1/goals")]
+// Authorization-header bearer tokens are not sent automatically by browsers; cookie authentication is excluded.
+[ApiController, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme), Route("api/v1/goals")]
 public sealed class GoalsController(IGoalService service) : ControllerBase
 {
     [HttpGet] public async Task<IActionResult> GetAll(CancellationToken token) => Ok((await service.GetAllAsync(token)).Select(ApiContractMapper.ToDto));
