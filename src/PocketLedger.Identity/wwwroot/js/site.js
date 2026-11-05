@@ -53,4 +53,8 @@
     const profileButton = document.getElementById("profile-menu-button");
     const profileMenu = document.getElementById("profile-menu");
     if (profileButton && profileMenu) setupMenu(profileButton, profileMenu);
+
+    document.querySelectorAll("time[data-local-time]").forEach(time => {
+        time.textContent = new Date(time.dateTime).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium" });
+    });
 })();

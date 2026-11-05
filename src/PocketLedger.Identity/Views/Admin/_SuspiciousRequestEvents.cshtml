@@ -21,7 +21,7 @@
                         <tr>
                             <td>@item.DetectedAtUtc.ToString("u")</td>
                             <td>@(item.Reason ?? "Request burst")</td>
-                            <td><code>@item.ClientIpAddress</code></td>
+                            <td><a href="@Url.Action("Index", "Admin", new { ip = item.ClientIpAddress }, null, null, "request-activity-heading")" title="Inspect this address"><code>@item.ClientIpAddress</code></a></td>
                             <td>@item.RequestCount</td>
                             <td>@item.Window.TotalMinutes.ToString("0") minutes</td>
                             <td>@(item.UserIds.Count == 0 ? "Anonymous or unattributed" : string.Join(", ", item.UserIds))</td>

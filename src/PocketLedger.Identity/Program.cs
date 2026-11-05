@@ -29,6 +29,10 @@ builder.Services.AddHttpClient<ICrowdSecDecisionReader, CrowdSecDecisionReader>(
 {
     client.Timeout = TimeSpan.FromSeconds(services.GetRequiredService<Microsoft.Extensions.Options.IOptions<CrowdSecOptions>>().Value.TimeoutSeconds);
 });
+builder.Services.AddHttpClient<ICrowdSecBanManager, CrowdSecBanManager>((services, client) =>
+{
+    client.Timeout = TimeSpan.FromSeconds(services.GetRequiredService<Microsoft.Extensions.Options.IOptions<CrowdSecOptions>>().Value.TimeoutSeconds);
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<IdentityDbContext>(options =>
 {
@@ -122,6 +126,7 @@ builder.Services.AddOpenIddict()
     });
 builder.Services.AddSingleton<IAuthenticationRateLimiter, AuthenticationRateLimiter>();
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<IUnknownUserLoginAttempts, UnknownUserLoginAttempts>();
 builder.Services.AddSingleton<UserKeyDerivationLimiter>();
 builder.Services.AddScoped<IUserDataKeyService, UserDataKeyService>();
 builder.Services.AddSingleton<IPendingSignInKeys, PendingSignInKeys>();

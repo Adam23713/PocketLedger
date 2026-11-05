@@ -18,10 +18,11 @@ namespace PocketLedger.Controllers;
 public class AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IdentityDbContext dbContext,
     IAuthenticationRateLimiter rateLimiter, IAuthenticationAuditService audit, IClientIpAddressResolver clientIpAddressResolver,
     IRegistrationSettingsService registrationSettings, IConfiguration configuration, IUserDataKeyService dataKeys, IPendingSignInKeys pendingKeys,
-    IUserAccountDeletionService accountDeletion, ISuspiciousActivityRecorder suspiciousActivity, TimeProvider timeProvider) : Controller
+    IUserAccountDeletionService accountDeletion, ISuspiciousActivityRecorder suspiciousActivity, TimeProvider timeProvider, IUnknownUserLoginAttempts unknownUserAttempts) : Controller
 {
     private static readonly TimeSpan RepeatedLockoutWindow = TimeSpan.FromHours(24);
     private const string DataUnlockFailedMessage = "Your data could not be unlocked. Contact the administrator.";
+    private const string LockedUntilKey = "LoginLockedUntil";
 
     [AllowAnonymous, HttpGet]
     public async Task<IActionResult> AccessBlocked()
@@ -78,7 +79,9 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!wasLocked && nowLocked) await ReportRepeatedLockoutAsync(user!, cancellationToken);
         var reason = result.IsLockedOut || wasLocked || nowLocked ? "LockedOut" : "InvalidCredentials";
         await audit.WriteAsync(reason == "LockedOut" ? "LoginLockout" : "LoginFailed", "Failure", user?.Id, normalized, reason, cancellationToken: cancellationToken);
-        ModelState.AddModelError(string.Empty, reason == "LockedOut" ? "Login is temporarily unavailable." : "Invalid login attempt.");
+        var status = user is null ? unknownUserAttempts.RecordFailure(normalized) : await GetLoginAttemptStatusAsync(user);
+        model.LockedUntilUtc = status.LockedUntilUtc;
+        if (status.LockedUntilUtc is null) ModelState.AddModelError(string.Empty, $"Invalid login attempt. {AttemptsLeftMessage(status.RemainingAttempts)}");
         return View(await BuildLoginModelAsync(model.ReturnUrl, model));
     }
 
@@ -226,8 +229,10 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             }
 
             await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, result.IsLockedOut ? "LockedOut" : "SignInRejected", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, result.IsLockedOut ? "Login is temporarily unavailable." : "The external login could not be completed.");
-            return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
+            if (!result.IsLockedOut) ModelState.AddModelError(string.Empty, "The external login could not be completed.");
+            var loginModel = await BuildLoginModelAsync(returnUrl);
+            if (result.IsLockedOut) loginModel.LockedUntilUtc = await userManager.GetLockoutEndDateAsync(linkedUser);
+            return View(nameof(Login), loginModel);
         }
 
         if (!TryGetVerifiedEmail(info.Principal, out var email))
@@ -307,7 +312,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!await AllowRequestAsync($"data-unlock:{user.Id}", cancellationToken)) return TooManyRequests();
         model.IsDataPassword = !await userManager.HasPasswordAsync(user);
         if (!ModelState.IsValid) return View(model);
-        if (await userManager.IsLockedOutAsync(user)) return await SignInStoppedAsync("Login is temporarily unavailable.", model.ReturnUrl);
+        if (await userManager.IsLockedOutAsync(user)) return await SignInLockedOutAsync(user, model.ReturnUrl);
 
         var unlock = await UnlockDataKeyAsync(user, model.Password, cancellationToken);
         if (unlock == DataKeyUnlock.Busy) return TooManyRequests();
@@ -319,9 +324,10 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             {
                 await ReportRepeatedLockoutAsync(user, cancellationToken);
                 await audit.WriteAsync("LoginLockout", "Failure", user.Id, user.NormalizedUserName, "LockedOut", cancellationToken: cancellationToken);
-                return await SignInStoppedAsync("Login is temporarily unavailable.", model.ReturnUrl);
+                return await SignInLockedOutAsync(user, model.ReturnUrl);
             }
-            ModelState.AddModelError(nameof(model.Password), model.IsDataPassword ? "Incorrect data password." : "Incorrect password.");
+            var status = await GetLoginAttemptStatusAsync(user);
+            ModelState.AddModelError(nameof(model.Password), $"{(model.IsDataPassword ? "Incorrect data password." : "Incorrect password.")} {AttemptsLeftMessage(status.RemainingAttempts)}");
             return View(model);
         }
         await userManager.ResetAccessFailedCountAsync(user);
@@ -595,6 +601,8 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         }
         if (user is null || user.IsAccessBlocked || await userManager.IsLockedOutAsync(user))
         {
+            // A wrong key counts toward a real account's lockout, so it has to count here too or the login countdown would reveal the difference.
+            if (user is null) unknownUserAttempts.RecordFailure(normalized);
             await audit.WriteAsync("AccountRecovery", "Failure", user?.Id, normalized, user is null ? "UnknownUser" : user.IsAccessBlocked ? "AccessBlocked" : "LockedOut", cancellationToken: cancellationToken);
             return Rejected();
         }
@@ -860,13 +868,26 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
     private async Task<ApplicationUser?> GetSigningInUserAsync()
         => await signInManager.GetTwoFactorAuthenticationUserAsync() ?? (User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null);
 
-    private async Task<IActionResult> SignInStoppedAsync(string message, string? returnUrl)
+    private async Task<IActionResult> SignInStoppedAsync(string? message, string? returnUrl)
     {
         pendingKeys.Clear(HttpContext);
         await signInManager.SignOutAsync();
         TempData["LoginMessage"] = message;
         return RedirectToAction(nameof(Login), new { returnUrl });
     }
+
+    private async Task<IActionResult> SignInLockedOutAsync(ApplicationUser user, string? returnUrl)
+    {
+        TempData[LockedUntilKey] = (await userManager.GetLockoutEndDateAsync(user))?.UtcDateTime;
+        return await SignInStoppedAsync(null, returnUrl);
+    }
+
+    private async Task<LoginAttemptStatus> GetLoginAttemptStatusAsync(ApplicationUser user) => await userManager.IsLockedOutAsync(user)
+        ? new LoginAttemptStatus(0, await userManager.GetLockoutEndDateAsync(user))
+        : new LoginAttemptStatus(userManager.Options.Lockout.MaxFailedAccessAttempts - await userManager.GetAccessFailedCountAsync(user), null);
+
+    private string AttemptsLeftMessage(int remaining) =>
+        $"You have {remaining} {(remaining == 1 ? "attempt" : "attempts")} left before sign-in is blocked for {userManager.Options.Lockout.DefaultLockoutTimeSpan.TotalMinutes:0} minutes.";
 
     private async Task<bool> ValidateNewPasswordAsync(ApplicationUser user, string password, string field)
     {
@@ -890,6 +911,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         model.ReturnUrl = returnUrl;
         model.RegistrationEnabled = (await registrationSettings.GetStatusAsync()).AcceptsRegistrations;
         model.ExternalProviders = await GetExternalProvidersAsync();
+        if (TempData[LockedUntilKey] is DateTime lockedUntil) model.LockedUntilUtc = new DateTimeOffset(lockedUntil.ToUniversalTime());
         return model;
     }
 

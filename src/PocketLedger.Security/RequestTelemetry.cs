@@ -38,6 +38,14 @@ public static class RequestTelemetryBuckets
         var ticks = TimeSpan.FromMinutes(bucketMinutes).Ticks;
         return new DateTimeOffset(utc.Ticks - utc.Ticks % ticks, TimeSpan.Zero);
     }
+
+    // The starts of every whole bucket that overlaps the interval.
+    public static IReadOnlyList<DateTimeOffset> Range(DateTimeOffset fromUtc, DateTimeOffset toUtc, int bucketMinutes = 5)
+    {
+        var starts = new List<DateTimeOffset>();
+        for (var start = Start(fromUtc, bucketMinutes); start < toUtc; start = start.AddMinutes(bucketMinutes)) starts.Add(start);
+        return starts;
+    }
 }
 
 public static class RelevantRequestClassifier
@@ -55,7 +63,10 @@ public static class RelevantRequestClassifier
             || value.StartsWith("/health/", StringComparison.OrdinalIgnoreCase)
             || value.StartsWith("/.well-known/", StringComparison.OrdinalIgnoreCase)
             || value.StartsWith("/openapi/", StringComparison.OrdinalIgnoreCase)
-            || value.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase)) return false;
+            || value.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase)
+            // Identity's synchronizer calls these on the internal network every 30 seconds, and Caddy answers 404 for them on the public hostnames.
+            || value.StartsWith("/internal-admin/", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/api/v1/internal-admin/", StringComparison.OrdinalIgnoreCase)) return false;
         return !StaticExtensions.Contains(Path.GetExtension(value));
     }
 }
@@ -69,6 +80,8 @@ public static class RequestTelemetryRegistration
             .Validate(options => options.BucketMinutes == 5, "Request telemetry uses five-minute buckets.")
             .ValidateOnStart();
         services.AddSingleton<RequestTelemetryConnection>();
+        services.AddSingleton<RequestClientActivityService>();
+        services.AddSingleton<IRequestClientActivityReader>(services => services.GetRequiredService<RequestClientActivityService>());
         services.AddSingleton<RequestTelemetryService>();
         services.AddSingleton<IRequestTelemetryReader>(services => services.GetRequiredService<RequestTelemetryService>());
         services.AddSingleton<IHostedService>(services => services.GetRequiredService<RequestTelemetryService>());
@@ -99,20 +112,33 @@ internal sealed class RequestTelemetryClientFilter(IEnumerable<string> ignoredCl
     }
 }
 
-internal readonly record struct RequestTelemetryObservation(DateTimeOffset BucketStartUtc, Guid? UserId);
+internal readonly record struct RequestTelemetryObservation(DateTimeOffset BucketStartUtc, Guid? UserId, string? ClientIpAddress, string Method, string Path, string Application, int StatusCode = 0);
 
 internal sealed class RequestTelemetryMiddleware(RequestDelegate next, RequestTelemetryService telemetry, SuspiciousRequestDetectionService suspiciousRequests, TimeProvider timeProvider,
     RequestTelemetryClientFilter clientFilter)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (RelevantRequestClassifier.IsRelevant(context.Request.Path) && !clientFilter.IsIgnored(context.User))
+        if (!RelevantRequestClassifier.IsRelevant(context.Request.Path) || clientFilter.IsIgnored(context.User))
         {
-            var timestamp = timeProvider.GetUtcNow();
-            telemetry.TryRecord(context.User, timestamp);
-            suspiciousRequests.TryRecord(context, timestamp);
+            await next(context);
+            return;
         }
-        await next(context);
+
+        var timestamp = timeProvider.GetUtcNow();
+        suspiciousRequests.TryRecord(context, timestamp);
+        // The request is described before it runs because later middleware can replace the user or re-execute another path; only the status needs the result.
+        var observation = telemetry.Describe(context, timestamp);
+        var statusCode = StatusCodes.Status500InternalServerError;
+        try
+        {
+            await next(context);
+            statusCode = context.Response.StatusCode;
+        }
+        finally
+        {
+            telemetry.TryRecord(observation, statusCode);
+        }
     }
 }
 
@@ -151,7 +177,7 @@ internal sealed class RequestTelemetryConnection(IOptions<RequestTelemetryOption
 }
 
 internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> options, RequestTelemetryConnection store, SuspiciousRequestDetectionService suspiciousRequests,
-    ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
+    RequestClientActivityService clientActivity, ILogger<RequestTelemetryService> logger) : BackgroundService, IRequestTelemetryReader
 {
     private const string KeyPrefix = "pocketledger:request-telemetry:v1:";
     private const string TotalField = "total";
@@ -160,16 +186,24 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
     private readonly Channel<RequestTelemetryObservation> queue = Channel.CreateBounded<RequestTelemetryObservation>(new BoundedChannelOptions(8192) { FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true, SingleWriter = false });
     private long lastFailureLogUtcTicks;
 
-    public void TryRecord(ClaimsPrincipal principal, DateTimeOffset timestamp)
+    public RequestTelemetryObservation? Describe(HttpContext context, DateTimeOffset timestamp)
     {
-        if (string.IsNullOrWhiteSpace(options.Value.ConnectionString)) return;
+        if (string.IsNullOrWhiteSpace(options.Value.ConnectionString)) return null;
         Guid? userId = null;
-        if (principal.Identity?.IsAuthenticated == true)
+        if (context.User.Identity?.IsAuthenticated == true)
         {
-            var value = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? principal.FindFirstValue("sub");
+            var value = context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? context.User.FindFirstValue("sub");
             if (Guid.TryParse(value, out var parsed)) userId = parsed;
         }
-        queue.Writer.TryWrite(new RequestTelemetryObservation(RequestTelemetryBuckets.Start(timestamp, options.Value.BucketMinutes), userId));
+        var application = context.RequestServices.GetService<IHostEnvironment>()?.ApplicationName ?? "Unknown";
+        return new RequestTelemetryObservation(RequestTelemetryBuckets.Start(timestamp, options.Value.BucketMinutes), userId,
+            context.Connection.RemoteIpAddress is { } address ? RequestClientAddress.Normalize(address) : null, RequestEndpointDescription.NormalizeMethod(context.Request.Method),
+            RequestEndpointDescription.NormalizePath(context.Request.Path.Value), RequestEndpointDescription.ShortenApplication(application));
+    }
+
+    public void TryRecord(RequestTelemetryObservation? observation, int statusCode)
+    {
+        if (observation is { } value) queue.Writer.TryWrite(value with { StatusCode = statusCode });
     }
 
     public async Task<RequestTelemetryStatistics> QueryAsync(DateTimeOffset fromUtc, DateTimeOffset toUtc, Guid? userId = null, CancellationToken cancellationToken = default)
@@ -233,7 +267,7 @@ internal sealed class RequestTelemetryService(IOptions<RequestTelemetryOptions> 
                         var expiresAtUnixMilliseconds = group.Key.BucketStartUtc.AddHours(options.Value.RetentionHours).ToUnixTimeMilliseconds();
                         return database.ScriptEvaluateAsync(IncrementScript, [key], [count, field, expiresAtUnixMilliseconds]);
                     });
-                    await Task.WhenAll(writes);
+                    await Task.WhenAll(writes.Concat(clientActivity.Write(database, observations)));
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
