@@ -203,11 +203,12 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
         var blocked = await FailAsync();
         Assert.Contains("Sign-in is blocked until", blocked);
         Assert.DoesNotContain("attempt left", blocked);
-        var until = DateTimeOffset.Parse(Regex.Match(blocked, "<time datetime=\"([^\"]+)\"").Groups[1].Value);
+        static DateTimeOffset BlockedUntil(string html) => DateTimeOffset.Parse(Regex.Match(html, "<time datetime=\"([^\"]+)\"").Groups[1].Value);
+        var until = BlockedUntil(blocked);
         Assert.InRange(until, before.AddMinutes(9), DateTimeOffset.UtcNow.AddMinutes(11));
 
-        // Further attempts while blocked show the same end time rather than extending it.
-        Assert.Contains($"<time datetime=\"{until.UtcDateTime:O}\"", await FailAsync());
+        // Further attempts while blocked show the same end time rather than extending it. PostgreSQL stores microseconds, so the reloaded value can differ below that.
+        Assert.Equal(until, BlockedUntil(await FailAsync()), TimeSpan.FromMilliseconds(1));
     }
 
     [Fact]
