@@ -3,11 +3,12 @@
 @{ ViewData["Title"] = "Recurring transactions"; }
 <div class="d-flex justify-content-between align-items-center mb-3"><h1>Recurring transactions</h1><a class="btn btn-primary" asp-action="Create">New template</a></div>
 <p class="text-muted">Enabled templates are processed automatically (Europe/Budapest).</p>
-@if (Model.Items.Count == 0) { <div class="alert alert-info">No regular recurring templates.</div> }
-else
+@if (Model.FrequencyGroups.Count == 0) { <div class="alert alert-info">No regular recurring templates.</div> }
+@foreach (var frequencyGroup in Model.FrequencyGroups)
 {
+    <h2 class="h4 mt-4">@frequencyGroup.Frequency</h2>
     <div class="list-group recurring-transaction-list">
-    @foreach (var item in Model.Items)
+    @foreach (var item in frequencyGroup.Items)
     {
         var negative = item.Type == TransactionType.Expense || item.Type == TransactionType.Adjustment && item.AdjustmentDirection == AdjustmentDirection.Decrease;
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -26,11 +27,11 @@ else
             </div>
         </div>
     }
-    @if (Model.ExpenseTotals.Count > 0)
+    @if (frequencyGroup.ExpenseTotals.Count > 0)
     {
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold">
-            <span>Total recurring expenses</span>
-            <span class="d-flex flex-wrap gap-3">@foreach (var total in Model.ExpenseTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span>
+            <span>Total @frequencyGroup.Frequency.ToString().ToLowerInvariant() recurring expenses</span>
+            <span class="d-flex flex-wrap gap-3">@foreach (var total in frequencyGroup.ExpenseTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span>
         </div>
     }
     </div>

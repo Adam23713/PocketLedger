@@ -64,6 +64,7 @@ if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(goo
         options.Scope.Add("openid");
         options.Scope.Add("email");
         options.ClaimActions.MapJsonKey("email_verified", "email_verified", ClaimValueTypes.Boolean);
+        options.Events.OnRemoteFailure = ExternalLoginEvents.RemoteFailureAsync;
     });
 }
 var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
@@ -82,6 +83,26 @@ if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(face
         options.ClaimActions.Clear();
         options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
         options.ClaimActions.Add(new FacebookVerifiedEmailClaimAction());
+        options.Events.OnRemoteFailure = ExternalLoginEvents.RemoteFailureAsync;
+    });
+}
+var githubClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+var githubClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(githubClientId) && !string.IsNullOrWhiteSpace(githubClientSecret))
+{
+    builder.Services.AddAuthentication().AddOAuth(GitHubAuthenticationEvents.SchemeName, GitHubAuthenticationEvents.SchemeName, options =>
+    {
+        options.ClientId = githubClientId;
+        options.ClientSecret = githubClientSecret;
+        options.CallbackPath = "/signin-github";
+        options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+        options.TokenEndpoint = "https://github.com/login/oauth/access_token";
+        options.UserInformationEndpoint = "https://api.github.com/user";
+        options.UsePkce = true;
+        options.Scope.Add("user:email");
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.Events.OnCreatingTicket = GitHubAuthenticationEvents.CreatingTicketAsync;
+        options.Events.OnRemoteFailure = ExternalLoginEvents.RemoteFailureAsync;
     });
 }
 builder.Services.ConfigureApplicationCookie(options =>

@@ -42,15 +42,20 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         }).OrderBy(item => !item.Enabled).ThenBy(item => item.NextOccurrence is null).ThenBy(item => item.NextOccurrence).ThenBy(item => item.FirstOccurrence).ToList();
         var normalItems = items.Where(item => item.DebtId is null).ToList();
         var loanItems = items.Where(item => item.DebtId is not null && (item.LastOccurrence is null || item.LastOccurrence >= today)).ToList();
-        var expenseTotals = normalItems.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
-            .GroupBy(item => item.Currency)
-            .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => item.Amount)))
-            .OrderBy(total => total.Currency)
-            .ToList();
+        var frequencyGroups = Enum.GetValues<RecurringFrequency>().Select(frequency =>
+        {
+            var frequencyItems = normalItems.Where(item => item.Frequency == frequency).ToList();
+            var expenseTotals = frequencyItems.Where(item => item.Enabled && item.Type == Models.Enums.TransactionType.Expense)
+                .GroupBy(item => item.Currency)
+                .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => item.Amount)))
+                .OrderBy(total => total.Currency)
+                .ToList();
+            return new RecurringTransactionFrequencyGroupViewModel(frequency, frequencyItems, expenseTotals);
+        }).Where(group => group.Items.Count > 0).ToList();
         var loanTotals = loanItems.Where(item => item.Enabled).GroupBy(item => item.Currency)
             .Select(group => new RecurringTransactionExpenseTotalViewModel(group.Key, group.Sum(item => RecurringSchedule.ToMonthlyAmount(item.Amount, item.Frequency))))
             .OrderBy(total => total.Currency).ToList();
-        return View(new RecurringTransactionIndexViewModel { Items = normalItems, LoanItems = loanItems, ExpenseTotals = expenseTotals, MonthlyLoanPaymentTotals = loanTotals });
+        return View(new RecurringTransactionIndexViewModel { FrequencyGroups = frequencyGroups, LoanItems = loanItems, MonthlyLoanPaymentTotals = loanTotals });
     }
 
     [HttpGet]

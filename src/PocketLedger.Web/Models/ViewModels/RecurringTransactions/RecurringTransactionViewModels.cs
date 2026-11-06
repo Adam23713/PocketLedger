@@ -6,11 +6,12 @@ namespace PocketLedger.Models.ViewModels.RecurringTransactions;
 
 public class RecurringTransactionIndexViewModel
 {
-    public IReadOnlyList<RecurringTransactionListItemViewModel> Items { get; init; } = [];
+    public IReadOnlyList<RecurringTransactionFrequencyGroupViewModel> FrequencyGroups { get; init; } = [];
     public IReadOnlyList<RecurringTransactionListItemViewModel> LoanItems { get; init; } = [];
-    public IReadOnlyList<RecurringTransactionExpenseTotalViewModel> ExpenseTotals { get; init; } = [];
     public IReadOnlyList<RecurringTransactionExpenseTotalViewModel> MonthlyLoanPaymentTotals { get; init; } = [];
 }
+
+public record RecurringTransactionFrequencyGroupViewModel(RecurringFrequency Frequency, IReadOnlyList<RecurringTransactionListItemViewModel> Items, IReadOnlyList<RecurringTransactionExpenseTotalViewModel> ExpenseTotals);
 
 public record RecurringTransactionExpenseTotalViewModel(string Currency, decimal Amount);
 

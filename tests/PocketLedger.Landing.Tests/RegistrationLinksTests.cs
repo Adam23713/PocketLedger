@@ -76,6 +76,7 @@ public sealed class RegistrationLinksTests
         Assert.Contains("id=\"delete-account\"", privacyHtml);
         Assert.Contains("Google LLC", privacyHtml);
         Assert.Contains("Meta Platforms, Inc.", privacyHtml);
+        Assert.Contains("GitHub, Inc.", privacyHtml);
     }
 
     private static WebApplicationFactory<Program> CreateFactory(RegistrationStatus status) => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>

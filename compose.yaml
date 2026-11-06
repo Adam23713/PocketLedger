@@ -145,6 +145,8 @@ services:
       Authentication__Google__ClientSecret: ${POCKETLEDGER_GOOGLE_CLIENT_SECRET:-}
       Authentication__Facebook__AppId: ${POCKETLEDGER_FACEBOOK_APP_ID:-}
       Authentication__Facebook__AppSecret: ${POCKETLEDGER_FACEBOOK_APP_SECRET:-}
+      Authentication__GitHub__ClientId: ${POCKETLEDGER_GITHUB_CLIENT_ID:-}
+      Authentication__GitHub__ClientSecret: ${POCKETLEDGER_GITHUB_CLIENT_SECRET:-}
       POCKETLEDGER_INITIAL_USERNAME: ${POCKETLEDGER_INITIAL_USERNAME}
       POCKETLEDGER_INITIAL_PASSWORD: ${POCKETLEDGER_INITIAL_PASSWORD}
     volumes:
