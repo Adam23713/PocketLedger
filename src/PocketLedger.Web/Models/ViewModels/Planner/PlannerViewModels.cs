@@ -17,7 +17,7 @@ public class PlannerFormViewModel
     public Guid? TargetAccountId { get; set; }
     public Guid? CategoryId { get; set; }
     [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal Amount { get; set; }
-    [Required, StringLength(3)] public string Currency { get; set; } = "HUF";
+    [Required, StringLength(3)] public string Currency { get; set; } = "EUR";
     [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal AccountAmount { get; set; }
     public decimal? TargetAmount { get; set; }
     [StringLength(500)] public string? Note { get; set; }

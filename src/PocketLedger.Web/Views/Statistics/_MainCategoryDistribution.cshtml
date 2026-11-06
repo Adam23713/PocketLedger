@@ -1,0 +1,28 @@
+@model IReadOnlyList<PocketLedger.Models.ViewModels.Statistics.StatisticsMainCategoryViewModel>
+@{ var kind = (string)ViewData["Kind"]!; }
+<section class="h-100" aria-labelledby="@(kind)-distribution-heading">
+    <h2 class="h4" id="@(kind)-distribution-heading">@ViewData["Heading"]</h2>
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted">@ViewData["EmptyText"]</p>
+    }
+    else
+    {
+        <div class="statistics-category-layout" data-category-distribution="@kind">
+            <div>
+                <div class="statistics-doughnut-container"><canvas id="@(kind)-category-chart" aria-label="@ViewData["Heading"]"></canvas></div>
+                <div class="statistics-category-selector" id="@(kind)-category-selector" aria-label="Select a main category"></div>
+            </div>
+            <div class="statistics-breakdown" aria-live="polite">
+                <h3 class="h5" id="@(kind)-breakdown-heading"></h3>
+                <p class="text-muted" id="@(kind)-breakdown-total"></p>
+                <div class="table-responsive edge-to-edge-table statistics-table-surface">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Subcategory</th><th class="text-end">Amount</th><th class="text-end">Share</th></tr></thead>
+                        <tbody id="@(kind)-breakdown-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</section>

@@ -5,18 +5,20 @@ using PocketLedger.Models;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.ViewModels.Account;
 using PocketLedger.Services;
+using PocketLedger.Services.Interfaces;
 using PocketLedger.Web.Api;
 
 namespace PocketLedger.Controllers;
 
 [Authorize]
-public sealed class SettingsController(IPreferencesApiClient preferences) : Controller
+public sealed class SettingsController(IPreferencesApiClient preferences, IAccountService accounts) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(CancellationToken token)
     {
         var item = await preferences.GetAsync(token);
-        return View("~/Views/Account/Settings.cshtml", ToViewModel(item));
+        var accountCurrencies = (await accounts.GetChoicesAsync(token)).Select(account => account.Currency).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return View("~/Views/Account/Settings.cshtml", ToViewModel(item, accountCurrencies));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -28,13 +30,18 @@ public sealed class SettingsController(IPreferencesApiClient preferences) : Cont
         return RedirectToAction(nameof(Index));
     }
 
-    private static SettingsViewModel ToViewModel(UserPreferenceResponse item) => new()
+    // Lists the currencies the user already configured plus the default and account currencies, so formats that matter are always editable.
+    private static SettingsViewModel ToViewModel(UserPreferenceResponse item, IReadOnlySet<string> accountCurrencies) => new()
     {
         DisplayName = item.DisplayName, AvatarId = item.AvatarId, DefaultCurrency = item.DefaultCurrency, TimeZoneId = item.TimeZoneId,
-        CurrencyFormats = Currencies.All.Select(definition =>
-        {
-            var format = item.CurrencyFormats.SingleOrDefault(value => value.CurrencyCode == definition.Code) ?? new UserCurrencyFormatDto(definition.Code, definition.DecimalDigits, ",", " ", PocketLedger.Models.Enums.CurrencyDisplay.Code, PocketLedger.Models.Enums.CurrencyPosition.After, true);
-            return new CurrencyFormatViewModel { CurrencyCode = definition.Code, DecimalPlaces = format.DecimalPlaces, DecimalSeparator = format.DecimalSeparator, ThousandsSeparator = format.ThousandsSeparator, CurrencyDisplay = format.CurrencyDisplay, CurrencyPosition = format.CurrencyPosition, UseSpace = format.UseSpace };
-        }).ToList()
+        CurrencyFormats = Currencies.All
+            .Where(definition => definition.Code == item.DefaultCurrency || accountCurrencies.Contains(definition.Code) || item.CurrencyFormats.Any(value => value.CurrencyCode == definition.Code))
+            .Select(definition =>
+            {
+                var format = item.CurrencyFormats.SingleOrDefault(value => value.CurrencyCode == definition.Code) ?? DefaultFormat(definition);
+                return new CurrencyFormatViewModel { CurrencyCode = definition.Code, DecimalPlaces = format.DecimalPlaces, DecimalSeparator = format.DecimalSeparator, ThousandsSeparator = format.ThousandsSeparator, CurrencyDisplay = format.CurrencyDisplay, CurrencyPosition = format.CurrencyPosition, UseSpace = format.UseSpace };
+            }).ToList()
     };
+
+    public static UserCurrencyFormatDto DefaultFormat(CurrencyDefinition definition) => new(definition.Code, definition.DecimalDigits, ",", " ", PocketLedger.Models.Enums.CurrencyDisplay.Code, PocketLedger.Models.Enums.CurrencyPosition.After, true);
 }

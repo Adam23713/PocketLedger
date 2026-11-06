@@ -8,7 +8,7 @@ public sealed class SettingsViewModel : IValidatableObject
 {
     [Display(Name = "Display name"), StringLength(100)] public string? DisplayName { get; set; }
     [Range(1, 5)] public int AvatarId { get; set; } = 1;
-    [Required] public string DefaultCurrency { get; set; } = "HUF";
+    [Required] public string DefaultCurrency { get; set; } = "EUR";
     [Required] public string TimeZoneId { get; set; } = "UTC";
     public List<CurrencyFormatViewModel> CurrencyFormats { get; set; } = [];
 
@@ -37,3 +37,5 @@ public sealed class CurrencyFormatViewModel
     public CurrencyPosition CurrencyPosition { get; set; }
     public bool UseSpace { get; set; } = true;
 }
+
+public sealed record CurrencyFormatEditorViewModel(string Key, CurrencyFormatViewModel Format);

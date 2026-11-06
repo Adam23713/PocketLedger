@@ -181,6 +181,92 @@ public sealed class UserDataKeyFlowTests : IClassFixture<WebApplicationFactory<P
         Assert.Equal(1, await users.GetAccessFailedCountAsync(user));
     }
 
+    [Theory]
+    [InlineData(Username)]
+    [InlineData("nobody")]
+    public async Task Login_CountsDownAndThenShowsWhenTheBlockEnds_ForRealAndUnknownUsersAlike(string username)
+    {
+        await SeedUserAsync();
+        using var client = CreateClient();
+        async Task<string> FailAsync()
+        {
+            var token = await GetAntiforgeryTokenAsync(client, "/Account/Login");
+            var response = await client.PostAsync("/Account/Login", Form(new Dictionary<string, string> { ["Username"] = username, ["Password"] = "Wrong!Password#2026", ["__RequestVerificationToken"] = token }));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        Assert.Contains("You have 2 attempts left before sign-in is blocked for 10 minutes.", await FailAsync());
+        Assert.Contains("You have 1 attempt left before sign-in is blocked for 10 minutes.", await FailAsync());
+
+        var before = DateTimeOffset.UtcNow;
+        var blocked = await FailAsync();
+        Assert.Contains("Sign-in is blocked until", blocked);
+        Assert.DoesNotContain("attempt left", blocked);
+        static DateTimeOffset BlockedUntil(string html) => DateTimeOffset.Parse(Regex.Match(html, "<time datetime=\"([^\"]+)\"").Groups[1].Value);
+        var until = BlockedUntil(blocked);
+        Assert.InRange(until, before.AddMinutes(9), DateTimeOffset.UtcNow.AddMinutes(11));
+
+        // Further attempts while blocked show the same end time rather than extending it. PostgreSQL stores microseconds, so the reloaded value can differ below that.
+        Assert.Equal(until, BlockedUntil(await FailAsync()), TimeSpan.FromMilliseconds(1));
+    }
+
+    [Fact]
+    public async Task Login_ForALockedUser_ShowsTheBlockEvenWithTheRightPassword()
+    {
+        await SeedUserAsync();
+        await using (var scope = factory.Services.CreateAsyncScope())
+        {
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            Assert.True((await users.SetLockoutEndDateAsync((await users.FindByNameAsync(Username))!, DateTimeOffset.UtcNow.AddMinutes(5))).Succeeded);
+        }
+        using var client = CreateClient();
+
+        var response = await LoginAsync(client, Password);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Sign-in is blocked until", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task UnlockData_CountsDownAndThenShowsTheBlockOnTheLoginPage()
+    {
+        await SeedUserAsync();
+        using var client = CreateClient();
+        Assert.Equal(HttpStatusCode.Redirect, (await LoginAsync(client, Password)).StatusCode);
+        var token = await GetAntiforgeryTokenAsync(client, "/Account/UnlockData");
+        Task<HttpResponseMessage> FailAsync() => client.PostAsync("/Account/UnlockData", Form(new Dictionary<string, string> { ["Password"] = "Wrong!Password#2026", ["__RequestVerificationToken"] = token }));
+
+        Assert.Contains("Incorrect password. You have 2 attempts left", await (await FailAsync()).Content.ReadAsStringAsync());
+        Assert.Contains("Incorrect password. You have 1 attempt left", await (await FailAsync()).Content.ReadAsStringAsync());
+        var stopped = await FailAsync();
+
+        Assert.Equal(HttpStatusCode.Redirect, stopped.StatusCode);
+        var login = await client.GetStringAsync(stopped.Headers.Location);
+        Assert.Contains("Sign-in is blocked until <time", login);
+    }
+
+    [Fact]
+    public async Task RecoverAccount_FailuresCountTowardTheLoginCountdown_ForUnknownUsersToo()
+    {
+        await SeedUserAsync();
+        using var client = CreateClient();
+        var token = await GetAntiforgeryTokenAsync(client, "/Account/RecoverAccount");
+        await client.PostAsync("/Account/RecoverAccount", Form(new Dictionary<string, string>
+        {
+            ["Username"] = "nobody",
+            ["RecoveryKey"] = RecoveryKey.Generate(),
+            ["NewPassword"] = NewPassword,
+            ["ConfirmPassword"] = NewPassword,
+            ["__RequestVerificationToken"] = token
+        }));
+
+        token = await GetAntiforgeryTokenAsync(client, "/Account/Login");
+        var response = await client.PostAsync("/Account/Login", Form(new Dictionary<string, string> { ["Username"] = "nobody", ["Password"] = "Wrong!Password#2026", ["__RequestVerificationToken"] = token }));
+
+        Assert.Contains("You have 1 attempt left", await response.Content.ReadAsStringAsync());
+    }
+
     [Fact]
     public async Task RecoverAccount_ForAnUnknownUser_GivesTheSameAnswer()
     {

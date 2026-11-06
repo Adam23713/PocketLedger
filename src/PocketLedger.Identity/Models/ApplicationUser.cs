@@ -10,7 +10,9 @@ public class ApplicationUser : IdentityUser<Guid>
     public bool AuthenticatorSetupComplete { get; set; }
     public bool IsAccessBlocked { get; set; }
     public bool IsBootstrapAdministrator { get; private set; }
+    // How the account was created: "Password" for local registration, otherwise the external login provider (Google, Facebook).
+    public string? RegistrationProvider { get; set; }
 
     public static ApplicationUser CreateBootstrapAdministrator(string username)
-        => new() { Id = Guid.NewGuid(), UserName = username, CreatedAtUtc = DateTimeOffset.UtcNow, IsBootstrapAdministrator = true };
+        => new() { Id = Guid.NewGuid(), UserName = username, CreatedAtUtc = DateTimeOffset.UtcNow, IsBootstrapAdministrator = true, RegistrationProvider = "Bootstrap" };
 }

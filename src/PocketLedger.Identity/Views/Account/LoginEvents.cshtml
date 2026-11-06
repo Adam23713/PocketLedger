@@ -1,3 +1,34 @@
 @model PocketLedger.Models.ViewModels.Account.AuditLogViewModel
-@{ ViewData["Title"] = "Login Events"; }
-<h1>Login Events</h1><table class="table"><thead><tr><th>UTC time</th><th>Event</th><th>Result</th><th>Address</th><th>User agent</th><th>Reason</th></tr></thead><tbody>@foreach (var item in Model.Events) { <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress)</td><td class="text-truncate" style="max-width: 24rem">@item.UserAgent</td><td>@item.FailureReason</td></tr> }</tbody></table><nav>@if (Model.Page > 1) { <a asp-route-page="@(Model.Page - 1)">Previous</a> } @if (Model.Page < Model.TotalPages) { <a asp-route-page="@(Model.Page + 1)">Next</a> }</nav>
+@using PocketLedger.Models.ViewModels
+@{
+    ViewData["Title"] = "Login Events";
+    var table = Model.Table;
+    string EventsUrl(string? sort = null, bool? descending = null, int? page = null) => Url.Action("LoginEvents", new { sort = sort ?? table.Sort, desc = descending ?? table.Descending, page = page ?? table.Page })!;
+    SortableHeaderViewModel Header(string label, string column) => new(label, EventsUrl(column, table.Sort == column ? !table.Descending : column == "time", 1), table.Sort == column, table.Descending);
+}
+<h1>Login Events</h1>
+@if (table.Items.Count == 0)
+{
+    <div class="alert alert-info" role="status">No login events yet.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr>
+                <partial name="_SortableHeader" model='Header("UTC time", "time")' />
+                <partial name="_SortableHeader" model='Header("Event", "event")' />
+                <partial name="_SortableHeader" model='Header("Result", "result")' />
+                <partial name="_SortableHeader" model='Header("Address", "address")' />
+                <partial name="_SortableHeader" model='Header("User agent", "agent")' />
+                <partial name="_SortableHeader" model='Header("Reason", "reason")' />
+            </tr></thead>
+            <tbody>@foreach (var item in table.Items) { <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress)</td><td class="text-truncate" style="max-width: 24rem">@item.UserAgent</td><td>@item.FailureReason</td></tr> }</tbody>
+        </table>
+    </div>
+    <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="Login event pages">
+        @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page - 1)" rel="prev">Previous</a> } else { <span></span> }
+        <span class="text-muted">Page @table.Page of @table.TotalPages · @table.TotalCount events</span>
+        @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page + 1)" rel="next">Next</a> } else { <span></span> }
+    </nav>
+}

@@ -1,0 +1,49 @@
+@model PocketLedger.Models.ViewModels.Goals.GoalFormViewModel
+@{ var initialMoneyFormat = MoneyFormatter.GetMoneyInputFormat(Currencies.Exists(Model.Currency) ? Model.Currency : "EUR"); }
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="goal-banner mb-4" id="goal-banner-preview" style="--goal-banner-color: @Model.BannerColor">
+    <img class="goal-banner-image" id="goal-banner-preview-image" src="@(GoalBanners.Find(Model.BannerImage)?.WebPath)" alt="" hidden="@(GoalBanners.Find(Model.BannerImage) is null)" />
+    <div class="goal-banner-title"><h2 class="h5 mb-0" id="goal-banner-preview-title">@(string.IsNullOrWhiteSpace(Model.Name) ? "Your goal" : Model.Name)</h2></div>
+</div>
+<div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" placeholder="e.g. Summer holiday" /><span asp-validation-for="Name" class="text-danger"></span></div>
+<div class="row">
+    <div class="col-md-4 mb-3"><label asp-for="Currency" class="form-label"></label><select asp-for="Currency" class="form-select">@foreach (var currency in Currencies.All) { var format = MoneyFormatter.GetMoneyInputFormat(currency.Code); <option value="@currency.Code" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@currency.Code — @currency.DisplayName</option> }</select><span asp-validation-for="Currency" class="text-danger"></span></div>
+    <div class="col-md-4 mb-3"><label asp-for="TargetAmount" class="form-label" for="goal-target-display"></label><input asp-for="TargetAmount" type="hidden" id="goal-target" /><input class="form-control" id="goal-target-display" type="text" inputmode="decimal" autocomplete="off" required data-money-value="goal-target" data-money-currency="Currency" data-decimal-places="@initialMoneyFormat.DecimalPlaces" data-decimal-separator="@initialMoneyFormat.DecimalSeparator" data-thousands-separator="@initialMoneyFormat.ThousandsSeparator" /><span asp-validation-for="TargetAmount" class="text-danger"></span></div>
+    <div class="col-md-4 mb-3"><label asp-for="SavedAmount" class="form-label" for="goal-saved-display"></label><input asp-for="SavedAmount" type="hidden" id="goal-saved" /><input class="form-control" id="goal-saved-display" type="text" inputmode="decimal" autocomplete="off" data-money-value="goal-saved" data-money-currency="Currency" data-decimal-places="@initialMoneyFormat.DecimalPlaces" data-decimal-separator="@initialMoneyFormat.DecimalSeparator" data-thousands-separator="@initialMoneyFormat.ThousandsSeparator" /><span asp-validation-for="SavedAmount" class="text-danger"></span></div>
+</div>
+<div class="row">
+    <div class="col-md-4 mb-3"><label asp-for="TargetDate" class="form-label"></label><input asp-for="TargetDate" type="date" class="form-control" /><div class="form-text">Optional.</div></div>
+    <div class="col-md-8 mb-3"><label asp-for="BannerColor" class="form-label"></label><input asp-for="BannerColor" type="color" class="form-control form-control-color w-100" /><span asp-validation-for="BannerColor" class="text-danger"></span></div>
+</div>
+<fieldset class="mb-3">
+    <legend class="form-label">Banner image</legend>
+    <div class="goal-banner-options">
+        <label class="goal-banner-option"><input type="radio" name="BannerImage" value="" checked="@(GoalBanners.Find(Model.BannerImage) is null)" /><span class="goal-banner-swatch" style="--goal-banner-color: @Model.BannerColor" data-goal-color-swatch></span><span>Color only</span></label>
+        @foreach (var image in GoalBanners.Images)
+        {
+            <label class="goal-banner-option"><input type="radio" name="BannerImage" value="@image.Id" data-image-path="@image.WebPath" checked="@(Model.BannerImage == image.Id)" /><span class="goal-banner-swatch" style="--goal-banner-color: @Model.BannerColor" data-goal-color-swatch><img src="@image.WebPath" alt="" /></span><span>@image.DisplayName</span></label>
+        }
+    </div>
+    <div class="form-text">Images are drawn over your banner color.</div>
+</fieldset>
+<div class="mb-3"><label asp-for="Note" class="form-label"></label><textarea asp-for="Note" class="form-control" rows="3" maxlength="500"></textarea><span asp-validation-for="Note" class="text-danger"></span></div>
+<script src="~/js/money-input.js" asp-append-version="true"></script>
+<script>
+    (() => {
+        const preview = document.getElementById("goal-banner-preview");
+        const image = document.getElementById("goal-banner-preview-image");
+        const title = document.getElementById("goal-banner-preview-title");
+        const name = document.getElementById("Name");
+        const color = document.getElementById("BannerColor");
+        function update() {
+            preview.style.setProperty("--goal-banner-color", color.value);
+            document.querySelectorAll("[data-goal-color-swatch]").forEach(swatch => swatch.style.setProperty("--goal-banner-color", color.value));
+            const selected = document.querySelector('input[name="BannerImage"]:checked');
+            image.hidden = !selected?.dataset.imagePath;
+            if (selected?.dataset.imagePath) image.src = selected.dataset.imagePath;
+            title.textContent = name.value.trim() || "Your goal";
+        }
+        [name, color, ...document.querySelectorAll('input[name="BannerImage"]')].forEach(input => input.addEventListener("input", update));
+        update();
+    })();
+</script>

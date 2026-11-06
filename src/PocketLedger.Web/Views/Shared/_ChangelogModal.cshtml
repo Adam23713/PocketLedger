@@ -1,0 +1,35 @@
+@model IReadOnlyList<PocketLedger.Models.ChangelogEntry>
+@{ var historyUrl = Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Changelog"; }
+<div class="modal fade" id="changelog-modal" tabindex="-1" aria-labelledby="changelog-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content changelog-modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="changelog-modal-title">What's new in PocketLedger @Model[0].Version</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @foreach (var entry in Model)
+                {
+                    <section class="changelog-entry">
+                        <h3 class="h6 mb-1">@entry.Version · @entry.Title</h3>
+                        <small class="text-muted">@entry.ReleasedOn.ToString("yyyy-MM-dd")</small>
+                        <ul class="mt-2">@foreach (var change in entry.Changes) { <li>@change</li> }</ul>
+                    </section>
+                }
+            </div>
+            <div class="modal-footer">
+                <a class="link-secondary me-auto" href="@historyUrl">Changelog history</a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
+            </div>
+            <form id="changelog-seen-form" asp-controller="Changelog" asp-action="Seen" method="post" hidden><input type="hidden" name="version" value="@Model[0].Version" /></form>
+        </div>
+    </div>
+</div>
+<script>
+    (() => {
+        const modal = document.getElementById("changelog-modal");
+        const form = document.getElementById("changelog-seen-form");
+        modal.addEventListener("hidden.bs.modal", () => fetch(form.action, { method: "POST", body: new FormData(form), credentials: "same-origin" }), { once: true });
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+    })();
+</script>

@@ -31,32 +31,10 @@
     <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-savings h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Available"' /></span><span>Savings</span></div><div class="dashboard-metric-value">@MoneyFormatter.Format(Model.Savings, Model.Currency)</div></div></div></div>
     <div class="col-6 col-lg-3"><div class="card dashboard-metric statistics-metric-balance h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Statistics"' /></span><span>Balance</span></div><div class="dashboard-metric-value">@MoneyFormatter.Format(Model.Balance, Model.Currency)</div></div></div></div>
 </div>
-<section class="mb-5" aria-labelledby="expense-distribution-heading">
-    <h2 class="h4" id="expense-distribution-heading">Expenses by main category</h2>
-    @if (Model.ExpenseMainCategories.Count == 0)
-    {
-        <p class="text-muted">No expense data for this month.</p>
-    }
-    else
-    {
-        <div class="statistics-category-layout">
-            <div>
-                <div class="statistics-doughnut-container"><canvas id="expense-category-chart" aria-label="Expense distribution by main category"></canvas></div>
-                <div class="statistics-category-selector" id="expense-category-selector" aria-label="Select a main category"></div>
-            </div>
-            <div class="statistics-breakdown" aria-live="polite">
-                <h3 class="h5" id="expense-breakdown-heading"></h3>
-                <p class="text-muted" id="expense-breakdown-total"></p>
-                <div class="table-responsive edge-to-edge-table statistics-table-surface">
-                    <table class="table table-sm align-middle">
-                        <thead><tr><th>Subcategory</th><th class="text-end">Amount</th><th class="text-end">Share</th></tr></thead>
-                        <tbody id="expense-breakdown-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    }
-</section>
+<div class="row g-4 mb-5">
+    <div class="col-lg-6"><partial name="_MainCategoryDistribution" model="Model.ExpenseMainCategories" view-data='new ViewDataDictionary(ViewData) { ["Kind"] = "expense", ["Heading"] = "Expenses by main category", ["EmptyText"] = "No expense data for this month." }' /></div>
+    <div class="col-lg-6"><partial name="_MainCategoryDistribution" model="Model.IncomeMainCategories" view-data='new ViewDataDictionary(ViewData) { ["Kind"] = "income", ["Heading"] = "Income by main category", ["EmptyText"] = "No income data for this month." }' /></div>
+</div>
 <section class="mb-5" aria-labelledby="monthly-trend-heading">
     <h2 class="h4" id="monthly-trend-heading">Income and expenses over the last 12 months</h2>
     <div class="statistics-trend-container"><canvas id="monthly-trend-chart" aria-label="Income and expenses over the last 12 months"></canvas></div>
@@ -84,6 +62,7 @@ else
 
 @section Scripts {
     <script id="expense-main-category-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.ExpenseMainCategories, jsonOptions))</script>
+    <script id="income-main-category-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.IncomeMainCategories, jsonOptions))</script>
     <script id="monthly-trend-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(Model.MonthlyTrend, jsonOptions))</script>
     <script src="~/lib/chart.js/chart.umd.min.js"></script>
     <script src="~/js/statistics.js" asp-append-version="true"></script>

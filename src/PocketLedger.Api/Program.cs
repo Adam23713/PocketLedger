@@ -74,6 +74,7 @@ builder.Services.AddScoped<IImportExportService, ImportExportService>();
 builder.Services.AddScoped<IEncryptedBackupService, ImportExportService>();
 builder.Services.AddScoped<IUserDataDeletionService, UserDataDeletionService>();
 builder.Services.AddScoped<IDebtService, DebtService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddRequestTelemetry(builder.Configuration);
 builder.Services.AddScoped<BlockedUserService>();

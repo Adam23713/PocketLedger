@@ -421,6 +421,10 @@ namespace PocketLedger.Identity.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("RegistrationProvider")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 

@@ -88,6 +88,7 @@ try:
         site = '{$POCKETLEDGER_LANDING_DOMAIN}, {$POCKETLEDGER_DOCS_DOMAIN}, {$POCKETLEDGER_WEB_DOMAIN}, {$POCKETLEDGER_API_DOMAIN}, {$POCKETLEDGER_IDENTITY_DOMAIN}'
         local = production.replace(site + ' {', ':8080 {').replace('{\n', '{\n\tauto_https off\n', 1).replace('roll_size 100MiB', 'roll_size 1MiB')
         api_tls_proxy = '''\t\treverse_proxy @api https://api:5051 {
+\t\t\theader_up X-Forwarded-For {client_ip}
 \t\t\ttransport http {
 \t\t\t\ttls_trust_pool file /run/pocketledger-internal-tls/ca.crt
 \t\t\t}

@@ -216,6 +216,16 @@ body > footer.footer.text-muted { margin-top: 2rem; position: relative; z-index:
 .dashboard-period small, .dashboard-period strong { display: block; }
 .dashboard-period small { color: var(--text-secondary); font-size: .72rem; margin-bottom: .1rem; }
 .dashboard-period strong { font-size: .9rem; overflow-wrap: anywhere; }
+.calendar-month-summary { container-type: inline-size; }
+.dashboard-period-stacked { grid-template-columns: minmax(0, 1fr); }
+.dashboard-period-stacked span { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; }
+.dashboard-period-stacked small { margin-bottom: 0; }
+.dashboard-period-stacked strong { text-align: end; }
+@container (max-width: 22rem) {
+  .calendar-month-summary .dashboard-period { grid-template-columns: minmax(0, 1fr); }
+  .calendar-month-summary .dashboard-period span { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; }
+  .calendar-month-summary .dashboard-period strong { text-align: end; }
+}
 .dashboard-metric-value,
 .dashboard-period strong,
 .account-card-balance strong { font-variant-numeric: tabular-nums; word-spacing: .22em; }
@@ -268,6 +278,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .list-group { border-radius: var(--card-radius); }
 .list-group-item-action:hover, .list-group-item-action:focus { background: var(--surface-background-hover); color: var(--text-primary); }
 .transaction-list > .list-group-item:nth-child(even), .recurring-transaction-list > .list-group-item:nth-child(even) { background-color: var(--table-stripe-background); }
+/* The translucent row surfaces sit on an opaque base so the page background never shows through the lists. */
+.transaction-list, .recurring-transaction-list { background: var(--modal-background); overflow: hidden; }
 .table { --bs-table-bg: transparent; --bs-table-color: var(--text-primary); --bs-table-border-color: var(--border-color); --bs-table-hover-bg: var(--surface-background-hover); --bs-table-hover-color: var(--text-primary); }
 .table > tbody > tr:nth-child(even) { --bs-table-bg-type: var(--table-stripe-background); --bs-table-color-type: var(--text-primary); }
 .table-responsive { background: var(--surface-background); border: 1px solid var(--border-color); border-radius: var(--card-radius); box-shadow: var(--card-shadow); padding: 0 .8rem; }
@@ -394,6 +406,8 @@ h2, h3, h4 { letter-spacing: -.02em; }
 .calendar-day.has-transactions { background: var(--surface-background); }
 .pagination { --bs-pagination-bg: var(--surface-background); --bs-pagination-border-color: var(--border-color); --bs-pagination-color: var(--accent-color); --bs-pagination-hover-bg: var(--surface-background-hover); --bs-pagination-active-bg: var(--accent-color); --bs-pagination-active-border-color: var(--accent-color); }
 .footer { border-top: 1px solid var(--border-color); color: var(--text-secondary) !important; }
+.footer-link { color: var(--text-secondary); text-decoration: none; }
+.footer-link:hover, .footer-link:focus { color: var(--accent-color); text-decoration: underline; }
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible { box-shadow: 0 0 0 .22rem var(--focus-ring) !important; outline: 2px solid transparent; }
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder { color: var(--text-secondary); text-align: end; }
@@ -437,11 +451,15 @@ h2, h3, h4 { letter-spacing: -.02em; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
 .header-avatar { border-radius: 50%; height: 2.35rem; object-fit: contain; transform: scale(1.12); width: 2.35rem; }
-.avatar-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: .75rem; }
-.avatar-selector label { border: 2px solid transparent; border-radius: 1rem; padding: .4rem; cursor: pointer; text-align: center; }
+.avatar-selector { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
+.avatar-selector label { display: flex; justify-content: center; border: 2px solid transparent; border-radius: 1rem; padding: .4rem; cursor: pointer; }
 .avatar-selector label:has(input:checked) { border-color: var(--bs-primary); background: color-mix(in srgb, var(--bs-primary) 10%, transparent); }
 .avatar-selector input { position: absolute; opacity: 0; }
-.avatar-selector img { width: 72px; height: 72px; object-fit: contain; }
+.avatar-selector img { width: 100%; max-width: 96px; aspect-ratio: 1; height: auto; object-fit: contain; }
+
+.currency-settings { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.currency-settings-list .list-group { max-height: 22rem; overflow-y: auto; }
+@media (min-width: 768px) { .currency-settings { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; } }
 
 .navigation-icon { width: 1.15rem; height: 1.15rem; flex-shrink: 0; vertical-align: -.2em; }
 .nav-link .navigation-icon, .profile-menu .navigation-icon { margin-right: .3rem; }
@@ -1031,3 +1049,26 @@ h2, h3, h4 { letter-spacing: -.02em; }
   [data-theme="banking"] .dashboard-hero { flex-wrap: wrap; }
   [data-theme="banking"] .dashboard-primary-action { width: 100%; }
 }
+
+.goal-banner { --goal-banner-color: #2563eb; position: relative; display: flex; align-items: flex-end; min-height: 10rem; overflow: hidden; border-radius: var(--card-radius, .75rem); background: linear-gradient(160deg, color-mix(in srgb, var(--goal-banner-color) 80%, #ffffff) 0%, var(--goal-banner-color) 55%, color-mix(in srgb, var(--goal-banner-color) 70%, #000000) 100%); color: #ffffff; }
+.goal-banner-large { min-height: 18rem; }
+.goal-card .goal-banner { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.goal-banner-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+.goal-banner-title { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; width: 100%; padding: 1rem 1.25rem; background: linear-gradient(to top, rgba(0, 0, 0, .45), transparent); text-shadow: 0 1px 3px rgba(0, 0, 0, .45); overflow-wrap: anywhere; }
+.goal-banner-title h1, .goal-banner-title h2 { color: #ffffff; }
+.goal-banner-large .goal-banner-title { padding: 1.5rem; }
+.goal-progress { height: .75rem; }
+.goal-note { white-space: pre-line; }
+.goal-banner-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: .75rem; }
+.goal-banner-option { display: flex; flex-direction: column; gap: .25rem; align-items: center; cursor: pointer; font-size: .85rem; text-align: center; }
+.goal-banner-option input { position: absolute; opacity: 0; }
+.goal-banner-swatch { --goal-banner-color: #2563eb; position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border: 2px solid transparent; border-radius: .5rem; background: var(--goal-banner-color); }
+.goal-banner-swatch img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+.goal-banner-option:has(input:checked) .goal-banner-swatch { border-color: var(--accent-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 35%, transparent); }
+.goal-banner-option:has(input:focus-visible) .goal-banner-swatch { box-shadow: 0 0 0 .22rem var(--focus-ring); }
+
+/* The changelog dialog is always opaque, whatever the theme's surface transparency. */
+html[data-theme] .changelog-modal-content { background: var(--modal-background); backdrop-filter: none; -webkit-backdrop-filter: none; }
+html[data-theme] .goal-form-surface { background: var(--modal-background); }
+/* Outline buttons that sit directly on the page background get an opaque fill so the background does not show through. */
+html[data-theme] .btn-opaque:not(:hover):not(:focus-visible):not(:active) { --bs-btn-bg: var(--modal-background); background-color: var(--modal-background); }

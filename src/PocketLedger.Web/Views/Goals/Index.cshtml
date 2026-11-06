@@ -1,0 +1,28 @@
+@model IReadOnlyList<PocketLedger.Models.ViewModels.Goals.GoalViewModel>
+@{ ViewData["Title"] = "Goals"; }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1>Goals</h1><a class="btn btn-primary" asp-action="Create">New goal</a></div>
+@if (Model.Count == 0)
+{
+    <div class="card card-body text-center py-5">
+        <h2 class="h5">No goals yet</h2>
+        <p class="text-muted">Set a target amount for something you are saving for and follow your progress.</p>
+        <div><a class="btn btn-primary" asp-action="Create">Create your first goal</a></div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+    @foreach (var goal in Model)
+    {
+        <div class="col-md-6 col-xl-4">
+            <a class="card goal-card h-100 text-reset text-decoration-none" asp-action="Details" asp-route-id="@goal.Id">
+                <partial name="_GoalBanner" model="goal" />
+                <div class="card-body">
+                    <partial name="_Progress" model="goal" />
+                    <small class="text-muted d-block mt-2">@(goal.TargetDate is { } date ? $"Target date: {date:yyyy-MM-dd}" : "No target date")</small>
+                </div>
+            </a>
+        </div>
+    }
+    </div>
+}
