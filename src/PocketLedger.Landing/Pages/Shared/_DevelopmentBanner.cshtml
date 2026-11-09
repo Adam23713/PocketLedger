@@ -9,7 +9,7 @@
 {
     <span>@development </span>@if (Model.RemainingSlots is not null)
     {
-        <span data-registration-content>Public registration is open — @remaining of @Model.MaximumUserCount @spots left — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
+        <span data-registration-content>Public registration is open — @remaining @spots left — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
     }
     else
     {
@@ -18,7 +18,7 @@
 }
 else if (Model.MaximumUserCount is not null && Model.RemainingSlots == 0)
 {
-    <span>@development Public registration is open, but all @Model.MaximumUserCount spots are currently taken — check back soon.</span>
+    <span>@development Public registration is open, but all spots are currently taken — check back soon.</span>
 }
 else
 {

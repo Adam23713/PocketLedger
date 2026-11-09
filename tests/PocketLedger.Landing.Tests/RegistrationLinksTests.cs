@@ -32,9 +32,10 @@ public sealed class RegistrationLinksTests
         var html = await client.GetStringAsync("/");
         var privacyHtml = await client.GetStringAsync("/privacy");
 
-        Assert.Contains("Public registration is open — 7 of 20 spots left — <a", html);
+        Assert.Contains("Public registration is open — 7 spots left — <a", html);
+        Assert.DoesNotContain("of 20 spots", html);
         Assert.Contains("href=\"https://app.example.test/Session/Register\"", html);
-        Assert.Contains("7 of 20 spots left", privacyHtml);
+        Assert.Contains("7 spots left", privacyHtml);
     }
 
     [Fact]
@@ -45,7 +46,7 @@ public sealed class RegistrationLinksTests
 
         var html = await client.GetStringAsync("/");
 
-        Assert.Contains("Public registration is open, but all 20 spots are currently taken", html);
+        Assert.Contains("Public registration is open, but all spots are currently taken", html);
         Assert.DoesNotContain("/Session/Register", html);
     }
 
