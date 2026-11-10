@@ -104,7 +104,7 @@ public sealed class GitHubAuthenticationTests : IClassFixture<WebApplicationFact
     [Fact]
     public async Task RemoteFailure_PreservesReturnUrlFromProtectedProperties()
     {
-        var http = new DefaultHttpContext();
+        var http = new DefaultHttpContext { RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider() };
         var context = new RemoteFailureContext(http, Scheme(), new OAuthOptions(), new InvalidOperationException("denied")) { Properties = new AuthenticationProperties { RedirectUri = "/Account/ExternalLoginCallback?returnUrl=%2Fconnect" } };
 
         await ExternalLoginEvents.RemoteFailureAsync(context);
