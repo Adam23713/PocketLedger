@@ -1,0 +1,17 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Zum Inhalt springen</value>
+  </data>
+  <data name="Guide" xml:space="preserve">
+    <value>Anleitung</value>
+  </data>
+  <data name="PocketLedger documentation" xml:space="preserve">
+    <value>PocketLedger-Dokumentation</value>
+  </data>
+</root>

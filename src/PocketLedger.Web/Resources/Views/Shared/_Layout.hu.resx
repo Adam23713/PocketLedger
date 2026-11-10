@@ -1,0 +1,32 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Áttekintés</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Tranzakciók</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>Naptár</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statisztikák</value>
+  </data>
+  <data name="Recurring" xml:space="preserve">
+    <value>Ismétlődő tételek</value>
+  </data>
+  <data name="Loans / Debts" xml:space="preserve">
+    <value>Kölcsönök és tartozások</value>
+  </data>
+  <data name="Monthly planner" xml:space="preserve">
+    <value>Havi tervező</value>
+  </data>
+  <data name="Goals" xml:space="preserve">
+    <value>Célok</value>
+  </data>
+</root>

@@ -1,0 +1,16 @@
+@using System.Globalization
+@using PocketLedger.Localization
+<form method="post" action="@Url.Content("~/ui-language")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)" />
+    <label>
+        <span lang="@CultureInfo.CurrentUICulture.Name">@UiLocalization.LanguageLabel</span>
+        <select name="language">
+            @foreach (var language in UiLocalization.Languages)
+            {
+                <option value="@language.Key" lang="@language.Key" selected="@(language.Key == CultureInfo.CurrentUICulture.Name)">@language.Value</option>
+            }
+        </select>
+    </label>
+    <button type="submit" lang="@CultureInfo.CurrentUICulture.Name">@UiLocalization.ApplyLabel</button>
+</form>

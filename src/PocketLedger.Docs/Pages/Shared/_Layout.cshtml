@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
 @inject IConfiguration Configuration
 @{
     var path = Context.Request.Path;
@@ -17,23 +18,24 @@
     <script src="~/site.js" asp-append-version="true" defer></script>
 </head>
 <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">@Text["Skip to content"]</a>
     <header class="header">
         <nav class="shell nav" aria-label="Main navigation">
             <a class="brand" asp-page="/Index"><img src="~/images/logo.png" width="34" height="34" alt="" /><span>PocketLedger <strong>Docs</strong></span></a>
             <div class="nav-links">
-                <a asp-page="/Guide/Index" aria-current="@(path.StartsWithSegments("/Guide") ? "page" : null)">Guide</a>
+                <a asp-page="/Guide/Index" aria-current="@(path.StartsWithSegments("/Guide") ? "page" : null)">@Text["Guide"]</a>
                 <a asp-page="/Api/Index" aria-current="@(path.StartsWithSegments("/Api") ? "page" : null)">API</a>
                 <a href="@landingUrl">PocketLedger</a>
                 <a href="https://github.com/Adam23713/PocketLedger" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
             </div>
+            @await Html.PartialAsync("_LanguageSelector")
         </nav>
     </header>
     <main id="main">
         @RenderBody()
     </main>
     <footer class="shell footer">
-        <span>PocketLedger documentation</span>
+        <span>@Text["PocketLedger documentation"]</span>
         <a href="@(landingUrl.TrimEnd('/'))/contact">Contact</a>
         <span>AGPL-3.0-only</span>
     </footer>

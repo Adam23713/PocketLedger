@@ -1,0 +1,32 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Übersicht</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transaktionen</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>Kalender</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statistiken</value>
+  </data>
+  <data name="Recurring" xml:space="preserve">
+    <value>Wiederkehrende Buchungen</value>
+  </data>
+  <data name="Loans / Debts" xml:space="preserve">
+    <value>Darlehen und Schulden</value>
+  </data>
+  <data name="Monthly planner" xml:space="preserve">
+    <value>Monatsplaner</value>
+  </data>
+  <data name="Goals" xml:space="preserve">
+    <value>Ziele</value>
+  </data>
+</root>

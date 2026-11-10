@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
 @{
     var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -58,14 +59,14 @@
                 </button>
                 <div class="navbar-collapse collapse" id="main-navigation">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> Dashboard</a></li>
-                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> Transactions</a></li>
-                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> Calendar</a></li>
-                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> Statistics</a></li>
-                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> Recurring</a></li>
-                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> Loans / Debts</a></li>
-                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> Monthly planner</a></li>
-                        <li class="nav-item"><a class="@NavClass("Goals")" asp-controller="Goals" asp-action="Index" aria-current="@(currentController == "Goals" ? "page" : null)"><partial name="_NavigationIcon" model='"Goals"' /> Goals</a></li>
+                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> @Text["Dashboard"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> @Text["Transactions"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> @Text["Calendar"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> @Text["Statistics"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> @Text["Recurring"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> @Text["Loans / Debts"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> @Text["Monthly planner"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Goals")" asp-controller="Goals" asp-action="Index" aria-current="@(currentController == "Goals" ? "page" : null)"><partial name="_NavigationIcon" model='"Goals"' /> @Text["Goals"]</a></li>
                     </ul>
                 </div>
                 <div class="header-actions">
@@ -109,6 +110,7 @@
                         </div>
                     </div>
                 </div>
+                @await Html.PartialAsync("_LanguageSelector")
             </div>
         </nav>
     </header>

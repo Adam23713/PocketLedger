@@ -1,0 +1,44 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Register" xml:space="preserve">
+    <value>Inscription</value>
+  </data>
+  <data name="Create your account" xml:space="preserve">
+    <value>Créez votre compte</value>
+  </data>
+  <data name="Start tracking your finances with PocketLedger" xml:space="preserve">
+    <value>Suivez vos finances avec PocketLedger</value>
+  </data>
+  <data name="or register with email" xml:space="preserve">
+    <value>ou inscrivez-vous par e-mail</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Nom d’utilisateur</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Adresse e-mail</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="Confirm password" xml:space="preserve">
+    <value>Confirmer le mot de passe</value>
+  </data>
+  <data name="At least 14 characters." xml:space="preserve">
+    <value>Au moins 14 caractères.</value>
+  </data>
+  <data name="Register and configure authenticator" xml:space="preserve">
+    <value>S’inscrire et configurer l’application d’authentification</value>
+  </data>
+  <data name="Already have an account?" xml:space="preserve">
+    <value>Vous avez déjà un compte ?</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
+</root>

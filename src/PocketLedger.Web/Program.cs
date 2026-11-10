@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -17,8 +18,9 @@ using PocketLedger.Web.Data;
 using PocketLedger.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddUiLocalization();
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Web");
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddViewLocalization();
 builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebConnection")));
 builder.Services.AddSingleton<DatabaseTicketStore>();
 builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
@@ -118,6 +120,7 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Home/Error");
 app.UseStaticFiles();
+app.UseRequestLocalization();
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
@@ -128,6 +131,7 @@ app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
 app.MapStaticAssets();
 app.MapEncryptionHealthEndpoints();
+app.MapUiLanguageSelection();
 app.Run();
 
 void AddApiClient<TService, TImplementation>() where TService : class where TImplementation : class, TService

@@ -30,4 +30,8 @@
   <ItemGroup>
     <ProjectReference Include="../PocketLedger.Security/PocketLedger.Security.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Localization/UiLocalization.cs" Link="Localization/UiLocalization.cs" />
+    <Content Include="../Localization/_LanguageSelector.cshtml" Link="Views/Shared/_LanguageSelector.cshtml" />
+  </ItemGroup>
 </Project>

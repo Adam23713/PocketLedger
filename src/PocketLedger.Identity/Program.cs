@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,8 +20,9 @@ using PocketLedger.Services;
 using PocketLedger.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddUiLocalization();
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddViewLocalization();
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
@@ -198,6 +200,7 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseStaticFiles();
+app.UseRequestLocalization();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
@@ -207,6 +210,7 @@ app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.MapEncryptionHealthEndpoints();
+app.MapUiLanguageSelection();
 app.Run();
 
 public partial class Program;
