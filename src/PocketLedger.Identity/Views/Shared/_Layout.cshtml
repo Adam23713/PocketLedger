@@ -90,14 +90,17 @@
                             <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
                                 <div class="profile-menu-header">@if (avatarId is not null) { <img src="~/images/avatars/@($"avatar-{avatarId}.png")" alt="" /> }<div><strong>@User.Identity?.Name</strong></div></div>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <a role="menuitem" href="@webBaseUrl"><partial name="_NavigationIcon" model='"App"' /> @CommonText.Get("PocketLedger app")</a>
+                                <a role="menuitem" href="@(webBaseUrl)/Settings"><partial name="_NavigationIcon" model='"Settings"' /> @CommonText.Get("Settings")</a>
+                                <a role="menuitem" href="@(webBaseUrl)/Accounts"><partial name="_NavigationIcon" model='"Accounts"' /> @CommonText.Get("Accounts")</a>
+                                <a role="menuitem" href="@(webBaseUrl)/Categories"><partial name="_NavigationIcon" model='"Categories"' /> @CommonText.Get("Categories")</a>
+                                <a role="menuitem" asp-controller="Account" asp-action="Security"><partial name="_NavigationIcon" model='"Security"' /> @CommonText.Get("Account & security")</a>
                                 <a role="menuitem" href="@landingBaseUrl"><partial name="_NavigationIcon" model='"Website"' /> @CommonText.Get("PocketLedger website")</a>
+                                <a role="menuitem" href="@(webBaseUrl)/ImportExport"><partial name="_NavigationIcon" model='"ImportExport"' /> @CommonText.Get("Import / Export")</a>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">@CommonText.Get("Logout")</button></form>
+                                <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit"><partial name="_NavigationIcon" model='"Session"' /> @CommonText.Get("Logout")</button></form>
                             </div>
                         </div>
                     </div>
-                    @await Html.PartialAsync("_LanguageSelector")
                 </div>
             </nav>
         </header>

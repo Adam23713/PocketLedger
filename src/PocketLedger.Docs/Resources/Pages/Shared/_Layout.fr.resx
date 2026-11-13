@@ -23,4 +23,7 @@
   <data name="Main navigation" xml:space="preserve">
     <value>Navigation principale</value>
   </data>
+  <data name="Home" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
 </root>

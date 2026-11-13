@@ -1268,4 +1268,19 @@
   <data name="{0}: {1} of {2} requests in the interval." xml:space="preserve">
     <value>{0}: {1} kérés az időszak {2} kéréséből.</value>
   </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Beállítások</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Számlák</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategóriák</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Fiók és biztonság</value>
+  </data>
+  <data name="Import / Export" xml:space="preserve">
+    <value>Importálás / Exportálás</value>
+  </data>
 </root>

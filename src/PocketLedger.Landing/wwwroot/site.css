@@ -140,10 +140,30 @@ img {
 }
 
 .nav > .brand,
-.nav > .button,
 .nav-links a {
     flex-shrink: 0;
     white-space: nowrap;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media (max-width: 480px) {
+    .nav-actions > .button-login.button-small {
+        min-width: 0;
+        padding-inline: 10px;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .nav-actions .login-icon {
+        display: none;
+    }
 }
 
 @media (max-width: 1199px) {
@@ -152,7 +172,7 @@ img {
         padding-block: 12px;
         row-gap: 12px;
     }
-    .nav > .button {
+    .nav-actions {
         margin-left: auto;
     }
     .nav-links {
@@ -726,9 +746,6 @@ h3 {
         flex-wrap:wrap;
         padding-block:12px;
         gap:12px;
-    }
-    .nav>.button {
-        margin-left:auto;
     }
     .nav-links {
         order:3;
@@ -1494,29 +1511,16 @@ body.viewer-open {
 .language-selector {
     flex: 0 0 auto;
 }
-.language-selector label {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    color: var(--muted);
-    font-size: .875rem;
-}
 .language-selector select {
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: .65rem;
     color: var(--ink);
     font: inherit;
+    font-size: .875rem;
     padding: .45rem .6rem;
 }
 .language-selector select:focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
-}
-.nav .language-selector label > span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
 }

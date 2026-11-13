@@ -25,7 +25,7 @@
             <div class="nav-links">
                 <a asp-page="/Guide/Index" aria-current="@(path.StartsWithSegments("/Guide") ? "page" : null)">@Text["Guide"]</a>
                 <a asp-page="/Api/Index" aria-current="@(path.StartsWithSegments("/Api") ? "page" : null)">API</a>
-                <a href="@landingUrl">PocketLedger</a>
+                <a href="@landingUrl">@Text["Home"]</a>
                 <a href="https://github.com/Adam23713/PocketLedger" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
             </div>
             @await Html.PartialAsync("_LanguageSelector")

@@ -1268,4 +1268,19 @@
   <data name="{0}: {1} of {2} requests in the interval." xml:space="preserve">
     <value>{0}: {1} von {2} Anfragen im Zeitraum.</value>
   </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Konten</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategorien</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Konto und Sicherheit</value>
+  </data>
+  <data name="Import / Export" xml:space="preserve">
+    <value>Import / Export</value>
+  </data>
 </root>
