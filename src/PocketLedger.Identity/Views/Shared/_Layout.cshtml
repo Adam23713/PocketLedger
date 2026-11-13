@@ -1,3 +1,4 @@
+@using PocketLedger.Localization
 @using PocketLedger.Security
 @{
     var configuration = Context.RequestServices.GetRequiredService<IConfiguration>();
@@ -16,7 +17,7 @@
         && string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
-<html lang="en" data-theme="horizon" data-bs-theme="light">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="horizon" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,52 +48,52 @@
     @if (showThemeSelector)
     {
         <header class="app-header">
-            <nav class="navbar navbar-expand-lg" aria-label="Identity navigation">
+            <nav class="navbar navbar-expand-lg" aria-label="@CommonText.Get("Identity navigation")">
                 <div class="container-fluid app-navbar-shell">
                     <a class="navbar-brand" href="@webBaseUrl">
                         <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
                         <span>PocketLedger</span>
                     </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#identity-navigation" aria-controls="identity-navigation" aria-expanded="false" aria-label="Toggle navigation">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#identity-navigation" aria-controls="identity-navigation" aria-expanded="false" aria-label="@CommonText.Get("Toggle navigation")">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="navbar-collapse collapse" id="identity-navigation">
                         <ul class="navbar-nav me-auto">
-                            <li class="nav-item"><a class="@NavClass("Account", "Manage")" asp-controller="Account" asp-action="Manage" aria-current="@(string.Equals(currentAction, "Manage", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Account</a></li>
-                            <li class="nav-item"><a class="@NavClass("Account", "Security")" asp-controller="Account" asp-action="Security" aria-current="@(string.Equals(currentAction, "Security", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Sign-in &amp; security</a></li>
-                            <li class="nav-item"><a class="@NavClass("Account", "Changelog")" asp-controller="Account" asp-action="Changelog" aria-current="@(string.Equals(currentAction, "Changelog", StringComparison.OrdinalIgnoreCase) ? "page" : null)">What's new</a></li>
-                            <li class="nav-item"><a class="@NavClass("Account", "LoginEvents")" asp-controller="Account" asp-action="LoginEvents" aria-current="@(string.Equals(currentAction, "LoginEvents", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Login Events</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Manage")" asp-controller="Account" asp-action="Manage" aria-current="@(string.Equals(currentAction, "Manage", StringComparison.OrdinalIgnoreCase) ? "page" : null)">@CommonText.Get("Account")</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Security")" asp-controller="Account" asp-action="Security" aria-current="@(string.Equals(currentAction, "Security", StringComparison.OrdinalIgnoreCase) ? "page" : null)">@CommonText.Get("Sign-in & security")</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "Changelog")" asp-controller="Account" asp-action="Changelog" aria-current="@(string.Equals(currentAction, "Changelog", StringComparison.OrdinalIgnoreCase) ? "page" : null)">@CommonText.Get("What's new")</a></li>
+                            <li class="nav-item"><a class="@NavClass("Account", "LoginEvents")" asp-controller="Account" asp-action="LoginEvents" aria-current="@(string.Equals(currentAction, "LoginEvents", StringComparison.OrdinalIgnoreCase) ? "page" : null)">@CommonText.Get("Login Events")</a></li>
                             @if (isBootstrapAdministrator)
                             {
-                                <li class="nav-item"><a class="@NavClass("Admin", "Index")" asp-controller="Admin" asp-action="Index" aria-current="@(string.Equals(currentController, "Admin", StringComparison.OrdinalIgnoreCase) ? "page" : null)">Admin</a></li>
+                                <li class="nav-item"><a class="@NavClass("Admin", "Index")" asp-controller="Admin" asp-action="Index" aria-current="@(string.Equals(currentController, "Admin", StringComparison.OrdinalIgnoreCase) ? "page" : null)">@CommonText.Get("Admin")</a></li>
                             }
                         </ul>
                     </div>
                     <div class="header-actions">
                         <div class="app-menu">
-                            <button class="header-icon-button" id="theme-menu-button" type="button" aria-label="Choose appearance theme" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">
+                            <button class="header-icon-button" id="theme-menu-button" type="button" aria-label="@CommonText.Get("Choose appearance theme")" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">
                                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg>
                             </button>
                             <div class="app-dropdown theme-menu" id="theme-menu" role="menu" aria-labelledby="theme-menu-button" hidden>
-                                <div class="dropdown-heading">Appearance</div>
+                                <div class="dropdown-heading">@CommonText.Get("Appearance")</div>
                                 <button type="button" role="menuitemradio" data-theme-value="horizon" aria-checked="false"><span class="theme-swatch horizon-swatch"></span><span>Horizon</span><span class="theme-check">✓</span></button>
-                                <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>Banking App</span><span class="theme-check">✓</span></button>
-                                <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>Glassmorphism</span><span class="theme-check">✓</span></button>
+                                <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>@CommonText.Get("Banking App")</span><span class="theme-check">✓</span></button>
+                                <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>@CommonText.Get("Glassmorphism")</span><span class="theme-check">✓</span></button>
                                 <button type="button" role="menuitemradio" data-theme-value="material" aria-checked="false"><span class="theme-swatch material-swatch"></span><span>Material Design 3</span><span class="theme-check">✓</span></button>
                             </div>
                         </div>
                         <div class="app-menu">
-                            <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
+                            <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="@CommonText.Get("Open profile menu")" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
                                 @if (avatarId is not null) { <img class="header-avatar" src="~/images/avatars/@($"avatar-{avatarId}.png")" alt="" /> }
                                 else { <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg> }
                             </button>
                             <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
                                 <div class="profile-menu-header">@if (avatarId is not null) { <img src="~/images/avatars/@($"avatar-{avatarId}.png")" alt="" /> }<div><strong>@User.Identity?.Name</strong></div></div>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <a role="menuitem" href="@webBaseUrl"><partial name="_NavigationIcon" model='"App"' /> PocketLedger app</a>
-                                <a role="menuitem" href="@landingBaseUrl"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
+                                <a role="menuitem" href="@webBaseUrl"><partial name="_NavigationIcon" model='"App"' /> @CommonText.Get("PocketLedger app")</a>
+                                <a role="menuitem" href="@landingBaseUrl"><partial name="_NavigationIcon" model='"Website"' /> @CommonText.Get("PocketLedger website")</a>
                                 <div class="dropdown-divider" role="separator"></div>
-                                <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">Logout</button></form>
+                                <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit">@CommonText.Get("Logout")</button></form>
                             </div>
                         </div>
                     </div>
@@ -106,7 +107,7 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="footer identity-footer text-muted py-3"><div class="container d-flex flex-wrap gap-3"><span>&copy; 2026 - PocketLedger</span><a class="footer-link" href="@(landingBaseUrl)/privacy">Privacy</a><a class="footer-link" href="@(landingBaseUrl)/contact">Contact</a></div></footer>
+    <footer class="footer identity-footer text-muted py-3"><div class="container d-flex flex-wrap gap-3"><span>&copy; 2026 - PocketLedger</span><a class="footer-link" href="@(landingBaseUrl)/privacy">@CommonText.Get("Privacy")</a><a class="footer-link" href="@(landingBaseUrl)/contact">@CommonText.Get("Contact")</a></div></footer>
     @await RenderSectionAsync("Modals", required: false)
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

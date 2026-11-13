@@ -26,4 +26,10 @@
   <data name="Log in" xml:space="preserve">
     <value>Bejelentkezés</value>
   </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>PocketLedger megnyitása</value>
+  </data>
 </root>

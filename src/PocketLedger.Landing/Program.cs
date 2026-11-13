@@ -35,16 +35,17 @@ app.Use(async (context, next) =>
     // Only the contact page loads Cloudflare Turnstile.
     var contactPage = context.Request.Path.Equals("/contact", StringComparison.OrdinalIgnoreCase);
     var turnstile = contactPage ? " https://challenges.cloudflare.com" : string.Empty;
+    var formAction = contactPage ? "'self'" : "'none'";
     // The home page may embed the configured YouTube video; no other page loads frames from YouTube.
     var homePage = context.Request.Path == "/" || context.Request.Path.Equals("/index", StringComparison.OrdinalIgnoreCase);
     var frameSources = contactPage ? turnstile : homePage && youTubeEmbedUrl is not null ? " " + YouTubeVideo.EmbedOrigin : " 'none'";
-    context.Response.Headers["Content-Security-Policy"] = $"default-src 'self'; script-src 'self'{turnstile}; frame-src{frameSources}; style-src 'self'; img-src 'self'; connect-src 'self' {appUri.GetLeftPart(UriPartial.Authority)}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+    context.Response.Headers["Content-Security-Policy"] = $"default-src 'self'; script-src 'self'{turnstile}; frame-src{frameSources}; style-src 'self'; img-src 'self'; connect-src 'self' {appUri.GetLeftPart(UriPartial.Authority)}; frame-ancestors 'none'; base-uri 'self'; form-action {formAction}";
     await next();
 });
 app.UseStaticFiles();
 app.UseRequestLocalization();
 app.MapRazorPages();
-app.MapUiLanguageSelection();
+app.MapUiLanguageSelection().AllowAnonymous();
 app.Run();
 
 static Uri GetOrigin(string value, string configurationKey, IWebHostEnvironment environment)

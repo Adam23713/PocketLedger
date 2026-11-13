@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
@@ -78,7 +79,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             return await InvalidFormAsync("Create", model, cancellationToken);
         }
     }
@@ -116,7 +117,7 @@ public class RecurringTransactionsController(IRecurringTransactionService recurr
         catch (EntityNotFoundException) { return NotFound(); }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             return await InvalidFormAsync("Edit", model, cancellationToken);
         }
     }

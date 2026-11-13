@@ -1,0 +1,149 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Contact — PocketLedger" xml:space="preserve">
+    <value>Kapcsolat — PocketLedger</value>
+  </data>
+  <data name="Found a bug or have a feature idea? You can also" xml:space="preserve">
+    <value>Hibát találtál, vagy van egy ötleted? Ezt is megteheted:</value>
+  </data>
+  <data name="GET IN TOUCH" xml:space="preserve">
+    <value>LÉPJ KAPCSOLATBA</value>
+  </data>
+  <data name="I will only use it to reply to you." xml:space="preserve">
+    <value>Csak arra használom, hogy válaszoljak neked.</value>
+  </data>
+  <data name="I will reply to the email address you provided, usually within a few days." xml:space="preserve">
+    <value>A megadott e-mail-címre válaszolok, általában néhány napon belül.</value>
+  </data>
+  <data name="It is not available right now. Please check back a little later, or reach out through" xml:space="preserve">
+    <value>Nézz vissza később, vagy addig írj itt:</value>
+  </data>
+  <data name="Leave this field empty" xml:space="preserve">
+    <value>Hagyd üresen ezt a mezőt</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Készítette:</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Üzenet</value>
+  </data>
+  <data name="Plain text only, up to {0} links." xml:space="preserve">
+    <value>Csak egyszerű szöveg, legfeljebb {0} hivatkozással.</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Adatvédelem</value>
+  </data>
+  <data name="Questions about your data are answered on the" xml:space="preserve">
+    <value>Az adataiddal kapcsolatos kérdésekre itt találsz választ:</value>
+  </data>
+  <data name="Questions, ideas" xml:space="preserve">
+    <value>Kérdésed, ötleted</value>
+  </data>
+  <data name="Send a message" xml:space="preserve">
+    <value>Üzenet küldése</value>
+  </data>
+  <data name="Send message" xml:space="preserve">
+    <value>Üzenet küldése</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Ugrás a tartalomra</value>
+  </data>
+  <data name="Thank you, your message is on its way." xml:space="preserve">
+    <value>Köszönöm, az üzeneted úton van.</value>
+  </data>
+  <data name="The anti-spam check could not be completed. Please wait for it to finish and send the message again." xml:space="preserve">
+    <value>A spamellenőrzés nem fejeződött be. Várd meg a végét, majd küldd el újra az üzenetet.</value>
+  </data>
+  <data name="The contact form is not available right now. Please try again later." xml:space="preserve">
+    <value>A kapcsolatfelvételi űrlap most nem elérhető. Próbáld újra később.</value>
+  </data>
+  <data name="The contact form is receiving a lot of messages right now. Please try again later." xml:space="preserve">
+    <value>Most sok üzenet érkezik az űrlapon. Próbáld újra később.</value>
+  </data>
+  <data name="The contact form is resting for a moment." xml:space="preserve">
+    <value>A kapcsolatfelvételi űrlap átmenetileg szünetel.</value>
+  </data>
+  <data name="This form has expired or was sent too quickly. Please check your message and send it again." xml:space="preserve">
+    <value>Az űrlap lejárt, vagy túl gyorsan küldted el. Ellenőrizd az üzeneted, majd küldd el újra.</value>
+  </data>
+  <data name="Whether something is not working, you are missing a feature, or you would simply like to share how you use PocketLedger." xml:space="preserve">
+    <value>Írj, ha valami nem működik, hiányzik egy funkció, vagy megosztanád, hogyan használod a PocketLedgert.</value>
+  </data>
+  <data name="You have sent several messages recently. Please wait an hour before trying again." xml:space="preserve">
+    <value>Nemrég több üzenetet küldtél. Várj egy órát, mielőtt újra próbálkozol.</value>
+  </data>
+  <data name="Your email address" xml:space="preserve">
+    <value>E-mail-címed</value>
+  </data>
+  <data name="Your message could not be sent right now. Please try again a little later." xml:space="preserve">
+    <value>Az üzenetet most nem sikerült elküldeni. Próbáld újra kicsit később.</value>
+  </data>
+  <data name="Your message is delivered to my inbox by email and is not stored on this website. See the" xml:space="preserve">
+    <value>Az üzeneted e-mailben érkezik a postaládámba, ezen a weboldalon nem tárolom. A részletek itt olvashatók:</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>és</value>
+  </data>
+  <data name="in the meantime." xml:space="preserve">
+    <value>addig is.</value>
+  </data>
+  <data name="open an issue on GitHub ↗" xml:space="preserve">
+    <value>Hibajegy nyitása a GitHubon ↗</value>
+  </data>
+  <data name="or feedback?" xml:space="preserve">
+    <value>vagy visszajelzésed van?</value>
+  </data>
+  <data name="page for details." xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="page." xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="{0} characters left" xml:space="preserve">
+    <value>Még {0} karakter írható</value>
+  </data>
+  <data name="← Back to the home page" xml:space="preserve">
+    <value>← Vissza a kezdőlapra</value>
+  </data>
+  <data name="Enter a valid email address, like name@example.com." xml:space="preserve">
+    <value>Adj meg érvényes e-mail-címet, például nev@example.com.</value>
+  </data>
+  <data name="Enter the email address I should reply to." xml:space="preserve">
+    <value>Add meg az e-mail-címet, amelyre válaszolhatok.</value>
+  </data>
+  <data name="Get in touch with the maker of PocketLedger — questions, feedback and ideas are welcome." xml:space="preserve">
+    <value>Lépj kapcsolatba a PocketLedger készítőjével. Kérdéseket, visszajelzéseket és ötleteket is szívesen fogadok.</value>
+  </data>
+  <data name="Keep the message under 4000 characters." xml:space="preserve">
+    <value>Az üzenet legfeljebb 4000 karakteres lehet.</value>
+  </data>
+  <data name="Please include no more than 3 links." xml:space="preserve">
+    <value>Legfeljebb 3 hivatkozást adj meg.</value>
+  </data>
+  <data name="Please send plain text only — HTML, scripts and code snippets are not accepted." xml:space="preserve">
+    <value>Küldj egyszerű szöveget. HTML, szkript és kódrészlet nem fogadható el.</value>
+  </data>
+  <data name="That email address is too long." xml:space="preserve">
+    <value>Az e-mail-cím túl hosszú.</value>
+  </data>
+  <data name="Write a message of at least 10 characters." xml:space="preserve">
+    <value>Írj legalább 10 karakter hosszú üzenetet.</value>
+  </data>
+  <data name="contact form" xml:space="preserve">
+    <value>kapcsolatfelvételi űrlap</value>
+  </data>
+  <data name="or" xml:space="preserve">
+    <value>vagy</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+</root>

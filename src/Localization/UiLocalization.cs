@@ -20,14 +20,14 @@ internal static class UiLocalization
         builder.Services.Configure<RequestLocalizationOptions>(options =>
         {
             var cultures = Languages.Keys.ToArray();
-            options.SetDefaultCulture("en").AddSupportedUICultures(cultures);
+            options.SetDefaultCulture("en").AddSupportedCultures("en").AddSupportedUICultures(cultures);
             options.RequestCultureProviders = [new CookieRequestCultureProvider(), new AcceptLanguageHeaderRequestCultureProvider()];
         });
     }
 
-    internal static void MapUiLanguageSelection(this WebApplication app)
+    internal static RouteHandlerBuilder MapUiLanguageSelection(this WebApplication app, Func<HttpContext, string, Task>? saveLanguage = null)
     {
-        app.MapPost("/ui-language", async (HttpContext context, IAntiforgery antiforgery) =>
+        return app.MapPost("/ui-language", async (HttpContext context, IAntiforgery antiforgery) =>
         {
             if (!await antiforgery.IsRequestValidAsync(context)) return Results.BadRequest();
 
@@ -35,13 +35,28 @@ internal static class UiLocalization
             var language = form["language"].ToString();
             if (!Languages.ContainsKey(language)) return Results.BadRequest();
 
-            context.Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture("en", language)),
-                new CookieOptions { HttpOnly = true, SameSite = SameSiteMode.Lax, Secure = context.Request.IsHttps, Path = "/", MaxAge = TimeSpan.FromDays(365) });
+            if (saveLanguage is not null) await saveLanguage(context, language);
+            SetCookie(context, language);
 
-            var returnUrl = form["returnUrl"].ToString();
+            if (!form.TryGetValue("returnUrl", out var returnPath)) return Results.NoContent();
+            var returnUrl = returnPath.ToString();
             return Results.LocalRedirect(IsLocalPath(returnUrl) ? returnUrl : "/");
-        }).AllowAnonymous();
+        });
+    }
+
+    internal static void SetCookie(HttpContext context, string language)
+    {
+        var domain = context.RequestServices.GetRequiredService<IConfiguration>()["Localization:CookieDomain"];
+        var secure = context.Request.IsHttps || context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsProduction();
+        context.Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture("en", language)),
+            new CookieOptions { Domain = string.IsNullOrWhiteSpace(domain) ? null : domain, HttpOnly = true, SameSite = SameSiteMode.Lax, Secure = secure, Path = "/", MaxAge = TimeSpan.FromDays(365) });
+    }
+
+    internal static void UseLanguage(string? language)
+    {
+        if (language is not null && Languages.ContainsKey(language))
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(language);
     }
 
     private static bool IsLocalPath(string path) =>
@@ -53,13 +68,5 @@ internal static class UiLocalization
         "de" => "Sprache",
         "fr" => "Langue",
         _ => "Language"
-    };
-
-    internal static string ApplyLabel => CultureInfo.CurrentUICulture.Name switch
-    {
-        "hu" => "Alkalmaz",
-        "de" => "Übernehmen",
-        "fr" => "Appliquer",
-        _ => "Apply"
     };
 }

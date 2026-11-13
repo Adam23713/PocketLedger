@@ -1,37 +1,38 @@
 @page "/guide/transactions"
-@{ ViewData["Title"] = "Transactions"; }
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
+@{ ViewData["Title"] = Text["Transactions"].Value; }
 <div class="docs-layout shell">
     <partial name="_GuideNavigation" />
     <article class="docs-content guide-article">
-        <p class="eyebrow">CHAPTER 03</p>
-        <h1>Transactions</h1>
-        <p class="lead">Every balance change is represented by an entry you can inspect. Choose the correct transaction type so reports remain accurate.</p>
+        <p class="eyebrow">@Text["CHAPTER 03"]</p>
+        <h1>@Text["Transactions"]</h1>
+        <p class="lead">@Text["Every balance change is represented by an entry you can inspect. Choose the correct transaction type so reports remain accurate."]</p>
 
-        <h2 id="create">Record an entry</h2>
-        <p>Select <strong>New transaction</strong> from the Transactions page or use an account card shortcut on the dashboard. Choose the type first; the form adapts to the information that type needs.</p>
+        <h2 id="create">@Text["Record an entry"]</h2>
+        <p>@Text["Select"] <strong>@Text["New transaction"]</strong> @Text["from the Transactions page or use an account card shortcut on the dashboard. Choose the type first; the form adapts to the information that type needs."]</p>
         <figure class="guide-figure">
-            <img src="~/images/guide/transaction-form.jpg" alt="New transaction form for an expense with account, amount, category, date and note fields" />
-            <figcaption>Categories appear for income and expenses, while transfers ask for a source and target account.</figcaption>
+            <img src="~/images/guide/transaction-form.jpg" alt="@Text["New transaction form for an expense with account, amount, category, date and note fields"]" />
+            <figcaption>@Text["Categories appear for income and expenses, while transfers ask for a source and target account."]</figcaption>
         </figure>
         <div class="transaction-types">
-            <div><span class="type-dot expense"></span><strong>Expense</strong><p>Reduces one account and contributes to expense reporting.</p></div>
-            <div><span class="type-dot income"></span><strong>Income</strong><p>Increases one account and contributes to income reporting.</p></div>
-            <div><span class="type-dot transfer"></span><strong>Transfer</strong><p>Moves value between accounts without counting as income or expense.</p></div>
-            <div><span class="type-dot adjustment"></span><strong>Adjustment</strong><p>Corrects a balance without describing normal financial activity.</p></div>
+            <div><span class="type-dot expense"></span><strong>@Text["Expense"]</strong><p>@Text["Reduces one account and contributes to expense reporting."]</p></div>
+            <div><span class="type-dot income"></span><strong>@Text["Income"]</strong><p>@Text["Increases one account and contributes to income reporting."]</p></div>
+            <div><span class="type-dot transfer"></span><strong>@Text["Transfer"]</strong><p>@Text["Moves value between accounts without counting as income or expense."]</p></div>
+            <div><span class="type-dot adjustment"></span><strong>@Text["Adjustment"]</strong><p>@Text["Corrects a balance without describing normal financial activity."]</p></div>
         </div>
-        <div class="guide-callout warning"><strong>Transfers across currencies need both amounts.</strong><p>Enter the amount leaving the source account and the amount arriving in the target account. PocketLedger preserves both values instead of inventing an exchange rate.</p></div>
+        <div class="guide-callout warning"><strong>@Text["Transfers across currencies need both amounts."]</strong><p>@Text["Enter the amount leaving the source account and the amount arriving in the target account. PocketLedger preserves both values instead of inventing an exchange rate."]</p></div>
 
-        <h2 id="history">Find and review transactions</h2>
-        <p>Filter by year and month, then open <strong>More filters</strong> for account, category, type, amount range or text search. Each day groups its incoming and outgoing totals.</p>
+        <h2 id="history">@Text["Find and review transactions"]</h2>
+        <p>@Text["Filter by year and month, then open"] <strong>@Text["More filters"]</strong> @Text["for account, category, type, amount range or text search. Each day groups its incoming and outgoing totals."]</p>
         <figure class="guide-figure">
-            <img src="~/images/guide/transactions.jpg" alt="Transaction history grouped by date with monthly filters and categorized entries" />
-            <figcaption>The history keeps the category, note, time, account and signed amount visible at a glance.</figcaption>
+            <img src="~/images/guide/transactions.jpg" alt="@Text["Transaction history grouped by date with monthly filters and categorized entries"]" />
+            <figcaption>@Text["The history keeps the category, note, time, account and signed amount visible at a glance."]</figcaption>
         </figure>
-        <p>Select any row to inspect the complete entry. From there you can edit or delete ordinary transactions. Entries generated by debt operations point back to the debt that owns them.</p>
+        <p>@Text["Select any row to inspect the complete entry. From there you can edit or delete ordinary transactions. Entries generated by debt operations point back to the debt that owns them."]</p>
         <figure class="guide-figure">
-            <img src="~/images/guide/transaction-details.jpg" alt="Transaction details showing type, amount, account, category, date and note" />
-            <figcaption>Details are the safest place to verify an entry before editing it.</figcaption>
+            <img src="~/images/guide/transaction-details.jpg" alt="@Text["Transaction details showing type, amount, account, category, date and note"]" />
+            <figcaption>@Text["Details are the safest place to verify an entry before editing it."]</figcaption>
         </figure>
-        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/AccountsAndCategories"><span aria-hidden="true">←</span> Accounts &amp; categories</a><a asp-page="/Guide/Planning">Planning &amp; insights <span aria-hidden="true">→</span></a></nav>
+        <nav class="chapter-pager" aria-label="@Text["Chapter navigation"]"><a asp-page="/Guide/AccountsAndCategories"><span aria-hidden="true">←</span> @Text["Accounts & categories"]</a><a asp-page="/Guide/Planning">@Text["Planning & insights"] <span aria-hidden="true">→</span></a></nav>
     </article>
 </div>

@@ -14,4 +14,13 @@
   <data name="PocketLedger documentation" xml:space="preserve">
     <value>Documentation de PocketLedger</value>
   </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Navigation principale</value>
+  </data>
 </root>

@@ -16,7 +16,7 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
     public async Task<IActionResult> Get(CancellationToken token)
     {
         var item = await GetOrCreateAsync(token);
-        return Ok(new UserPreferenceResponse(item.DisplayName, item.AvatarId, item.DefaultCurrency, item.TimeZoneId, item.CurrencyFormats.Select(ApiContractMapper.ToDto).ToArray(), item.LastSeenChangelogVersion));
+        return Ok(new UserPreferenceResponse(item.DisplayName, item.AvatarId, item.DefaultCurrency, item.TimeZoneId, item.CurrencyFormats.Select(ApiContractMapper.ToDto).ToArray(), item.LastSeenChangelogVersion, item.Language ?? RegistrationLanguage()));
     }
 
     [HttpPut]
@@ -33,6 +33,20 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
         return NoContent();
     }
 
+    [HttpPut("language")]
+    public async Task<IActionResult> SetLanguage(UserLanguageRequest request, CancellationToken token)
+    {
+        if (SupportedLanguage(request.Language) is not { } language) return BadRequest();
+        var item = await GetOrCreateAsync(token);
+        item.Language = language;
+        await dbContext.SaveChangesAsync(token);
+        return NoContent();
+    }
+
+    private string? RegistrationLanguage() => SupportedLanguage(User.FindFirst("locale")?.Value);
+
+    private static string? SupportedLanguage(string? language) => language is "en" or "hu" or "de" or "fr" ? language : null;
+
     [HttpPut("changelog")]
     public async Task<IActionResult> MarkChangelogSeen(ChangelogSeenRequest request, CancellationToken token)
     {
@@ -48,11 +62,10 @@ public sealed class PreferencesController(PocketLedgerDbContext dbContext, ICurr
         var item = await dbContext.UserPreferences.Include(user => user.CurrencyFormats).SingleOrDefaultAsync(user => user.UserId == currentUser.UserId, token);
         if (item is not null) return item;
         // New users have nothing to catch up on, so they start at the current release.
-        item = new UserPreference { UserId = currentUser.UserId, TimeZoneId = userDates.NormalizeTimeZoneId(dateOptions.Value.DefaultTimeZoneId), LastSeenChangelogVersion = Changelog.Latest.Version };
+        item = new UserPreference { UserId = currentUser.UserId, Language = RegistrationLanguage(), TimeZoneId = userDates.NormalizeTimeZoneId(dateOptions.Value.DefaultTimeZoneId), LastSeenChangelogVersion = Changelog.Latest.Version };
         dbContext.UserPreferences.Add(item);
-        await dbContext.SaveChangesAsync(token);
         // The preference row is created on the user's first visit, which is when new users receive the starter categories.
-        await DefaultCategorySeeder.SeedAsync(dbContext, token);
+        if (await DefaultCategorySeeder.SeedAsync(dbContext, token) == 0) await dbContext.SaveChangesAsync(token);
         return item;
     }
 }

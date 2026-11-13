@@ -1,4 +1,5 @@
 using PocketLedger.Contracts;
+using PocketLedger.Models;
 using PocketLedger.Models.Entities;
 using PocketLedger.Services;
 using PocketLedger.Services.Interfaces;
@@ -10,8 +11,8 @@ internal static class ApiContractMapper
     public static CurrencyBalanceDto ToDto(this CurrencyBalance value) => new(value.Currency, value.Amount);
     public static AccountDto ToDto(this Account value) => new(value.Id, value.Name, value.Type, value.Currency, value.InitialBalance, value.Icon, value.Color, value.DisplayOrder, value.IncludeInMainBalance, value.IncludeInNetWorth, value.IncludeInStatistics);
     public static Account ToEntity(this AccountDto value) => new() { Id = value.Id, Name = value.Name, Type = value.Type, Currency = value.Currency, InitialBalance = value.InitialBalance, Icon = value.Icon, Color = value.Color, DisplayOrder = value.DisplayOrder, IncludeInMainBalance = value.IncludeInMainBalance, IncludeInNetWorth = value.IncludeInNetWorth, IncludeInStatistics = value.IncludeInStatistics };
-    public static CategoryDto ToDto(this Category value) => new(value.Id, value.Name, value.Type, value.Icon, value.ParentCategoryId, value.ParentCategory?.ToShallowDto(), value.Subcategories.Select(ToShallowDto).ToArray(), value.DisplayOrder);
-    private static CategoryDto ToShallowDto(this Category value) => new(value.Id, value.Name, value.Type, value.Icon, value.ParentCategoryId, null, [], value.DisplayOrder);
+    public static CategoryDto ToDto(this Category value) => new(value.Id, DefaultCategories.DisplayName(value), value.Type, value.Icon, value.ParentCategoryId, value.ParentCategory?.ToShallowDto(), value.Subcategories.Select(ToShallowDto).ToArray(), value.DisplayOrder);
+    private static CategoryDto ToShallowDto(this Category value) => new(value.Id, DefaultCategories.DisplayName(value), value.Type, value.Icon, value.ParentCategoryId, null, [], value.DisplayOrder);
     public static Category ToEntity(this CategoryDto value) => new() { Id = value.Id, Name = value.Name, Type = value.Type, Icon = value.Icon, ParentCategoryId = value.ParentCategoryId, DisplayOrder = value.DisplayOrder };
     public static GoalDto ToDto(this Goal value) => new(value.Id, value.Name, value.TargetAmount, value.SavedAmount, value.Currency, value.TargetDate, value.BannerColor, value.BannerImage, value.Note, value.CreatedAt);
     public static Goal ToEntity(this GoalDto value) => new() { Id = value.Id, Name = value.Name, TargetAmount = value.TargetAmount, SavedAmount = value.SavedAmount, Currency = value.Currency, TargetDate = value.TargetDate, BannerColor = value.BannerColor, BannerImage = value.BannerImage, Note = value.Note, CreatedAt = value.CreatedAt };

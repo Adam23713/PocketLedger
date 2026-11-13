@@ -1,0 +1,125 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Back to overview" xml:space="preserve">
+    <value>Vissza az áttekintéshez</value>
+  </data>
+  <data name="CHAPTER 06" xml:space="preserve">
+    <value>06. FEJEZET</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Fejezetnavigáció</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Adatok és beállítások</value>
+  </data>
+  <data name="Data and settings" xml:space="preserve">
+    <value>Adatok és beállítások</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Tartozások és célok</value>
+  </data>
+  <data name=". Set a display name and avatar, choose your default currency and time zone, then configure how each currency should display decimal places, separators, symbols and spacing." xml:space="preserve">
+    <value>. Állíts be megjelenített nevet és profilképet, válassz alapértelmezett pénznemet és időzónát, majd pénznemenként állítsd be a tizedesjegyeket, elválasztókat, jeleket és szóközöket.</value>
+  </data>
+  <data name="A practical routine" xml:space="preserve">
+    <value>Gyakorlati rutin</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Fiók és biztonság</value>
+  </data>
+  <data name="At month end" xml:space="preserve">
+    <value>A hónap végén</value>
+  </data>
+  <data name="Backup passwords cannot be recovered." xml:space="preserve">
+    <value>A biztonsági mentések jelszava nem állítható helyre.</value>
+  </data>
+  <data name="Before the next month" xml:space="preserve">
+    <value>A következő hónap előtt</value>
+  </data>
+  <data name="CSV import" xml:space="preserve">
+    <value>CSV-import</value>
+  </data>
+  <data name="Choose" xml:space="preserve">
+    <value>Válaszd ezt:</value>
+  </data>
+  <data name="Create an encrypted backup and verify that you still have its password." xml:space="preserve">
+    <value>Készíts titkosított mentést, és ellenőrizd, hogy megvan-e a jelszava.</value>
+  </data>
+  <data name="Creates a password-protected copy of all PocketLedger financial data." xml:space="preserve">
+    <value>Jelszóval védett másolatot készít a PocketLedger összes pénzügyi adatáról.</value>
+  </data>
+  <data name="Downloads filtered transactions as a password-protected workbook." xml:space="preserve">
+    <value>A szűrt tranzakciókat jelszóval védett munkafüzetként tölti le.</value>
+  </data>
+  <data name="During the week" xml:space="preserve">
+    <value>Hét közben</value>
+  </data>
+  <data name="Encrypted backup" xml:space="preserve">
+    <value>Titkosított biztonsági mentés</value>
+  </data>
+  <data name="Excel export" xml:space="preserve">
+    <value>Excel-export</value>
+  </data>
+  <data name="Formatting changes presentation only; stored monetary values remain unchanged." xml:space="preserve">
+    <value>A formázás a megjelenítést módosítja, a tárolt összegek változatlanok maradnak.</value>
+  </data>
+  <data name="Import, export and back up" xml:space="preserve">
+    <value>Importálás, exportálás és biztonsági mentés</value>
+  </data>
+  <data name="Make the interface feel local, move transaction data in or out, and keep an encrypted copy of everything that matters." xml:space="preserve">
+    <value>Szabd a felületet a helyi igényeidhez, importáld vagy exportáld a tranzakciókat, és tarts titkosított másolatot a fontos adatokról.</value>
+  </data>
+  <data name="Manage account security" xml:space="preserve">
+    <value>Fiókbiztonság kezelése</value>
+  </data>
+  <data name="Open your avatar menu and choose" xml:space="preserve">
+    <value>Nyisd meg a profilmenüt, és válaszd ezt:</value>
+  </data>
+  <data name="Personalize PocketLedger" xml:space="preserve">
+    <value>A PocketLedger személyre szabása</value>
+  </data>
+  <data name="Previews an encrypted backup, then replaces the signed-in user’s current finance data after explicit confirmation." xml:space="preserve">
+    <value>Megmutatja a titkosított mentés előnézetét, majd megerősítés után lecseréli a bejelentkezett felhasználó jelenlegi pénzügyi adatait.</value>
+  </data>
+  <data name="Previews bank-exported rows and imports only entries that pass validation." xml:space="preserve">
+    <value>Előnézetet ad a bankból exportált sorokról, és az érvényes tételeket importálja.</value>
+  </data>
+  <data name="Record activity and check recurring entries." xml:space="preserve">
+    <value>Rögzítsd a forgalmat, és ellenőrizd az ismétlődő tételeket.</value>
+  </data>
+  <data name="Regularly" xml:space="preserve">
+    <value>Rendszeresen</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Visszaállítás</value>
+  </data>
+  <data name="Review Transactions, Calendar and Statistics for missing or unusual entries." xml:space="preserve">
+    <value>A Tranzakciók, a Naptár és a Statisztikák nézetben keress hiányzó vagy szokatlan tételeket.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Beállítások</value>
+  </data>
+  <data name="Transaction exchange and full-database backup serve different purposes." xml:space="preserve">
+    <value>A tranzakciók átvitele és a teljes adatmentés külön célokat szolgál.</value>
+  </data>
+  <data name="Update the Monthly planner, debts and goals." xml:space="preserve">
+    <value>Frissítsd a havi tervezőt, a tartozásokat és a célokat.</value>
+  </data>
+  <data name="Use a unique password and store it separately from the backup file. Restoring replaces current finance data, so review the preview before confirming." xml:space="preserve">
+    <value>Használj egyedi jelszót, és tárold külön a mentéstől. A visszaállítás lecseréli a jelenlegi pénzügyi adatokat, ezért megerősítés előtt ellenőrizd az előnézetet.</value>
+  </data>
+  <data name="from the avatar menu to manage password access, authenticator settings, recovery material, login events and active security options. Never share QR codes, one-time codes, recovery codes or the data recovery key." xml:space="preserve">
+    <value>a profilmenüből a jelszó, a hitelesítő, a helyreállítási adatok, a bejelentkezési események és a biztonsági lehetőségek kezeléséhez. A QR-kódot, az egyszer használatos kódokat, a helyreállítási kódokat és az adat-helyreállítási kulcsot ne oszd meg.</value>
+  </data>
+  <data name="Import and Export page with encrypted Excel export, CSV import, encrypted backup and restore actions" xml:space="preserve">
+    <value>Importálás és exportálás oldal titkosított Excel-exporttal, CSV-importtal, titkosított mentéssel és visszaállítással</value>
+  </data>
+  <data name="Settings page with profile, avatar, default currency, time zone and currency formatting controls" xml:space="preserve">
+    <value>Beállítások oldal profillal, profilképpel, alapértelmezett pénznemmel, időzónával és pénznemformázással</value>
+  </data>
+</root>

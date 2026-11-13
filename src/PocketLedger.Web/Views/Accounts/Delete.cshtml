@@ -1,16 +1,17 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Accounts.AccountDeleteViewModel
-@{ ViewData["Title"] = "Delete account"; }
-<h1>Delete account</h1>
+@{ ViewData["Title"] = CommonText.Get("Delete account"); }
+<h1>@CommonText.Get("Delete account")</h1>
 @if (Model.HasRelatedData)
 {
-    <div class="alert alert-danger"><strong>This action cannot be undone.</strong> Deleting <strong>@Model.Name</strong> will also permanently delete @Model.TransactionCount transaction(s), @Model.RecurringTransactionCount recurring transaction(s), and @Model.DebtCount loan/debt record(s).</div>
+    <div class="alert alert-danger"><strong>@CommonText.Get("This action cannot be undone.")</strong> Deleting <strong>@Model.Name</strong> will also permanently delete @Model.TransactionCount transaction(s), @Model.RecurringTransactionCount recurring transaction(s), and @Model.DebtCount loan/debt record(s).</div>
 }
 else
 {
-    <div class="alert alert-warning">Delete <strong>@Model.Name</strong>? This action cannot be undone.</div>
+    <div class="alert alert-warning">@CommonText.Get("Delete") <strong>@Model.Name</strong>? This action cannot be undone.</div>
 }
 <p>Current balance: @MoneyFormatter.Format(Model.CurrentBalance, Model.Currency)</p>
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-    <button class="btn btn-danger" type="submit">Delete</button>
-    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+    <button class="btn btn-danger" type="submit">@CommonText.Get("Delete")</button>
+    <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">@CommonText.Get("Cancel")</a>
 </form>

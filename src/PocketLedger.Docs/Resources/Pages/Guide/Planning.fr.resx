@@ -1,0 +1,89 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="CHAPTER 04" xml:space="preserve">
+    <value>CHAPITRE 04</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Navigation des chapitres</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Dettes et objectifs</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Planification et analyse</value>
+  </data>
+  <data name="Planning and insights" xml:space="preserve">
+    <value>Planification et analyse</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="A recurring template describes future activity; generated transactions remain visible in the normal history." xml:space="preserve">
+    <value>Un modèle récurrent décrit l’activité future. Les transactions générées restent visibles dans l’historique habituel.</value>
+  </data>
+  <data name="Automate repeating entries" xml:space="preserve">
+    <value>Automatiser les écritures récurrentes</value>
+  </data>
+  <data name="Calendar is ideal for spotting clusters, timing effects and unusually expensive days." xml:space="preserve">
+    <value>Le calendrier aide à repérer les regroupements, les effets de calendrier et les journées particulièrement coûteuses.</value>
+  </data>
+  <data name="Choose a month and currency to see daily income, expenses and running totals. Summary cards at the top highlight the month’s overall movement." xml:space="preserve">
+    <value>Choisissez un mois et une devise pour voir les revenus, dépenses et cumuls quotidiens. Les cartes en haut résument l’activité du mois.</value>
+  </data>
+  <data name="Create a recurring template for salaries, subscriptions, rent and other predictable items. Choose the account, category, amount, frequency and next date. Active templates generate transactions according to their schedule." xml:space="preserve">
+    <value>Créez des modèles pour les salaires, abonnements, loyers et autres écritures prévisibles. Choisissez le compte, la catégorie, le montant, la fréquence et la prochaine date. Les modèles actifs génèrent des transactions selon leur calendrier.</value>
+  </data>
+  <data name="Each currency is calculated separately. Accounts marked Include contribute to the available-to-spend total." xml:space="preserve">
+    <value>Chaque devise est calculée séparément. Les comptes inclus contribuent au total disponible.</value>
+  </data>
+  <data name="Main-category charts reveal the broad shape of spending before you drill into subcategories." xml:space="preserve">
+    <value>Les graphiques des catégories principales montrent la répartition générale des dépenses avant le détail des sous-catégories.</value>
+  </data>
+  <data name="Plan a future month" xml:space="preserve">
+    <value>Planifier un mois à venir</value>
+  </data>
+  <data name="Plans are estimates, not posted transactions." xml:space="preserve">
+    <value>Les prévisions sont des estimations et non des transactions comptabilisées.</value>
+  </data>
+  <data name="Read the calendar" xml:space="preserve">
+    <value>Lire le calendrier</value>
+  </data>
+  <data name="Statistics combines monthly totals, category distribution, recurring expenses, account balances and longer-term trends. Select the same month and currency you want to compare elsewhere." xml:space="preserve">
+    <value>Les statistiques combinent les totaux mensuels, la répartition par catégorie, les dépenses récurrentes, les soldes et les tendances à long terme. Utilisez le même mois et la même devise pour comparer les vues.</value>
+  </data>
+  <data name="The Monthly planner combines planned income, expenses and transfers with active recurring entries and expected loan payments. Add items for the selected month, pause optional plans, and adjust opening balances when planning from a different starting point." xml:space="preserve">
+    <value>Le planificateur mensuel combine les revenus, dépenses et virements prévus avec les écritures récurrentes et les remboursements attendus. Ajoutez des éléments pour le mois choisi, suspendez les projets facultatifs et ajustez les soldes d’ouverture si nécessaire.</value>
+  </data>
+  <data name="The list separates editable templates from loan-related schedules managed by the debt feature." xml:space="preserve">
+    <value>La liste distingue les modèles modifiables des échéanciers gérés dans la rubrique des dettes.</value>
+  </data>
+  <data name="Turn repeated activity into automation, then use calendar, statistics and the monthly planner to understand what happened and what comes next." xml:space="preserve">
+    <value>Automatisez les opérations récurrentes, puis utilisez le calendrier, les statistiques et le planificateur mensuel pour examiner le passé et les prochains mois.</value>
+  </data>
+  <data name="Understand the patterns" xml:space="preserve">
+    <value>Comprendre les tendances</value>
+  </data>
+  <data name="Use the planner to test a future month. Record the real event as a transaction when it actually happens." xml:space="preserve">
+    <value>Simulez un mois à venir dans le planificateur. Enregistrez l’opération réelle comme transaction lorsqu’elle se produit.</value>
+  </data>
+  <data name="Monthly calendar with daily income, expense and running balance information" xml:space="preserve">
+    <value>Calendrier mensuel avec revenus, dépenses et solde cumulé par jour</value>
+  </data>
+  <data name="Monthly planner with expected totals, planned items and projected balances for several currencies" xml:space="preserve">
+    <value>Planificateur mensuel avec totaux prévus, éléments planifiés et soldes projetés dans plusieurs devises</value>
+  </data>
+  <data name="Recurring transaction form with type, account, amount, category, schedule and note" xml:space="preserve">
+    <value>Formulaire de transaction récurrente avec type, compte, montant, catégorie, échéancier et note</value>
+  </data>
+  <data name="Recurring transaction list showing income, expenses and a loan-related recurring payment" xml:space="preserve">
+    <value>Liste des revenus, dépenses et remboursements récurrents</value>
+  </data>
+  <data name="Statistics dashboard with income, expenses, balance and category distribution charts" xml:space="preserve">
+    <value>Tableau statistique avec graphiques des revenus, dépenses, soldes et catégories</value>
+  </data>
+</root>

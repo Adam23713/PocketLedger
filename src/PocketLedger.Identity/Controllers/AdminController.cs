@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -86,15 +87,15 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         if (!RequestClientAddress.TryNormalize(ip, out var address))
         {
-            TempData["AdminWarning"] = "No ban was created because the address is not a complete IPv4 or IPv6 address.";
+            TempData["AdminWarning"] = CommonText.Get("No ban was created because the address is not a complete IPv4 or IPv6 address.");
             return RedirectToAction(nameof(Index), new { page });
         }
         var refusal = ClientAddressPolicy.GetBanRefusal(address!, IsCurrentAdministratorAddress(address!));
-        if (refusal is null && !AllowedBanHours.Contains(durationHours)) refusal = "The selected ban duration is not supported.";
-        if (refusal is null && !banManager.IsConfigured) refusal = "Banning is not configured: set CROWDSEC_IDENTITY_MACHINE_PASSWORD on the server.";
+        if (refusal is null && !AllowedBanHours.Contains(durationHours)) refusal = CommonText.Get("The selected ban duration is not supported.");
+        if (refusal is null && !banManager.IsConfigured) refusal = CommonText.Get("Banning is not configured: set CROWDSEC_IDENTITY_MACHINE_PASSWORD on the server.");
         if (refusal is not null)
         {
-            TempData["AdminWarning"] = $"No ban was created. {refusal}";
+            TempData["AdminWarning"] = CommonText.Format("No ban was created. {0}", CommonText.Get(refusal));
             return RedirectToAction(nameof(Index), null, new { page, ip = address }, "request-activity-heading");
         }
 
@@ -102,11 +103,11 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         {
             await audit.WriteAsync("ClientAddressBanned", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
                 metadata: $"Address={address};DurationHours={durationHours}", cancellationToken: cancellationToken);
-            TempData["AdminMessage"] = $"{address} is banned for {FormatBanDuration(durationHours)}. Every PocketLedger site starts refusing it within a few seconds.";
+            TempData["AdminMessage"] = CommonText.Format("{0} is banned for {1}. Every PocketLedger site starts refusing it within a few seconds.", address, FormatBanDuration(durationHours));
         }
         else
         {
-            TempData["AdminWarning"] = $"{address} was not banned because CrowdSec could not be reached or refused the request.";
+            TempData["AdminWarning"] = CommonText.Format("{0} was not banned because CrowdSec could not be reached or refused the request.", address);
         }
         return RedirectToAction(nameof(Index), null, new { page, ip = address }, "request-activity-heading");
     }
@@ -118,7 +119,7 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         var isValid = RequestClientAddress.TryNormalize(text, out _) || (text?.Contains('/') == true && IPNetwork.TryParse(text, out _));
         if (!isValid)
         {
-            TempData["AdminWarning"] = "No ban was removed because the address is not valid.";
+            TempData["AdminWarning"] = CommonText.Get("No ban was removed because the address is not valid.");
             return RedirectToAction(nameof(Index), new { page });
         }
 
@@ -126,16 +127,16 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         {
             await audit.WriteAsync("ClientAddressBanRemoved", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
                 metadata: $"Address={text}", cancellationToken: cancellationToken);
-            TempData["AdminMessage"] = $"The bans on {text} were removed. Every PocketLedger site accepts it again within a few seconds.";
+            TempData["AdminMessage"] = CommonText.Format("The bans on {0} were removed. Every PocketLedger site accepts it again within a few seconds.", text);
         }
         else
         {
-            TempData["AdminWarning"] = $"The bans on {text} were not removed because CrowdSec could not be reached or refused the request.";
+            TempData["AdminWarning"] = CommonText.Format("The bans on {0} were not removed because CrowdSec could not be reached or refused the request.", text);
         }
         return RedirectToAction(nameof(Index), new { page });
     }
 
-    private static string FormatBanDuration(int hours) => hours switch { 1 => "1 hour", < 24 => $"{hours} hours", 24 => "1 day", _ => $"{hours / 24} days" };
+    private static string FormatBanDuration(int hours) => hours switch { 1 => CommonText.Get("1 hour"), < 24 => CommonText.Format("{0} hours", hours), 24 => CommonText.Get("1 day"), _ => CommonText.Format("{0} days", hours / 24) };
 
     private bool IsCurrentAdministratorAddress(string address)
     {
@@ -150,16 +151,16 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         if (maximumUserCount is < 1 or > PublicRegistrationOptions.MaximumAllowedUserCount)
         {
-            TempData["AdminWarning"] = $"The account limit must be between 1 and {PublicRegistrationOptions.MaximumAllowedUserCount:N0}, or left empty for no limit.";
+            TempData["AdminWarning"] = CommonText.Format("The account limit must be between 1 and {0:N0}, or left empty for no limit.", PublicRegistrationOptions.MaximumAllowedUserCount);
             return RedirectToAction(nameof(Index), new { page });
         }
         await registrationSettings.UpdateAsync(isOpen, maximumUserCount, cancellationToken);
         await audit.WriteAsync("RegistrationSettingsChanged", "Success", Guid.TryParse(userManager.GetUserId(User), out var adminId) ? adminId : null,
             metadata: $"IsOpen={isOpen};MaximumUserCount={maximumUserCount?.ToString() ?? "Unlimited"}", cancellationToken: cancellationToken);
         var status = await registrationSettings.GetStatusAsync(cancellationToken);
-        TempData["AdminMessage"] = !status.IsOpen ? "Registration settings saved. Public registration is closed."
-            : status.RemainingSlots is { } remaining ? $"Registration settings saved. Public registration is open with {remaining} of {status.MaximumUserCount} accounts available."
-            : "Registration settings saved. Public registration is open without an account limit.";
+        TempData["AdminMessage"] = !status.IsOpen ? CommonText.Get("Registration settings saved. Public registration is closed.")
+            : status.RemainingSlots is { } remaining ? CommonText.Format("Registration settings saved. Public registration is open with {0} of {1} accounts available.", remaining, status.MaximumUserCount)
+            : CommonText.Get("Registration settings saved. Public registration is open without an account limit.");
         return RedirectToAction(nameof(Index), new { page });
     }
 
@@ -172,13 +173,12 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         try
         {
             await accessPropagation.BlockAsync(user.Id, cancellationToken);
-            TempData["AdminMessage"] = $"{user.UserName} has been blocked and all of their sessions were terminated.";
+            TempData["AdminMessage"] = CommonText.Format("{0} has been blocked and all of their sessions were terminated.", user.UserName);
         }
         catch (Exception exception) when (IsPropagationFailure(exception, cancellationToken))
         {
             logger.LogError(exception, "Blocking user {UserId} could not be propagated to the API or web app.", user.Id);
-            TempData["AdminWarning"] = $"{user.UserName} is blocked and can no longer sign in, but the API or web app could not be reached. " +
-                $"Their remaining sessions are terminated automatically within {UserAccessBlockSynchronizer.Interval.TotalSeconds:0} seconds once it is reachable.";
+            TempData["AdminWarning"] = CommonText.Format("{0} is blocked and can no longer sign in, but the API or web app could not be reached. Their remaining sessions are terminated automatically within {1:0} seconds once it is reachable.", user.UserName, UserAccessBlockSynchronizer.Interval.TotalSeconds);
         }
         return RedirectToAction(nameof(Index), new { page });
     }
@@ -194,12 +194,12 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         try
         {
             await accessPropagation.UnblockAsync(user.Id, cancellationToken);
-            TempData["AdminMessage"] = $"{user.UserName} has been unblocked.";
+            TempData["AdminMessage"] = CommonText.Format("{0} has been unblocked.", user.UserName);
         }
         catch (Exception exception) when (IsPropagationFailure(exception, cancellationToken))
         {
             logger.LogError(exception, "Unblocking user {UserId} could not be propagated to the API.", user.Id);
-            TempData["AdminWarning"] = $"{user.UserName} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes.";
+            TempData["AdminWarning"] = CommonText.Format("{0} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes.", user.UserName);
         }
         return RedirectToAction(nameof(Index), new { page });
     }
@@ -215,7 +215,7 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
         if (!result.Succeeded) throw new InvalidOperationException("The user could not be unlocked.");
         await audit.WriteAsync("LoginLockoutCleared", "Success", user.Id, user.NormalizedUserName,
             metadata: $"ClearedBy={userManager.GetUserId(User)}", cancellationToken: cancellationToken);
-        TempData["AdminMessage"] = $"{user.UserName} can sign in again.";
+        TempData["AdminMessage"] = CommonText.Format("{0} can sign in again.", user.UserName);
         return RedirectToAction(nameof(Index), new { page });
     }
 
@@ -224,14 +224,14 @@ public sealed class AdminController(UserManager<ApplicationUser> userManager, IR
     {
         if (!string.Equals(confirmation, "DELETE", StringComparison.Ordinal))
         {
-            TempData["AdminWarning"] = "The user was not deleted because the confirmation text did not match DELETE.";
+            TempData["AdminWarning"] = CommonText.Get("The user was not deleted because the confirmation text did not match DELETE.");
             return RedirectToAction(nameof(Index), new { page });
         }
         var user = await FindManageableUserAsync(userId);
         if (user is null) return NotFound();
         await accountDeletion.DeleteAsync(user, cancellationToken);
 
-        TempData["AdminMessage"] = $"{user.UserName} has been deleted.";
+        TempData["AdminMessage"] = CommonText.Format("{0} has been deleted.", user.UserName);
         return RedirectToAction(nameof(Index), new { page });
     }
 

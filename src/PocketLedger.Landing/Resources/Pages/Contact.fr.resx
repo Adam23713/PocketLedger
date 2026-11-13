@@ -1,0 +1,149 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Contact — PocketLedger" xml:space="preserve">
+    <value>Contact — PocketLedger</value>
+  </data>
+  <data name="Found a bug or have a feature idea? You can also" xml:space="preserve">
+    <value>Vous avez trouvé un bug ou avez une idée ? Vous pouvez aussi</value>
+  </data>
+  <data name="GET IN TOUCH" xml:space="preserve">
+    <value>CONTACTEZ-MOI</value>
+  </data>
+  <data name="I will only use it to reply to you." xml:space="preserve">
+    <value>Je l’utiliserai uniquement pour vous répondre.</value>
+  </data>
+  <data name="I will reply to the email address you provided, usually within a few days." xml:space="preserve">
+    <value>Je répondrai à l’adresse e-mail indiquée, généralement sous quelques jours.</value>
+  </data>
+  <data name="It is not available right now. Please check back a little later, or reach out through" xml:space="preserve">
+    <value>Revenez un peu plus tard ou contactez-moi sur</value>
+  </data>
+  <data name="Leave this field empty" xml:space="preserve">
+    <value>Laissez ce champ vide</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Créé par</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Plain text only, up to {0} links." xml:space="preserve">
+    <value>Texte brut uniquement, avec {0} liens au maximum.</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Confidentialité</value>
+  </data>
+  <data name="Questions about your data are answered on the" xml:space="preserve">
+    <value>Les réponses aux questions sur vos données figurent sur la page</value>
+  </data>
+  <data name="Questions, ideas" xml:space="preserve">
+    <value>Des questions, des idées</value>
+  </data>
+  <data name="Send a message" xml:space="preserve">
+    <value>Envoyer un message</value>
+  </data>
+  <data name="Send message" xml:space="preserve">
+    <value>Envoyer le message</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Aller au contenu</value>
+  </data>
+  <data name="Thank you, your message is on its way." xml:space="preserve">
+    <value>Merci, votre message est en route.</value>
+  </data>
+  <data name="The anti-spam check could not be completed. Please wait for it to finish and send the message again." xml:space="preserve">
+    <value>La vérification antispam n’a pas abouti. Attendez qu’elle se termine puis renvoyez le message.</value>
+  </data>
+  <data name="The contact form is not available right now. Please try again later." xml:space="preserve">
+    <value>Le formulaire de contact est actuellement indisponible. Réessayez plus tard.</value>
+  </data>
+  <data name="The contact form is receiving a lot of messages right now. Please try again later." xml:space="preserve">
+    <value>Le formulaire reçoit beaucoup de messages. Réessayez plus tard.</value>
+  </data>
+  <data name="The contact form is resting for a moment." xml:space="preserve">
+    <value>Le formulaire de contact est momentanément indisponible.</value>
+  </data>
+  <data name="This form has expired or was sent too quickly. Please check your message and send it again." xml:space="preserve">
+    <value>Le formulaire a expiré ou a été envoyé trop rapidement. Vérifiez votre message et renvoyez-le.</value>
+  </data>
+  <data name="Whether something is not working, you are missing a feature, or you would simply like to share how you use PocketLedger." xml:space="preserve">
+    <value>Écrivez-moi si quelque chose ne fonctionne pas, s’il vous manque une fonctionnalité ou si vous souhaitez expliquer comment vous utilisez PocketLedger.</value>
+  </data>
+  <data name="You have sent several messages recently. Please wait an hour before trying again." xml:space="preserve">
+    <value>Vous avez envoyé plusieurs messages récemment. Attendez une heure avant de réessayer.</value>
+  </data>
+  <data name="Your email address" xml:space="preserve">
+    <value>Votre adresse e-mail</value>
+  </data>
+  <data name="Your message could not be sent right now. Please try again a little later." xml:space="preserve">
+    <value>Votre message n’a pas pu être envoyé. Réessayez un peu plus tard.</value>
+  </data>
+  <data name="Your message is delivered to my inbox by email and is not stored on this website. See the" xml:space="preserve">
+    <value>Votre message arrive par e-mail et n’est pas conservé sur ce site. Pour en savoir plus, consultez</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>et</value>
+  </data>
+  <data name="in the meantime." xml:space="preserve">
+    <value>en attendant.</value>
+  </data>
+  <data name="open an issue on GitHub ↗" xml:space="preserve">
+    <value>Ouvrir un ticket sur GitHub ↗</value>
+  </data>
+  <data name="or feedback?" xml:space="preserve">
+    <value>ou des commentaires ?</value>
+  </data>
+  <data name="page for details." xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="page." xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="{0} characters left" xml:space="preserve">
+    <value>{0} caractères restants</value>
+  </data>
+  <data name="← Back to the home page" xml:space="preserve">
+    <value>← Retour à l’accueil</value>
+  </data>
+  <data name="Enter a valid email address, like name@example.com." xml:space="preserve">
+    <value>Saisissez une adresse e-mail valide, par exemple nom@example.com.</value>
+  </data>
+  <data name="Enter the email address I should reply to." xml:space="preserve">
+    <value>Indiquez l’adresse e-mail à laquelle je peux répondre.</value>
+  </data>
+  <data name="Get in touch with the maker of PocketLedger — questions, feedback and ideas are welcome." xml:space="preserve">
+    <value>Contactez le créateur de PocketLedger. Vos questions, retours et idées sont les bienvenus.</value>
+  </data>
+  <data name="Keep the message under 4000 characters." xml:space="preserve">
+    <value>Le message ne doit pas dépasser 4000 caractères.</value>
+  </data>
+  <data name="Please include no more than 3 links." xml:space="preserve">
+    <value>Ajoutez au maximum 3 liens.</value>
+  </data>
+  <data name="Please send plain text only — HTML, scripts and code snippets are not accepted." xml:space="preserve">
+    <value>Envoyez uniquement du texte brut. Le HTML, les scripts et les extraits de code ne sont pas acceptés.</value>
+  </data>
+  <data name="That email address is too long." xml:space="preserve">
+    <value>Cette adresse e-mail est trop longue.</value>
+  </data>
+  <data name="Write a message of at least 10 characters." xml:space="preserve">
+    <value>Rédigez un message d’au moins 10 caractères.</value>
+  </data>
+  <data name="contact form" xml:space="preserve">
+    <value>formulaire de contact</value>
+  </data>
+  <data name="or" xml:space="preserve">
+    <value>ou</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+</root>

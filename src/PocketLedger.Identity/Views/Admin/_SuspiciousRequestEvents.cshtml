@@ -1,27 +1,28 @@
+@using PocketLedger.Localization
 @model PocketLedger.Security.SuspiciousRequestEventsResult
 
 <section class="mt-5" aria-labelledby="suspicious-requests-heading">
-    <h2 class="h4 mb-2" id="suspicious-requests-heading">Suspicious request bursts</h2>
+    <h2 class="h4 mb-2" id="suspicious-requests-heading">@CommonText.Get("Suspicious request bursts")</h2>
     @if (!Model.IsAvailable)
     {
-        <div class="alert alert-info" role="status">Suspicious request detection is currently unavailable.</div>
+        <div class="alert alert-info" role="status">@CommonText.Get("Suspicious request detection is currently unavailable.")</div>
     }
     else if (Model.Events.Count == 0)
     {
-        <div class="alert alert-info" role="status">No suspicious request bursts were detected recently.</div>
+        <div class="alert alert-info" role="status">@CommonText.Get("No suspicious request bursts were detected recently.")</div>
     }
     else
     {
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th scope="col">Detected (UTC)</th><th scope="col">Reason</th><th scope="col">Client address</th><th scope="col">Requests / attempts</th><th scope="col">Detection window</th><th scope="col">Users</th><th scope="col">Application / host</th></tr></thead>
+                <thead><tr><th scope="col">@CommonText.Get("Detected (UTC)")</th><th scope="col">@CommonText.Get("Reason")</th><th scope="col">@CommonText.Get("Client address")</th><th scope="col">@CommonText.Get("Requests / attempts")</th><th scope="col">@CommonText.Get("Detection window")</th><th scope="col">@CommonText.Get("Users")</th><th scope="col">@CommonText.Get("Application / host")</th></tr></thead>
                 <tbody>
                     @foreach (var item in Model.Events)
                     {
                         <tr>
                             <td>@item.DetectedAtUtc.ToString("u")</td>
                             <td>@(item.Reason ?? "Request burst")</td>
-                            <td><a href="@Url.Action("Index", "Admin", new { ip = item.ClientIpAddress }, null, null, "request-activity-heading")" title="Inspect this address"><code>@item.ClientIpAddress</code></a></td>
+                            <td><a href="@Url.Action("Index", "Admin", new { ip = item.ClientIpAddress }, null, null, "request-activity-heading")" title="@CommonText.Get("Inspect this address")"><code>@item.ClientIpAddress</code></a></td>
                             <td>@item.RequestCount</td>
                             <td>@item.Window.TotalMinutes.ToString("0") minutes</td>
                             <td>@(item.UserIds.Count == 0 ? "Anonymous or unattributed" : string.Join(", ", item.UserIds))</td>

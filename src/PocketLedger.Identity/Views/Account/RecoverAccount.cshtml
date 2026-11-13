@@ -1,29 +1,29 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Account.RecoverAccountViewModel
-@{ ViewData["Title"] = "Recover account"; }
-<h1>Recover account</h1>
-<p>Use the data recovery key you saved when you created your account to choose a new password.
-    You will still need your authenticator app to sign in afterwards. If you signed up with an external provider, this replaces your data password.</p>
+@{ ViewData["Title"] = CommonText.Get("Recover account"); }
+<h1>@CommonText.Get("Recover account")</h1>
+<p>@CommonText.Get("Use the data recovery key you saved when you created your account to choose a new password. You will still need your authenticator app to sign in afterwards. If you signed up with an external provider, this replaces your data password.")</p>
 <form method="post">
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-3">
-        <label asp-for="Username"></label>
+        <label asp-for="Username">@CommonText.Get(Html.DisplayNameFor(model => model.Username))</label>
         <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
     </div>
     <div class="mb-3">
-        <label asp-for="RecoveryKey"></label>
+        <label asp-for="RecoveryKey">@CommonText.Get(Html.DisplayNameFor(model => model.RecoveryKey))</label>
         <input asp-for="RecoveryKey" class="form-control" autocomplete="off" spellcheck="false" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" />
     </div>
     <div class="mb-3">
-        <label asp-for="NewPassword"></label>
+        <label asp-for="NewPassword">@CommonText.Get(Html.DisplayNameFor(model => model.NewPassword))</label>
         <input asp-for="NewPassword" class="form-control" autocomplete="new-password" />
     </div>
     <div class="mb-3">
-        <label asp-for="ConfirmPassword"></label>
+        <label asp-for="ConfirmPassword">@CommonText.Get(Html.DisplayNameFor(model => model.ConfirmPassword))</label>
         <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
     </div>
-    <button class="btn btn-primary">Recover account</button>
+    <button class="btn btn-primary">@CommonText.Get("Recover account")</button>
 </form>
-<p class="mt-3"><a asp-action="Login">Back to login</a></p>
+<p class="mt-3"><a asp-action="Login">@CommonText.Get("Back to login")</a></p>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

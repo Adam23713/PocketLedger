@@ -1,0 +1,500 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Close image viewer" xml:space="preserve">
+    <value>Fermer la visionneuse</value>
+  </data>
+  <data name="Close ×" xml:space="preserve">
+    <value>Fermer ×</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Créé par</value>
+  </data>
+  <data name="Next screenshot" xml:space="preserve">
+    <value>Capture suivante</value>
+  </data>
+  <data name="Next →" xml:space="preserve">
+    <value>Suivant →</value>
+  </data>
+  <data name="PocketLedger screenshots" xml:space="preserve">
+    <value>Captures d’écran de PocketLedger</value>
+  </data>
+  <data name="Previous screenshot" xml:space="preserve">
+    <value>Capture précédente</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Confidentialité</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Politique de confidentialité</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Aller au contenu</value>
+  </data>
+  <data name="Zoom in" xml:space="preserve">
+    <value>Agrandir</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>et</value>
+  </data>
+  <data name="← Previous" xml:space="preserve">
+    <value>← Précédent</value>
+  </data>
+  <data name="Fit to screen" xml:space="preserve">
+    <value>Adapter à l’écran</value>
+  </data>
+  <data name="(Hungary), who is the data controller responsible for your personal data under the GDPR for this purpose." xml:space="preserve">
+    <value>(Hongrie), responsable du traitement de vos données personnelles au sens du RGPD à cette fin.</value>
+  </data>
+  <data name=", why we collect it, who we share it with, and the rights you have over it under the EU General Data Protection Regulation (GDPR). It does not apply to an instance of PocketLedger that you or someone else self-hosts — the operator of that instance is responsible for its own privacy notice." xml:space="preserve">
+    <value>, pourquoi nous les collectons, avec qui nous les partageons et quels sont vos droits au titre du règlement général de l’UE sur la protection des données (RGPD). Cette notice ne s’applique pas aux instances PocketLedger auto-hébergées par vous ou par un tiers. Leur exploitant est responsable de sa propre notice.</value>
+  </data>
+  <data name="Account &amp; authentication data" xml:space="preserve">
+    <value>Données de compte et d’authentification</value>
+  </data>
+  <data name="Accounts, transactions and their notes, categories, recurring entries, loans and debts, planner/budget entries, your display name, and preferences such as currency, timezone, icons and colours" xml:space="preserve">
+    <value>Comptes, transactions et notes, catégories, écritures récurrentes, prêts et dettes, éléments de planification et de budget, nom affiché et préférences telles que devise, fuseau horaire, icônes et couleurs</value>
+  </data>
+  <data name="An encrypted, password-protected export of your finance data, generated only if and when you use the Import/Export feature. It never includes your password, TOTP secret, recovery codes or session data" xml:space="preserve">
+    <value>Export chiffré et protégé par mot de passe de vos données financières, créé uniquement lorsque vous utilisez l’import/export. Il n’inclut jamais votre mot de passe, votre secret TOTP, vos codes de récupération ni vos données de session.</value>
+  </data>
+  <data name="Automated decision-making" xml:space="preserve">
+    <value>Prise de décision automatisée</value>
+  </data>
+  <data name="Backup files you create" xml:space="preserve">
+    <value>Fichiers de sauvegarde que vous créez</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Changes to this notice" xml:space="preserve">
+    <value>Modifications de cette notice</value>
+  </data>
+  <data name="Children" xml:space="preserve">
+    <value>Enfants</value>
+  </data>
+  <data name="Contact form messages" xml:space="preserve">
+    <value>Messages du formulaire de contact</value>
+  </data>
+  <data name="Contact us" xml:space="preserve">
+    <value>Nous contacter</value>
+  </data>
+  <data name="Cookies" xml:space="preserve">
+    <value>Cookies</value>
+  </data>
+  <data name="Creating and running your account; storing, showing and letting you import/export your financial data" xml:space="preserve">
+    <value>Créer et gérer le compte, stocker et afficher les données financières et permettre leur importation et exportation</value>
+  </data>
+  <data name="Detecting and blocking abusive, fraudulent or high-volume traffic (rate limiting, automated ban rules)" xml:space="preserve">
+    <value>Détecter et bloquer le trafic abusif, frauduleux ou excessif (limitation de débit et blocages automatiques)</value>
+  </data>
+  <data name="Effective date: 5 November 2026 · Applies to pocketledger.dev and the PocketLedger application" xml:space="preserve">
+    <value>Date d’effet : 5 novembre 2026 · S’applique à pocketledger.dev et à l’application PocketLedger</value>
+  </data>
+  <data name="Examples" xml:space="preserve">
+    <value>Exemples</value>
+  </data>
+  <data name="Financial data you enter" xml:space="preserve">
+    <value>Données financières que vous saisissez</value>
+  </data>
+  <data name="Generated automatically as you use the Service" xml:space="preserve">
+    <value>Générées automatiquement lors de l’utilisation du service</value>
+  </data>
+  <data name="Generated automatically by our edge infrastructure for every request, including from visitors who are not registered users" xml:space="preserve">
+    <value>Générées automatiquement par notre infrastructure de périphérie pour chaque requête, y compris celles des visiteurs non inscrits</value>
+  </data>
+  <data name="Google, Meta (Facebook) or GitHub, when you choose to sign in with them" xml:space="preserve">
+    <value>Google, Meta (Facebook) ou GitHub, si vous choisissez de vous connecter via leur service</value>
+  </data>
+  <data name="How long we keep it" xml:space="preserve">
+    <value>Durée de conservation</value>
+  </data>
+  <data name="How we protect your data" xml:space="preserve">
+    <value>Comment nous protégeons vos données</value>
+  </data>
+  <data name="IP address, requested URL, timestamp and response status for each request to our servers" xml:space="preserve">
+    <value>Adresse IP, URL demandée, horodatage et statut de réponse pour chaque requête à nos serveurs</value>
+  </data>
+  <data name="International data transfers" xml:space="preserve">
+    <value>Transferts internationaux de données</value>
+  </data>
+  <data name="Keeping your account secure: two-factor authentication, recovery codes, sign-in auditing" xml:space="preserve">
+    <value>Sécuriser le compte avec l’authentification à deux facteurs, les codes de récupération et la journalisation des connexions</value>
+  </data>
+  <data name="LEGAL" xml:space="preserve">
+    <value>MENTIONS LÉGALES</value>
+  </data>
+  <data name="Legal basis (GDPR Art. 6)" xml:space="preserve">
+    <value>Base juridique (art. 6 du RGPD)</value>
+  </data>
+  <data name="Letting you sign in with Google, Facebook or GitHub, if you choose to" xml:space="preserve">
+    <value>Connexion via Google, Facebook ou GitHub, si vous le choisissez</value>
+  </data>
+  <data name="On this page" xml:space="preserve">
+    <value>Sur cette page</value>
+  </data>
+  <data name="Only if you choose to sign in with Google, Facebook or GitHub: the provider's identifier for your account, your email address and whether the provider has verified it. We don't request your name, profile picture, contacts, friends list or any other profile data" xml:space="preserve">
+    <value>Uniquement en cas de connexion avec Google, Facebook ou GitHub : votre identifiant chez le fournisseur, votre adresse e-mail et son statut de vérification. Nous ne demandons ni nom, ni photo, ni contacts, ni liste d’amis, ni autres données du profil.</value>
+  </data>
+  <data name="Our legitimate interest in protecting the Service and its users from abuse (Art. 6(1)(f))" xml:space="preserve">
+    <value>Notre intérêt légitime à protéger le service et ses utilisateurs contre les abus (art. 6, par. 1, point f)</value>
+  </data>
+  <data name="Performance of a contract with you (Art. 6(1)(b))" xml:space="preserve">
+    <value>Exécution d’un contrat avec vous (art. 6, par. 1, point b)</value>
+  </data>
+  <data name="Performance of a contract, and our legitimate interest in keeping accounts secure (Art. 6(1)(b) and (f))" xml:space="preserve">
+    <value>Exécution du contrat et intérêt légitime à sécuriser les comptes (art. 6, par. 1, points b et f)</value>
+  </data>
+  <data name="PocketLedger is a personal project, not a registered company. The hosted service at pocketledger.dev is operated by" xml:space="preserve">
+    <value>PocketLedger est un projet personnel et non une société immatriculée. Le service sur pocketledger.dev est exploité par</value>
+  </data>
+  <data name="Purpose" xml:space="preserve">
+    <value>Finalité</value>
+  </data>
+  <data name="Responding when you contact us for support" xml:space="preserve">
+    <value>Répondre aux demandes d’assistance</value>
+  </data>
+  <data name="Security &amp; activity data" xml:space="preserve">
+    <value>Données de sécurité et d’activité</value>
+  </data>
+  <data name="Sign-in timestamps and outcomes, the IP address and browser/device identifier (user agent) of your most recent successful login, and security audit events such as password or 2FA changes" xml:space="preserve">
+    <value>Dates et résultats de connexion, adresse IP et identifiant du navigateur ou de l’appareil (agent utilisateur) de la dernière connexion réussie, et événements de sécurité comme les changements de mot de passe ou de 2FA</value>
+  </data>
+  <data name="Social sign-in data" xml:space="preserve">
+    <value>Données de connexion externe</value>
+  </data>
+  <data name="Steps taken at your request, and our legitimate interest in providing support (Art. 6(1)(b) and (f))" xml:space="preserve">
+    <value>Mesures prises à votre demande et intérêt légitime à fournir une assistance (art. 6, par. 1, points b et f)</value>
+  </data>
+  <data name="Table of contents" xml:space="preserve">
+    <value>Table des matières</value>
+  </data>
+  <data name="Technical &amp; connection data" xml:space="preserve">
+    <value>Données techniques et de connexion</value>
+  </data>
+  <data name="The email address you give us to reply to and the text of your message. The website itself does not store them: they are forwarded straight to our mailbox at our email provider (see" xml:space="preserve">
+    <value>L’adresse e-mail fournie pour la réponse et le texte du message. Le site ne les conserve pas et les transmet directement à notre boîte chez notre fournisseur de messagerie (voir</value>
+  </data>
+  <data name="This notice explains, in plain language, what personal data PocketLedger collects when you use our hosted service at" xml:space="preserve">
+    <value>Cette notice explique simplement quelles données personnelles PocketLedger collecte lorsque vous utilisez notre service hébergé sur</value>
+  </data>
+  <data name="Username, email address, phone number (only if you choose to provide one), a one-way hash of your password (we never store it in plain text), your TOTP two-factor secret and recovery codes" xml:space="preserve">
+    <value>Nom d’utilisateur, adresse e-mail, téléphone (si fourni), hachage à sens unique du mot de passe (jamais stocké en clair), secret TOTP et codes de récupération</value>
+  </data>
+  <data name="We do not ask for or knowingly collect bank account numbers, card numbers, or credentials for any outside financial institution — PocketLedger is a manual ledger, not a service that connects to your bank." xml:space="preserve">
+    <value>Nous ne demandons ni ne collectons sciemment de numéros de compte bancaire, de carte ou d’identifiants d’établissements financiers externes. PocketLedger est un registre manuel, sans connexion à votre banque.</value>
+  </data>
+  <data name="We have not appointed a Data Protection Officer: at our current size and the kind of data we process, one is not legally required. You can reach us directly using the contact details in" xml:space="preserve">
+    <value>Nous n’avons pas désigné de délégué à la protection des données, car notre taille actuelle et la nature des données traitées ne l’exigent pas. Vous pouvez nous contacter directement aux coordonnées de</value>
+  </data>
+  <data name="We only collect data that lets the Service work, keeps your account secure, or that you choose to give us." xml:space="preserve">
+    <value>Nous collectons uniquement les données nécessaires au fonctionnement du service, à la sécurité du compte ou que vous choisissez de fournir.</value>
+  </data>
+  <data name="What data we collect" xml:space="preserve">
+    <value>Quelles données nous collectons</value>
+  </data>
+  <data name="Where it comes from" xml:space="preserve">
+    <value>Provenance</value>
+  </data>
+  <data name="Who we are" xml:space="preserve">
+    <value>Qui sommes-nous</value>
+  </data>
+  <data name="Who we share it with" xml:space="preserve">
+    <value>Avec qui nous partageons les données</value>
+  </data>
+  <data name="Why we use it, and on what legal basis" xml:space="preserve">
+    <value>Finalités et bases juridiques</value>
+  </data>
+  <data name="You, directly, as you use the Service" xml:space="preserve">
+    <value>Directement de vous lors de l’utilisation du service</value>
+  </data>
+  <data name="You, on request" xml:space="preserve">
+    <value>Vous, sur demande</value>
+  </data>
+  <data name="You, when you register or manage your account" xml:space="preserve">
+    <value>Vous, lors de l’inscription ou de la gestion du compte</value>
+  </data>
+  <data name="You, when you use the" xml:space="preserve">
+    <value>Vous, lorsque vous utilisez le</value>
+  </data>
+  <data name="Your rights, and how to use them" xml:space="preserve">
+    <value>Vos droits et leur exercice</value>
+  </data>
+  <data name="contact form" xml:space="preserve">
+    <value>formulaire de contact</value>
+  </data>
+  <data name="for anything related to your data or this notice." xml:space="preserve">
+    <value>pour toute question concernant vos données ou cette notice.</value>
+  </data>
+  <data name="section 13" xml:space="preserve">
+    <value>la section 13</value>
+  </data>
+  <data name="section 2" xml:space="preserve">
+    <value>la section 2</value>
+  </data>
+  <data name="section 4" xml:space="preserve">
+    <value>la section 4</value>
+  </data>
+  <data name="(Facebook) and" xml:space="preserve">
+    <value>(Facebook) et</value>
+  </data>
+  <data name="(YouTube), only if you choose to play the video on our home page. Until you click play, nothing is loaded from YouTube. Once you do, the video is loaded from YouTube's privacy-enhanced domain (youtube-nocookie.com), and YouTube receives your IP address and the technical details of your browser, and may store data in your browser, as described in" xml:space="preserve">
+    <value>(YouTube), uniquement si vous lancez la vidéo de l’accueil. Avant ce clic, rien n’est chargé depuis YouTube. Ensuite, la vidéo provient du domaine youtube-nocookie.com, conçu pour mieux préserver la confidentialité. YouTube reçoit votre adresse IP et des détails techniques du navigateur et peut y stocker des données, comme indiqué dans</value>
+  </data>
+  <data name=", only if you choose to sign in with them. When you do, the provider learns that you signed in to PocketLedger, and sends us the limited data listed in" xml:space="preserve">
+    <value>, uniquement si vous choisissez de vous connecter via leur service. Le fournisseur apprend que vous vous êtes connecté à PocketLedger et nous transmet les données limitées décrites à</value>
+  </data>
+  <data name=", our email provider, which hosts our mailboxes on servers within the EEA. Emails you send us — including messages from the" xml:space="preserve">
+    <value> est notre fournisseur de messagerie et héberge nos boîtes sur des serveurs situés dans l’EEE. Vos e-mails, y compris les messages envoyés via le</value>
+  </data>
+  <data name=", then go to" xml:space="preserve">
+    <value>, puis accédez à</value>
+  </data>
+  <data name=", which is delivered through its mail servers — and our replies are stored there." xml:space="preserve">
+    <value>, acheminés par ses serveurs de messagerie, ainsi que nos réponses y sont conservés.</value>
+  </data>
+  <data name=", which sits in front of our servers to provide content delivery, DDoS protection and bot/abuse filtering. As part of this, Cloudflare sees connection-level metadata — such as your IP address and the host and path you're requesting — for every request to the Service. Cloudflare's data processing terms are built into its standard customer agreement; see" xml:space="preserve">
+    <value> se place en amont de nos serveurs pour distribuer les contenus, protéger contre les attaques DDoS et filtrer les robots et abus. Cloudflare voit ainsi les métadonnées de connexion de chaque requête, comme votre adresse IP, l’hôte et le chemin demandés. Ses conditions de traitement sont intégrées à son contrat client standard. Voir</value>
+  </data>
+  <data name=", who runs the physical servers your data is stored and processed on, located within the European Economic Area (EEA)." xml:space="preserve">
+    <value> exploite les serveurs physiques situés dans l’Espace économique européen (EEE) où vos données sont stockées et traitées.</value>
+  </data>
+  <data name=". Before you confirm, you can download an encrypted backup of your financial data. Deletion removes your account, your financial data, any connected Google or Facebook sign-in, your sign-in history and your encryption keys, and ends all of your active sessions. The only thing we keep is your account's random internal identifier and the time of deletion, with no name, email or other personal data attached, so that any session still open elsewhere is refused." xml:space="preserve">
+    <value>. Avant de confirmer, vous pouvez télécharger une sauvegarde chiffrée de vos données financières. La suppression efface le compte, les données financières, les connexions Google ou Facebook associées, l’historique de connexion et les clés de chiffrement et met fin aux sessions actives. Nous gardons uniquement l’identifiant interne aléatoire et la date de suppression, sans nom, e-mail ni autre donnée personnelle, afin de rejeter les sessions encore ouvertes ailleurs.</value>
+  </data>
+  <data name=". If you can't sign in, contact us using the details in" xml:space="preserve">
+    <value>. Si vous ne pouvez pas vous connecter, contactez-nous aux coordonnées de</value>
+  </data>
+  <data name=". On the contact form, Cloudflare Turnstile checks that the message is sent by a person rather than a bot; to do so it evaluates signals from your browser for that page only, without setting advertising or tracking cookies." xml:space="preserve">
+    <value>. Sur le formulaire, Cloudflare Turnstile vérifie que le message provient d’une personne. Il analyse des signaux du navigateur sur cette seule page, sans déposer de cookies publicitaires ni de suivi.</value>
+  </data>
+  <data name=". We never send them your financial data. Their own handling of your data is covered by" xml:space="preserve">
+    <value>. Nous ne leur envoyons jamais vos données financières. Leur propre traitement est décrit dans</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Compte</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Compte et sécurité</value>
+  </data>
+  <data name="Apart from the email provider above, we use no third-party email delivery service, and we have no analytics or advertising partners. We do not sell your data, rent it out, or share it with data brokers. We may disclose data where required by law, or to protect the rights, property or safety of PocketLedger, our users, or others." xml:space="preserve">
+    <value>Hormis le fournisseur cité, nous n’utilisons aucun service tiers d’envoi d’e-mails et n’avons aucun partenaire d’analyse ou de publicité. Nous ne vendons ni ne louons vos données et ne les communiquons pas aux courtiers. Nous pouvons les divulguer si la loi l’exige ou pour protéger les droits, les biens ou la sécurité de PocketLedger, de ses utilisateurs ou d’autres personnes.</value>
+  </data>
+  <data name="Cloudflare's GDPR information ↗" xml:space="preserve">
+    <value>Informations RGPD de Cloudflare ↗</value>
+  </data>
+  <data name="Contact form messages are kept in our mailbox only as long as needed to answer you and handle any follow-up, and you can ask us to delete them at any time." xml:space="preserve">
+    <value>Les messages du formulaire sont conservés dans notre boîte le temps de vous répondre et de traiter les suites éventuelles. Vous pouvez demander leur suppression à tout moment.</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Supprimer le compte</value>
+  </data>
+  <data name="Deleting your PocketLedger account doesn't change anything in your Google, Facebook or GitHub account. To also remove PocketLedger from the apps connected there, use" xml:space="preserve">
+    <value>La suppression de votre compte PocketLedger ne modifie pas vos comptes Google, Facebook ou GitHub. Pour retirer PocketLedger des applications associées, utilisez</value>
+  </data>
+  <data name="Facebook's Apps and Websites settings ↗" xml:space="preserve">
+    <value>Facebook : applications et sites web ↗</value>
+  </data>
+  <data name="GitHub's Authorized OAuth Apps ↗" xml:space="preserve">
+    <value>GitHub : applications OAuth autorisées ↗</value>
+  </data>
+  <data name="GitHub's Privacy Statement ↗" xml:space="preserve">
+    <value>Déclaration de confidentialité de GitHub ↗</value>
+  </data>
+  <data name="Google's Privacy Policy ↗" xml:space="preserve">
+    <value>Politique de confidentialité de Google ↗</value>
+  </data>
+  <data name="Google's third-party connections ↗" xml:space="preserve">
+    <value>Google : connexions tierces ↗</value>
+  </data>
+  <data name="How to delete your account" xml:space="preserve">
+    <value>Comment supprimer votre compte</value>
+  </data>
+  <data name="If we ever perform routine technical backups of our servers for disaster-recovery purposes, these are rotated on a short cycle and are not used to restore data you've asked us to delete." xml:space="preserve">
+    <value>Si nous réalisons des sauvegardes techniques de routine pour la reprise après sinistre, elles sont renouvelées selon un cycle court et ne servent pas à restaurer des données dont vous avez demandé la suppression.</value>
+  </data>
+  <data name="Meta's Privacy Policy ↗" xml:space="preserve">
+    <value>Politique de confidentialité de Meta ↗</value>
+  </data>
+  <data name="Our automated abuse-detection system (CrowdSec) runs entirely on our own servers, and its optional community threat-sharing feature is switched off — it does not send your data anywhere outside our infrastructure." xml:space="preserve">
+    <value>Notre système de détection automatique des abus (CrowdSec) fonctionne entièrement sur nos serveurs. Le partage communautaire facultatif des menaces est désactivé. Vos données ne quittent pas notre infrastructure par ce biais.</value>
+  </data>
+  <data name="Our hosting provider" xml:space="preserve">
+    <value>Notre hébergeur</value>
+  </data>
+  <data name="Raw technical access logs used for abuse detection are kept for a short, fixed window (currently up to seven days) and then automatically deleted; they are not linked to your account beyond that window." xml:space="preserve">
+    <value>Les journaux d’accès bruts servant à détecter les abus sont conservés pour une période fixe courte, actuellement jusqu’à sept jours, puis supprimés automatiquement. Ils ne sont plus liés à votre compte au-delà de cette période.</value>
+  </data>
+  <data name="Sign in, open the profile menu, choose" xml:space="preserve">
+    <value>Connectez-vous, ouvrez le menu du profil et choisissez</value>
+  </data>
+  <data name="We do not use your data for advertising or behavioural profiling, we run no analytics or tracking on the Service, and we do not send marketing emails. If that ever changes, we will update this notice and ask for your consent wherever the law requires it, rather than relying on this notice to cover it retroactively." xml:space="preserve">
+    <value>Nous n’utilisons pas vos données pour la publicité ou le profilage comportemental, ne déployons ni analyse ni suivi sur le service et n’envoyons pas d’e-mails marketing. Si cela change, nous actualiserons cette notice et recueillerons votre consentement lorsque la loi l’exige, sans nous appuyer rétroactivement sur cette notice.</value>
+  </data>
+  <data name="We keep the list of parties who can see your data short and deliberately:" xml:space="preserve">
+    <value>Nous limitons volontairement le nombre de parties qui peuvent consulter vos données :</value>
+  </data>
+  <data name="When you delete your account, your account, authentication, and financial data is deleted immediately — we don't keep a separate retention window &quot;just in case.&quot; An encrypted backup you've exported yourself is yours to keep or delete; we don't retain a copy of it after you download it." xml:space="preserve">
+    <value>Lorsque vous supprimez votre compte, les données de compte, d’authentification et financières sont effacées immédiatement. Il n’existe pas de délai supplémentaire de conservation. Vous pouvez conserver ou supprimer la sauvegarde chiffrée que vous avez exportée. Nous n’en gardons aucune copie après le téléchargement.</value>
+  </data>
+  <data name="Your account and financial data is stored and primarily processed on servers located within the EEA. The transfers outside the EEA we're aware of are the connection-level metadata described above that necessarily passes through Cloudflare, Inc. as part of its edge and security service, only if you choose social sign-in, the sign-in exchange with Google LLC, Meta Platforms, Inc. or GitHub, Inc., and, only if you choose to play the home page video, the video request to Google LLC (YouTube). All of these companies are headquartered in the United States. These transfers rely on the EU–U.S. Data Privacy Framework, with Standard Contractual Clauses as a fallback safeguard where the Framework doesn't apply." xml:space="preserve">
+    <value>Les données de compte et financières sont stockées et principalement traitées sur des serveurs situés dans l’EEE. Les transferts hors de l’EEE dont nous avons connaissance concernent les métadonnées de connexion passant par Cloudflare, Inc., l’échange de connexion avec Google LLC, Meta Platforms, Inc. ou GitHub, Inc. si vous choisissez une connexion externe, et la requête vidéo à Google LLC (YouTube) si vous lancez la vidéo de l’accueil. Ces sociétés ont leur siège aux États-Unis. Les transferts s’appuient sur le cadre UE–États-Unis de protection des données et, à défaut, sur les clauses contractuelles types.</value>
+  </data>
+  <data name="and use" xml:space="preserve">
+    <value>et utilisez</value>
+  </data>
+  <data name="and we'll delete your account for you." xml:space="preserve">
+    <value>et nous supprimerons votre compte.</value>
+  </data>
+  <data name="or" xml:space="preserve">
+    <value>ou</value>
+  </data>
+  <data name=", with no setting to turn this off and no plaintext fallback on error." xml:space="preserve">
+    <value>. Le chiffrement ne peut pas être désactivé et aucune sauvegarde en clair n’est utilisée en cas d’erreur.</value>
+  </data>
+  <data name=". We'll respond within one month, as required by the GDPR." xml:space="preserve">
+    <value>. Nous répondrons dans un délai d’un mois, conformément au RGPD.</value>
+  </data>
+  <data name="1055 Budapest, Falk Miksa utca 9-11, Hungary (postal: 1363 Budapest, Pf.: 9.)" xml:space="preserve">
+    <value>1055 Budapest, Falk Miksa utca 9–11, Hongrie (adresse postale : 1363 Budapest, Pf. 9)</value>
+  </data>
+  <data name="Access" xml:space="preserve">
+    <value>Accès</value>
+  </data>
+  <data name="Data controller" xml:space="preserve">
+    <value>Responsable du traitement</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Erase" xml:space="preserve">
+    <value>Effacement</value>
+  </data>
+  <data name="Every account is protected by" xml:space="preserve">
+    <value>Chaque compte est protégé par</value>
+  </data>
+  <data name="Every internal connection between our services is itself encrypted with a private TLS certificate authority, independent of the public HTTPS connection your browser uses." xml:space="preserve">
+    <value>Toutes les connexions internes entre nos services sont chiffrées avec une autorité de certification TLS privée, indépendamment de la connexion HTTPS publique de votre navigateur.</value>
+  </data>
+  <data name="Export your data" xml:space="preserve">
+    <value>Portabilité des données</value>
+  </data>
+  <data name="For anything about this notice or your personal data — access, correction, deletion, or just a question — reach out directly:" xml:space="preserve">
+    <value>Pour toute question sur cette notice ou vos données personnelles, notamment l’accès, la rectification ou l’effacement, contactez-nous directement :</value>
+  </data>
+  <data name="Full technical detail:" xml:space="preserve">
+    <value>Détails techniques :</value>
+  </data>
+  <data name="Hungarian supervisory authority" xml:space="preserve">
+    <value>Autorité de contrôle hongroise</value>
+  </data>
+  <data name="Lodge a complaint" xml:space="preserve">
+    <value>Réclamation</value>
+  </data>
+  <data name="PocketLedger automatically posts recurring transactions on the schedule you set up yourself — that's carrying out your own instructions, not a decision made about you. We do not use automated decision-making or profiling that produces legal or similarly significant effects on you." xml:space="preserve">
+    <value>PocketLedger enregistre automatiquement les transactions récurrentes selon le calendrier que vous définissez. Il applique vos instructions sans prendre de décision à votre sujet. Nous n’utilisons aucune décision automatisée ni aucun profilage produisant des effets juridiques ou comparables pour vous.</value>
+  </data>
+  <data name="PocketLedger is open source, so you don't have to take our word for this — you can read exactly how it's built:" xml:space="preserve">
+    <value>PocketLedger est open source. Vous pouvez consulter le code pour vérifier son fonctionnement :</value>
+  </data>
+  <data name="Privacy Policy — PocketLedger" xml:space="preserve">
+    <value>Politique de confidentialité — PocketLedger</value>
+  </data>
+  <data name="Project" xml:space="preserve">
+    <value>Projet</value>
+  </data>
+  <data name="Rectify" xml:space="preserve">
+    <value>Rectification</value>
+  </data>
+  <data name="Restrict or object" xml:space="preserve">
+    <value>Limitation ou opposition</value>
+  </data>
+  <data name="Sensitive fields (transaction notes, account and category names, debts, your TOTP secret, recovery codes) are" xml:space="preserve">
+    <value>Les champs sensibles (notes de transaction, noms des comptes et catégories, dettes, secret TOTP et codes de récupération) sont</value>
+  </data>
+  <data name="Signing in sets two cookies on the application domain: an encrypted session cookie that keeps you signed in, and an anti-forgery cookie that protects your account from cross-site request forgery. If you sign in with Google, Facebook or GitHub, short-lived cookies also protect that sign-in from tampering and are removed once it completes. All of these are strictly necessary for the Service to function, contain no advertising or tracking identifiers, and are not shared with any third party. Because they're strictly necessary, they don't require a cookie-consent banner under EU ePrivacy rules. Preference cookies remember the appearance theme, avatar and language you choose. They only store those choices. We set no analytics, advertising or tracking cookies." xml:space="preserve">
+    <value>À la connexion, un cookie de session chiffré vous maintient connecté et un autre protège contre la falsification de requêtes intersites. Avec Google, Facebook ou GitHub, des cookies temporaires protègent aussi la connexion et sont supprimés à son terme. Ces cookies sont indispensables au service, ne contiennent aucun identifiant publicitaire ou de suivi et ne sont pas partagés avec des tiers. Les règles ePrivacy de l’UE n’exigent pas de bandeau pour les cookies strictement nécessaires. Les cookies de préférence mémorisent uniquement le thème, l’avatar et la langue choisis. Nous n’utilisons aucun cookie d’analyse, de publicité ou de suivi.</value>
+  </data>
+  <data name="TOTP-based two-factor authentication" xml:space="preserve">
+    <value>une authentification à deux facteurs basée sur TOTP</value>
+  </data>
+  <data name="The Service isn't directed at, and shouldn't be used by, anyone under the age of 16. We don't knowingly collect data from children. If you believe a child has provided us with personal data, contact us and we'll delete it." xml:space="preserve">
+    <value>Le service ne s’adresse pas aux personnes de moins de 16 ans et elles ne doivent pas l’utiliser. Nous ne collectons pas sciemment de données d’enfants. Si vous pensez qu’un enfant nous a fourni des données personnelles, contactez-nous pour que nous les supprimions.</value>
+  </data>
+  <data name="The application also keeps short-lived security statistics for at most 48 hours, after which they expire automatically: request counts in five-minute intervals, broken down by account and by IP address; for each IP address, the request method, the path without its query string or record identifiers, the response status and the accounts seen from that address, in hourly groups; and the IP address of every request for a rolling three-minute window so unusually high request volumes can be detected. When an IP address exceeds that threshold, we record an incident containing the address, the accounts and the parts of the Service involved, the request count and the time, so the traffic can be reviewed and blocked if necessary. An IP address that an administrator bans from this data stays on the block list for the chosen period, at most 30 days." xml:space="preserve">
+    <value>L’application conserve des statistiques de sécurité pendant 48 heures au maximum, puis les efface automatiquement. Les requêtes sont comptées par intervalles de cinq minutes, par compte et par adresse IP. Pour chaque adresse, la méthode, le chemin sans paramètres ni identifiants d’enregistrements, le statut de réponse et les comptes observés sont regroupés par heure. L’adresse IP de chaque requête est conservée dans une fenêtre glissante de trois minutes pour détecter les volumes inhabituels. En cas de dépassement, un incident enregistre l’adresse, les comptes et parties du service concernés, le nombre de requêtes et l’heure, afin d’examiner et si nécessaire de bloquer le trafic. Une adresse bloquée par un administrateur reste sur la liste pour la durée choisie, au maximum 30 jours.</value>
+  </data>
+  <data name="The home page video is the only third-party content we embed, and it stays unloaded until you click play. After that, YouTube (Google LLC) may store data in your browser under its own policy; see" xml:space="preserve">
+    <value>La vidéo d’accueil est le seul contenu tiers intégré. Elle n’est chargée que lorsque vous la lancez. YouTube (Google LLC) peut ensuite stocker des données dans votre navigateur selon sa propre politique. Voir</value>
+  </data>
+  <data name="To exercise any of these rights, contact us using the details in" xml:space="preserve">
+    <value>Pour exercer ces droits, contactez-nous aux coordonnées de</value>
+  </data>
+  <data name="Traffic to the Service passes through a rate-limiting and automated-ban layer that blocks abusive or high-volume requests before they reach the application." xml:space="preserve">
+    <value>Le trafic traverse une couche de limitation et de blocage automatique qui arrête les requêtes abusives ou trop nombreuses avant qu’elles n’atteignent l’application.</value>
+  </data>
+  <data name="Under the GDPR, you have the right to:" xml:space="preserve">
+    <value>Le RGPD vous confère les droits suivants :</value>
+  </data>
+  <data name="We may update this notice as the Service changes. The effective date at the top always reflects the latest version. If a change is material, we'll make that clear on the Service itself, not just here." xml:space="preserve">
+    <value>Nous pouvons mettre cette notice à jour lorsque le service évolue. La date d’effet en haut correspond à la dernière version. Les changements importants seront aussi signalés clairement sur le service.</value>
+  </data>
+  <data name="Withdraw consent" xml:space="preserve">
+    <value>Retrait du consentement</value>
+  </data>
+  <data name="Your encryption key can only be unlocked with your PocketLedger password or your data recovery key. If you sign in with Google, Facebook or GitHub, you set a separate" xml:space="preserve">
+    <value>Votre clé de chiffrement ne peut être déverrouillée qu’avec votre mot de passe PocketLedger ou votre clé de récupération des données. Si vous utilisez Google, Facebook ou GitHub, vous définissez un</value>
+  </data>
+  <data name="and one-time recovery codes, including accounts that sign in with Google, Facebook or GitHub. When public registration is enabled, new users can create their own account." xml:space="preserve">
+    <value>et des codes de récupération à usage unique, y compris pour les connexions avec Google, Facebook ou GitHub. Lorsque les inscriptions publiques sont ouvertes, les nouveaux utilisateurs peuvent créer leur compte.</value>
+  </data>
+  <data name="at any time, for any processing that is ever based on consent (we currently have none)." xml:space="preserve">
+    <value>à tout moment pour tout traitement fondé sur le consentement. Nous n’en effectuons aucun actuellement.</value>
+  </data>
+  <data name="data password" xml:space="preserve">
+    <value>mot de passe distinct pour vos données</value>
+  </data>
+  <data name="database encryption ↗" xml:space="preserve">
+    <value>Chiffrement de la base ↗</value>
+  </data>
+  <data name="edge security ↗" xml:space="preserve">
+    <value>Sécurité en périphérie ↗</value>
+  </data>
+  <data name="encrypted before they're ever written to the database" xml:space="preserve">
+    <value>chiffrés avant toute écriture en base</value>
+  </data>
+  <data name="for this, so the social provider alone can never unlock your financial data." xml:space="preserve">
+    <value>. Le fournisseur externe ne peut donc pas déverrouiller vos données financières à lui seul.</value>
+  </data>
+  <data name="in a portable format — use the built-in encrypted backup under Import/Export at any time; it covers your complete financial dataset." xml:space="preserve">
+    <value>Vous pouvez exporter vos données dans un format portable via la sauvegarde chiffrée dans Importation/Exportation. Elle couvre toutes vos données financières.</value>
+  </data>
+  <data name="inaccurate or incomplete data — most of this you can already edit directly in the app." xml:space="preserve">
+    <value>des données inexactes ou incomplètes. Vous pouvez modifier la plupart de ces données dans l’application.</value>
+  </data>
+  <data name="key management ↗" xml:space="preserve">
+    <value>Gestion des clés ↗</value>
+  </data>
+  <data name="the personal data we hold about you." xml:space="preserve">
+    <value>aux données personnelles que nous détenons sur vous.</value>
+  </data>
+  <data name="to certain processing, in particular any processing based on our legitimate interest." xml:space="preserve">
+    <value>à certains traitements, notamment ceux fondés sur notre intérêt légitime.</value>
+  </data>
+  <data name="with a supervisory authority, including the one below or the one in your own country of residence within the EU/EEA." xml:space="preserve">
+    <value>auprès d’une autorité de contrôle, notamment celle indiquée ci-dessous ou celle de votre pays de résidence dans l’UE ou l’EEE.</value>
+  </data>
+  <data name="your data (&quot;right to be forgotten&quot;) by deleting your account — see" xml:space="preserve">
+    <value>de vos données (« droit à l’oubli ») en supprimant votre compte. Voir</value>
+  </data>
+  <data name="Ádám Kertész, Hungary" xml:space="preserve">
+    <value>Ádám Kertész, Hongrie</value>
+  </data>
+</root>

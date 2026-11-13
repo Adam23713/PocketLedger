@@ -1,35 +1,36 @@
 @page "/guide/getting-started"
-@{ ViewData["Title"] = "Getting started"; }
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
+@{ ViewData["Title"] = Text["Getting started"].Value; }
 <div class="docs-layout shell">
     <partial name="_GuideNavigation" />
     <article class="docs-content guide-article">
-        <p class="eyebrow">CHAPTER 01</p>
-        <h1>Getting started</h1>
-        <p class="lead">Create a protected account, learn the main navigation and understand what the dashboard is telling you.</p>
+        <p class="eyebrow">@Text["CHAPTER 01"]</p>
+        <h1>@Text["Getting started"]</h1>
+        <p class="lead">@Text["Create a protected account, learn the main navigation and understand what the dashboard is telling you."]</p>
 
-        <h2 id="registration">Create your account</h2>
+        <h2 id="registration">@Text["Create your account"]</h2>
         <ol class="guide-steps">
-            <li><span>1</span><div><strong>Open registration</strong><p>Choose a username, provide your email address and create a password of at least 14 characters.</p></div></li>
-            <li><span>2</span><div><strong>Save the data recovery key</strong><p>Store it offline. It is the only recovery path if you forget your password, and PocketLedger shows it only once.</p></div></li>
-            <li><span>3</span><div><strong>Configure an authenticator</strong><p>Scan the QR code with an authenticator app, enter the six-digit code, then save the single-use recovery codes.</p></div></li>
+            <li><span>1</span><div><strong>@Text["Open registration"]</strong><p>@Text["Choose a username, provide your email address and create a password of at least 14 characters."]</p></div></li>
+            <li><span>2</span><div><strong>@Text["Save the data recovery key"]</strong><p>@Text["Store it offline. It is the only recovery path if you forget your password, and PocketLedger shows it only once."]</p></div></li>
+            <li><span>3</span><div><strong>@Text["Configure an authenticator"]</strong><p>@Text["Scan the QR code with an authenticator app, enter the six-digit code, then save the single-use recovery codes."]</p></div></li>
         </ol>
-        <div class="guide-callout warning"><strong>Keep secrets out of screenshots and cloud notes.</strong><p>Your password, authenticator key, recovery codes and data recovery key protect different parts of the account. Store them securely and separately.</p></div>
+        <div class="guide-callout warning"><strong>@Text["Keep secrets out of screenshots and cloud notes."]</strong><p>@Text["Your password, authenticator key, recovery codes and data recovery key protect different parts of the account. Store them securely and separately."]</p></div>
 
-        <h2 id="dashboard">Meet the dashboard</h2>
-        <p>The top row summarizes total balance, net worth, account count and this month’s movement. Account cards show the current balance and provide shortcuts for expenses, income and transfers.</p>
+        <h2 id="dashboard">@Text["Meet the dashboard"]</h2>
+        <p>@Text["The top row summarizes total balance, net worth, account count and this month’s movement. Account cards show the current balance and provide shortcuts for expenses, income and transfers."]</p>
         <figure class="guide-figure">
-            <img src="~/images/guide/dashboard.jpg" alt="Dashboard with multi-currency totals and four account cards" />
-            <figcaption>Use the quick actions on an account card when you already know which account should change.</figcaption>
+            <img src="~/images/guide/dashboard.jpg" alt="@Text["Dashboard with multi-currency totals and four account cards"]" />
+            <figcaption>@Text["Use the quick actions on an account card when you already know which account should change."]</figcaption>
         </figure>
         <div class="guide-feature-list">
-            <div><strong>Total balance</strong><p>Accounts included in your main balance, grouped by currency.</p></div>
-            <div><strong>Net worth</strong><p>Accounts marked for net-worth reporting, also grouped by currency.</p></div>
-            <div><strong>This month</strong><p>Income, expenses and the resulting change for the current month.</p></div>
-            <div><strong>Privacy toggle</strong><p>Temporarily hides monetary amounts when somebody else can see your screen.</p></div>
+            <div><strong>@Text["Total balance"]</strong><p>@Text["Accounts included in your main balance, grouped by currency."]</p></div>
+            <div><strong>@Text["Net worth"]</strong><p>@Text["Accounts marked for net-worth reporting, also grouped by currency."]</p></div>
+            <div><strong>@Text["This month"]</strong><p>@Text["Income, expenses and the resulting change for the current month."]</p></div>
+            <div><strong>@Text["Privacy toggle"]</strong><p>@Text["Temporarily hides monetary amounts when somebody else can see your screen."]</p></div>
         </div>
 
-        <h2 id="navigation">Find your way around</h2>
-        <p>The main navigation contains daily-use features. Open your avatar menu for Accounts, Categories, Settings, Account &amp; security, Import / Export and Logout. The appearance button lets you switch between the available themes without changing your data.</p>
-        <nav class="chapter-pager" aria-label="Chapter navigation"><a asp-page="/Guide/Index"><span aria-hidden="true">←</span> Guide overview</a><a asp-page="/Guide/AccountsAndCategories">Accounts &amp; categories <span aria-hidden="true">→</span></a></nav>
+        <h2 id="navigation">@Text["Find your way around"]</h2>
+        <p>@Text["The main navigation contains daily-use features. Open your avatar menu for Accounts, Categories, Settings, Account & security, Import / Export and Logout. The appearance button lets you switch between the available themes without changing your data."]</p>
+        <nav class="chapter-pager" aria-label="@Text["Chapter navigation"]"><a asp-page="/Guide/Index"><span aria-hidden="true">←</span> @Text["Guide overview"]</a><a asp-page="/Guide/AccountsAndCategories">@Text["Accounts & categories"] <span aria-hidden="true">→</span></a></nav>
     </article>
 </div>

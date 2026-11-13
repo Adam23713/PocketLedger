@@ -14,4 +14,13 @@
   <data name="PocketLedger documentation" xml:space="preserve">
     <value>PocketLedger dokumentáció</value>
   </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Dokumentáció</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
 </root>

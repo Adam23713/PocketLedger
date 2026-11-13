@@ -1,9 +1,10 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Admin.AdminDashboardViewModel
-@{ ViewData["Title"] = "Admin"; }
+@{ ViewData["Title"] = CommonText.Get("Admin"); }
 
 <div class="mb-4">
-    <h1 class="mb-1">Admin dashboard</h1>
-    <p class="text-muted mb-0">Operational overview and user access management for the bootstrap administrator.</p>
+    <h1 class="mb-1">@CommonText.Get("Admin dashboard")</h1>
+    <p class="text-muted mb-0">@CommonText.Get("Operational overview and user access management for the bootstrap administrator.")</p>
 </div>
 
 @if (TempData["AdminMessage"] is string message)
@@ -19,8 +20,8 @@
 <section class="card mb-5" aria-labelledby="registration-heading">
     <div class="card-header d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 py-3">
         <div>
-            <h2 class="h5 mb-0" id="registration-heading">Registration</h2>
-            <p class="text-muted small mb-0">Control public sign-up and how many accounts the instance can hold.</p>
+            <h2 class="h5 mb-0" id="registration-heading">@CommonText.Get("Registration")</h2>
+            <p class="text-muted small mb-0">@CommonText.Get("Control public sign-up and how many accounts the instance can hold.")</p>
         </div>
         <span class="badge @(registration.AcceptsRegistrations ? "text-bg-success" : registration.IsOpen ? "text-bg-warning" : "text-bg-secondary")">
             @(registration.AcceptsRegistrations ? "Open" : registration.IsOpen ? "Open — no free accounts" : "Closed")
@@ -28,13 +29,13 @@
     </div>
     <div class="card-body">
         <dl class="row g-3 text-center mb-4">
-            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Registered</dt><dd class="fs-3 fw-semibold mb-0" data-registration-registered>@registration.RegisteredUserCount</dd></div></div>
-            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Limit</dt><dd class="fs-3 fw-semibold mb-0" data-registration-maximum>@(registration.MaximumUserCount?.ToString() ?? "Unlimited")</dd></div></div>
-            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">Free</dt><dd class="fs-3 fw-semibold mb-0" data-registration-remaining>@(registration.RemainingSlots?.ToString() ?? "Unlimited")</dd></div></div>
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">@CommonText.Get("Registered")</dt><dd class="fs-3 fw-semibold mb-0" data-registration-registered>@registration.RegisteredUserCount</dd></div></div>
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">@CommonText.Get("Limit")</dt><dd class="fs-3 fw-semibold mb-0" data-registration-maximum>@(registration.MaximumUserCount?.ToString() ?? "Unlimited")</dd></div></div>
+            <div class="col-4"><div class="border rounded-3 p-3 h-100"><dt class="text-muted fw-normal small">@CommonText.Get("Free")</dt><dd class="fs-3 fw-semibold mb-0" data-registration-remaining>@(registration.RemainingSlots?.ToString() ?? "Unlimited")</dd></div></div>
         </dl>
         @if (registration.MaximumUserCount is { } limit && registration.RegisteredUserCount > limit)
         {
-            <div class="alert alert-warning" role="status">There are more registered accounts than the limit allows. Existing accounts are kept; new registrations stay blocked until the count drops below the limit.</div>
+            <div class="alert alert-warning" role="status">@CommonText.Get("There are more registered accounts than the limit allows. Existing accounts are kept; new registrations stay blocked until the count drops below the limit.")</div>
         }
         <form asp-action="UpdateRegistration" method="post" class="row g-3 align-items-end border-top pt-3">
             <input name="page" type="hidden" value="@Model.Page" />
@@ -42,42 +43,42 @@
                 <div class="form-check form-switch mb-2">
                     <input class="form-check-input" type="checkbox" role="switch" id="registration-open" name="isOpen" value="true" @(registration.IsOpen ? "checked" : null) />
                     <input type="hidden" name="isOpen" value="false" />
-                    <label class="form-check-label" for="registration-open">Public registration is open</label>
+                    <label class="form-check-label" for="registration-open">@CommonText.Get("Public registration is open")</label>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-md-3">
-                <label class="form-label" for="registration-maximum">Maximum number of accounts</label>
+                <label class="form-label" for="registration-maximum">@CommonText.Get("Maximum number of accounts")</label>
                 <input class="form-control" type="number" id="registration-maximum" name="maximumUserCount" min="1" max="@PocketLedger.Configuration.PublicRegistrationOptions.MaximumAllowedUserCount" step="1"
-                       value="@registration.MaximumUserCount" placeholder="Unlimited" aria-describedby="registration-maximum-help" />
+                       value="@registration.MaximumUserCount" placeholder="@CommonText.Get("Unlimited")" aria-describedby="registration-maximum-help" />
             </div>
             <div class="col-12 col-md-auto">
-                <button class="btn btn-primary" type="submit">Save registration settings</button>
+                <button class="btn btn-primary" type="submit">@CommonText.Get("Save registration settings")</button>
             </div>
-            <div class="col-12 form-text mt-1" id="registration-maximum-help">Every account counts toward the limit, including the administrator and blocked accounts. Leave the limit empty for no limit.</div>
+            <div class="col-12 form-text mt-1" id="registration-maximum-help">@CommonText.Get("Every account counts toward the limit, including the administrator and blocked accounts. Leave the limit empty for no limit.")</div>
         </form>
     </div>
 </section>
 
 <section aria-labelledby="user-overview-heading">
     <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 mb-2">
-        <h2 class="h4 mb-0" id="user-overview-heading">Users</h2>
+        <h2 class="h4 mb-0" id="user-overview-heading">@CommonText.Get("Users")</h2>
         <span class="text-muted">@Model.TotalUsers total</span>
     </div>
     @if (Model.Users.Count == 0)
     {
-        <div class="alert alert-info" role="status">No users are available.</div>
+        <div class="alert alert-info" role="status">@CommonText.Get("No users are available.")</div>
     }
     else
     {
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th scope="col">Username</th><th scope="col">Email</th><th scope="col">Registered with</th><th scope="col">Last successful login (UTC)</th><th scope="col">Status</th><th scope="col">Locked out until (UTC)</th><th scope="col">Actions</th></tr></thead>
+                <thead><tr><th scope="col">@CommonText.Get("Username")</th><th scope="col">@CommonText.Get("Email")</th><th scope="col">@CommonText.Get("Registered with")</th><th scope="col">@CommonText.Get("Last successful login (UTC)")</th><th scope="col">@CommonText.Get("Status")</th><th scope="col">@CommonText.Get("Locked out until (UTC)")</th><th scope="col">@CommonText.Get("Actions")</th></tr></thead>
                 <tbody>
                     @foreach (var user in Model.Users)
                     {
                         <tr>
                             <td>@user.Username</td>
-                            <td>@(user.Email ?? "Not available")</td>
+                            <td>@(user.Email ?? CommonText.Get("Not available"))</td>
                             <td>@(user.RegistrationProvider ?? "Unknown")</td>
                             <td>@(user.LastSuccessfulLoginAtUtc?.ToString("u") ?? "Never signed in")</td>
                             <td>@(user.IsAccessBlocked ? "Blocked" : user.LockoutEndUtc is not null ? "Locked out" : "Active")</td>
@@ -85,7 +86,7 @@
                             <td>
                                 @if (user.IsBootstrapAdministrator)
                                 {
-                                    <span class="text-muted">Protected administrator</span>
+                                    <span class="text-muted">@CommonText.Get("Protected administrator")</span>
                                 }
                                 else
                                 {
@@ -98,10 +99,10 @@
                                         <form asp-action="Unlock" method="post">
                                             <input name="userId" type="hidden" value="@user.Id" />
                                             <input name="page" type="hidden" value="@Model.Page" />
-                                            <button class="btn btn-sm btn-outline-primary" type="submit" disabled="@(user.LockoutEndUtc is null)" title="@(user.LockoutEndUtc is null ? "The user is not locked out." : "End the failed-login lockout so the user can sign in again now.")">Clear lockout</button>
+                                            <button class="btn btn-sm btn-outline-primary" type="submit" disabled="@(user.LockoutEndUtc is null)" title="@(user.LockoutEndUtc is null ? "The user is not locked out." : "End the failed-login lockout so the user can sign in again now.")">@CommonText.Get("Clear lockout")</button>
                                         </form>
                                         <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#delete-user-modal"
-                                                data-delete-user-id="@user.Id" data-delete-username="@user.Username">Delete</button>
+                                                data-delete-user-id="@user.Id" data-delete-username="@user.Username">@CommonText.Get("Delete")</button>
                                     </div>
                                 }
                             </td>
@@ -113,10 +114,10 @@
     }
     @if (Model.TotalPages > 1)
     {
-        <nav class="d-flex align-items-center justify-content-between mt-3" aria-label="User overview pages">
+        <nav class="d-flex align-items-center justify-content-between mt-3" aria-label="@CommonText.Get("User overview pages")">
             @if (Model.Page > 1)
             {
-                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page - 1)" rel="prev">Previous</a>
+                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page - 1)" rel="prev">@CommonText.Get("Previous")</a>
             }
             else
             {
@@ -125,7 +126,7 @@
             <span class="text-muted">Page @Model.Page of @Model.TotalPages</span>
             @if (Model.Page < Model.TotalPages)
             {
-                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page + 1)" rel="next">Next</a>
+                <a class="btn btn-outline-secondary" asp-action="Index" asp-route-page="@(Model.Page + 1)" rel="next">@CommonText.Get("Next")</a>
             }
             else
             {
@@ -146,17 +147,17 @@
                 <input name="userId" type="hidden" />
                 <input name="page" type="hidden" value="@Model.Page" />
                 <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="delete-user-modal-title">Permanently delete user?</h2>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h2 class="modal-title fs-5" id="delete-user-modal-title">@CommonText.Get("Permanently delete user?")</h2>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="@CommonText.Get("Close")"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="delete-user-warning">This permanently deletes <strong data-delete-username></strong> and all of their PocketLedger data. This action cannot be undone.</p>
-                    <label class="form-label" for="delete-confirmation">Type <strong>DELETE</strong> to confirm</label>
+                    <p id="delete-user-warning">@CommonText.Get("This permanently deletes") <strong data-delete-username></strong> @CommonText.Get("and all of their PocketLedger data. This action cannot be undone.")</p>
+                    <label class="form-label" for="delete-confirmation">@CommonText.Get("Type") <strong>DELETE</strong> to confirm</label>
                     <input class="form-control" id="delete-confirmation" name="confirmation" type="text" autocomplete="off" spellcheck="false" required />
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger" type="submit" data-delete-submit disabled>Permanently delete</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">@CommonText.Get("Cancel")</button>
+                    <button class="btn btn-danger" type="submit" data-delete-submit disabled>@CommonText.Get("Permanently delete")</button>
                 </div>
             </form>
         </div>
@@ -165,6 +166,53 @@
 
 @section Scripts {
     <script src="~/lib/chart.js/chart.umd.min.js"></script>
+    <script id="request-activity-translations" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new string[]
+    {
+        "All requests in the interval",
+        "Anonymous",
+        "Ban {0} for {1}? Every PocketLedger site will refuse this address.",
+        "Banned",
+        "Client address data is currently unavailable; totals below are still accurate.",
+        "Client addresses",
+        "Cloudflare edge",
+        "CrowdSec cannot be reached, so the ban status of this address is unknown.",
+        "Failed (4xx/5xx)",
+        "Failed (4xx/5xx): requests/minute",
+        "First seen",
+        "Inspect",
+        "Internal network",
+        "Last seen",
+        "Loading address details…",
+        "Loading request activity…",
+        "No address matches.",
+        "No client addresses were recorded in this interval.",
+        "No endpoints were recorded for this address in this interval.",
+        "No requests from {0} during this interval.",
+        "No requests matched the selected activity view during this interval.",
+        "No signed-in account was seen from this address.",
+        "No traffic in this interval.",
+        "Not banned. A ban blocks this address on every PocketLedger site.",
+        "Not banned. Signed-in accounts used this address, so a ban also locks out those people while they are on it.",
+        "Only part of the requested request-activity interval is available.",
+        "Request activity could not be loaded. The rest of the admin dashboard remains available.",
+        "Request telemetry is currently unavailable. The rest of the admin dashboard remains available.",
+        "Requests",
+        "Requests/minute",
+        "Showing the {0} busiest of {1} addresses.",
+        "Signed-in accounts seen from this address: {0}.",
+        "The details of this address could not be loaded.",
+        "The endpoints of this address could not be loaded.",
+        "The filter is not valid.",
+        "The list may be incomplete because the hourly storage limit was reached during this interval.",
+        "This address is banned on every PocketLedger site.",
+        "You",
+        "{0} left",
+        "{0} requests are in the totals but not listed per address because too many addresses were active in an interval.",
+        "{0} requests are not itemized because this address reached the limit of 200 different endpoints in an hour.",
+        "{0} requests from {1} addresses; {2} were not signed in.",
+        "{0}: requests/minute",
+        "{0}: {1} of {2} requests in the interval.",
+    }.ToDictionary(key => key, CommonText.Get)))</script>
     <script src="~/js/request-activity.js" asp-append-version="true"></script>
     <script src="~/js/admin-user-deletion.js" asp-append-version="true"></script>
 }

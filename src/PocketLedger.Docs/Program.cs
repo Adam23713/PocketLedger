@@ -14,7 +14,7 @@ app.Use(async (context, next) =>
 app.UseStaticFiles();
 app.UseRequestLocalization();
 app.MapRazorPages();
-app.MapUiLanguageSelection();
+app.MapUiLanguageSelection().AllowAnonymous();
 app.Run();
 
 public partial class Program;

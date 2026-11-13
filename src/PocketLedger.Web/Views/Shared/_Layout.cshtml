@@ -1,4 +1,4 @@
-@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
+@using PocketLedger.Localization
 @{
     var applicationVersion = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "unknown";
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -9,7 +9,7 @@
     string NavClass(string controller) => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "nav-link active" : "nav-link";
 }
 <!DOCTYPE html>
-<html lang="en" data-theme="horizon" data-bs-theme="light">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="horizon" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,42 +48,42 @@
         <span class="banking-ambient-stars"></span>
     </div>
     <header class="app-header">
-        <nav class="navbar navbar-expand-lg" aria-label="Main navigation">
+        <nav class="navbar navbar-expand-lg" aria-label="@CommonText.Get("Main navigation")">
             <div class="container-fluid app-navbar-shell">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" title="PocketLedger v@(applicationVersion)">
                     <img src="~/images/app-icons/pocketledger-32.png" alt="" width="28" height="28" />
                     <span>PocketLedger</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation" aria-expanded="false" aria-label="@CommonText.Get("Toggle navigation")">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="main-navigation">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> @Text["Dashboard"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> @Text["Transactions"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> @Text["Calendar"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> @Text["Statistics"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> @Text["Recurring"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> @Text["Loans / Debts"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> @Text["Monthly planner"]</a></li>
-                        <li class="nav-item"><a class="@NavClass("Goals")" asp-controller="Goals" asp-action="Index" aria-current="@(currentController == "Goals" ? "page" : null)"><partial name="_NavigationIcon" model='"Goals"' /> @Text["Goals"]</a></li>
+                        <li class="nav-item"><a class="@NavClass("Home")" asp-controller="Home" asp-action="Index" aria-current="@(currentController == "Home" ? "page" : null)"><partial name="_NavigationIcon" model='"Home"' /> @CommonText.Get("Dashboard")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Transactions")" asp-controller="Transactions" asp-action="Index" aria-current="@(currentController == "Transactions" ? "page" : null)"><partial name="_NavigationIcon" model='"Transactions"' /> @CommonText.Get("Transactions")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Calendar")" asp-controller="Calendar" asp-action="Index" aria-current="@(currentController == "Calendar" ? "page" : null)"><partial name="_NavigationIcon" model='"Calendar"' /> @CommonText.Get("Calendar")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Statistics")" asp-controller="Statistics" asp-action="Index" aria-current="@(currentController == "Statistics" ? "page" : null)"><partial name="_NavigationIcon" model='"Statistics"' /> @CommonText.Get("Statistics")</a></li>
+                        <li class="nav-item"><a class="@NavClass("RecurringTransactions")" asp-controller="RecurringTransactions" asp-action="Index" aria-current="@(currentController == "RecurringTransactions" ? "page" : null)"><partial name="_NavigationIcon" model='"RecurringTransactions"' /> @CommonText.Get("Recurring")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Debts")" asp-controller="Debts" asp-action="Index" aria-current="@(currentController == "Debts" ? "page" : null)"><partial name="_NavigationIcon" model='"Debts"' /> @CommonText.Get("Loans / Debts")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Planner")" asp-controller="Planner" asp-action="Index" aria-current="@(currentController == "Planner" ? "page" : null)"><partial name="_NavigationIcon" model='"Planner"' /> @CommonText.Get("Monthly planner")</a></li>
+                        <li class="nav-item"><a class="@NavClass("Goals")" asp-controller="Goals" asp-action="Index" aria-current="@(currentController == "Goals" ? "page" : null)"><partial name="_NavigationIcon" model='"Goals"' /> @CommonText.Get("Goals")</a></li>
                     </ul>
                 </div>
                 <div class="header-actions">
                     <div class="app-menu">
-                        <button class="header-icon-button" id="theme-menu-button" type="button" aria-label="Choose appearance theme" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">
+                        <button class="header-icon-button" id="theme-menu-button" type="button" aria-label="@CommonText.Get("Choose appearance theme")" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu">
                             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" /></svg>
                         </button>
                         <div class="app-dropdown theme-menu" id="theme-menu" role="menu" aria-labelledby="theme-menu-button" hidden>
-                            <div class="dropdown-heading">Appearance</div>
+                            <div class="dropdown-heading">@CommonText.Get("Appearance")</div>
                             <button type="button" role="menuitemradio" data-theme-value="horizon" aria-checked="false"><span class="theme-swatch horizon-swatch"></span><span>Horizon</span><span class="theme-check">✓</span></button>
-                            <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>Banking App</span><span class="theme-check">✓</span></button>
-                            <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>Glassmorphism</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="banking" aria-checked="false"><span class="theme-swatch banking-swatch"></span><span>@CommonText.Get("Banking App")</span><span class="theme-check">✓</span></button>
+                            <button type="button" role="menuitemradio" data-theme-value="glass" aria-checked="false"><span class="theme-swatch glass-swatch"></span><span>@CommonText.Get("Glassmorphism")</span><span class="theme-check">✓</span></button>
                             <button type="button" role="menuitemradio" data-theme-value="material" aria-checked="false"><span class="theme-swatch material-swatch"></span><span>Material Design 3</span><span class="theme-check">✓</span></button>
                         </div>
                     </div>
                     <div class="app-menu">
-                        <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
+                        <button class="header-icon-button profile-button" id="profile-menu-button" type="button" aria-label="@CommonText.Get("Open profile menu")" aria-haspopup="menu" aria-expanded="false" aria-controls="profile-menu">
                             @if (currentProfile is not null) { <img class="header-avatar" src="~/images/avatars/@($"avatar-{currentProfile.AvatarId}.png")" alt="" /> }
                         </button>
                         <div class="app-dropdown profile-menu" id="profile-menu" role="menu" aria-labelledby="profile-menu-button" hidden>
@@ -95,22 +95,21 @@
                                 </div>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <a role="menuitem" asp-controller="Settings" asp-action="Index"><partial name="_NavigationIcon" model='"Settings"' /> Settings</a>
-                                <a class="@(currentController == "Accounts" ? "active" : null)" role="menuitem" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)"><partial name="_NavigationIcon" model='"Accounts"' /> Accounts</a>
-                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)"><partial name="_NavigationIcon" model='"Categories"' /> Categories</a>
-                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")"><partial name="_NavigationIcon" model='"Security"' /> Account &amp; security</a>
-                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")"><partial name="_NavigationIcon" model='"Website"' /> PocketLedger website</a>
-                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index"><partial name="_NavigationIcon" model='"ImportExport"' /> Import / Export</a>
+                                <a class="@(currentController == "Accounts" ? "active" : null)" role="menuitem" asp-controller="Accounts" asp-action="Index" aria-current="@(currentController == "Accounts" ? "page" : null)"><partial name="_NavigationIcon" model='"Accounts"' /> @CommonText.Get("Accounts")</a>
+                                <a class="@(currentController == "Categories" ? "active" : null)" role="menuitem" asp-controller="Categories" asp-action="Index" aria-current="@(currentController == "Categories" ? "page" : null)"><partial name="_NavigationIcon" model='"Categories"' /> @CommonText.Get("Categories")</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Security")"><partial name="_NavigationIcon" model='"Security"' /> @CommonText.Get("Account & security")</a>
+                                <a role="menuitem" href="@(Context.RequestServices.GetRequiredService<IConfiguration>()["Landing:BaseUrl"] ?? "https://pocketledger.dev")"><partial name="_NavigationIcon" model='"Website"' /> @CommonText.Get("PocketLedger website")</a>
+                                <a role="menuitem" asp-controller="ImportExport" asp-action="Index"><partial name="_NavigationIcon" model='"ImportExport"' /> @CommonText.Get("Import / Export")</a>
                                 <div class="dropdown-divider" role="separator"></div>
                                 <form asp-controller="Session" asp-action="Logout" method="post"><button class="logout-action" role="menuitem" type="submit"><partial name="_NavigationIcon" model='"Session"' /> Logout</button></form>
                             }
                             else
                             {
-                                <a role="menuitem" asp-controller="Session" asp-action="Login"><partial name="_NavigationIcon" model='"Session"' /> Login</a>
+                                <a role="menuitem" asp-controller="Session" asp-action="Login"><partial name="_NavigationIcon" model='"Session"' /> @CommonText.Get("Login")</a>
                             }
                         </div>
                     </div>
                 </div>
-                @await Html.PartialAsync("_LanguageSelector")
             </div>
         </nav>
     </header>
@@ -118,11 +117,11 @@
         <main role="main" class="pb-3">
             @if (TempData["SuccessMessage"] is string successMessage)
             {
-                <div class="alert alert-success" role="alert">@successMessage</div>
+                <div class="alert alert-success" role="alert">@CommonText.Get(successMessage)</div>
             }
             @if (TempData["ErrorMessage"] is string errorMessage)
             {
-                <div class="alert alert-danger" role="alert">@errorMessage</div>
+                <div class="alert alert-danger" role="alert">@CommonText.Get(errorMessage)</div>
             }
             @RenderBody()
         </main>

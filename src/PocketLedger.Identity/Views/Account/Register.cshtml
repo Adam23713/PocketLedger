@@ -2,13 +2,13 @@
 @model PocketLedger.Models.ViewModels.Account.RegisterViewModel
 @{ ViewData["Title"] = Text["Register"].Value; }
 <div class="auth-shell">
-    @await Html.PartialAsync("_LanguageSelector")
     <div class="card auth-card">
         <div class="auth-header">
             <img class="auth-logo" src="~/images/app-icons/pocketledger-32.png" alt="" width="48" height="48" />
             <h1>@Text["Create your account"]</h1>
             <p class="text-muted">@Text["Start tracking your finances with PocketLedger"]</p>
         </div>
+        <div class="mb-3">@await Html.PartialAsync("_LanguageSelector")</div>
         @if (Model.ExternalProviders.Count > 0)
         {
             <partial name="_ExternalLoginButtons" model="(Model.ExternalProviders, Model.ReturnUrl)" />

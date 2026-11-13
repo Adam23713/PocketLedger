@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PocketLedger.Models.Enums;
@@ -90,7 +91,7 @@ public class TransactionFormViewModel : IValidatableObject
 {
     public Guid Id { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "The {0} field is required.")]
     public TransactionType Type { get; set; } = TransactionType.Expense;
 
     [Required(ErrorMessage = "Account is required.")]
@@ -104,19 +105,19 @@ public class TransactionFormViewModel : IValidatableObject
     public decimal? TargetAmount { get; set; }
     public decimal? ExchangeRate { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "The {0} field is required.")]
     public DateOnly TransactionDate { get; set; }
 
-    [Range(0, 23)]
+    [Range(0, 23, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     public int TransactionHour { get; set; }
 
-    [Range(0, 59)]
+    [Range(0, 59, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     public int TransactionMinute { get; set; }
 
     public Guid? CategoryId { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }
 
-    [StringLength(500)]
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     public string? Note { get; set; }
 
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
@@ -124,7 +125,7 @@ public class TransactionFormViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (Type == TransactionType.Transfer && ExchangeRate is <= 0) yield return new ValidationResult("Exchange rate must be greater than zero.", [nameof(ExchangeRate)]);
+        if (Type == TransactionType.Transfer && ExchangeRate is <= 0) yield return new ValidationResult(CommonText.Get("Exchange rate must be greater than zero."), [nameof(ExchangeRate)]);
     }
 }
 

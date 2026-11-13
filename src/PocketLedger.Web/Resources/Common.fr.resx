@@ -1,0 +1,1949 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="'{0}' and '{1}' do not match." xml:space="preserve">
+    <value>« {0} » et « {1} » ne correspondent pas.</value>
+  </data>
+  <data name=") instead of changing the initial balance" xml:space="preserve">
+    <value>) plutôt que modifier le solde initial</value>
+  </data>
+  <data name="+ Add item" xml:space="preserve">
+    <value>+ Ajouter un élément</value>
+  </data>
+  <data name=", shortfall" xml:space="preserve">
+    <value>, déficit</value>
+  </data>
+  <data name="A category cannot be its own parent." xml:space="preserve">
+    <value>Une catégorie ne peut pas être sa propre catégorie parente.</value>
+  </data>
+  <data name="A category containing subcategories cannot become a subcategory." xml:space="preserve">
+    <value>Une catégorie contenant des sous-catégories ne peut pas devenir une sous-catégorie.</value>
+  </data>
+  <data name="A category is required for income and expense transactions." xml:space="preserve">
+    <value>Une catégorie est obligatoire pour les revenus et les dépenses.</value>
+  </data>
+  <data name="A contact link is available in the footer on every page." xml:space="preserve">
+    <value>Un lien de contact figure dans le pied de page de chaque page.</value>
+  </data>
+  <data name="A main category containing subcategories cannot change type." xml:space="preserve">
+    <value>Le type d’une catégorie principale contenant des sous-catégories ne peut pas être modifié.</value>
+  </data>
+  <data name="A note is required for a manual correction." xml:space="preserve">
+    <value>Une note est obligatoire pour une correction manuelle.</value>
+  </data>
+  <data name="A planned date is required for transfers." xml:space="preserve">
+    <value>Une date prévue est obligatoire pour les virements.</value>
+  </data>
+  <data name="A planned date is required." xml:space="preserve">
+    <value>Une date prévue est obligatoire.</value>
+  </data>
+  <data name="A positive amount and date are required." xml:space="preserve">
+    <value>Un montant positif et une date sont obligatoires.</value>
+  </data>
+  <data name="A positive automatic payment amount is required." xml:space="preserve">
+    <value>Le montant du paiement automatique doit être positif.</value>
+  </data>
+  <data name="A subcategory cannot contain another subcategory." xml:space="preserve">
+    <value>Une sous-catégorie ne peut pas en contenir une autre.</value>
+  </data>
+  <data name="A transfer's source amount must use the source account currency." xml:space="preserve">
+    <value>Le montant source d’un virement doit être dans la devise du compte source.</value>
+  </data>
+  <data name="Access blocked" xml:space="preserve">
+    <value>Accès bloqué</value>
+  </data>
+  <data name="Access is currently blocked" xml:space="preserve">
+    <value>L’accès est actuellement bloqué</value>
+  </data>
+  <data name="Access to this account is currently disabled and under review." xml:space="preserve">
+    <value>L’accès à ce compte est suspendu pendant son examen.</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Compte</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Compte et sécurité</value>
+  </data>
+  <data name="Account (required for real money movement)" xml:space="preserve">
+    <value>Compte (obligatoire pour un mouvement de fonds réel)</value>
+  </data>
+  <data name="Account / source account" xml:space="preserve">
+    <value>Compte / compte source</value>
+  </data>
+  <data name="Account balances" xml:space="preserve">
+    <value>Soldes des comptes</value>
+  </data>
+  <data name="Account created successfully." xml:space="preserve">
+    <value>Compte créé.</value>
+  </data>
+  <data name="Account currency cannot be changed after creation." xml:space="preserve">
+    <value>La devise du compte ne peut plus être modifiée après sa création.</value>
+  </data>
+  <data name="Account deleted successfully." xml:space="preserve">
+    <value>Compte supprimé.</value>
+  </data>
+  <data name="Account is required." xml:space="preserve">
+    <value>Le compte est obligatoire.</value>
+  </data>
+  <data name="Account name is required." xml:space="preserve">
+    <value>Le nom du compte est obligatoire.</value>
+  </data>
+  <data name="Account not found." xml:space="preserve">
+    <value>Compte introuvable.</value>
+  </data>
+  <data name="Account summary" xml:space="preserve">
+    <value>Récapitulatif du compte</value>
+  </data>
+  <data name="Account updated successfully." xml:space="preserve">
+    <value>Compte mis à jour.</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Comptes</value>
+  </data>
+  <data name="Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart." xml:space="preserve">
+    <value>Comptes inclus dans le solde du planificateur, regroupés par devise. Les éléments non datés sont exclus du graphique quotidien.</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="Active financial accounts" xml:space="preserve">
+    <value>Comptes financiers actifs</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="Add Transaction" xml:space="preserve">
+    <value>Ajouter une transaction</value>
+  </data>
+  <data name="Add a currency…" xml:space="preserve">
+    <value>Ajouter une devise…</value>
+  </data>
+  <data name="Add an item to your monthly plan." xml:space="preserve">
+    <value>Ajoutez un élément à votre plan mensuel.</value>
+  </data>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Correction</value>
+  </data>
+  <data name="Adjustment direction" xml:space="preserve">
+    <value>Sens de la correction</value>
+  </data>
+  <data name="Adjustment direction is only valid for adjustments." xml:space="preserve">
+    <value>Le sens de correction ne s’applique qu’aux corrections.</value>
+  </data>
+  <data name="Adjustment direction is required." xml:space="preserve">
+    <value>Le sens de la correction est obligatoire.</value>
+  </data>
+  <data name="AdjustmentDirection" xml:space="preserve">
+    <value>Sens de correction</value>
+  </data>
+  <data name="Adjustments cannot use a category." xml:space="preserve">
+    <value>Les corrections ne peuvent pas avoir de catégorie.</value>
+  </data>
+  <data name="After" xml:space="preserve">
+    <value>Après</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="All main categories" xml:space="preserve">
+    <value>Toutes les catégories principales</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Montant</value>
+  </data>
+  <data name="Amount added to the goal." xml:space="preserve">
+    <value>Montant ajouté à l’objectif.</value>
+  </data>
+  <data name="Amount credited to target account" xml:space="preserve">
+    <value>Montant crédité sur le compte destinataire</value>
+  </data>
+  <data name="Amount credited to target account ·" xml:space="preserve">
+    <value>Montant crédité sur le compte destinataire ·</value>
+  </data>
+  <data name="Amount filters cannot be negative." xml:space="preserve">
+    <value>Les filtres de montant ne peuvent pas être négatifs.</value>
+  </data>
+  <data name="Amount in account currency" xml:space="preserve">
+    <value>Montant dans la devise du compte</value>
+  </data>
+  <data name="Amount in account currency ·" xml:space="preserve">
+    <value>Montant dans la devise du compte ·</value>
+  </data>
+  <data name="Amount must be greater than zero." xml:space="preserve">
+    <value>Le montant doit être supérieur à zéro.</value>
+  </data>
+  <data name="Amount withdrawn from the goal." xml:space="preserve">
+    <value>Montant retiré de l’objectif.</value>
+  </data>
+  <data name="Amounts are shown in each account's currency. Paused items are excluded." xml:space="preserve">
+    <value>Les montants sont affichés dans la devise du compte. Les éléments en pause sont exclus.</value>
+  </data>
+  <data name="Amounts must be positive, at most 999999999999999.9999, with at most four decimal places." xml:space="preserve">
+    <value>Les montants doivent être positifs, au plus égaux à 999999999999999,9999, avec quatre décimales au maximum.</value>
+  </data>
+  <data name="An account is required for automatic payment." xml:space="preserve">
+    <value>Un compte est obligatoire pour le paiement automatique.</value>
+  </data>
+  <data name="An account is required for this operation." xml:space="preserve">
+    <value>Un compte est obligatoire pour cette opération.</value>
+  </data>
+  <data name="An error occurred while processing your request." xml:space="preserve">
+    <value>Une erreur est survenue lors du traitement de votre demande.</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="Authenticator QR code" xml:space="preserve">
+    <value>Code QR d’authentification</value>
+  </data>
+  <data name="Automatic payment" xml:space="preserve">
+    <value>Paiement automatique</value>
+  </data>
+  <data name="Automatic payment amount" xml:space="preserve">
+    <value>Montant du paiement automatique</value>
+  </data>
+  <data name="Automatic payment requires a positive scheduled and remaining amount." xml:space="preserve">
+    <value>Le paiement automatique exige des montants prévu et restant positifs.</value>
+  </data>
+  <data name="Automatic payment settings are invalid." xml:space="preserve">
+    <value>Les paramètres du paiement automatique ne sont pas valides.</value>
+  </data>
+  <data name="Automatically generated operations cannot be edited. Delete the operation or edit its recurring payment instead." xml:space="preserve">
+    <value>Les opérations générées automatiquement ne sont pas modifiables. Supprimez l’opération ou modifiez le paiement récurrent.</value>
+  </data>
+  <data name="Available to spend" xml:space="preserve">
+    <value>Montant disponible</value>
+  </data>
+  <data name="Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner." xml:space="preserve">
+    <value>Le montant disponible correspond au solde prévu après les revenus, dépenses et virements planifiés. Seuls les comptes inclus contribuent au total. Chaque devise est calculée séparément à partir des soldes d’ouverture du planificateur.</value>
+  </data>
+  <data name="Avatar" xml:space="preserve">
+    <value>Avatar</value>
+  </data>
+  <data name="Avatar {0}" xml:space="preserve">
+    <value>Avatar {0}</value>
+  </data>
+  <data name="Back to accounts" xml:space="preserve">
+    <value>Retour aux comptes</value>
+  </data>
+  <data name="Back to transactions" xml:space="preserve">
+    <value>Retour aux transactions</value>
+  </data>
+  <data name="Backup file is empty or invalid." xml:space="preserve">
+    <value>Le fichier de sauvegarde est vide ou non valide.</value>
+  </data>
+  <data name="Backup password" xml:space="preserve">
+    <value>Mot de passe de la sauvegarde</value>
+  </data>
+  <data name="Backup password contains invalid Unicode characters." xml:space="preserve">
+    <value>Le mot de passe de sauvegarde contient des caractères Unicode non valides.</value>
+  </data>
+  <data name="Backup password is required." xml:space="preserve">
+    <value>Le mot de passe de sauvegarde est obligatoire.</value>
+  </data>
+  <data name="Backup restored successfully." xml:space="preserve">
+    <value>Sauvegarde restaurée.</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>Solde</value>
+  </data>
+  <data name="Balance adjustments" xml:space="preserve">
+    <value>Corrections de solde</value>
+  </data>
+  <data name="Bank" xml:space="preserve">
+    <value>Banque</value>
+  </data>
+  <data name="Bank Account" xml:space="preserve">
+    <value>Compte bancaire</value>
+  </data>
+  <data name="BankAccount" xml:space="preserve">
+    <value>Compte bancaire</value>
+  </data>
+  <data name="Banking App" xml:space="preserve">
+    <value>Application bancaire</value>
+  </data>
+  <data name="Banner color" xml:space="preserve">
+    <value>Couleur de bannière</value>
+  </data>
+  <data name="Banner color must be a hex color such as #2563eb." xml:space="preserve">
+    <value>La couleur de bannière doit être hexadécimale, par exemple #2563eb.</value>
+  </data>
+  <data name="Banner image" xml:space="preserve">
+    <value>Image de bannière</value>
+  </data>
+  <data name="Before" xml:space="preserve">
+    <value>Avant</value>
+  </data>
+  <data name="Bills" xml:space="preserve">
+    <value>Factures</value>
+  </data>
+  <data name="CSV contains an unterminated quoted field." xml:space="preserve">
+    <value>Le CSV contient un champ entre guillemets non fermé.</value>
+  </data>
+  <data name="Calculated from amount and exchange rate." xml:space="preserve">
+    <value>Calculé à partir du montant et du taux de change.</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>Calendrier</value>
+  </data>
+  <data name="Calendar financial summary" xml:space="preserve">
+    <value>Récapitulatif financier du calendrier</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Cash" xml:space="preserve">
+    <value>Espèces</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Catégories</value>
+  </data>
+  <data name="Categories referenced by transactions or containing subcategories cannot be deleted." xml:space="preserve">
+    <value>Les catégories liées à des transactions ou contenant des sous-catégories ne peuvent pas être supprimées.</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Category / subcategory" xml:space="preserve">
+    <value>Catégorie / sous-catégorie</value>
+  </data>
+  <data name="Category created successfully." xml:space="preserve">
+    <value>Catégorie créée.</value>
+  </data>
+  <data name="Category deleted successfully." xml:space="preserve">
+    <value>Catégorie supprimée.</value>
+  </data>
+  <data name="Category is required." xml:space="preserve">
+    <value>Une catégorie est obligatoire.</value>
+  </data>
+  <data name="Category name is required." xml:space="preserve">
+    <value>Le nom de la catégorie est obligatoire.</value>
+  </data>
+  <data name="Category not found." xml:space="preserve">
+    <value>Catégorie introuvable.</value>
+  </data>
+  <data name="Category type does not match transaction type." xml:space="preserve">
+    <value>Le type de catégorie ne correspond pas au type de transaction.</value>
+  </data>
+  <data name="Category updated successfully." xml:space="preserve">
+    <value>Catégorie mise à jour.</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Variation</value>
+  </data>
+  <data name="Changelog history" xml:space="preserve">
+    <value>Historique des modifications</value>
+  </data>
+  <data name="Choose a valid color." xml:space="preserve">
+    <value>Choisissez une couleur valide.</value>
+  </data>
+  <data name="Choose appearance theme" xml:space="preserve">
+    <value>Choisir un thème</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Clôturé</value>
+  </data>
+  <data name="Closed months are read-only." xml:space="preserve">
+    <value>Les mois clôturés sont en lecture seule.</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Coffee" xml:space="preserve">
+    <value>Café</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Color must be a valid hexadecimal color." xml:space="preserve">
+    <value>La couleur doit être une valeur hexadécimale valide.</value>
+  </data>
+  <data name="Color only" xml:space="preserve">
+    <value>Couleur seule</value>
+  </data>
+  <data name="Confirm Excel password" xml:space="preserve">
+    <value>Confirmer le mot de passe Excel</value>
+  </data>
+  <data name="Confirm backup password" xml:space="preserve">
+    <value>Confirmer le mot de passe de la sauvegarde</value>
+  </data>
+  <data name="Confirm data password" xml:space="preserve">
+    <value>Confirmer le mot de passe des données</value>
+  </data>
+  <data name="Confirm new password" xml:space="preserve">
+    <value>Confirmer le nouveau mot de passe</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmation du mot de passe</value>
+  </data>
+  <data name="Continue with {0}" xml:space="preserve">
+    <value>Continuer avec {0}</value>
+  </data>
+  <data name="Contribution amount cannot be zero." xml:space="preserve">
+    <value>Le montant du versement ne peut pas être nul.</value>
+  </data>
+  <data name="Contribution direction" xml:space="preserve">
+    <value>Sens du versement</value>
+  </data>
+  <data name="Could not refresh the plan. Please reload the page to check the saved settings." xml:space="preserve">
+    <value>Le plan n’a pas pu être actualisé. Rechargez la page pour vérifier les paramètres enregistrés.</value>
+  </data>
+  <data name="Could not save notes. Please try again." xml:space="preserve">
+    <value>Les notes n’ont pas pu être enregistrées. Réessayez.</value>
+  </data>
+  <data name="Could not save the planner changes. Please try again." xml:space="preserve">
+    <value>Les modifications du planificateur n’ont pas pu être enregistrées. Réessayez.</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="Create an Adjustment transaction (" xml:space="preserve">
+    <value>Créer une transaction de correction (</value>
+  </data>
+  <data name="Create an account to start planning." xml:space="preserve">
+    <value>Créez un compte pour commencer à planifier.</value>
+  </data>
+  <data name="Create your first goal" xml:space="preserve">
+    <value>Créez votre premier objectif</value>
+  </data>
+  <data name="Credit Card" xml:space="preserve">
+    <value>Carte de crédit</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Carte de crédit</value>
+  </data>
+  <data name="CrowdSec ban pages" xml:space="preserve">
+    <value>Pages des blocages CrowdSec</value>
+  </data>
+  <data name="Currencies" xml:space="preserve">
+    <value>Devises</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Devise</value>
+  </data>
+  <data name="Currency cannot be changed after account creation." xml:space="preserve">
+    <value>La devise ne peut plus être modifiée après la création du compte.</value>
+  </data>
+  <data name="Currency cannot be changed after debt creation." xml:space="preserve">
+    <value>La devise ne peut plus être modifiée après la création de la dette.</value>
+  </data>
+  <data name="Currency does not match the account." xml:space="preserve">
+    <value>La devise ne correspond pas à celle du compte.</value>
+  </data>
+  <data name="Currency must contain exactly three letters." xml:space="preserve">
+    <value>Le code devise doit contenir exactement trois lettres.</value>
+  </data>
+  <data name="Currency settings were redesigned: pick a currency from the list to adjust its format, and choose your default currency." xml:space="preserve">
+    <value>Les paramètres de devise ont été repensés. Sélectionnez une devise pour ajuster son format et choisissez la devise par défaut.</value>
+  </data>
+  <data name="Currency to add" xml:space="preserve">
+    <value>Devise à ajouter</value>
+  </data>
+  <data name="Current account balance" xml:space="preserve">
+    <value>Solde courant du compte</value>
+  </data>
+  <data name="Current balance" xml:space="preserve">
+    <value>Solde actuel</value>
+  </data>
+  <data name="Current password" xml:space="preserve">
+    <value>Mot de passe actuel</value>
+  </data>
+  <data name="Daily" xml:space="preserve">
+    <value>Quotidien</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Tableau de bord</value>
+  </data>
+  <data name="Data password" xml:space="preserve">
+    <value>Mot de passe des données</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Date and time" xml:space="preserve">
+    <value>Date et heure</value>
+  </data>
+  <data name="Debt and account currencies must match." xml:space="preserve">
+    <value>La dette et le compte doivent utiliser la même devise.</value>
+  </data>
+  <data name="Debt closed." xml:space="preserve">
+    <value>Dette clôturée.</value>
+  </data>
+  <data name="Debt created." xml:space="preserve">
+    <value>Dette créée.</value>
+  </data>
+  <data name="Debt deleted successfully." xml:space="preserve">
+    <value>Dette supprimée.</value>
+  </data>
+  <data name="Debt direction cannot be changed after operations have been recorded." xml:space="preserve">
+    <value>Le sens de la dette ne peut plus être modifié après l’enregistrement d’opérations.</value>
+  </data>
+  <data name="Debt name is required." xml:space="preserve">
+    <value>Le nom de la dette est obligatoire.</value>
+  </data>
+  <data name="Debt operation" xml:space="preserve">
+    <value>Opération sur la dette</value>
+  </data>
+  <data name="Debt operation deleted." xml:space="preserve">
+    <value>Opération de dette supprimée.</value>
+  </data>
+  <data name="Debt operation recorded." xml:space="preserve">
+    <value>Opération de dette enregistrée.</value>
+  </data>
+  <data name="Debt operation updated." xml:space="preserve">
+    <value>Opération de dette mise à jour.</value>
+  </data>
+  <data name="Debt reopened." xml:space="preserve">
+    <value>Dette rouverte.</value>
+  </data>
+  <data name="Debt transactions must be created from the debt page." xml:space="preserve">
+    <value>Les transactions de dette doivent être créées depuis la page de la dette.</value>
+  </data>
+  <data name="Debt transactions must be deleted from the debt page." xml:space="preserve">
+    <value>Les transactions de dette doivent être supprimées depuis la page de la dette.</value>
+  </data>
+  <data name="Debt transactions must be edited from the debt page." xml:space="preserve">
+    <value>Les transactions de dette doivent être modifiées depuis la page de la dette.</value>
+  </data>
+  <data name="Debt updated." xml:space="preserve">
+    <value>Dette mise à jour.</value>
+  </data>
+  <data name="DebtEntry" xml:space="preserve">
+    <value>Écriture de dette</value>
+  </data>
+  <data name="Decimal places" xml:space="preserve">
+    <value>Décimales</value>
+  </data>
+  <data name="Decimal separator" xml:space="preserve">
+    <value>Séparateur décimal</value>
+  </data>
+  <data name="Decrease" xml:space="preserve">
+    <value>Diminution</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Par défaut</value>
+  </data>
+  <data name="Default currency" xml:space="preserve">
+    <value>Devise par défaut</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Supprimer le compte</value>
+  </data>
+  <data name="Delete category" xml:space="preserve">
+    <value>Supprimer la catégorie</value>
+  </data>
+  <data name="Delete debt" xml:space="preserve">
+    <value>Supprimer la dette</value>
+  </data>
+  <data name="Delete debt and related transactions" xml:space="preserve">
+    <value>Supprimer la dette et les transactions associées</value>
+  </data>
+  <data name="Delete goal" xml:space="preserve">
+    <value>Supprimer l’objectif</value>
+  </data>
+  <data name="Delete planned item" xml:space="preserve">
+    <value>Supprimer l’élément prévu</value>
+  </data>
+  <data name="Delete recurring transaction" xml:space="preserve">
+    <value>Supprimer la transaction récurrente</value>
+  </data>
+  <data name="Delete the planner items referencing this account before deleting the account." xml:space="preserve">
+    <value>Supprimez les éléments du planificateur liés à ce compte avant de le supprimer.</value>
+  </data>
+  <data name="Delete this item from the monthly plan?" xml:space="preserve">
+    <value>Supprimer cet élément du plan mensuel ?</value>
+  </data>
+  <data name="Delete this {0} transaction?" xml:space="preserve">
+    <value>Supprimer cette transaction ({0}) ?</value>
+  </data>
+  <data name="Delete this {0} {1} template?" xml:space="preserve">
+    <value>Supprimer ce modèle ({0}, {1}) ?</value>
+  </data>
+  <data name="Delete transaction" xml:space="preserve">
+    <value>Supprimer la transaction</value>
+  </data>
+  <data name="Delete {0}?" xml:space="preserve">
+    <value>Supprimer {0} ?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Suppression</value>
+  </data>
+  <data name="Deleting {0}?" xml:space="preserve">
+    <value>Supprimer {0} ?</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="Development" xml:space="preserve">
+    <value>Développement</value>
+  </data>
+  <data name="Development Mode" xml:space="preserve">
+    <value>Mode développement</value>
+  </data>
+  <data name="Direction" xml:space="preserve">
+    <value>Sens</value>
+  </data>
+  <data name="Display name" xml:space="preserve">
+    <value>Nom affiché</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Ordre d’affichage</value>
+  </data>
+  <data name="Display order cannot be negative." xml:space="preserve">
+    <value>L’ordre d’affichage ne peut pas être négatif.</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Ordre d’affichage</value>
+  </data>
+  <data name="Download a password-protected backup of the complete PocketLedger database." xml:space="preserve">
+    <value>Téléchargez une sauvegarde protégée par mot de passe de la base PocketLedger complète.</value>
+  </data>
+  <data name="Download encrypted Excel" xml:space="preserve">
+    <value>Télécharger le fichier Excel chiffré</value>
+  </data>
+  <data name="Download encrypted backup" xml:space="preserve">
+    <value>Télécharger la sauvegarde chiffrée</value>
+  </data>
+  <data name="Due date cannot be before start date." xml:space="preserve">
+    <value>La date d’échéance ne peut pas précéder la date de début.</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Date d’échéance</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Doublon</value>
+  </data>
+  <data name="EarlyRepayment" xml:space="preserve">
+    <value>Remboursement anticipé</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Edit account" xml:space="preserve">
+    <value>Modifier le compte</value>
+  </data>
+  <data name="Edit category" xml:space="preserve">
+    <value>Modifier la catégorie</value>
+  </data>
+  <data name="Edit debt" xml:space="preserve">
+    <value>Modifier la dette</value>
+  </data>
+  <data name="Edit debt operation" xml:space="preserve">
+    <value>Modifier l’opération sur la dette</value>
+  </data>
+  <data name="Edit goal" xml:space="preserve">
+    <value>Modifier l’objectif</value>
+  </data>
+  <data name="Edit item" xml:space="preserve">
+    <value>Modifier l’élément</value>
+  </data>
+  <data name="Edit opening balance for {0}" xml:space="preserve">
+    <value>Modifier le solde d’ouverture de {0}</value>
+  </data>
+  <data name="Edit recurring transaction" xml:space="preserve">
+    <value>Modifier la transaction récurrente</value>
+  </data>
+  <data name="Edit transaction" xml:space="preserve">
+    <value>Modifier la transaction</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Adresse e-mail</value>
+  </data>
+  <data name="Enable automatic payment" xml:space="preserve">
+    <value>Activer le paiement automatique</value>
+  </data>
+  <data name="Enable translations" xml:space="preserve">
+    <value>Activer les traductions</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Activé</value>
+  </data>
+  <data name="Enabled templates are processed automatically (Europe/Budapest)." xml:space="preserve">
+    <value>Les modèles actifs sont traités automatiquement (Europe/Budapest).</value>
+  </data>
+  <data name="Encrypted PocketLedger backup" xml:space="preserve">
+    <value>Sauvegarde PocketLedger chiffrée</value>
+  </data>
+  <data name="Encrypted backup file" xml:space="preserve">
+    <value>Fichier de sauvegarde chiffré</value>
+  </data>
+  <data name="Enter the amount credited to the target account." xml:space="preserve">
+    <value>Saisissez le montant crédité sur le compte destinataire.</value>
+  </data>
+  <data name="Enter the backup password again" xml:space="preserve">
+    <value>Saisissez à nouveau le mot de passe de la sauvegarde</value>
+  </data>
+  <data name="Enter valid notes." xml:space="preserve">
+    <value>Saisissez des notes valides.</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="Error." xml:space="preserve">
+    <value>Erreur.</value>
+  </data>
+  <data name="Excel export password contains invalid Unicode characters." xml:space="preserve">
+    <value>Le mot de passe d’export Excel contient des caractères Unicode non valides.</value>
+  </data>
+  <data name="Excel export password is required." xml:space="preserve">
+    <value>Le mot de passe d’export Excel est obligatoire.</value>
+  </data>
+  <data name="Excel password" xml:space="preserve">
+    <value>Mot de passe Excel</value>
+  </data>
+  <data name="Exchange rate" xml:space="preserve">
+    <value>Taux de change</value>
+  </data>
+  <data name="Exchange rate must be greater than zero." xml:space="preserve">
+    <value>Le taux de change doit être supérieur à zéro.</value>
+  </data>
+  <data name="Excluded" xml:space="preserve">
+    <value>Exclu</value>
+  </data>
+  <data name="Expected 7 columns." xml:space="preserve">
+    <value>La ligne doit contenir 7 colonnes.</value>
+  </data>
+  <data name="Expected account balances" xml:space="preserve">
+    <value>Soldes prévisionnels</value>
+  </data>
+  <data name="Expected balance over time" xml:space="preserve">
+    <value>Évolution du solde prévisionnel</value>
+  </data>
+  <data name="Expected closing balance" xml:space="preserve">
+    <value>Solde de clôture prévisionnel</value>
+  </data>
+  <data name="Expected expenses" xml:space="preserve">
+    <value>Dépenses prévues</value>
+  </data>
+  <data name="Expected income" xml:space="preserve">
+    <value>Revenus prévus</value>
+  </data>
+  <data name="Expense" xml:space="preserve">
+    <value>Dépense</value>
+  </data>
+  <data name="Expenses" xml:space="preserve">
+    <value>Dépenses</value>
+  </data>
+  <data name="Expenses by category" xml:space="preserve">
+    <value>Dépenses par catégorie</value>
+  </data>
+  <data name="Expenses exceed income this month." xml:space="preserve">
+    <value>Ce mois-ci, les dépenses dépassent les revenus.</value>
+  </data>
+  <data name="Explicit confirmation is required." xml:space="preserve">
+    <value>Une confirmation explicite est requise.</value>
+  </data>
+  <data name="Export Excel" xml:space="preserve">
+    <value>Exporter vers Excel</value>
+  </data>
+  <data name="Export transactions to a password-protected Excel workbook, or preview and import a CSV file." xml:space="preserve">
+    <value>Exportez les transactions dans un classeur Excel protégé ou prévisualisez et importez un fichier CSV.</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filtrer</value>
+  </data>
+  <data name="Filter accounts by type" xml:space="preserve">
+    <value>Filtrer les comptes par type</value>
+  </data>
+  <data name="Financial data cannot be assigned to another owner." xml:space="preserve">
+    <value>Les données financières ne peuvent pas être attribuées à un autre propriétaire.</value>
+  </data>
+  <data name="Financial data must have an owner." xml:space="preserve">
+    <value>Les données financières doivent avoir un propriétaire.</value>
+  </data>
+  <data name="Financial data owned by another user cannot be modified." xml:space="preserve">
+    <value>Les données financières d’un autre utilisateur ne peuvent pas être modifiées.</value>
+  </data>
+  <data name="Find an address…" xml:space="preserve">
+    <value>Rechercher une adresse…</value>
+  </data>
+  <data name="First occurrence is required." xml:space="preserve">
+    <value>La première occurrence est obligatoire.</value>
+  </data>
+  <data name="FirstOccurrence" xml:space="preserve">
+    <value>Première occurrence</value>
+  </data>
+  <data name="Fixed expenses" xml:space="preserve">
+    <value>Dépenses fixes</value>
+  </data>
+  <data name="Follow current balance" xml:space="preserve">
+    <value>Suivre le solde actuel</value>
+  </data>
+  <data name="For local debugging, set {0} to {1} and restart the app." xml:space="preserve">
+    <value>Pour le débogage local, définissez {0} sur {1} et redémarrez l’application.</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Fréquence</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Du</value>
+  </data>
+  <data name="Gift" xml:space="preserve">
+    <value>Cadeau</value>
+  </data>
+  <data name="Glassmorphism" xml:space="preserve">
+    <value>Effet verre</value>
+  </data>
+  <data name="Goal created." xml:space="preserve">
+    <value>Objectif créé.</value>
+  </data>
+  <data name="Goal deleted." xml:space="preserve">
+    <value>Objectif supprimé.</value>
+  </data>
+  <data name="Goal name cannot be longer than 200 characters." xml:space="preserve">
+    <value>Le nom de l’objectif ne peut pas dépasser 200 caractères.</value>
+  </data>
+  <data name="Goal name is required." xml:space="preserve">
+    <value>Le nom de l’objectif est obligatoire.</value>
+  </data>
+  <data name="Goal progress" xml:space="preserve">
+    <value>Progression de l’objectif</value>
+  </data>
+  <data name="Goal saved." xml:space="preserve">
+    <value>Objectif enregistré.</value>
+  </data>
+  <data name="Goals" xml:space="preserve">
+    <value>Objectifs</value>
+  </data>
+  <data name="Goals, more currencies and starter categories" xml:space="preserve">
+    <value>Objectifs, nouvelles devises et catégories par défaut</value>
+  </data>
+  <data name="Got it" xml:space="preserve">
+    <value>Compris</value>
+  </data>
+  <data name="Health" xml:space="preserve">
+    <value>Santé</value>
+  </data>
+  <data name="Hide dashboard amounts" xml:space="preserve">
+    <value>Masquer les montants du tableau de bord</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="Hour" xml:space="preserve">
+    <value>Heure</value>
+  </data>
+  <data name="I understand that current data will be replaced." xml:space="preserve">
+    <value>Je comprends que les données actuelles seront remplacées.</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Icône</value>
+  </data>
+  <data name="Identity navigation" xml:space="preserve">
+    <value>Navigation du compte</value>
+  </data>
+  <data name="Images are drawn over your banner color." xml:space="preserve">
+    <value>Les images s’affichent sur la couleur de bannière.</value>
+  </data>
+  <data name="Import / Export" xml:space="preserve">
+    <value>Importation / Exportation</value>
+  </data>
+  <data name="Import CSV" xml:space="preserve">
+    <value>Importer un CSV</value>
+  </data>
+  <data name="Import valid rows" xml:space="preserve">
+    <value>Importer les lignes valides</value>
+  </data>
+  <data name="Imported {0} rows; skipped {1} duplicates and {2} invalid rows." xml:space="preserve">
+    <value>{0} lignes importées, {1} doublons et {2} lignes non valides ignorés.</value>
+  </data>
+  <data name="Include" xml:space="preserve">
+    <value>Inclure</value>
+  </data>
+  <data name="Include an account in the planner balance to see the chart." xml:space="preserve">
+    <value>Incluez un compte dans le solde du planificateur pour afficher le graphique.</value>
+  </data>
+  <data name="Include in main balance" xml:space="preserve">
+    <value>Inclure dans le solde principal</value>
+  </data>
+  <data name="Include in net worth" xml:space="preserve">
+    <value>Inclure dans le patrimoine net</value>
+  </data>
+  <data name="Include in statistics" xml:space="preserve">
+    <value>Inclure dans les statistiques</value>
+  </data>
+  <data name="Include {0} in planner balance" xml:space="preserve">
+    <value>Inclure {0} dans le solde du planificateur</value>
+  </data>
+  <data name="Included in" xml:space="preserve">
+    <value>Inclus dans</value>
+  </data>
+  <data name="Income" xml:space="preserve">
+    <value>Revenus</value>
+  </data>
+  <data name="Income and expenses over the last 12 months" xml:space="preserve">
+    <value>Revenus et dépenses des 12 derniers mois</value>
+  </data>
+  <data name="Income by category" xml:space="preserve">
+    <value>Revenus par catégorie</value>
+  </data>
+  <data name="Incoming" xml:space="preserve">
+    <value>Entrant</value>
+  </data>
+  <data name="Incoming transfers" xml:space="preserve">
+    <value>Virements entrants</value>
+  </data>
+  <data name="Increase" xml:space="preserve">
+    <value>Augmentation</value>
+  </data>
+  <data name="Increase original amount by the difference" xml:space="preserve">
+    <value>Augmenter le montant initial de la différence</value>
+  </data>
+  <data name="Initial balance" xml:space="preserve">
+    <value>Solde initial</value>
+  </data>
+  <data name="Inspect this address" xml:space="preserve">
+    <value>Examiner cette adresse</value>
+  </data>
+  <data name="Insufficient funds for" xml:space="preserve">
+    <value>Fonds insuffisants pour</value>
+  </data>
+  <data name="Internet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="Invalid" xml:space="preserve">
+    <value>Non valide</value>
+  </data>
+  <data name="Invalid date." xml:space="preserve">
+    <value>Date non valide.</value>
+  </data>
+  <data name="Invalid planner copy day." xml:space="preserve">
+    <value>Le jour de copie de l’élément planifié n’est pas valide.</value>
+  </data>
+  <data name="Invalid planner opening balances." xml:space="preserve">
+    <value>Les soldes d’ouverture du planificateur ne sont pas valides.</value>
+  </data>
+  <data name="Invalid saved planner month." xml:space="preserve">
+    <value>Le mois enregistré n’est pas valide.</value>
+  </data>
+  <data name="It can result in displaying sensitive information from exceptions to end users." xml:space="preserve">
+    <value>Des informations sensibles issues des exceptions peuvent être affichées aux utilisateurs.</value>
+  </data>
+  <data name="Large amounts in the calendar's monthly overview are listed under each other so they stay readable." xml:space="preserve">
+    <value>Les grands montants sont affichés les uns sous les autres dans le calendrier mensuel pour rester lisibles.</value>
+  </data>
+  <data name="Last 12 months" xml:space="preserve">
+    <value>12 derniers mois</value>
+  </data>
+  <data name="Last occurrence cannot be before first occurrence." xml:space="preserve">
+    <value>La dernière occurrence ne peut pas précéder la première.</value>
+  </data>
+  <data name="Last occurrence cannot be before the next occurrence." xml:space="preserve">
+    <value>La dernière occurrence ne peut pas précéder la prochaine.</value>
+  </data>
+  <data name="Last occurrence is required when an end date is selected." xml:space="preserve">
+    <value>La dernière occurrence est obligatoire lorsqu’une date de fin est sélectionnée.</value>
+  </data>
+  <data name="Last payment date" xml:space="preserve">
+    <value>Date du dernier paiement</value>
+  </data>
+  <data name="LastOccurrence" xml:space="preserve">
+    <value>Dernière occurrence</value>
+  </data>
+  <data name="Latest transactions" xml:space="preserve">
+    <value>Dernières transactions</value>
+  </data>
+  <data name="Limit operation to the remaining debt" xml:space="preserve">
+    <value>Limiter l’opération au solde de la dette</value>
+  </data>
+  <data name="Linked account" xml:space="preserve">
+    <value>Compte associé</value>
+  </data>
+  <data name="Linked/source account" xml:space="preserve">
+    <value>Compte associé / source</value>
+  </data>
+  <data name="Loan Recurring Transactions" xml:space="preserve">
+    <value>Opérations de prêt récurrentes</value>
+  </data>
+  <data name="LoanDisbursement" xml:space="preserve">
+    <value>Décaissement du prêt</value>
+  </data>
+  <data name="Loans / Debts" xml:space="preserve">
+    <value>Prêts et dettes</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Connexion</value>
+  </data>
+  <data name="Login event pages" xml:space="preserve">
+    <value>Pages des événements de connexion</value>
+  </data>
+  <data name="Login events can be filtered, sorted and paged." xml:space="preserve">
+    <value>Les événements de connexion peuvent être filtrés, triés et paginés.</value>
+  </data>
+  <data name="Main balance" xml:space="preserve">
+    <value>Solde principal</value>
+  </data>
+  <data name="Main category" xml:space="preserve">
+    <value>Catégorie principale</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Navigation principale</value>
+  </data>
+  <data name="ManualCorrectionDecrease" xml:space="preserve">
+    <value>Correction manuelle à la baisse</value>
+  </data>
+  <data name="ManualCorrectionIncrease" xml:space="preserve">
+    <value>Correction manuelle à la hausse</value>
+  </data>
+  <data name="Max amount" xml:space="preserve">
+    <value>Montant maximum</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Min amount" xml:space="preserve">
+    <value>Montant minimum</value>
+  </data>
+  <data name="Minimum amount cannot exceed maximum amount." xml:space="preserve">
+    <value>Le montant minimum ne peut pas dépasser le maximum.</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Minute</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Mois</value>
+  </data>
+  <data name="Month must be between 1 and 12." xml:space="preserve">
+    <value>Le mois doit être compris entre 1 et 12.</value>
+  </data>
+  <data name="Monthly" xml:space="preserve">
+    <value>Mensuel</value>
+  </data>
+  <data name="Monthly expense" xml:space="preserve">
+    <value>Dépense mensuelle</value>
+  </data>
+  <data name="Monthly overview" xml:space="preserve">
+    <value>Vue mensuelle</value>
+  </data>
+  <data name="Monthly planner" xml:space="preserve">
+    <value>Planificateur mensuel</value>
+  </data>
+  <data name="More filters" xml:space="preserve">
+    <value>Plus de filtres</value>
+  </data>
+  <data name="More than 150 currencies are now supported." xml:space="preserve">
+    <value>Plus de 150 devises sont désormais prises en charge.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Name / category" xml:space="preserve">
+    <value>Nom / catégorie</value>
+  </data>
+  <data name="Name / note" xml:space="preserve">
+    <value>Nom / note</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Patrimoine net</value>
+  </data>
+  <data name="New account" xml:space="preserve">
+    <value>Nouveau compte</value>
+  </data>
+  <data name="New category" xml:space="preserve">
+    <value>Nouvelle catégorie</value>
+  </data>
+  <data name="New debt" xml:space="preserve">
+    <value>Nouvelle dette</value>
+  </data>
+  <data name="New debt operation" xml:space="preserve">
+    <value>Nouvelle opération sur la dette</value>
+  </data>
+  <data name="New goal" xml:space="preserve">
+    <value>Nouvel objectif</value>
+  </data>
+  <data name="New operation" xml:space="preserve">
+    <value>Nouvelle opération</value>
+  </data>
+  <data name="New password" xml:space="preserve">
+    <value>Nouveau mot de passe</value>
+  </data>
+  <data name="New recurring transaction" xml:space="preserve">
+    <value>Nouvelle transaction récurrente</value>
+  </data>
+  <data name="New template" xml:space="preserve">
+    <value>Nouveau modèle</value>
+  </data>
+  <data name="New transaction" xml:space="preserve">
+    <value>Nouvelle transaction</value>
+  </data>
+  <data name="New users start with default categories and subcategories." xml:space="preserve">
+    <value>Les nouveaux utilisateurs disposent de catégories et sous-catégories par défaut.</value>
+  </data>
+  <data name="Next month" xml:space="preserve">
+    <value>Mois suivant</value>
+  </data>
+  <data name="Next payment" xml:space="preserve">
+    <value>Prochain paiement</value>
+  </data>
+  <data name="Next payment date" xml:space="preserve">
+    <value>Date du prochain paiement</value>
+  </data>
+  <data name="Next payment date is required." xml:space="preserve">
+    <value>La date du prochain paiement est obligatoire.</value>
+  </data>
+  <data name="Next: {0}" xml:space="preserve">
+    <value>Prochaine occurrence : {0}</value>
+  </data>
+  <data name="No account types are selected." xml:space="preserve">
+    <value>Aucun type de compte sélectionné.</value>
+  </data>
+  <data name="No accounts have been created." xml:space="preserve">
+    <value>Aucun compte n’a été créé.</value>
+  </data>
+  <data name="No accounts yet." xml:space="preserve">
+    <value>Aucun compte pour le moment.</value>
+  </data>
+  <data name="No accounts yet. Create your first account to get started." xml:space="preserve">
+    <value>Aucun compte pour le moment. Créez votre premier compte pour commencer.</value>
+  </data>
+  <data name="No active debts." xml:space="preserve">
+    <value>Aucune dette active.</value>
+  </data>
+  <data name="No active income, expenses or transfers for this month." xml:space="preserve">
+    <value>Aucun revenu, aucune dépense ni aucun virement actif ce mois-ci.</value>
+  </data>
+  <data name="No categories." xml:space="preserve">
+    <value>Aucune catégorie.</value>
+  </data>
+  <data name="No category" xml:space="preserve">
+    <value>Aucune catégorie</value>
+  </data>
+  <data name="No closed debts." xml:space="preserve">
+    <value>Aucune dette clôturée.</value>
+  </data>
+  <data name="No currency selected." xml:space="preserve">
+    <value>Aucune devise sélectionnée.</value>
+  </data>
+  <data name="No data." xml:space="preserve">
+    <value>Aucune donnée.</value>
+  </data>
+  <data name="No end date" xml:space="preserve">
+    <value>Aucune date de fin</value>
+  </data>
+  <data name="No goals yet" xml:space="preserve">
+    <value>Aucun objectif pour le moment</value>
+  </data>
+  <data name="No items for this month yet." xml:space="preserve">
+    <value>Aucun élément pour ce mois.</value>
+  </data>
+  <data name="No items." xml:space="preserve">
+    <value>Aucun élément.</value>
+  </data>
+  <data name="No loan recurring transactions." xml:space="preserve">
+    <value>Aucune opération de prêt récurrente.</value>
+  </data>
+  <data name="No matching transactions." xml:space="preserve">
+    <value>Aucune transaction correspondante.</value>
+  </data>
+  <data name="No note." xml:space="preserve">
+    <value>Aucune note.</value>
+  </data>
+  <data name="No operations yet." xml:space="preserve">
+    <value>Aucune opération pour le moment.</value>
+  </data>
+  <data name="No recurring expenses are scheduled for this month." xml:space="preserve">
+    <value>Aucune dépense récurrente n’est prévue ce mois-ci.</value>
+  </data>
+  <data name="No regular recurring templates." xml:space="preserve">
+    <value>Aucun modèle récurrent ordinaire.</value>
+  </data>
+  <data name="No transaction currencies this month" xml:space="preserve">
+    <value>Aucune devise de transaction ce mois-ci</value>
+  </data>
+  <data name="No transactions for this account." xml:space="preserve">
+    <value>Aucune transaction pour ce compte.</value>
+  </data>
+  <data name="No transactions yet." xml:space="preserve">
+    <value>Aucune transaction pour le moment.</value>
+  </data>
+  <data name="No upcoming occurrence" xml:space="preserve">
+    <value>Aucune occurrence à venir</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="None (main category)" xml:space="preserve">
+    <value>Aucune (catégorie principale)</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="Note cannot be longer than 500 characters." xml:space="preserve">
+    <value>La note ne peut pas dépasser 500 caractères.</value>
+  </data>
+  <data name="Note cannot exceed 500 characters." xml:space="preserve">
+    <value>La note ne peut pas dépasser 500 caractères.</value>
+  </data>
+  <data name="Note contains" xml:space="preserve">
+    <value>La note contient</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="Notes cannot exceed 10000 characters." xml:space="preserve">
+    <value>Les notes ne peuvent pas dépasser 10 000 caractères.</value>
+  </data>
+  <data name="Notes saved." xml:space="preserve">
+    <value>Notes enregistrées.</value>
+  </data>
+  <data name="Occurrences" xml:space="preserve">
+    <value>Occurrences</value>
+  </data>
+  <data name="One or more selected categories no longer match a starter category." xml:space="preserve">
+    <value>Au moins une catégorie sélectionnée ne correspond plus à une catégorie par défaut.</value>
+  </data>
+  <data name="Only a fully repaid debt can be closed." xml:space="preserve">
+    <value>Seule une dette intégralement remboursée peut être clôturée.</value>
+  </data>
+  <data name="Only adjustments can define an adjustment direction." xml:space="preserve">
+    <value>Seules les corrections peuvent définir un sens de correction.</value>
+  </data>
+  <data name="Only income and expense CSV rows are supported." xml:space="preserve">
+    <value>Seules les lignes de revenus et de dépenses sont prises en charge dans le CSV.</value>
+  </data>
+  <data name="Only main categories can use icons." xml:space="preserve">
+    <value>Seules les catégories principales peuvent avoir une icône.</value>
+  </data>
+  <data name="Only transfers can define a target amount." xml:space="preserve">
+    <value>Seuls les virements peuvent définir un montant destinataire.</value>
+  </data>
+  <data name="Open profile menu" xml:space="preserve">
+    <value>Ouvrir le menu du profil</value>
+  </data>
+  <data name="Opening balance" xml:space="preserve">
+    <value>Solde d’ouverture</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Opération</value>
+  </data>
+  <data name="Optional." xml:space="preserve">
+    <value>Facultatif.</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Ordre</value>
+  </data>
+  <data name="Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="Original amount" xml:space="preserve">
+    <value>Montant initial</value>
+  </data>
+  <data name="Original amount cannot be lower than the already repaid amount." xml:space="preserve">
+    <value>Le montant initial ne peut pas être inférieur au montant déjà remboursé.</value>
+  </data>
+  <data name="Original amount must be greater than zero." xml:space="preserve">
+    <value>Le montant initial doit être supérieur à zéro.</value>
+  </data>
+  <data name="Original currency" xml:space="preserve">
+    <value>Devise d’origine</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Autre</value>
+  </data>
+  <data name="Outgoing expense" xml:space="preserve">
+    <value>Dépense sortante</value>
+  </data>
+  <data name="Outgoing transfers" xml:space="preserve">
+    <value>Virements sortants</value>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Catégorie parente</value>
+  </data>
+  <data name="Parent and subcategory must have the same category type." xml:space="preserve">
+    <value>La catégorie parente et la sous-catégorie doivent avoir le même type.</value>
+  </data>
+  <data name="Parent category" xml:space="preserve">
+    <value>Catégorie parente</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Mettre en pause</value>
+  </data>
+  <data name="Paused" xml:space="preserve">
+    <value>En pause</value>
+  </data>
+  <data name="Paused items are excluded from totals and forecasts." xml:space="preserve">
+    <value>Les éléments en pause sont exclus des totaux et prévisions.</value>
+  </data>
+  <data name="Payable" xml:space="preserve">
+    <value>À payer</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>Paiement</value>
+  </data>
+  <data name="Person or bank name" xml:space="preserve">
+    <value>Nom de la personne ou de la banque</value>
+  </data>
+  <data name="Person or bank name is required." xml:space="preserve">
+    <value>Le nom de la personne ou de la banque est obligatoire.</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Téléphone</value>
+  </data>
+  <data name="Plan your month and see what to expect." xml:space="preserve">
+    <value>Planifiez votre mois et voyez à quoi vous attendre.</value>
+  </data>
+  <data name="Planned date" xml:space="preserve">
+    <value>Date prévue</value>
+  </data>
+  <data name="Planned expenses" xml:space="preserve">
+    <value>Dépenses planifiées</value>
+  </data>
+  <data name="Planned income" xml:space="preserve">
+    <value>Revenus planifiés</value>
+  </data>
+  <data name="Planned item saved." xml:space="preserve">
+    <value>Élément planifié enregistré.</value>
+  </data>
+  <data name="Planned transfers" xml:space="preserve">
+    <value>Virements planifiés</value>
+  </data>
+  <data name="Planner months must be unique." xml:space="preserve">
+    <value>Chaque mois planifié doit être unique.</value>
+  </data>
+  <data name="Plans can be viewed up to ten years ahead." xml:space="preserve">
+    <value>Les plans peuvent être consultés jusqu’à dix ans à l’avance.</value>
+  </data>
+  <data name="PocketLedger website" xml:space="preserve">
+    <value>Site PocketLedger</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Aperçu</value>
+  </data>
+  <data name="Previous month" xml:space="preserve">
+    <value>Mois précédent</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Politique de confidentialité</value>
+  </data>
+  <data name="Private Person" xml:space="preserve">
+    <value>Particulier</value>
+  </data>
+  <data name="PrivatePerson" xml:space="preserve">
+    <value>Particulier</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Reached" xml:space="preserve">
+    <value>Atteint</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Prêt</value>
+  </data>
+  <data name="Receivable" xml:space="preserve">
+    <value>À recevoir</value>
+  </data>
+  <data name="Receivables can currently only belong to a private person." xml:space="preserve">
+    <value>Les créances ne peuvent actuellement être associées qu’à des particuliers.</value>
+  </data>
+  <data name="ReceivedRepayment" xml:space="preserve">
+    <value>Remboursement reçu</value>
+  </data>
+  <data name="Recent transactions" xml:space="preserve">
+    <value>Transactions récentes</value>
+  </data>
+  <data name="Record" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Recovery code" xml:space="preserve">
+    <value>Code de récupération</value>
+  </data>
+  <data name="Recovery key" xml:space="preserve">
+    <value>Clé de récupération</value>
+  </data>
+  <data name="Recurring" xml:space="preserve">
+    <value>Opérations récurrentes</value>
+  </data>
+  <data name="Recurring expenses by main category" xml:space="preserve">
+    <value>Dépenses récurrentes par catégorie principale</value>
+  </data>
+  <data name="Recurring transaction created." xml:space="preserve">
+    <value>Transaction récurrente créée.</value>
+  </data>
+  <data name="Recurring transaction deleted." xml:space="preserve">
+    <value>Transaction récurrente supprimée.</value>
+  </data>
+  <data name="Recurring transaction updated." xml:space="preserve">
+    <value>Transaction récurrente mise à jour.</value>
+  </data>
+  <data name="Recurring transactions" xml:space="preserve">
+    <value>Transactions récurrentes</value>
+  </data>
+  <data name="Recurring transfers are not supported yet." xml:space="preserve">
+    <value>Les virements récurrents ne sont pas encore pris en charge.</value>
+  </data>
+  <data name="Recurring · read-only" xml:space="preserve">
+    <value>Récurrent · lecture seule</value>
+  </data>
+  <data name="Referenced financial data must belong to the same owner." xml:space="preserve">
+    <value>Les données financières liées doivent appartenir au même propriétaire.</value>
+  </data>
+  <data name="Remaining" xml:space="preserve">
+    <value>Restant</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="Reopen" xml:space="preserve">
+    <value>Rouvrir</value>
+  </data>
+  <data name="Request ID:" xml:space="preserve">
+    <value>ID de la requête :</value>
+  </data>
+  <data name="Requests per minute by five-minute UTC interval" xml:space="preserve">
+    <value>Requêtes par minute par intervalles UTC de cinq minutes</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Réinitialiser</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="Restore backup" xml:space="preserve">
+    <value>Restaurer la sauvegarde</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Résultat</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Reprendre</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>Ligne</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Save item" xml:space="preserve">
+    <value>Enregistrer l’élément</value>
+  </data>
+  <data name="Save settings" xml:space="preserve">
+    <value>Enregistrer les paramètres</value>
+  </data>
+  <data name="Saved amount cannot be negative." xml:space="preserve">
+    <value>Le montant épargné ne peut pas être négatif.</value>
+  </data>
+  <data name="Saved so far" xml:space="preserve">
+    <value>Épargne actuelle</value>
+  </data>
+  <data name="SavedAmount" xml:space="preserve">
+    <value>Montant épargné</value>
+  </data>
+  <data name="Savings" xml:space="preserve">
+    <value>Épargne</value>
+  </data>
+  <data name="Savings goals: set a target amount, pick a banner color or image and follow your progress." xml:space="preserve">
+    <value>Objectifs d’épargne : fixez un montant, choisissez une couleur ou une image et suivez votre progression.</value>
+  </data>
+  <data name="Saving…" xml:space="preserve">
+    <value>Enregistrement…</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Sélectionner</value>
+  </data>
+  <data name="Select Income, Expense or Transfer." xml:space="preserve">
+    <value>Sélectionnez Revenu, Dépense ou Virement.</value>
+  </data>
+  <data name="Select a .plbackup file." xml:space="preserve">
+    <value>Sélectionnez un fichier .plbackup.</value>
+  </data>
+  <data name="Select a CSV file." xml:space="preserve">
+    <value>Sélectionnez un fichier CSV.</value>
+  </data>
+  <data name="Select a category to see the breakdown." xml:space="preserve">
+    <value>Sélectionnez une catégorie pour afficher la répartition.</value>
+  </data>
+  <data name="Select a currency to adjust how its amounts are displayed. Currencies that are not in the list use the standard format." xml:space="preserve">
+    <value>Choisissez une devise pour personnaliser l’affichage des montants. Les devises absentes de la liste utilisent le format standard.</value>
+  </data>
+  <data name="Select a direction" xml:space="preserve">
+    <value>Sélectionner un sens</value>
+  </data>
+  <data name="Select a main category" xml:space="preserve">
+    <value>Sélectionner une catégorie principale</value>
+  </data>
+  <data name="Select a target account" xml:space="preserve">
+    <value>Sélectionner un compte destinataire</value>
+  </data>
+  <data name="Select a valid planning month." xml:space="preserve">
+    <value>Sélectionnez un mois de planification valide.</value>
+  </data>
+  <data name="Select account" xml:space="preserve">
+    <value>Sélectionner un compte</value>
+  </data>
+  <data name="Select an account" xml:space="preserve">
+    <value>Sélectionner un compte</value>
+  </data>
+  <data name="Select month" xml:space="preserve">
+    <value>Sélectionner un mois</value>
+  </data>
+  <data name="Select only categories that came with PocketLedger. Leave your own categories unchecked." xml:space="preserve">
+    <value>Cochez uniquement les catégories fournies avec PocketLedger. Laissez vos propres catégories décochées.</value>
+  </data>
+  <data name="Select target account" xml:space="preserve">
+    <value>Sélectionner un compte destinataire</value>
+  </data>
+  <data name="Selected calendar month" xml:space="preserve">
+    <value>Mois sélectionné dans le calendrier</value>
+  </data>
+  <data name="Selected statistics month" xml:space="preserve">
+    <value>Mois sélectionné pour les statistiques</value>
+  </data>
+  <data name="Set a target amount for something you are saving for and follow your progress." xml:space="preserve">
+    <value>Fixez un montant cible pour votre projet et suivez votre progression.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Settings saved." xml:space="preserve">
+    <value>Paramètres enregistrés.</value>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Afficher</value>
+  </data>
+  <data name="Show dashboard amounts" xml:space="preserve">
+    <value>Afficher les montants du tableau de bord</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
+  <data name="Sign in again" xml:space="preserve">
+    <value>Reconnectez-vous</value>
+  </data>
+  <data name="Source account" xml:space="preserve">
+    <value>Compte source</value>
+  </data>
+  <data name="Source and target accounts are required." xml:space="preserve">
+    <value>Un compte source et un compte destinataire sont obligatoires.</value>
+  </data>
+  <data name="Source and target accounts must be different." xml:space="preserve">
+    <value>Les comptes source et destinataire doivent être différents.</value>
+  </data>
+  <data name="Space between value and currency" xml:space="preserve">
+    <value>Espace entre le montant et la devise</value>
+  </data>
+  <data name="Start / due" xml:space="preserve">
+    <value>Début / échéance</value>
+  </data>
+  <data name="Start date cannot be after end date." xml:space="preserve">
+    <value>La date de début ne peut pas suivre la date de fin.</value>
+  </data>
+  <data name="Start date is required." xml:space="preserve">
+    <value>La date de début est obligatoire.</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Date de début</value>
+  </data>
+  <data name="Starter category translations enabled." xml:space="preserve">
+    <value>Traduction des catégories par défaut activée.</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statistiques</value>
+  </data>
+  <data name="Statistics now shows income by main category in a doughnut chart, just like expenses." xml:space="preserve">
+    <value>Les statistiques affichent les revenus par catégorie principale dans un graphique en anneau, comme les dépenses.</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Still needed" xml:space="preserve">
+    <value>Reste à épargner</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Subcategories cannot use an icon." xml:space="preserve">
+    <value>Les sous-catégories ne peuvent pas avoir d’icône.</value>
+  </data>
+  <data name="Subcategory" xml:space="preserve">
+    <value>Sous-catégorie</value>
+  </data>
+  <data name="Switching to the {0} environment displays more details about the error." xml:space="preserve">
+    <value>L’environnement {0} affiche des informations plus détaillées sur l’erreur.</value>
+  </data>
+  <data name="Symbol" xml:space="preserve">
+    <value>Symbole</value>
+  </data>
+  <data name="Symbol: {0}" xml:space="preserve">
+    <value>Symbole : {0}</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Objectif</value>
+  </data>
+  <data name="Target account" xml:space="preserve">
+    <value>Compte destinataire</value>
+  </data>
+  <data name="Target account and target amount must be empty for non-transfer transactions." xml:space="preserve">
+    <value>Le compte et le montant destinataires sont réservés aux virements.</value>
+  </data>
+  <data name="Target amount" xml:space="preserve">
+    <value>Montant cible</value>
+  </data>
+  <data name="Target amount must be greater than zero." xml:space="preserve">
+    <value>Le montant destinataire doit être supérieur à zéro.</value>
+  </data>
+  <data name="Target amount must equal source amount when account currencies match." xml:space="preserve">
+    <value>Si les devises des comptes sont identiques, les montants source et destinataire doivent être égaux.</value>
+  </data>
+  <data name="Target date" xml:space="preserve">
+    <value>Date cible</value>
+  </data>
+  <data name="The Development environment shouldn't be enabled for deployed applications." xml:space="preserve">
+    <value>L’environnement de développement doit être désactivé dans une application déployée.</value>
+  </data>
+  <data name="The Excel export password contains invalid Unicode characters." xml:space="preserve">
+    <value>Le mot de passe d’export Excel contient des caractères Unicode non valides.</value>
+  </data>
+  <data name="The account amount must equal the original amount when currencies match." xml:space="preserve">
+    <value>Si les devises sont identiques, le montant du compte doit être égal au montant initial.</value>
+  </data>
+  <data name="The account cannot be deleted because transactions reference it." xml:space="preserve">
+    <value>Le compte ne peut pas être supprimé car des transactions y sont liées.</value>
+  </data>
+  <data name="The adjustment financial semantics are invalid." xml:space="preserve">
+    <value>Les données financières de la correction ne sont pas valides.</value>
+  </data>
+  <data name="The amount expected to be credited or debited in the account currency." xml:space="preserve">
+    <value>Montant attendu du crédit ou du débit dans la devise du compte.</value>
+  </data>
+  <data name="The backup exceeds the 64 MiB limit." xml:space="preserve">
+    <value>La sauvegarde dépasse la limite de 64 Mio.</value>
+  </data>
+  <data name="The backup exceeds the 64 MiB payload limit." xml:space="preserve">
+    <value>Les données de sauvegarde dépassent la limite de 64 Mio.</value>
+  </data>
+  <data name="The backup password contains invalid Unicode characters." xml:space="preserve">
+    <value>Le mot de passe de sauvegarde contient des caractères Unicode non valides.</value>
+  </data>
+  <data name="The category cannot be deleted because transactions reference it." xml:space="preserve">
+    <value>La catégorie ne peut pas être supprimée car des transactions y sont liées.</value>
+  </data>
+  <data name="The category cannot be deleted while it contains subcategories." xml:space="preserve">
+    <value>La catégorie ne peut pas être supprimée tant qu’elle contient des sous-catégories.</value>
+  </data>
+  <data name="The debt entry operation is invalid." xml:space="preserve">
+    <value>L’opération de dette n’est pas valide.</value>
+  </data>
+  <data name="The debt is closed." xml:space="preserve">
+    <value>La dette est clôturée.</value>
+  </data>
+  <data name="The debt operation type is invalid." xml:space="preserve">
+    <value>Le type d’opération de dette n’est pas valide.</value>
+  </data>
+  <data name="The encrypted backup data is invalid." xml:space="preserve">
+    <value>Les données de la sauvegarde chiffrée ne sont pas valides.</value>
+  </data>
+  <data name="The expected closing balance is zero or negative." xml:space="preserve">
+    <value>Le solde de clôture prévu est nul ou négatif.</value>
+  </data>
+  <data name="The expense debt operation is invalid." xml:space="preserve">
+    <value>L’opération de dette sortante n’est pas valide.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a minimum length of '{1}'." xml:space="preserve">
+    <value>Le champ « {0} » doit contenir au moins {1} caractères ou éléments.</value>
+  </data>
+  <data name="The field {0} must be a string with a maximum length of {1}." xml:space="preserve">
+    <value>Le champ « {0} » doit contenir au maximum {1} caractères.</value>
+  </data>
+  <data name="The field {0} must be between {1} and {2}." xml:space="preserve">
+    <value>« {0} » doit être compris entre {1} et {2}.</value>
+  </data>
+  <data name="The income debt operation is invalid." xml:space="preserve">
+    <value>L’opération de dette entrante n’est pas valide.</value>
+  </data>
+  <data name="The initial balance on the account form now follows your currency format." xml:space="preserve">
+    <value>Le solde initial du formulaire utilise désormais votre format de devise.</value>
+  </data>
+  <data name="The opening balance supports at most four decimal places." xml:space="preserve">
+    <value>Le solde d’ouverture accepte quatre décimales au maximum.</value>
+  </data>
+  <data name="The operation amount exceeds the remaining debt. Choose whether to increase the original amount or limit the operation." xml:space="preserve">
+    <value>Le montant dépasse le solde de la dette. Choisissez d’augmenter le montant initial ou de limiter l’opération.</value>
+  </data>
+  <data name="The operation does not match the debt direction." xml:space="preserve">
+    <value>L’opération ne correspond pas au sens de la dette.</value>
+  </data>
+  <data name="The passwords do not match." xml:space="preserve">
+    <value>Les mots de passe ne correspondent pas.</value>
+  </data>
+  <data name="The plan month must be the first day of the month." xml:space="preserve">
+    <value>Le mois planifié doit être indiqué par le premier jour du mois.</value>
+  </data>
+  <data name="The planned date must belong to the selected month." xml:space="preserve">
+    <value>La date prévue doit appartenir au mois sélectionné.</value>
+  </data>
+  <data name="The saved plan is invalid." xml:space="preserve">
+    <value>Le plan enregistré n’est pas valide.</value>
+  </data>
+  <data name="The selected account does not exist." xml:space="preserve">
+    <value>Le compte sélectionné n’existe pas.</value>
+  </data>
+  <data name="The selected account type is invalid." xml:space="preserve">
+    <value>Le type de compte sélectionné n’est pas valide.</value>
+  </data>
+  <data name="The selected banner image is invalid." xml:space="preserve">
+    <value>L’image de bannière sélectionnée n’est pas valide.</value>
+  </data>
+  <data name="The selected category does not exist." xml:space="preserve">
+    <value>La catégorie sélectionnée n’existe pas.</value>
+  </data>
+  <data name="The selected category icon is invalid." xml:space="preserve">
+    <value>L’icône de catégorie sélectionnée n’est pas valide.</value>
+  </data>
+  <data name="The selected category type is invalid." xml:space="preserve">
+    <value>Le type de catégorie sélectionné n’est pas valide.</value>
+  </data>
+  <data name="The selected currency is not supported." xml:space="preserve">
+    <value>La devise sélectionnée n’est pas prise en charge.</value>
+  </data>
+  <data name="The selected debt direction or type is invalid." xml:space="preserve">
+    <value>Le sens ou le type de dette sélectionné n’est pas valide.</value>
+  </data>
+  <data name="The selected debt operation is invalid." xml:space="preserve">
+    <value>L’opération de dette sélectionnée n’est pas valide.</value>
+  </data>
+  <data name="The selected file is not a PocketLedger encrypted backup." xml:space="preserve">
+    <value>Le fichier sélectionné n’est pas une sauvegarde PocketLedger chiffrée.</value>
+  </data>
+  <data name="The selected frequency is invalid." xml:space="preserve">
+    <value>La fréquence sélectionnée n’est pas valide.</value>
+  </data>
+  <data name="The selected icon is invalid." xml:space="preserve">
+    <value>L’icône sélectionnée n’est pas valide.</value>
+  </data>
+  <data name="The selected icon is not valid for this category type." xml:space="preserve">
+    <value>L’icône sélectionnée ne convient pas à ce type de catégorie.</value>
+  </data>
+  <data name="The selected local time does not exist because of a daylight-saving transition." xml:space="preserve">
+    <value>L’heure locale sélectionnée n’existe pas en raison du changement d’heure.</value>
+  </data>
+  <data name="The selected month is invalid." xml:space="preserve">
+    <value>Le mois sélectionné n’est pas valide.</value>
+  </data>
+  <data name="The selected parent category does not exist." xml:space="preserve">
+    <value>La catégorie parente sélectionnée n’existe pas.</value>
+  </data>
+  <data name="The transaction financial semantics are unsupported." xml:space="preserve">
+    <value>Les données financières de cette transaction ne sont pas prises en charge.</value>
+  </data>
+  <data name="The transaction list shows the category first, with the type and note underneath." xml:space="preserve">
+    <value>La liste affiche d’abord la catégorie, puis le type et la note en dessous.</value>
+  </data>
+  <data name="The transaction type is invalid." xml:space="preserve">
+    <value>Le type de transaction n’est pas valide.</value>
+  </data>
+  <data name="The transfer financial semantics are invalid." xml:space="preserve">
+    <value>Les données financières du virement ne sont pas valides.</value>
+  </data>
+  <data name="The {0} field is not a valid e-mail address." xml:space="preserve">
+    <value>Le champ « {0} » ne contient pas une adresse e-mail valide.</value>
+  </data>
+  <data name="The {0} field is required." xml:space="preserve">
+    <value>Le champ « {0} » est obligatoire.</value>
+  </data>
+  <data name="These adjustments affect balances without counting as income or expenses." xml:space="preserve">
+    <value>Ces corrections modifient les soldes sans compter comme revenus ou dépenses.</value>
+  </data>
+  <data name="This action cannot be undone." xml:space="preserve">
+    <value>Cette action est irréversible.</value>
+  </data>
+  <data name="This changelog: see what's new after an update, and browse earlier releases from your account page." xml:space="preserve">
+    <value>Ce journal présente les nouveautés après une mise à jour. Les versions précédentes restent accessibles depuis votre compte.</value>
+  </data>
+  <data name="This is not a debt transaction." xml:space="preserve">
+    <value>Cette transaction n’est pas liée à une dette.</value>
+  </data>
+  <data name="This month" xml:space="preserve">
+    <value>Ce mois-ci</value>
+  </data>
+  <data name="This operation cannot use an account." xml:space="preserve">
+    <value>Cette opération ne peut pas utiliser de compte.</value>
+  </data>
+  <data name="This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates." xml:space="preserve">
+    <value>Le planificateur utilise les éléments prévus et les revenus et dépenses récurrents actifs, y compris les remboursements de prêt. Les montants sont estimatifs.</value>
+  </data>
+  <data name="Thousands separator" xml:space="preserve">
+    <value>Séparateur de milliers</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Heure</value>
+  </data>
+  <data name="Time zone" xml:space="preserve">
+    <value>Fuseau horaire</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Au</value>
+  </data>
+  <data name="Toggle navigation" xml:space="preserve">
+    <value>Afficher ou masquer la navigation</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Total balance" xml:space="preserve">
+    <value>Solde total</value>
+  </data>
+  <data name="Total monthly loan payments" xml:space="preserve">
+    <value>Total des remboursements mensuels</value>
+  </data>
+  <data name="Totals by currency" xml:space="preserve">
+    <value>Totaux par devise</value>
+  </data>
+  <data name="Transaction created successfully." xml:space="preserve">
+    <value>Transaction créée.</value>
+  </data>
+  <data name="Transaction date is required." xml:space="preserve">
+    <value>La date de transaction est obligatoire.</value>
+  </data>
+  <data name="Transaction deleted successfully." xml:space="preserve">
+    <value>Transaction supprimée.</value>
+  </data>
+  <data name="Transaction details" xml:space="preserve">
+    <value>Détails de la transaction</value>
+  </data>
+  <data name="Transaction updated successfully." xml:space="preserve">
+    <value>Transaction mise à jour.</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>Virement</value>
+  </data>
+  <data name="Transfer in" xml:space="preserve">
+    <value>Virement entrant</value>
+  </data>
+  <data name="Transfer into {0}" xml:space="preserve">
+    <value>Virement vers {0}</value>
+  </data>
+  <data name="Transfer out" xml:space="preserve">
+    <value>Virement sortant</value>
+  </data>
+  <data name="Transfer out of {0}" xml:space="preserve">
+    <value>Virement depuis {0}</value>
+  </data>
+  <data name="Transfers" xml:space="preserve">
+    <value>Virements</value>
+  </data>
+  <data name="Transfers are not supported yet." xml:space="preserve">
+    <value>Les virements ne sont pas encore pris en charge.</value>
+  </data>
+  <data name="Transfers cannot use a category." xml:space="preserve">
+    <value>Les virements ne peuvent pas avoir de catégorie.</value>
+  </data>
+  <data name="Transfers cannot use an adjustment direction." xml:space="preserve">
+    <value>Les virements ne peuvent pas définir un sens de correction.</value>
+  </data>
+  <data name="Translate existing starter categories" xml:space="preserve">
+    <value>Traduire les catégories par défaut existantes</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Undated" xml:space="preserve">
+    <value>Sans date</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Illimité</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Modifications non enregistrées</value>
+  </data>
+  <data name="Update savings" xml:space="preserve">
+    <value>Mettre à jour l’épargne</value>
+  </data>
+  <data name="Use between 10 and 128 characters. A forgotten password cannot be recovered." xml:space="preserve">
+    <value>Utilisez entre 10 et 128 caractères. Un mot de passe oublié ne peut pas être récupéré.</value>
+  </data>
+  <data name="Use the current account balance automatically instead of a custom opening balance." xml:space="preserve">
+    <value>Utilisez automatiquement le solde courant du compte à la place d’un solde d’ouverture personnalisé.</value>
+  </data>
+  <data name="Use this page to detail your site's privacy policy." xml:space="preserve">
+    <value>Cette page permet de présenter la politique de confidentialité du site.</value>
+  </data>
+  <data name="Used for new accounts and as the preselected currency in forms." xml:space="preserve">
+    <value>Utilisée pour les nouveaux comptes et présélectionnée dans les formulaires.</value>
+  </data>
+  <data name="User overview pages" xml:space="preserve">
+    <value>Pages de la liste des utilisateurs</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Nom d’utilisateur</value>
+  </data>
+  <data name="View all" xml:space="preserve">
+    <value>Tout afficher</value>
+  </data>
+  <data name="View debt" xml:space="preserve">
+    <value>Voir la dette</value>
+  </data>
+  <data name="Warning:" xml:space="preserve">
+    <value>Attention :</value>
+  </data>
+  <data name="We couldn't complete your sign-in. Your login request may have expired or already been used. Please start again from this browser and allow cookies." xml:space="preserve">
+    <value>La connexion n’a pas abouti. La demande a peut-être expiré ou déjà été utilisée. Recommencez dans ce navigateur et autorisez les cookies.</value>
+  </data>
+  <data name="Weekly" xml:space="preserve">
+    <value>Hebdomadaire</value>
+  </data>
+  <data name="What's new in PocketLedger {0}" xml:space="preserve">
+    <value>Nouveautés de PocketLedger {0}</value>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="Yearly" xml:space="preserve">
+    <value>Annuel</value>
+  </data>
+  <data name="You are on track!" xml:space="preserve">
+    <value>Vous êtes sur la bonne voie !</value>
+  </data>
+  <data name="You cannot withdraw more than the saved amount." xml:space="preserve">
+    <value>Vous ne pouvez pas retirer plus que le montant épargné.</value>
+  </data>
+  <data name="Your selected avatar is now shown on the account pages too." xml:space="preserve">
+    <value>L’avatar choisi apparaît aussi sur les pages du compte.</value>
+  </data>
+  <data name="a confirmed restore replaces all current PocketLedger data. It runs in a database transaction and rolls back on failure." xml:space="preserve">
+    <value>Une restauration confirmée remplace toutes les données PocketLedger actuelles. Elle s’exécute dans une transaction de base de données et est annulée en cas d’échec.</value>
+  </data>
+  <data name="e.g. 203.0.113.10" xml:space="preserve">
+    <value>p. ex. 203.0.113.10</value>
+  </data>
+  <data name="e.g. Summer holiday" xml:space="preserve">
+    <value>p. ex. vacances d’été</value>
+  </data>
+  <data name="no due date" xml:space="preserve">
+    <value>pas de date d’échéance</value>
+  </data>
+  <data name="{0} icon {1}" xml:space="preserve">
+    <value>Icône {0} {1}</value>
+  </data>
+  <data name="{0} opening balance ({1})" xml:space="preserve">
+    <value>Solde d’ouverture de {0} ({1})</value>
+  </data>
+</root>

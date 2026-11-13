@@ -1,0 +1,92 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 · Set up" xml:space="preserve">
+    <value>01 · Configurer</value>
+  </data>
+  <data name="02 · Record" xml:space="preserve">
+    <value>02 · Enregistrer</value>
+  </data>
+  <data name="03 · Understand" xml:space="preserve">
+    <value>03 · Analyser</value>
+  </data>
+  <data name="04 · Protect" xml:space="preserve">
+    <value>04 · Protéger</value>
+  </data>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Comptes et catégories</value>
+  </data>
+  <data name="Automate entries, review trends and plan the months ahead." xml:space="preserve">
+    <value>Automatisez les écritures, examinez les tendances et planifiez les prochains mois.</value>
+  </data>
+  <data name="Build the structure that keeps balances and spending meaningful." xml:space="preserve">
+    <value>Structurez vos comptes pour suivre les soldes et les dépenses.</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Navigation des chapitres</value>
+  </data>
+  <data name="Choose a chapter" xml:space="preserve">
+    <value>Choisir un chapitre</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Données et paramètres</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Dettes et objectifs</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Premiers pas</value>
+  </data>
+  <data name="Guide" xml:space="preserve">
+    <value>Guide</value>
+  </data>
+  <data name="New to PocketLedger?" xml:space="preserve">
+    <value>Vous débutez avec PocketLedger ?</value>
+  </data>
+  <data name="Personalize PocketLedger and keep portable encrypted copies." xml:space="preserve">
+    <value>Personnalisez PocketLedger et conservez des copies chiffrées et portables.</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Planification et analyse</value>
+  </data>
+  <data name="Recommended learning path" xml:space="preserve">
+    <value>Parcours d’apprentissage recommandé</value>
+  </data>
+  <data name="Record income, expenses, transfers and balance corrections." xml:space="preserve">
+    <value>Enregistrez les revenus, les dépenses, les virements et les corrections de solde.</value>
+  </data>
+  <data name="Register securely, learn the navigation and read the dashboard." xml:space="preserve">
+    <value>Inscrivez-vous en toute sécurité et découvrez la navigation et le tableau de bord.</value>
+  </data>
+  <data name="Start the guide" xml:space="preserve">
+    <value>Commencer le guide</value>
+  </data>
+  <data name="Start with Getting started, then create your accounts before recording transactions. Most reports become useful as soon as a few categorized entries exist." xml:space="preserve">
+    <value>Commencez par Premiers pas, puis créez vos comptes avant de saisir des transactions. Quelques écritures catégorisées suffisent pour exploiter la plupart des rapports.</value>
+  </data>
+  <data name="The dashboard brings balances, monthly activity and everyday actions into one place." xml:space="preserve">
+    <value>Le tableau de bord réunit les soldes, l’activité du mois et les actions courantes.</value>
+  </data>
+  <data name="This guide takes you from your first account to planning, reporting and encrypted backups. Follow it in order for a complete tour, or jump directly to the task you need." xml:space="preserve">
+    <value>Ce guide vous accompagne du premier compte à la planification, aux rapports et aux sauvegardes chiffrées. Suivez-le dans l’ordre ou accédez directement à la tâche voulue.</value>
+  </data>
+  <data name="Track what is owed and make progress towards savings targets." xml:space="preserve">
+    <value>Suivez les sommes dues et la progression de vos objectifs d’épargne.</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="User guide" xml:space="preserve">
+    <value>GUIDE D’UTILISATION</value>
+  </data>
+  <data name="Your money, clearly organized." xml:space="preserve">
+    <value>Vos finances, bien organisées.</value>
+  </data>
+  <data name="PocketLedger dashboard showing balances in several currencies, account cards and quick transaction actions" xml:space="preserve">
+    <value>Tableau de bord PocketLedger avec soldes multidevises, cartes de compte et raccourcis</value>
+  </data>
+</root>

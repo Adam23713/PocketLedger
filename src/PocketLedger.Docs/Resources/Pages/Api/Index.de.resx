@@ -1,0 +1,80 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="API conventions" xml:space="preserve">
+    <value>API-Konventionen</value>
+  </data>
+  <data name="API navigation" xml:space="preserve">
+    <value>API-Navigation</value>
+  </data>
+  <data name="Authentication" xml:space="preserve">
+    <value>Authentifizierung</value>
+  </data>
+  <data name="Client integration" xml:space="preserve">
+    <value>Clientintegration</value>
+  </data>
+  <data name="Coming soon" xml:space="preserve">
+    <value>Demnächst</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Kopiert</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopieren</value>
+  </data>
+  <data name="DEVELOPER DOCUMENTATION" xml:space="preserve">
+    <value>ENTWICKLERDOKUMENTATION</value>
+  </data>
+  <data name="Endpoint details and executable examples will be added once the public API contract is documented." xml:space="preserve">
+    <value>Details zu Endpunkten und ausführbare Beispiele folgen nach der Dokumentation des öffentlichen API-Vertrags.</value>
+  </data>
+  <data name="Endpoint reference" xml:space="preserve">
+    <value>Endpunktreferenz</value>
+  </data>
+  <data name="Endpoints" xml:space="preserve">
+    <value>Endpunkte</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="Example format" xml:space="preserve">
+    <value>Beispielformat</value>
+  </data>
+  <data name="Examples will be ready to copy and will clearly mark the values that need to be replaced." xml:space="preserve">
+    <value>Die Beispiele lassen sich kopieren und kennzeichnen alle zu ersetzenden Werte.</value>
+  </data>
+  <data name="Follow a practical path from the first request to a working client." xml:space="preserve">
+    <value>Folge einem praktischen Weg von der ersten Anfrage zum funktionsfähigen Client.</value>
+  </data>
+  <data name="Obtain and use access tokens safely." xml:space="preserve">
+    <value>Beschaffe und verwende Zugriffstoken sicher.</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Übersicht</value>
+  </data>
+  <data name="Placeholder curl example" xml:space="preserve">
+    <value>curl-Platzhalterbeispiel</value>
+  </data>
+  <data name="Planned topics" xml:space="preserve">
+    <value>Geplante Themen</value>
+  </data>
+  <data name="See inputs, outputs and copyable curl requests." xml:space="preserve">
+    <value>Sieh dir Eingaben, Ausgaben und kopierbare curl-Anfragen an.</value>
+  </data>
+  <data name="The API documentation will cover authentication, request and response formats, endpoints and practical examples for client developers." xml:space="preserve">
+    <value>Die API-Dokumentation behandelt Authentifizierung, Anfrage- und Antwortformate, Endpunkte und praktische Beispiele für Client-Entwickler.</value>
+  </data>
+  <data name="The API reference is not published yet." xml:space="preserve">
+    <value>Die API-Referenz ist noch nicht veröffentlicht.</value>
+  </data>
+  <data name="Understand formats, pagination, validation and errors." xml:space="preserve">
+    <value>Verstehe Formate, Seitennavigation, Validierung und Fehler.</value>
+  </data>
+  <data name="Copy failed" xml:space="preserve">
+    <value>Kopieren fehlgeschlagen</value>
+  </data>
+</root>

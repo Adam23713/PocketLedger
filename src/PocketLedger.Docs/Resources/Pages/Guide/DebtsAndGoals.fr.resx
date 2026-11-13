@@ -1,0 +1,86 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="CHAPTER 05" xml:space="preserve">
+    <value>CHAPITRE 05</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Navigation des chapitres</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Données et paramètres</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Dettes et objectifs</value>
+  </data>
+  <data name="Debts and goals" xml:space="preserve">
+    <value>Dettes et objectifs</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Planification et analyse</value>
+  </data>
+  <data name="Create a debt as either" xml:space="preserve">
+    <value>Créez une dette et choisissez</value>
+  </data>
+  <data name="Create a goal with a name, currency, target amount and optional target date. Choose a banner, record what is already saved, then add contributions or withdrawals as the plan changes." xml:space="preserve">
+    <value>Créez un objectif avec un nom, une devise, un montant cible et, si souhaité, une date. Choisissez une bannière, indiquez l’épargne existante, puis ajoutez les versements ou les retraits.</value>
+  </data>
+  <data name="Currency groups keep obligations comparable without hidden conversion." xml:space="preserve">
+    <value>Le regroupement par devise permet de comparer les engagements sans conversion implicite.</value>
+  </data>
+  <data name="Debt operations are the source of truth for how the outstanding amount changed." xml:space="preserve">
+    <value>Les opérations de dette indiquent comment le solde restant a évolué.</value>
+  </data>
+  <data name="Goal contributions track progress but do not change an account balance automatically." xml:space="preserve">
+    <value>Les versements suivent la progression sans modifier automatiquement le solde d’un compte.</value>
+  </data>
+  <data name="Keep obligations separate from ordinary spending, and give long-term savings a visible destination." xml:space="preserve">
+    <value>Suivez les engagements séparément des dépenses courantes et donnez un objectif visible à votre épargne à long terme.</value>
+  </data>
+  <data name="Keep the ledger and motivation separate." xml:space="preserve">
+    <value>Séparez les écritures et le suivi des objectifs.</value>
+  </data>
+  <data name="Open a debt to add payments, borrowing, lending or corrections. PocketLedger maintains the remaining amount and records linked account activity. Close the debt when it is settled; closed items remain available for history." xml:space="preserve">
+    <value>Ouvrez une dette pour ajouter un paiement, un emprunt, un prêt ou une correction. PocketLedger suit le solde restant et enregistre l’activité du compte associé. Clôturez la dette une fois réglée. Elle reste consultable dans l’historique.</value>
+  </data>
+  <data name="Payable" xml:space="preserve">
+    <value>À payer</value>
+  </data>
+  <data name="Receivable" xml:space="preserve">
+    <value>À recevoir</value>
+  </data>
+  <data name="Save towards a goal" xml:space="preserve">
+    <value>Épargner pour un objectif</value>
+  </data>
+  <data name="The goals page turns a distant target into a visible progress indicator." xml:space="preserve">
+    <value>La page des objectifs rend visible la progression vers un objectif à long terme.</value>
+  </data>
+  <data name="Track money owed" xml:space="preserve">
+    <value>Suivre les sommes dues</value>
+  </data>
+  <data name="Use an actual savings account and transfers for real money movement. Use Goals to visualize the purpose and progress of those savings." xml:space="preserve">
+    <value>Utilisez un compte d’épargne et des virements pour les mouvements réels. La rubrique Objectifs permet de suivre le but et la progression de cette épargne.</value>
+  </data>
+  <data name="when somebody owes you. Link an account when operations should affect a real balance, and configure a payment schedule for predictable repayments." xml:space="preserve">
+    <value>si quelqu’un vous doit de l’argent. Associez un compte si les opérations doivent affecter un solde réel, et configurez un échéancier pour les remboursements prévisibles.</value>
+  </data>
+  <data name="when you owe money or" xml:space="preserve">
+    <value>si vous devez de l’argent ou</value>
+  </data>
+  <data name="Debt details with remaining balance, repayment schedule and operation history" xml:space="preserve">
+    <value>Détails de la dette avec solde restant, échéancier et historique des opérations</value>
+  </data>
+  <data name="Goal details with saved amount, target, remaining amount, date and contribution form" xml:space="preserve">
+    <value>Détails de l’objectif avec épargne, cible, montant restant, date et formulaire de versement</value>
+  </data>
+  <data name="Loans and debts grouped by currency with payable and receivable totals" xml:space="preserve">
+    <value>Prêts et dettes par devise avec les totaux à payer et à recevoir</value>
+  </data>
+  <data name="Savings goals overview with a visual progress card" xml:space="preserve">
+    <value>Vue d’ensemble des objectifs d’épargne avec une carte de progression</value>
+  </data>
+</root>

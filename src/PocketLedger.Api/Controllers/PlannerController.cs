@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PocketLedger.Models;
 using PocketLedger.Services.Interfaces;
 
 namespace PocketLedger.Api.Controllers;
@@ -9,7 +10,27 @@ namespace PocketLedger.Api.Controllers;
 [ApiController, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme), Route("api/v1/planner")]
 public sealed class PlannerController(IPlannerService service) : ControllerBase
 {
-    [HttpGet("{year:int}/{month:int}")] public async Task<IActionResult> Month(int year, int month, CancellationToken token) => Ok(await service.GetMonthAsync(year, month, token));
+    [HttpGet("{year:int}/{month:int}")]
+    public async Task<IActionResult> Month(int year, int month, CancellationToken token)
+    {
+        var result = await service.GetMonthAsync(year, month, token);
+        return Ok(result with { Events = result.Events.Select(item => item with { CategoryName = LocalizeCategoryName(item) }).ToArray() });
+    }
+
+    private static string? LocalizeCategoryName(PlannerEvent item)
+    {
+        var name = item.CategoryName;
+        if (name is null) return null;
+        if (item.StarterCategoryKey is { } key)
+        {
+            if (name == key) return DefaultCategories.DisplayName(key, key);
+            if (name.EndsWith(" / " + key, StringComparison.Ordinal))
+                name = name[..^key.Length] + DefaultCategories.DisplayName(key, key);
+        }
+        if (item.ParentStarterCategoryKey is { } parentKey && name.StartsWith(parentKey + " / ", StringComparison.Ordinal))
+            name = DefaultCategories.DisplayName(parentKey, parentKey) + name[parentKey.Length..];
+        return name;
+    }
     [HttpPut("{year:int}/{month:int}/notes")] public async Task<IActionResult> Notes(int year, int month, PlannerNotesInput input, CancellationToken token) { await service.UpdateNotesAsync(year, month, input, token); return NoContent(); }
     [HttpPut("{year:int}/{month:int}/accounts/{accountId:guid}")] public async Task<IActionResult> OpeningBalance(int year, int month, Guid accountId, PlannerOpeningBalanceInput input, CancellationToken token) { await service.UpdateOpeningBalanceAsync(year, month, accountId, input, token); return NoContent(); }
     [HttpGet("items/{id:guid}")] public async Task<IActionResult> Get(Guid id, CancellationToken token) => await service.GetByIdAsync(id, token) is { } item ? Ok(item) : NotFound();

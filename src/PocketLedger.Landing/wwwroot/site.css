@@ -114,7 +114,7 @@ img {
 .nav {
     display:flex;
     align-items:center;
-    gap:32px;
+    gap:16px;
     min-height:82px;
 }
 
@@ -133,10 +133,35 @@ img {
 
 .nav-links {
     display:flex;
-    gap:26px;
+    gap:clamp(12px, 1.3vw, 20px);
     margin-left:auto;
     font-size:.9rem;
     font-weight:550;
+}
+
+.nav > .brand,
+.nav > .button,
+.nav-links a {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 1199px) {
+    .nav {
+        flex-wrap: wrap;
+        padding-block: 12px;
+        row-gap: 12px;
+    }
+    .nav > .button {
+        margin-left: auto;
+    }
+    .nav-links {
+        order: 1;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0;
+    }
 }
 
 .button {
@@ -672,9 +697,6 @@ h3 {
     .nav-links {
         gap:16px;
     }
-    .nav-links a:nth-child(n+3) {
-        display:none;
-    }
     .tour-step {
         grid-template-columns:minmax(0,1.2fr) 40px minmax(0,1fr);
     }
@@ -714,9 +736,6 @@ h3 {
         justify-content:center;
         margin:0;
         gap:24px;
-    }
-    .nav-links a:nth-child(n+3) {
-        display:block;
     }
     .nav-links {
         font-size:.8rem;
@@ -1471,3 +1490,33 @@ body.viewer-open {
 .video-placeholder:hover .video-play, .video-placeholder:focus-visible .video-play { transform:scale(1.08); }
 .video-placeholder-title { font-size:1rem; font-weight:650; }
 .video-placeholder-note { font-size:.78rem; max-width:24rem; opacity:.75; }
+
+.language-selector {
+    flex: 0 0 auto;
+}
+.language-selector label {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--muted);
+    font-size: .875rem;
+}
+.language-selector select {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: .65rem;
+    color: var(--ink);
+    font: inherit;
+    padding: .45rem .6rem;
+}
+.language-selector select:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+.nav .language-selector label > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}

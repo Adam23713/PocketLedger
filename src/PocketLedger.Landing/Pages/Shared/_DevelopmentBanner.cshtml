@@ -1,26 +1,27 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
 @model PocketLedger.Landing.RegistrationStatus
 @{
     var appUrl = (string)ViewData["AppUrl"]!;
-    const string development = "PocketLedger is still under active development.";
+    var development = Text["PocketLedger is still under active development."];
     var remaining = Model.RemainingSlots ?? 0;
-    var spots = remaining == 1 ? "spot" : "spots";
+    var spots = remaining == 1 ? Text["Public registration is open — {0} spot left —", remaining] : Text["Public registration is open — {0} spots left —", remaining];
 }
 <div class="development"><span class="status-dot" aria-hidden="true"></span>@if (Model.AcceptsRegistrations)
 {
     <span>@development </span>@if (Model.RemainingSlots is not null)
     {
-        <span data-registration-content>Public registration is open — @remaining @spots left — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
+        <span data-registration-content>@spots <a data-registration-link href="@(appUrl + "/Session/Register")">@Text["create your account"]</a>.</span>
     }
     else
     {
-        <span data-registration-content>Public registration is open — <a data-registration-link href="@(appUrl + "/Session/Register")">create your account</a>.</span>
+        <span data-registration-content>@Text["Public registration is open —"] <a data-registration-link href="@(appUrl + "/Session/Register")">@Text["create your account"]</a>.</span>
     }
 }
 else if (Model.MaximumUserCount is not null && Model.RemainingSlots == 0)
 {
-    <span>@development Public registration is open, but all spots are currently taken — check back soon.</span>
+    <span>@development @Text["Public registration is open, but all spots are currently taken — check back soon."]</span>
 }
 else
 {
-    <span>@development Public registration isn't open yet — it's coming soon.</span>
+    <span>@development @Text["Public registration isn't open yet — it's coming soon."]</span>
 }</div>

@@ -1,8 +1,9 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Home.HomeViewModel
 @using PocketLedger.Models.Enums
 @{
-    ViewData["Title"] = "Dashboard";
-    string AccountTypeLabel(AccountType type) => type switch { AccountType.BankAccount => "Bank Account", AccountType.CreditCard => "Credit Card", _ => type.ToString() };
+    ViewData["Title"] = CommonText.Get("Dashboard");
+    string AccountTypeLabel(AccountType type) => CommonText.Get(type switch { AccountType.BankAccount => "Bank Account", AccountType.CreditCard => "Credit Card", _ => type.ToString() });
     string AccountTypeIcon(AccountType type) => type switch { AccountType.BankAccount => "BankAccount", AccountType.Savings => "Savings", AccountType.CreditCard => "CreditCard", AccountType.Cash => "Cash", _ => "Other" };
     var availableAccountTypes = Model.Accounts.Select(account => account.Type).Distinct().OrderBy(type => type).ToList();
 }
@@ -14,33 +15,33 @@
 <div class="dashboard-hero d-flex justify-content-between align-items-center mb-3">
     <div>
         <div class="d-flex align-items-center gap-2">
-            <h1>Dashboard</h1>
-            <button class="dashboard-privacy-button" id="dashboard-privacy-button" type="button" aria-label="Hide dashboard amounts" aria-pressed="false" title="Hide dashboard amounts">
+            <h1>@CommonText.Get("Dashboard")</h1>
+            <button class="dashboard-privacy-button" id="dashboard-privacy-button" data-show-label="@CommonText.Get("Show dashboard amounts")" data-hide-label="@CommonText.Get("Hide dashboard amounts")" type="button" aria-label="@CommonText.Get("Hide dashboard amounts")" aria-pressed="false" title="@CommonText.Get("Hide dashboard amounts")">
                 <svg class="privacy-visible-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.75" /></svg>
                 <svg class="privacy-hidden-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6a9.8 9.8 0 0 0 3.1-.5M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
             </button>
         </div>
     </div>
-    <a class="btn btn-primary dashboard-primary-action" asp-controller="Accounts" asp-action="Create"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>New account</a>
+    <a class="btn btn-primary dashboard-primary-action" asp-controller="Accounts" asp-action="Create"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>@CommonText.Get("New account")</a>
 </div>
 @foreach (var warning in Model.DebtFundingWarnings)
 {
-    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@warning.IconAlt" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span>, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span>.</span></div>
+    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert"><img class="category-icon" src="@warning.IconPath" alt="@CommonText.IconLabel(warning.IconAlt)" /><span><strong>Insufficient funds for <a asp-controller="Debts" asp-action="Details" asp-route-id="@warning.DebtId">@warning.DebtName</a>.</strong> @warning.Date.ToString("yyyy-MM-dd"): <span data-private-amount>@MoneyFormatter.Format(warning.Amount, warning.Currency)</span> from @warning.AccountName; current balance <span data-private-amount>@MoneyFormatter.Format(warning.AccountBalance, warning.Currency)</span>, shortfall <span data-private-amount>@MoneyFormatter.Format(warning.Shortfall, warning.Currency)</span>.</span></div>
 }
 
 <div class="row g-3 mb-4 dashboard-summary">
-    <div class="col-6 col-lg-3"><div class="card dashboard-metric dashboard-metric-balance h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Available"' /></span><span>Total balance</span></div>@foreach (var total in Model.MainBalances) { <div class="dashboard-metric-value" data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
-    <div class="col-6 col-lg-3"><div class="card dashboard-metric dashboard-metric-net-worth h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Statistics"' /></span><span>Net worth</span></div>@foreach (var total in Model.NetWorthBalances) { <div class="dashboard-metric-value" data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
-    <div class="col-6 col-lg-2"><div class="card dashboard-metric dashboard-metric-accounts h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Accounts"' /></span><span>Accounts</span></div><div class="dashboard-metric-value">@Model.AccountCount</div><small class="dashboard-metric-caption">Active financial accounts</small></div></div></div>
-    <div class="col-12 col-lg-4"><div class="card dashboard-metric dashboard-metric-month h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>This month</span></div>@foreach (var total in Model.MonthlyTotals) { <div class="dashboard-period"><span><small>Income</small><strong class="text-success" data-private-amount>+@MoneyFormatter.Format(total.Income, total.Currency)</strong></span><span><small>Expenses</small><strong class="text-danger" data-private-amount>−@MoneyFormatter.Format(total.Expenses, total.Currency)</strong></span><span><small>Change</small><strong data-private-amount>@MoneyFormatter.Format(total.Change, total.Currency)</strong></span></div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric dashboard-metric-balance h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Available"' /></span><span>@CommonText.Get("Total balance")</span></div>@foreach (var total in Model.MainBalances) { <div class="dashboard-metric-value" data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card dashboard-metric dashboard-metric-net-worth h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Statistics"' /></span><span>@CommonText.Get("Net worth")</span></div>@foreach (var total in Model.NetWorthBalances) { <div class="dashboard-metric-value" data-private-amount>@MoneyFormatter.Format(total.Amount, total.Currency)</div> }</div></div></div>
+    <div class="col-6 col-lg-2"><div class="card dashboard-metric dashboard-metric-accounts h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Accounts"' /></span><span>@CommonText.Get("Accounts")</span></div><div class="dashboard-metric-value">@Model.AccountCount</div><small class="dashboard-metric-caption">@CommonText.Get("Active financial accounts")</small></div></div></div>
+    <div class="col-12 col-lg-4"><div class="card dashboard-metric dashboard-metric-month h-100"><div class="card-body"><div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>@CommonText.Get("This month")</span></div>@foreach (var total in Model.MonthlyTotals) { <div class="dashboard-period"><span><small>@CommonText.Get("Income")</small><strong class="text-success" data-private-amount>+@MoneyFormatter.Format(total.Income, total.Currency)</strong></span><span><small>@CommonText.Get("Expenses")</small><strong class="text-danger" data-private-amount>−@MoneyFormatter.Format(total.Expenses, total.Currency)</strong></span><span><small>@CommonText.Get("Change")</small><strong data-private-amount>@MoneyFormatter.Format(total.Change, total.Currency)</strong></span></div> }</div></div></div>
 </div>
 
 <div class="account-balance-toolbar">
-    <h2 class="h4 mb-0">Account balances</h2>
+    <h2 class="h4 mb-0">@CommonText.Get("Account balances")</h2>
     @if (availableAccountTypes.Count > 0)
     {
-        <div class="account-type-filters" id="dashboard-account-filters" role="group" aria-label="Filter accounts by type">
-            <button class="account-type-filter active" type="button" data-account-filter="all" aria-pressed="true">All</button>
+        <div class="account-type-filters" id="dashboard-account-filters" role="group" aria-label="@CommonText.Get("Filter accounts by type")">
+            <button class="account-type-filter active" type="button" data-account-filter="all" aria-pressed="true">@CommonText.Get("All")</button>
             @foreach (var accountType in availableAccountTypes)
             {
                 <button class="account-type-filter active" type="button" data-account-filter="@accountType" aria-pressed="true"><partial name="_NavigationIcon" model="AccountTypeIcon(accountType)" />@AccountTypeLabel(accountType)</button>
@@ -48,11 +49,11 @@
         </div>
     }
 </div>
-<div class="alert alert-info mb-3" id="dashboard-account-filter-empty" hidden>No account types are selected.</div>
+<div class="alert alert-info mb-3" id="dashboard-account-filter-empty" hidden>@CommonText.Get("No account types are selected.")</div>
 <div class="row g-3 mb-5 dashboard-account-grid">
     @if (Model.Accounts.Count == 0)
     {
-        <div class="col"><div class="alert alert-info">No accounts yet. Create your first account to get started.</div></div>
+        <div class="col"><div class="alert alert-info">@CommonText.Get("No accounts yet. Create your first account to get started.")</div></div>
     }
     @foreach (var account in Model.Accounts)
     {
@@ -63,18 +64,18 @@
                 <a class="card-body account-card-main text-decoration-none text-body" asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id">
                     <div class="account-card-header">
                         <div class="account-card-identity">
-                            <img class="account-icon" src="@account.IconPath" alt="@account.IconAlt" />
+                            <img class="account-icon" src="@account.IconPath" alt="@CommonText.IconLabel(account.IconAlt)" />
                             <h2>@account.Name</h2>
                         </div>
                         <span class="account-type-badge"><partial name="_NavigationIcon" model="accountTypeIcon" />@accountType</span>
                     </div>
-                    <div class="account-card-balance"><small>Current balance</small><strong data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</strong></div>
+                    <div class="account-card-balance"><small>@CommonText.Get("Current balance")</small><strong data-private-amount>@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</strong></div>
                 </a>
                 <div class="card-footer account-card-actions d-flex flex-nowrap gap-2">
-                    <a class="btn btn-sm btn-danger dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Expense"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8" /></svg>Expense</a>
-                    <a class="btn btn-sm btn-success dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Income"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>Income</a>
-                    <a class="btn btn-sm btn-primary dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Transfer" title="Transfer out of @account.Name"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m5-5-5 5 5 5" /></svg>Transfer out</a>
-                    <a class="btn btn-sm btn-primary dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-targetAccountId="@account.Id" asp-route-type="Transfer" title="Transfer into @account.Name"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>Transfer in</a>
+                    <a class="btn btn-sm btn-danger dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Expense"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8" /></svg>@CommonText.Get("Expense")</a>
+                    <a class="btn btn-sm btn-success dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Income"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M8 12h8M12 8v8" /></svg>@CommonText.Get("Income")</a>
+                    <a class="btn btn-sm btn-primary dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-accountId="@account.Id" asp-route-type="Transfer" title="@CommonText.Format("Transfer out of {0}", account.Name)"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5m5-5-5 5 5 5" /></svg>@CommonText.Get("Transfer out")</a>
+                    <a class="btn btn-sm btn-primary dashboard-action-button" asp-controller="Transactions" asp-action="Create" asp-route-targetAccountId="@account.Id" asp-route-type="Transfer" title="@CommonText.Format("Transfer into {0}", account.Name)"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>@CommonText.Get("Transfer in")</a>
                 </div>
             </div>
         </div>
@@ -83,27 +84,27 @@
 
 <div class="dashboard-latest">
 <div class="d-flex justify-content-between align-items-center mb-2">
-    <h2 class="h4 mb-0">Latest transactions</h2>
-    <a class="btn btn-sm btn-outline-primary btn-opaque" asp-controller="Transactions" asp-action="Index">View all</a>
+    <h2 class="h4 mb-0">@CommonText.Get("Latest transactions")</h2>
+    <a class="btn btn-sm btn-outline-primary btn-opaque" asp-controller="Transactions" asp-action="Index">@CommonText.Get("View all")</a>
 </div>
 @if (Model.RecentTransactions.Count == 0)
 {
-    <p class="text-muted">No transactions yet.</p>
+    <p class="text-muted">@CommonText.Get("No transactions yet.")</p>
 }
 else
 {
     <div class="table-responsive edge-to-edge-table">
         <table class="table align-middle">
-            <thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Category</th><th class="text-end">Amount</th></tr></thead>
+            <thead><tr><th>@CommonText.Get("Date")</th><th>@CommonText.Get("Type")</th><th>@CommonText.Get("Account")</th><th>@CommonText.Get("Category")</th><th class="text-end">@CommonText.Get("Amount")</th></tr></thead>
             <tbody>
             @foreach (var transaction in Model.RecentTransactions)
             {
                 var negative = transaction.Type == TransactionType.Expense || transaction.Type == TransactionType.Adjustment && transaction.AdjustmentDirection == AdjustmentDirection.Decrease || transaction.Type == TransactionType.Transfer || transaction.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
                 <tr>
                     <td><a asp-controller="Transactions" asp-action="Details" asp-route-id="@transaction.Id">@transaction.TransactionDate.ToString("yyyy-MM-dd")</a></td>
-                    <td>@transaction.Type</td>
-                    <td>@(transaction.AccountName ?? "No account movement")</td>
-                    <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@transaction.DebtIconAlt" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@transaction.CategoryIconAlt" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
+                    <td>@CommonText.EnumLabel(transaction.Type)</td>
+                    <td>@(transaction.AccountName ?? CommonText.Get("No account movement"))</td>
+                    <td>@if (!string.IsNullOrWhiteSpace(transaction.DebtIconPath)) { <img class="category-icon me-2" src="@transaction.DebtIconPath" alt="@CommonText.IconLabel(transaction.DebtIconAlt)" /> } else if (!string.IsNullOrWhiteSpace(transaction.CategoryIconPath)) { <img class="category-icon me-2" src="@transaction.CategoryIconPath" alt="@CommonText.IconLabel(transaction.CategoryIconAlt)" /> }@(transaction.DebtOperationType?.ToString() ?? transaction.CategoryName ?? "—")</td>
                     <td class="text-end @(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(transaction.Amount, transaction.Currency)</td>
                 </tr>
             }

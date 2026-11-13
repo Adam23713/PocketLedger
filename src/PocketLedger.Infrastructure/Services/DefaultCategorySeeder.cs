@@ -17,7 +17,7 @@ public static class DefaultCategorySeeder
             var main = existing.FirstOrDefault(item => item.ParentCategoryId is null && item.Type == definition.Type && string.Equals(item.Name, definition.Name, StringComparison.OrdinalIgnoreCase));
             if (main is null)
             {
-                main = new Category { Id = Guid.NewGuid(), Name = definition.Name, Type = definition.Type, Icon = definition.Icon, DisplayOrder = existing.Count(item => item.ParentCategoryId is null && item.Type == definition.Type) };
+                main = new Category { Id = Guid.NewGuid(), Name = definition.Name, StarterCategoryKey = definition.Name, Type = definition.Type, Icon = definition.Icon, DisplayOrder = existing.Count(item => item.ParentCategoryId is null && item.Type == definition.Type) };
                 dbContext.Categories.Add(main);
                 existing.Add(main);
                 added++;
@@ -27,7 +27,7 @@ public static class DefaultCategorySeeder
             {
                 var name = definition.Subcategories[index];
                 if (existing.Any(item => item.ParentCategoryId == main.Id && string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase))) continue;
-                var subcategory = new Category { Id = Guid.NewGuid(), Name = name, Type = definition.Type, ParentCategoryId = main.Id, DisplayOrder = index };
+                var subcategory = new Category { Id = Guid.NewGuid(), Name = name, StarterCategoryKey = name, Type = definition.Type, ParentCategoryId = main.Id, DisplayOrder = index };
                 dbContext.Categories.Add(subcategory);
                 existing.Add(subcategory);
                 added++;

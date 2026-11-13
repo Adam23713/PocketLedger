@@ -1,2 +1,3 @@
-@{ ViewData["Title"] = "Access denied"; }
-<h1>Access denied</h1><p>You do not have access to this resource.</p>
+@using PocketLedger.Localization
+@{ ViewData["Title"] = CommonText.Get("Access denied"); }
+<h1>@CommonText.Get("Access denied")</h1><p>@CommonText.Get("You do not have access to this resource.")</p>

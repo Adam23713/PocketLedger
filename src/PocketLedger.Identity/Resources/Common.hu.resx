@@ -1,0 +1,1271 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="'{0}' and '{1}' do not match." xml:space="preserve">
+    <value>A(z) {0} és a(z) {1} nem egyezik.</value>
+  </data>
+  <data name="1 day" xml:space="preserve">
+    <value>1 nap</value>
+  </data>
+  <data name="1 hour" xml:space="preserve">
+    <value>1 óra</value>
+  </data>
+  <data name="A contact link is available in the footer on every page." xml:space="preserve">
+    <value>Minden oldal láblécében elérhető a kapcsolatfelvételi hivatkozás.</value>
+  </data>
+  <data name="A successful recovery requires configuring a new authenticator." xml:space="preserve">
+    <value>A sikeres helyreállítás után új hitelesítőt kell beállítani.</value>
+  </data>
+  <data name="Access denied" xml:space="preserve">
+    <value>Hozzáférés megtagadva</value>
+  </data>
+  <data name="Access is currently blocked" xml:space="preserve">
+    <value>A hozzáférés jelenleg le van tiltva</value>
+  </data>
+  <data name="Access to this account is currently disabled and under review." xml:space="preserve">
+    <value>A fiókhoz való hozzáférés felülvizsgálat miatt szünetel.</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Számla</value>
+  </data>
+  <data name="Account details" xml:space="preserve">
+    <value>Fiókadatok</value>
+  </data>
+  <data name="Account is required." xml:space="preserve">
+    <value>A számla kötelező.</value>
+  </data>
+  <data name="Account recovery was not completed. Check the username and recovery key and try again." xml:space="preserve">
+    <value>A fiók helyreállítása sikertelen. Ellenőrizd a felhasználónevet és a helyreállítási kulcsot, majd próbáld újra.</value>
+  </data>
+  <data name="AccountRecovery" xml:space="preserve">
+    <value>Fiók helyreállítása</value>
+  </data>
+  <data name="Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart." xml:space="preserve">
+    <value>A tervező egyenlegébe bevont számlák pénznemenként. A dátum nélküli tételek nem szerepelnek a napi diagramon.</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Műveletek</value>
+  </data>
+  <data name="Active CrowdSec bans" xml:space="preserve">
+    <value>Aktív CrowdSec-tiltások</value>
+  </data>
+  <data name="Activity owner" xml:space="preserve">
+    <value>Tevékenység tulajdonosa</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>Cím</value>
+  </data>
+  <data name="Addresses" xml:space="preserve">
+    <value>Címek</value>
+  </data>
+  <data name="Adjustment direction" xml:space="preserve">
+    <value>Korrekció iránya</value>
+  </data>
+  <data name="AdjustmentDirection" xml:space="preserve">
+    <value>Korrekció iránya</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Adminisztráció</value>
+  </data>
+  <data name="Admin dashboard" xml:space="preserve">
+    <value>Adminisztrációs áttekintés</value>
+  </data>
+  <data name="All activity (includes anonymous/unattributed)" xml:space="preserve">
+    <value>Összes aktivitás (névtelen és fiókhoz nem rendelt is)</value>
+  </data>
+  <data name="All available accounts are currently taken." xml:space="preserve">
+    <value>Jelenleg minden fiókhely betelt.</value>
+  </data>
+  <data name="All available accounts are taken" xml:space="preserve">
+    <value>Minden elérhető fiókhely betelt</value>
+  </data>
+  <data name="All requests in the interval" xml:space="preserve">
+    <value>Összes kérés az időszakban</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Összeg</value>
+  </data>
+  <data name="Amount credited to target account" xml:space="preserve">
+    <value>Célszámlán jóváírt összeg</value>
+  </data>
+  <data name="Amount credited to target account ·" xml:space="preserve">
+    <value>Célszámlán jóváírt összeg ·</value>
+  </data>
+  <data name="Amount in account currency" xml:space="preserve">
+    <value>Összeg a számla pénznemében</value>
+  </data>
+  <data name="Amount in account currency ·" xml:space="preserve">
+    <value>Összeg a számla pénznemében ·</value>
+  </data>
+  <data name="Amounts are shown in each account's currency. Paused items are excluded." xml:space="preserve">
+    <value>Az összegek az adott számla pénznemében jelennek meg. A szüneteltetett tételek nem szerepelnek az összesítésben.</value>
+  </data>
+  <data name="An account already exists for this email address." xml:space="preserve">
+    <value>Ehhez az e-mail-címhez már tartozik fiók.</value>
+  </data>
+  <data name="An account already exists for this email address. Sign in with the existing account instead." xml:space="preserve">
+    <value>Ehhez az e-mail-címhez már tartozik fiók. Jelentkezz be a meglévő fiókoddal.</value>
+  </data>
+  <data name="Anonymous" xml:space="preserve">
+    <value>Névtelen</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Megjelenés</value>
+  </data>
+  <data name="Application" xml:space="preserve">
+    <value>Alkalmazás</value>
+  </data>
+  <data name="Application / host" xml:space="preserve">
+    <value>Alkalmazás / kiszolgáló</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Alkalmazás</value>
+  </data>
+  <data name="Authenticator QR code" xml:space="preserve">
+    <value>Hitelesítő QR-kód</value>
+  </data>
+  <data name="Authenticator code" xml:space="preserve">
+    <value>Hitelesítőkód</value>
+  </data>
+  <data name="Authenticator recovery" xml:space="preserve">
+    <value>Hitelesítő helyreállítása</value>
+  </data>
+  <data name="AuthenticatorResetThroughRecovery" xml:space="preserve">
+    <value>Hitelesítő visszaállítása helyreállítással</value>
+  </data>
+  <data name="AuthenticatorSetup" xml:space="preserve">
+    <value>Hitelesítő beállítása</value>
+  </data>
+  <data name="AuthenticatorSetupCompleted" xml:space="preserve">
+    <value>Hitelesítő beállítása befejezve</value>
+  </data>
+  <data name="Automatic payment amount" xml:space="preserve">
+    <value>Automatikus fizetés összege</value>
+  </data>
+  <data name="Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner." xml:space="preserve">
+    <value>Az elkölthető összeg a tervezett bevételek, kiadások és átvezetések utáni várható maradvány. Csak a bevont számlák számítanak bele. A számítás pénznemenként, a tervező nyitóegyenlegeiből indul ki.</value>
+  </data>
+  <data name="Avatar" xml:space="preserve">
+    <value>Profilkép</value>
+  </data>
+  <data name="Back to login" xml:space="preserve">
+    <value>Vissza a bejelentkezéshez</value>
+  </data>
+  <data name="Ban address" xml:space="preserve">
+    <value>Cím tiltása</value>
+  </data>
+  <data name="Ban for" xml:space="preserve">
+    <value>Tiltás időtartama</value>
+  </data>
+  <data name="Ban {0} for {1}? Every PocketLedger site will refuse this address." xml:space="preserve">
+    <value>Letiltod a(z) {0} címet erre az időre: {1}? Minden PocketLedger-oldal elutasítja a címet.</value>
+  </data>
+  <data name="Banking App" xml:space="preserve">
+    <value>Banki app</value>
+  </data>
+  <data name="Banned" xml:space="preserve">
+    <value>Letiltva</value>
+  </data>
+  <data name="Banner color" xml:space="preserve">
+    <value>Borítószín</value>
+  </data>
+  <data name="Banning from this page is off because no CrowdSec machine account is configured (" xml:space="preserve">
+    <value>Ezen az oldalon a tiltás ki van kapcsolva, mert nincs beállítva CrowdSec gépfiók (</value>
+  </data>
+  <data name="Banning is not configured: set CROWDSEC_IDENTITY_MACHINE_PASSWORD on the server." xml:space="preserve">
+    <value>A tiltás nincs beállítva. Add meg a szerveren a CROWDSEC_IDENTITY_MACHINE_PASSWORD változót.</value>
+  </data>
+  <data name="Bills" xml:space="preserve">
+    <value>Számlák és díjak</value>
+  </data>
+  <data name="Busiest address" xml:space="preserve">
+    <value>Legaktívabb cím</value>
+  </data>
+  <data name="Calendar financial summary" xml:space="preserve">
+    <value>Naptári pénzügyi összesítő</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="Change password" xml:space="preserve">
+    <value>Jelszó módosítása</value>
+  </data>
+  <data name="Change your password while keeping your current signed-in session active. Your data stays readable; only its key is re-wrapped." xml:space="preserve">
+    <value>Módosítsd a jelszavadat a jelenlegi munkamenet megszakítása nélkül. Az adatok olvashatók maradnak, csak a kulcsuk védelme frissül.</value>
+  </data>
+  <data name="Choose a data password" xml:space="preserve">
+    <value>Válassz adatvédelmi jelszót</value>
+  </data>
+  <data name="Choose a valid color." xml:space="preserve">
+    <value>Válassz érvényes színt.</value>
+  </data>
+  <data name="Choose appearance theme" xml:space="preserve">
+    <value>Téma választása</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="Clear lockout" xml:space="preserve">
+    <value>Zárolás feloldása</value>
+  </data>
+  <data name="Client IP address" xml:space="preserve">
+    <value>Kliens IP-címe</value>
+  </data>
+  <data name="Client address" xml:space="preserve">
+    <value>Kliens címe</value>
+  </data>
+  <data name="Client address data is currently unavailable; totals below are still accurate." xml:space="preserve">
+    <value>A klienscímadatok jelenleg nem elérhetők. Az alábbi összesítések továbbra is pontosak.</value>
+  </data>
+  <data name="Client addresses" xml:space="preserve">
+    <value>Klienscímek</value>
+  </data>
+  <data name="ClientAddressBanRemoved" xml:space="preserve">
+    <value>Klienscím tiltása feloldva</value>
+  </data>
+  <data name="ClientAddressBanned" xml:space="preserve">
+    <value>Klienscím letiltva</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Bezárás</value>
+  </data>
+  <data name="Cloudflare edge" xml:space="preserve">
+    <value>Cloudflare peremhálózat</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kód</value>
+  </data>
+  <data name="Coffee" xml:space="preserve">
+    <value>Kávé</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Szín</value>
+  </data>
+  <data name="Color must be a valid hexadecimal color." xml:space="preserve">
+    <value>A színnek érvényes hexadecimális színnek kell lennie.</value>
+  </data>
+  <data name="Configure Microsoft Authenticator" xml:space="preserve">
+    <value>Microsoft Authenticator beállítása</value>
+  </data>
+  <data name="Confirm data password" xml:space="preserve">
+    <value>Adatvédelmi jelszó megerősítése</value>
+  </data>
+  <data name="Confirm new password" xml:space="preserve">
+    <value>Új jelszó megerősítése</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Jelszó megerősítése</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Folytatás</value>
+  </data>
+  <data name="Continue with {0}" xml:space="preserve">
+    <value>Folytatás ezzel: {0}</value>
+  </data>
+  <data name="Contribution direction" xml:space="preserve">
+    <value>Hozzájárulás iránya</value>
+  </data>
+  <data name="Control public sign-up and how many accounts the instance can hold." xml:space="preserve">
+    <value>Állítsd be a nyilvános regisztrációt és a példányon engedélyezett fiókok számát.</value>
+  </data>
+  <data name="Create a new data recovery key if you lost the previous one or think someone else has seen it. The previous key stops working immediately." xml:space="preserve">
+    <value>Hozz létre új adat-helyreállítási kulcsot, ha elveszett a régi, vagy más is láthatta. A korábbi kulcs azonnal érvénytelenné válik.</value>
+  </data>
+  <data name="Create a new one. You'll need your current password, and the old key stops working." xml:space="preserve">
+    <value>Hozz létre újat. Szükség lesz a jelenlegi jelszavadra, a régi kulcs pedig érvénytelenné válik.</value>
+  </data>
+  <data name="Create a new recovery key" xml:space="preserve">
+    <value>Új helyreállítási kulcs létrehozása</value>
+  </data>
+  <data name="Create new recovery key" xml:space="preserve">
+    <value>Új helyreállítási kulcs létrehozása</value>
+  </data>
+  <data name="CrowdSec ban pages" xml:space="preserve">
+    <value>CrowdSec-tiltások lapozása</value>
+  </data>
+  <data name="CrowdSec cannot be reached, so the ban status of this address is unknown." xml:space="preserve">
+    <value>A CrowdSec nem érhető el, így nem tudható, hogy a cím tiltva van-e.</value>
+  </data>
+  <data name="CrowdSec decisions are currently unavailable." xml:space="preserve">
+    <value>A CrowdSec döntései jelenleg nem elérhetők.</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Pénznem</value>
+  </data>
+  <data name="Currency must contain exactly three letters." xml:space="preserve">
+    <value>A pénznemkód pontosan három betűből állhat.</value>
+  </data>
+  <data name="Currency settings were redesigned: pick a currency from the list to adjust its format, and choose your default currency." xml:space="preserve">
+    <value>Megújultak a pénznembeállítások. Válassz pénznemet a formátum beállításához, és add meg az alapértelmezett pénznemet.</value>
+  </data>
+  <data name="Current account balance" xml:space="preserve">
+    <value>Aktuális számlaegyenleg</value>
+  </data>
+  <data name="Current password" xml:space="preserve">
+    <value>Jelenlegi jelszó</value>
+  </data>
+  <data name="Danger zone" xml:space="preserve">
+    <value>Veszélyzóna</value>
+  </data>
+  <data name="Data encryption" xml:space="preserve">
+    <value>Adattitkosítás</value>
+  </data>
+  <data name="Data password" xml:space="preserve">
+    <value>Adatvédelmi jelszó</value>
+  </data>
+  <data name="Data recovery key" xml:space="preserve">
+    <value>Adat-helyreállítási kulcs</value>
+  </data>
+  <data name="DataKeyCreated" xml:space="preserve">
+    <value>Adatkulcs létrehozva</value>
+  </data>
+  <data name="DataKeyUnlock" xml:space="preserve">
+    <value>Adatkulcs feloldása</value>
+  </data>
+  <data name="DataRecoveryKeyRegenerated" xml:space="preserve">
+    <value>Új adat-helyreállítási kulcs</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Fiók törlése</value>
+  </data>
+  <data name="Deleting your account permanently removes your PocketLedger identity and all financial data. This action cannot be undone." xml:space="preserve">
+    <value>A fiók törlése végleg eltávolítja a PocketLedger-fiókodat és az összes pénzügyi adatodat. A művelet nem vonható vissza.</value>
+  </data>
+  <data name="Detected (UTC)" xml:space="preserve">
+    <value>Észlelve (UTC)</value>
+  </data>
+  <data name="Detection window" xml:space="preserve">
+    <value>Észlelési időablak</value>
+  </data>
+  <data name="Direction" xml:space="preserve">
+    <value>Irány</value>
+  </data>
+  <data name="Display name" xml:space="preserve">
+    <value>Megjelenített név</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Megjelenítési sorrend</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Megjelenítési sorrend</value>
+  </data>
+  <data name="Download a password-protected backup before deleting your account. The backup does not contain your login, social account connection, password, authenticator, or recovery key." xml:space="preserve">
+    <value>A fiók törlése előtt tölts le jelszóval védett mentést. A mentés nem tartalmazza a belépési adataidat, a kapcsolt külső fiókodat, a jelszavadat, a hitelesítődet vagy a helyreállítási kulcsodat.</value>
+  </data>
+  <data name="Download encrypted backup" xml:space="preserve">
+    <value>Titkosított mentés letöltése</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Esedékesség</value>
+  </data>
+  <data name="Edit item" xml:space="preserve">
+    <value>Tétel szerkesztése</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail-cím</value>
+  </data>
+  <data name="EmailCollision" xml:space="preserve">
+    <value>Az e-mail-cím már foglalt</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Aktív</value>
+  </data>
+  <data name="Endpoints requested" xml:space="preserve">
+    <value>Lekért végpontok</value>
+  </data>
+  <data name="Enter the data password you chose for this account. Your financial data is encrypted with it." xml:space="preserve">
+    <value>Add meg az ehhez a fiókhoz választott adatvédelmi jelszót. Ez védi a pénzügyi adataid titkosítását.</value>
+  </data>
+  <data name="Enter your password to unlock your financial data." xml:space="preserve">
+    <value>Add meg a jelszavad a pénzügyi adataid feloldásához.</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>Esemény</value>
+  </data>
+  <data name="Every account counts toward the limit, including the administrator and blocked accounts. Leave the limit empty for no limit." xml:space="preserve">
+    <value>A korlátba minden fiók beleszámít, az adminisztrátori és a tiltott fiókok is. Korlátlan fiókszámhoz hagyd üresen.</value>
+  </data>
+  <data name="ExistingEmail" xml:space="preserve">
+    <value>Meglévő e-mail-cím</value>
+  </data>
+  <data name="ExternalLogin" xml:space="preserve">
+    <value>Külső bejelentkezés</value>
+  </data>
+  <data name="ExternalLoginLinkFailed" xml:space="preserve">
+    <value>A külső fiók összekapcsolása sikertelen</value>
+  </data>
+  <data name="ExternalLoginTotpRequired" xml:space="preserve">
+    <value>Külső bejelentkezés kétfaktoros ellenőrzése</value>
+  </data>
+  <data name="ExternalRegistration" xml:space="preserve">
+    <value>Külső regisztráció</value>
+  </data>
+  <data name="Failed (4xx/5xx)" xml:space="preserve">
+    <value>Sikertelen (4xx/5xx)</value>
+  </data>
+  <data name="Failed (4xx/5xx): requests/minute" xml:space="preserve">
+    <value>Sikertelen (4xx/5xx): kérés/perc</value>
+  </data>
+  <data name="Failure" xml:space="preserve">
+    <value>Sikertelen</value>
+  </data>
+  <data name="Filter accounts by type" xml:space="preserve">
+    <value>Számlák szűrése típus szerint</value>
+  </data>
+  <data name="Find an address in this list" xml:space="preserve">
+    <value>Cím keresése a listában</value>
+  </data>
+  <data name="Find an address…" xml:space="preserve">
+    <value>Cím keresése…</value>
+  </data>
+  <data name="First seen" xml:space="preserve">
+    <value>Első észlelés</value>
+  </data>
+  <data name="First seen (UTC)" xml:space="preserve">
+    <value>Első észlelés (UTC)</value>
+  </data>
+  <data name="FirstOccurrence" xml:space="preserve">
+    <value>Első előfordulás</value>
+  </data>
+  <data name="Forgot it? Use your recovery key" xml:space="preserve">
+    <value>Elfelejtetted? Használd a helyreállítási kulcsodat</value>
+  </data>
+  <data name="Forgot your password?" xml:space="preserve">
+    <value>Elfelejtetted a jelszavad?</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Szabad</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Gyakoriság</value>
+  </data>
+  <data name="Gift" xml:space="preserve">
+    <value>Ajándék</value>
+  </data>
+  <data name="Glassmorphism" xml:space="preserve">
+    <value>Üveghatás</value>
+  </data>
+  <data name="Goal progress" xml:space="preserve">
+    <value>Cél előrehaladása</value>
+  </data>
+  <data name="Goals, more currencies and starter categories" xml:space="preserve">
+    <value>Célok, több pénznem és gyári kategóriák</value>
+  </data>
+  <data name="Health" xml:space="preserve">
+    <value>Egészség</value>
+  </data>
+  <data name="Hide dashboard amounts" xml:space="preserve">
+    <value>Összegek elrejtése az áttekintőn</value>
+  </data>
+  <data name="Hour" xml:space="preserve">
+    <value>Óra</value>
+  </data>
+  <data name="I saved the recovery codes" xml:space="preserve">
+    <value>Elmentettem a helyreállítási kódokat</value>
+  </data>
+  <data name="I saved the recovery key" xml:space="preserve">
+    <value>Elmentettem a helyreállítási kulcsot</value>
+  </data>
+  <data name="Identity navigation" xml:space="preserve">
+    <value>Fiókoldali navigáció</value>
+  </data>
+  <data name="IdentityError.ConcurrencyFailure" xml:space="preserve">
+    <value>Az adatok közben megváltoztak. Próbáld újra.</value>
+  </data>
+  <data name="IdentityError.DefaultError" xml:space="preserve">
+    <value>A fiókművelet nem fejeződött be.</value>
+  </data>
+  <data name="IdentityError.DuplicateEmail" xml:space="preserve">
+    <value>Ez az e-mail-cím már használatban van.</value>
+  </data>
+  <data name="IdentityError.DuplicateUserName" xml:space="preserve">
+    <value>A felhasználónév már foglalt.</value>
+  </data>
+  <data name="IdentityError.InvalidEmail" xml:space="preserve">
+    <value>Az e-mail-cím érvénytelen.</value>
+  </data>
+  <data name="IdentityError.InvalidToken" xml:space="preserve">
+    <value>Az ellenőrzőkód érvénytelen.</value>
+  </data>
+  <data name="IdentityError.InvalidUserName" xml:space="preserve">
+    <value>A felhasználónév érvénytelen vagy nem megengedett karaktert tartalmaz.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresDigit" xml:space="preserve">
+    <value>A jelszónak legalább egy számjegyet kell tartalmaznia.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresLower" xml:space="preserve">
+    <value>A jelszónak legalább egy kisbetűt kell tartalmaznia.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresNonAlphanumeric" xml:space="preserve">
+    <value>A jelszónak legalább egy, betűtől és számtól eltérő karaktert kell tartalmaznia.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresUniqueChars" xml:space="preserve">
+    <value>A jelszónak legalább {1} különböző karaktert kell tartalmaznia.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresUpper" xml:space="preserve">
+    <value>A jelszónak legalább egy nagybetűt kell tartalmaznia.</value>
+  </data>
+  <data name="IdentityError.PasswordTooShort" xml:space="preserve">
+    <value>A jelszónak legalább {0} karakterből kell állnia.</value>
+  </data>
+  <data name="IdentityValidationFailed" xml:space="preserve">
+    <value>A fiókellenőrzés sikertelen</value>
+  </data>
+  <data name="Include in main balance" xml:space="preserve">
+    <value>Beleszámít a fő egyenlegbe</value>
+  </data>
+  <data name="Include in net worth" xml:space="preserve">
+    <value>Beleszámít a nettó vagyonba</value>
+  </data>
+  <data name="Include in statistics" xml:space="preserve">
+    <value>Beleszámít a statisztikákba</value>
+  </data>
+  <data name="Incorrect data password." xml:space="preserve">
+    <value>Helytelen adatvédelmi jelszó.</value>
+  </data>
+  <data name="Incorrect password." xml:space="preserve">
+    <value>Helytelen jelszó.</value>
+  </data>
+  <data name="Initial balance" xml:space="preserve">
+    <value>Kezdőegyenleg</value>
+  </data>
+  <data name="Inspect" xml:space="preserve">
+    <value>Megtekintés</value>
+  </data>
+  <data name="Inspect this address" xml:space="preserve">
+    <value>Cím megtekintése</value>
+  </data>
+  <data name="Internal network" xml:space="preserve">
+    <value>Belső hálózat</value>
+  </data>
+  <data name="Internet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="Interval start (UTC)" xml:space="preserve">
+    <value>Időszak kezdete (UTC)</value>
+  </data>
+  <data name="Invalid authentication attempt." xml:space="preserve">
+    <value>Érvénytelen hitelesítési kísérlet.</value>
+  </data>
+  <data name="Invalid authentication code." xml:space="preserve">
+    <value>Érvénytelen hitelesítőkód.</value>
+  </data>
+  <data name="Invalid login attempt." xml:space="preserve">
+    <value>Sikertelen bejelentkezési kísérlet.</value>
+  </data>
+  <data name="JavaScript is required to load the request activity chart and its tabular alternative." xml:space="preserve">
+    <value>A kérések diagramjának és táblázatos nézetének betöltéséhez JavaScript szükséges.</value>
+  </data>
+  <data name="Keep your financial data if you may return later." xml:space="preserve">
+    <value>Őrizd meg a pénzügyi adataidat, ha később visszatérnél.</value>
+  </data>
+  <data name="Large amounts in the calendar's monthly overview are listed under each other so they stay readable." xml:space="preserve">
+    <value>A naptár havi áttekintőjében a nagy összegek egymás alatt jelennek meg, hogy olvashatók maradjanak.</value>
+  </data>
+  <data name="Last payment date" xml:space="preserve">
+    <value>Utolsó fizetés dátuma</value>
+  </data>
+  <data name="Last seen" xml:space="preserve">
+    <value>Utolsó észlelés</value>
+  </data>
+  <data name="Last seen (UTC hour)" xml:space="preserve">
+    <value>Utolsó észlelés (UTC óra)</value>
+  </data>
+  <data name="Last seen (UTC)" xml:space="preserve">
+    <value>Utolsó észlelés (UTC)</value>
+  </data>
+  <data name="Last successful login (UTC)" xml:space="preserve">
+    <value>Utolsó sikeres bejelentkezés (UTC)</value>
+  </data>
+  <data name="LastOccurrence" xml:space="preserve">
+    <value>Utolsó előfordulás</value>
+  </data>
+  <data name="Latest five" xml:space="preserve">
+    <value>Utolsó öt</value>
+  </data>
+  <data name="Limit" xml:space="preserve">
+    <value>Korlát</value>
+  </data>
+  <data name="Loading address details…" xml:space="preserve">
+    <value>Címadatok betöltése…</value>
+  </data>
+  <data name="Loading request activity…" xml:space="preserve">
+    <value>Kérések betöltése…</value>
+  </data>
+  <data name="Locked out until (UTC)" xml:space="preserve">
+    <value>Zárolva eddig (UTC)</value>
+  </data>
+  <data name="Login Events" xml:space="preserve">
+    <value>Bejelentkezési események</value>
+  </data>
+  <data name="Login event pages" xml:space="preserve">
+    <value>Bejelentkezési események lapozása</value>
+  </data>
+  <data name="Login events can be filtered, sorted and paged." xml:space="preserve">
+    <value>A bejelentkezési események szűrhetők, rendezhetők és lapozhatók.</value>
+  </data>
+  <data name="LoginBlocked" xml:space="preserve">
+    <value>Bejelentkezés letiltva</value>
+  </data>
+  <data name="LoginLockout" xml:space="preserve">
+    <value>Bejelentkezési zárolás</value>
+  </data>
+  <data name="LoginLockoutCleared" xml:space="preserve">
+    <value>Bejelentkezési zárolás feloldva</value>
+  </data>
+  <data name="LoginSucceeded" xml:space="preserve">
+    <value>Sikeres bejelentkezés</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Kijelentkezés</value>
+  </data>
+  <data name="Lookback" xml:space="preserve">
+    <value>Vizsgált időszak</value>
+  </data>
+  <data name="Lost the key, or someone saw it?" xml:space="preserve">
+    <value>Elvesztetted a kulcsot, vagy más is láthatta?</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="Maximum number of accounts" xml:space="preserve">
+    <value>Fiókok maximális száma</value>
+  </data>
+  <data name="Merge identical addresses" xml:space="preserve">
+    <value>Azonos címek összevonása</value>
+  </data>
+  <data name="Method" xml:space="preserve">
+    <value>Metódus</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Perc</value>
+  </data>
+  <data name="MissingExternalLoginInfo" xml:space="preserve">
+    <value>Hiányzó külső bejelentkezési adatok</value>
+  </data>
+  <data name="More than 150 currencies are now supported." xml:space="preserve">
+    <value>Már több mint 150 pénznem támogatott.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Név</value>
+  </data>
+  <data name="New password" xml:space="preserve">
+    <value>Új jelszó</value>
+  </data>
+  <data name="New recovery key" xml:space="preserve">
+    <value>Új helyreállítási kulcs</value>
+  </data>
+  <data name="New users start with default categories and subcategories." xml:space="preserve">
+    <value>Az új felhasználók gyári kategóriákat és alkategóriákat kapnak.</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Következő</value>
+  </data>
+  <data name="Next month" xml:space="preserve">
+    <value>Következő hónap</value>
+  </data>
+  <data name="Next payment date" xml:space="preserve">
+    <value>Következő fizetés dátuma</value>
+  </data>
+  <data name="No address matches." xml:space="preserve">
+    <value>Nincs megfelelő cím.</value>
+  </data>
+  <data name="No ban was created because the address is not a complete IPv4 or IPv6 address." xml:space="preserve">
+    <value>Nem jött létre tiltás, mert a megadott cím nem teljes IPv4- vagy IPv6-cím.</value>
+  </data>
+  <data name="No ban was created. {0}" xml:space="preserve">
+    <value>Nem jött létre tiltás. {0}</value>
+  </data>
+  <data name="No ban was removed because the address is not valid." xml:space="preserve">
+    <value>Nem oldottunk fel tiltást, mert a cím érvénytelen.</value>
+  </data>
+  <data name="No client addresses were recorded in this interval." xml:space="preserve">
+    <value>Ebben az időszakban nem rögzítettünk klienscímet.</value>
+  </data>
+  <data name="No endpoints were recorded for this address in this interval." xml:space="preserve">
+    <value>Ebben az időszakban nem rögzítettünk végpontot ehhez a címhez.</value>
+  </data>
+  <data name="No login events are available for your account yet." xml:space="preserve">
+    <value>A fiókodhoz még nincsenek bejelentkezési események.</value>
+  </data>
+  <data name="No login events yet." xml:space="preserve">
+    <value>Még nincsenek bejelentkezési események.</value>
+  </data>
+  <data name="No requests from {0} during this interval." xml:space="preserve">
+    <value>Nem érkezett kérés erről a címről az időszakban: {0}.</value>
+  </data>
+  <data name="No requests matched the selected activity view during this interval." xml:space="preserve">
+    <value>Ebben az időszakban egy kérés sem felelt meg a kiválasztott nézetnek.</value>
+  </data>
+  <data name="No signed-in account was seen from this address." xml:space="preserve">
+    <value>Erről a címről nem észleltünk bejelentkezett fiókot.</value>
+  </data>
+  <data name="No suspicious request bursts were detected recently." xml:space="preserve">
+    <value>Nem észleltünk mostanában gyanús kéréscsúcsot.</value>
+  </data>
+  <data name="No traffic in this interval." xml:space="preserve">
+    <value>Ebben az időszakban nincs forgalom.</value>
+  </data>
+  <data name="No users are available." xml:space="preserve">
+    <value>Nincs megjeleníthető felhasználó.</value>
+  </data>
+  <data name="Not available" xml:space="preserve">
+    <value>Nem érhető el</value>
+  </data>
+  <data name="Not banned. A ban blocks this address on every PocketLedger site." xml:space="preserve">
+    <value>Nincs tiltva. A tiltás minden PocketLedger-oldalon blokkolja ezt a címet.</value>
+  </data>
+  <data name="Not banned. Signed-in accounts used this address, so a ban also locks out those people while they are on it." xml:space="preserve">
+    <value>Nincs tiltva. Ezt a címet bejelentkezett fiókok használták, ezért tiltás esetén ők sem férnének hozzá innen.</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Megjegyzés</value>
+  </data>
+  <data name="Only part of the requested request-activity interval is available." xml:space="preserve">
+    <value>A kért időszak forgalmi adatai csak részben érhetők el.</value>
+  </data>
+  <data name="Open profile menu" xml:space="preserve">
+    <value>Profilmenü megnyitása</value>
+  </data>
+  <data name="Operational overview and user access management for the bootstrap administrator." xml:space="preserve">
+    <value>Üzemeltetési áttekintés és hozzáférés-kezelés a kezdeti adminisztrátornak.</value>
+  </data>
+  <data name="Original amount" xml:space="preserve">
+    <value>Eredeti összeg</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Jelszó</value>
+  </data>
+  <data name="Password change was not completed. Check your current password and try again." xml:space="preserve">
+    <value>A jelszómódosítás sikertelen. Ellenőrizd a jelenlegi jelszavadat, és próbáld újra.</value>
+  </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value>Jelszó módosítása</value>
+  </data>
+  <data name="Path" xml:space="preserve">
+    <value>Útvonal</value>
+  </data>
+  <data name="Permanently delete" xml:space="preserve">
+    <value>Végleges törlés</value>
+  </data>
+  <data name="Permanently delete account" xml:space="preserve">
+    <value>Fiók végleges törlése</value>
+  </data>
+  <data name="Permanently delete user?" xml:space="preserve">
+    <value>Végleg törlöd a felhasználót?</value>
+  </data>
+  <data name="Permanently delete your account?" xml:space="preserve">
+    <value>Végleg törlöd a fiókodat?</value>
+  </data>
+  <data name="Person or bank name" xml:space="preserve">
+    <value>Személy vagy bank neve</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Please wait" xml:space="preserve">
+    <value>Kis türelmet</value>
+  </data>
+  <data name="PocketLedger app" xml:space="preserve">
+    <value>PocketLedger alkalmazás</value>
+  </data>
+  <data name="PocketLedger website" xml:space="preserve">
+    <value>PocketLedger-weboldal</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Előző</value>
+  </data>
+  <data name="Previous month" xml:space="preserve">
+    <value>Előző hónap</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Adatvédelem</value>
+  </data>
+  <data name="Protected administrator" xml:space="preserve">
+    <value>Védett adminisztrátor</value>
+  </data>
+  <data name="ProviderError" xml:space="preserve">
+    <value>Szolgáltatói hiba</value>
+  </data>
+  <data name="Public registration is open" xml:space="preserve">
+    <value>A nyilvános regisztráció nyitva van</value>
+  </data>
+  <data name="RateLimitRejected" xml:space="preserve">
+    <value>Kéréskorlát elérve</value>
+  </data>
+  <data name="RateLimited" xml:space="preserve">
+    <value>Kérések korlátozva</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="Recent login events" xml:space="preserve">
+    <value>Legutóbbi bejelentkezési események</value>
+  </data>
+  <data name="Recover account" xml:space="preserve">
+    <value>Fiók helyreállítása</value>
+  </data>
+  <data name="Recovery code" xml:space="preserve">
+    <value>Helyreállítási kód</value>
+  </data>
+  <data name="Recovery codes" xml:space="preserve">
+    <value>Helyreállítási kódok</value>
+  </data>
+  <data name="Recovery key" xml:space="preserve">
+    <value>Helyreállítási kulcs</value>
+  </data>
+  <data name="RecoveryCodeAuthentication" xml:space="preserve">
+    <value>Hitelesítés helyreállítási kóddal</value>
+  </data>
+  <data name="RecoveryCodesRegenerated" xml:space="preserve">
+    <value>Új helyreállítási kódok</value>
+  </data>
+  <data name="Registered" xml:space="preserve">
+    <value>Regisztrált</value>
+  </data>
+  <data name="Registered with" xml:space="preserve">
+    <value>Regisztráció módja</value>
+  </data>
+  <data name="Registration" xml:space="preserve">
+    <value>Regisztráció</value>
+  </data>
+  <data name="Registration is currently unavailable." xml:space="preserve">
+    <value>A regisztráció jelenleg nem érhető el.</value>
+  </data>
+  <data name="Registration is open, but every available account has already been created. Please check back later." xml:space="preserve">
+    <value>A regisztráció nyitva van, de minden fiókhely betelt. Nézz vissza később.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is closed." xml:space="preserve">
+    <value>A regisztrációs beállítások mentve. A nyilvános regisztráció zárva van.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is open with {0} of {1} accounts available." xml:space="preserve">
+    <value>A regisztrációs beállítások mentve. A nyilvános regisztráció nyitva van. {1} fiókhelyből {0} elérhető.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is open without an account limit." xml:space="preserve">
+    <value>A regisztrációs beállítások mentve. A nyilvános regisztráció korlát nélkül nyitva van.</value>
+  </data>
+  <data name="RegistrationSettingsChanged" xml:space="preserve">
+    <value>Regisztrációs beállítások módosítva</value>
+  </data>
+  <data name="Release notes for every PocketLedger version, newest first." xml:space="preserve">
+    <value>A PocketLedger-verziók kiadási megjegyzései, a legújabbal kezdve.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Eltávolítás</value>
+  </data>
+  <data name="Remove ban on this address" xml:space="preserve">
+    <value>A cím tiltásának feloldása</value>
+  </data>
+  <data name="Request activity" xml:space="preserve">
+    <value>Kérések aktivitása</value>
+  </data>
+  <data name="Request activity could not be loaded. The rest of the admin dashboard remains available." xml:space="preserve">
+    <value>A kérések aktivitása nem tölthető be. Az adminisztrációs felület többi része használható.</value>
+  </data>
+  <data name="Request telemetry is currently unavailable. The rest of the admin dashboard remains available." xml:space="preserve">
+    <value>A kérések telemetriája jelenleg nem elérhető. Az adminisztrációs felület többi része használható.</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>Kérések</value>
+  </data>
+  <data name="Requests / attempts" xml:space="preserve">
+    <value>Kérések / próbálkozások</value>
+  </data>
+  <data name="Requests per minute by five-minute UTC interval" xml:space="preserve">
+    <value>Percenkénti kérések ötperces UTC-időszakokban</value>
+  </data>
+  <data name="Requests reaching the web app, API and Identity, in five-minute UTC intervals. Filter by account or client address to see who generated the traffic." xml:space="preserve">
+    <value>A webalkalmazáshoz, az API-hoz és az Identityhez érkező kérések ötperces UTC-intervallumokban. Szűrj fiókra vagy klienscímre a forgalom forrásához.</value>
+  </data>
+  <data name="Requests/minute" xml:space="preserve">
+    <value>Kérések/perc</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Eredmény</value>
+  </data>
+  <data name="Review recent account activity and manage your sign-in security." xml:space="preserve">
+    <value>Tekintsd át a fiók tevékenységét, és kezeld a bejelentkezés biztonságát.</value>
+  </data>
+  <data name="Review your account details and manage your PocketLedger account." xml:space="preserve">
+    <value>Tekintsd át az adataidat, és kezeld PocketLedger-fiókodat.</value>
+  </data>
+  <data name="Save registration settings" xml:space="preserve">
+    <value>Regisztrációs beállítások mentése</value>
+  </data>
+  <data name="Save these single-use codes now. They will not be shown again." xml:space="preserve">
+    <value>Mentsd el ezeket az egyszer használatos kódokat. Később nem jelennek meg újra.</value>
+  </data>
+  <data name="Saved so far" xml:space="preserve">
+    <value>Eddig megtakarítva</value>
+  </data>
+  <data name="SavedAmount" xml:space="preserve">
+    <value>Megtakarított összeg</value>
+  </data>
+  <data name="Savings goals: set a target amount, pick a banner color or image and follow your progress." xml:space="preserve">
+    <value>Megtakarítási célok: adj meg célösszeget, válassz borítószínt vagy képet, és kövesd az előrehaladást.</value>
+  </data>
+  <data name="Scan this QR code, or enter the shared key manually." xml:space="preserve">
+    <value>Olvasd be a QR-kódot, vagy add meg kézzel a megosztott kulcsot.</value>
+  </data>
+  <data name="SecurityStampInvalidation" xml:space="preserve">
+    <value>Biztonsági bélyeg érvénytelenítése</value>
+  </data>
+  <data name="Select a main category" xml:space="preserve">
+    <value>Válassz főkategóriát</value>
+  </data>
+  <data name="Select month" xml:space="preserve">
+    <value>Hónap kiválasztása</value>
+  </data>
+  <data name="Selected calendar month" xml:space="preserve">
+    <value>Kiválasztott naptári hónap</value>
+  </data>
+  <data name="Selected statistics month" xml:space="preserve">
+    <value>Statisztika kiválasztott hónapja</value>
+  </data>
+  <data name="Show dashboard amounts" xml:space="preserve">
+    <value>Összegek megjelenítése az áttekintőn</value>
+  </data>
+  <data name="Showing the {0} busiest of {1} addresses." xml:space="preserve">
+    <value>A(z) {1} címből a(z) {0} legaktívabb látható.</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Sign out and choose &quot;Use your recovery key&quot; on the sign-in page. You'll set a new password there." xml:space="preserve">
+    <value>Jelentkezz ki, majd a belépőoldalon válaszd a helyreállítási kulcs használatát. Ott új jelszót állíthatsz be.</value>
+  </data>
+  <data name="Sign-in" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Sign-in &amp; security" xml:space="preserve">
+    <value>Bejelentkezés és biztonság</value>
+  </data>
+  <data name="Signed in" xml:space="preserve">
+    <value>Bejelentkezve</value>
+  </data>
+  <data name="Signed in as" xml:space="preserve">
+    <value>Bejelentkezve mint</value>
+  </data>
+  <data name="Signed-in accounts seen from this address: {0}." xml:space="preserve">
+    <value>Erről a címről észlelt bejelentkezett fiókok: {0}.</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Kezdődátum</value>
+  </data>
+  <data name="Statistics now shows income by main category in a doughnut chart, just like expenses." xml:space="preserve">
+    <value>A statisztikában a bevételek is gyűrűdiagramon láthatók főkategóriánként, akárcsak a kiadások.</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Állapot</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Sikeres</value>
+  </data>
+  <data name="Suspicious request bursts" xml:space="preserve">
+    <value>Gyanús kéréscsúcsok</value>
+  </data>
+  <data name="Suspicious request detection is currently unavailable." xml:space="preserve">
+    <value>A gyanús kérések észlelése jelenleg nem elérhető.</value>
+  </data>
+  <data name="Target amount" xml:space="preserve">
+    <value>Célösszeg</value>
+  </data>
+  <data name="Target date" xml:space="preserve">
+    <value>Céldátum</value>
+  </data>
+  <data name="The Development environment shouldn't be enabled for deployed applications." xml:space="preserve">
+    <value>Telepített alkalmazásban a fejlesztői környezetet ki kell kapcsolni.</value>
+  </data>
+  <data name="The account limit must be between 1 and {0:N0}, or left empty for no limit." xml:space="preserve">
+    <value>A fiókok korlátja 1 és {0:N0} között lehet. Korlátlan fiókszámhoz hagyd üresen.</value>
+  </data>
+  <data name="The bans on {0} were not removed because CrowdSec could not be reached or refused the request." xml:space="preserve">
+    <value>A(z) {0} cím tiltását nem sikerült feloldani, mert a CrowdSec nem érhető el, vagy elutasította a kérést.</value>
+  </data>
+  <data name="The bans on {0} were removed. Every PocketLedger site accepts it again within a few seconds." xml:space="preserve">
+    <value>A(z) {0} cím tiltását feloldottuk. Néhány másodpercen belül minden PocketLedger-oldal újra fogadja.</value>
+  </data>
+  <data name="The bootstrap administrator account is protected and cannot delete itself." xml:space="preserve">
+    <value>A kezdeti adminisztrátori fiók védett, saját magát nem törölheti.</value>
+  </data>
+  <data name="The details of this address could not be loaded." xml:space="preserve">
+    <value>A cím adatait nem sikerült betölteni.</value>
+  </data>
+  <data name="The endpoints of this address could not be loaded." xml:space="preserve">
+    <value>A címhez tartozó végpontok nem tölthetők be.</value>
+  </data>
+  <data name="The external account could not be registered." xml:space="preserve">
+    <value>A külső fiókot nem sikerült regisztrálni.</value>
+  </data>
+  <data name="The external login could not be completed." xml:space="preserve">
+    <value>A külső bejelentkezés nem fejeződött be.</value>
+  </data>
+  <data name="The external login response could not be validated." xml:space="preserve">
+    <value>A külső bejelentkezés válaszát nem sikerült ellenőrizni.</value>
+  </data>
+  <data name="The external login was cancelled or rejected by the provider." xml:space="preserve">
+    <value>A külső bejelentkezést megszakítottad, vagy a szolgáltató elutasította.</value>
+  </data>
+  <data name="The external provider must supply a verified email address." xml:space="preserve">
+    <value>A külső szolgáltatónak ellenőrzött e-mail-címet kell megadnia.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a minimum length of '{1}'." xml:space="preserve">
+    <value>A(z) {0} mezőnek legalább {1} karakterből vagy elemből kell állnia.</value>
+  </data>
+  <data name="The field {0} must be a string with a maximum length of {1}." xml:space="preserve">
+    <value>A(z) {0} mező legfeljebb {1} karakterből állhat.</value>
+  </data>
+  <data name="The field {0} must be between {1} and {2}." xml:space="preserve">
+    <value>A(z) {0} értékének {1} és {2} között kell lennie.</value>
+  </data>
+  <data name="The filter is not valid." xml:space="preserve">
+    <value>A szűrő érvénytelen.</value>
+  </data>
+  <data name="The initial balance on the account form now follows your currency format." xml:space="preserve">
+    <value>A számlaűrlap kezdőegyenlege a beállított pénznemformátumot használja.</value>
+  </data>
+  <data name="The list may be incomplete because the hourly storage limit was reached during this interval." xml:space="preserve">
+    <value>A lista hiányos lehet, mert az időszakban elértük az óránkénti tárolási korlátot.</value>
+  </data>
+  <data name="The passwords do not match." xml:space="preserve">
+    <value>A jelszavak nem egyeznek.</value>
+  </data>
+  <data name="The recovery key was not replaced. Check your current password and try again." xml:space="preserve">
+    <value>A helyreállítási kulcs cseréje sikertelen. Ellenőrizd a jelenlegi jelszavadat, és próbáld újra.</value>
+  </data>
+  <data name="The selected ban duration is not supported." xml:space="preserve">
+    <value>A kiválasztott tiltási időtartam nem támogatott.</value>
+  </data>
+  <data name="The transaction list shows the category first, with the type and note underneath." xml:space="preserve">
+    <value>A tranzakciólista először a kategóriát mutatja, alatta a típust és a megjegyzést.</value>
+  </data>
+  <data name="The user was not deleted because the confirmation text did not match DELETE." xml:space="preserve">
+    <value>A felhasználót nem töröltük, mert a megerősítő szöveg nem egyezett a DELETE szóval.</value>
+  </data>
+  <data name="The {0} field is not a valid e-mail address." xml:space="preserve">
+    <value>A(z) {0} mezőben megadott e-mail-cím érvénytelen.</value>
+  </data>
+  <data name="The {0} field is required." xml:space="preserve">
+    <value>A(z) {0} mező kötelező.</value>
+  </data>
+  <data name="There are more registered accounts than the limit allows. Existing accounts are kept; new registrations stay blocked until the count drops below the limit." xml:space="preserve">
+    <value>A regisztrált fiókok száma meghaladja a korlátot. A meglévő fiókok megmaradnak, új fiók akkor regisztrálható, ha a szám a korlát alá csökken.</value>
+  </data>
+  <data name="There are no active IP or range bans." xml:space="preserve">
+    <value>Nincs aktív IP- vagy tartománytiltás.</value>
+  </data>
+  <data name="This address is banned on every PocketLedger site." xml:space="preserve">
+    <value>Ez a cím minden PocketLedger-oldalon tiltva van.</value>
+  </data>
+  <data name="This changelog: see what's new after an update, and browse earlier releases from your account page." xml:space="preserve">
+    <value>Ebben a változásnaplóban frissítés után megnézheted az újdonságokat, a fiókoldalon pedig a korábbi kiadásokat.</value>
+  </data>
+  <data name="This permanently deletes" xml:space="preserve">
+    <value>Ezzel végleg törlöd a következő felhasználót:</value>
+  </data>
+  <data name="This permanently deletes your PocketLedger account and all financial data. This action cannot be undone." xml:space="preserve">
+    <value>Ezzel végleg törlöd PocketLedger-fiókodat és az összes pénzügyi adatodat. A művelet nem vonható vissza.</value>
+  </data>
+  <data name="This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates." xml:space="preserve">
+    <value>A tervező a tervezett tételeket és az aktív ismétlődő bevételeket és kiadásokat, köztük a törlesztéseket használja. Az összegek becslések.</value>
+  </data>
+  <data name="Timeline: intervals with traffic, newest first" xml:space="preserve">
+    <value>Idővonal: forgalmat tartalmazó időszakok, a legújabbal kezdve</value>
+  </data>
+  <data name="To restore the backup later, create a new PocketLedger account and upload the file from Import / Export." xml:space="preserve">
+    <value>A későbbi visszaállításhoz hozz létre új PocketLedger-fiókot, és töltsd fel a fájlt az Importálás / Exportálás menüből.</value>
+  </data>
+  <data name="Toggle navigation" xml:space="preserve">
+    <value>Navigáció megnyitása vagy bezárása</value>
+  </data>
+  <data name="Too many authentication requests. Wait a minute, then go back and try again. Signing in on another device also counts toward this limit." xml:space="preserve">
+    <value>Túl sok hitelesítési kérés. Várj egy percet, majd lépj vissza és próbáld újra. A más eszközön indított bejelentkezés is beleszámít a korlátba.</value>
+  </data>
+  <data name="Totals by currency" xml:space="preserve">
+    <value>Összesítések pénznemenként</value>
+  </data>
+  <data name="TotpChallenge" xml:space="preserve">
+    <value>Kétfaktoros hitelesítés</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Típus</value>
+  </data>
+  <data name="UTC time" xml:space="preserve">
+    <value>UTC-idő</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Korlátlan</value>
+  </data>
+  <data name="Unlock your data" xml:space="preserve">
+    <value>Adatok feloldása</value>
+  </data>
+  <data name="UnsupportedProvider" xml:space="preserve">
+    <value>Nem támogatott szolgáltató</value>
+  </data>
+  <data name="Use a recovery code" xml:space="preserve">
+    <value>Helyreállítási kód használata</value>
+  </data>
+  <data name="Use a recovery code to replace the authenticator registered to your account." xml:space="preserve">
+    <value>A fiókodhoz regisztrált hitelesítőt helyreállítási kóddal cserélheted le.</value>
+  </data>
+  <data name="Use the current account balance automatically instead of a custom opening balance." xml:space="preserve">
+    <value>A kézzel megadott nyitóegyenleg helyett automatikusan az aktuális számlaegyenleget használd.</value>
+  </data>
+  <data name="Use the data recovery key you saved when you created your account to choose a new password. You will still need your authenticator app to sign in afterwards. If you signed up with an external provider, this replaces your data password." xml:space="preserve">
+    <value>A fiók létrehozásakor elmentett adat-helyreállítási kulccsal állíthatsz be új jelszót. A bejelentkezéshez utána is kell a hitelesítő alkalmazás. Külső szolgáltatós regisztráció esetén az adatvédelmi jelszavad cserélődik le.</value>
+  </data>
+  <data name="Use this page to detail your site's privacy policy." xml:space="preserve">
+    <value>Ezen az oldalon adhatod meg a webhely adatvédelmi szabályzatát.</value>
+  </data>
+  <data name="User overview pages" xml:space="preserve">
+    <value>Felhasználólista lapozása</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Felhasználónév</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Felhasználók</value>
+  </data>
+  <data name="ValidationFailed" xml:space="preserve">
+    <value>Sikertelen ellenőrzés</value>
+  </data>
+  <data name="Verification code" xml:space="preserve">
+    <value>Ellenőrzőkód</value>
+  </data>
+  <data name="VerifiedEmailRequired" xml:space="preserve">
+    <value>Ellenőrzött e-mail-cím szükséges</value>
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value>Ellenőrzés</value>
+  </data>
+  <data name="What's new" xml:space="preserve">
+    <value>Újdonságok</value>
+  </data>
+  <data name="What's new in PocketLedger {0}" xml:space="preserve">
+    <value>A PocketLedger {0} újdonságai</value>
+  </data>
+  <data name="You" xml:space="preserve">
+    <value>Te</value>
+  </data>
+  <data name="You do not have access to this resource." xml:space="preserve">
+    <value>Nincs hozzáférésed ehhez az erőforráshoz.</value>
+  </data>
+  <data name="You have {0} attempt left before sign-in is blocked for {1:0} minutes." xml:space="preserve">
+    <value>Még {0} kísérleted van, mielőtt a bejelentkezést {1:0} percre letiltjuk.</value>
+  </data>
+  <data name="You have {0} attempts left before sign-in is blocked for {1:0} minutes." xml:space="preserve">
+    <value>Még {0} kísérleted van, mielőtt a bejelentkezést {1:0} percre letiltjuk.</value>
+  </data>
+  <data name="You must confirm that the recovery codes were saved." xml:space="preserve">
+    <value>Erősítsd meg, hogy elmentetted a helyreállítási kódokat.</value>
+  </data>
+  <data name="Your account and all PocketLedger data have been permanently deleted." xml:space="preserve">
+    <value>A fiókodat és az összes PocketLedger-adatodat végleg töröltük.</value>
+  </data>
+  <data name="Your account was not deleted because the confirmation text did not match DELETE." xml:space="preserve">
+    <value>A fiókod törlése elmaradt, mert a megerősítő szöveg nem egyezett a DELETE szóval.</value>
+  </data>
+  <data name="Your data could not be unlocked. Contact the administrator." xml:space="preserve">
+    <value>Az adatokat nem sikerült feloldani. Fordulj az adminisztrátorhoz.</value>
+  </data>
+  <data name="Your financial data is encrypted with a key that only your password and this recovery key can open. If you forget your password, this key is the only way to get your data back. Nobody, including the administrator, can recover it for you. Save it somewhere safe and offline now. It will not be shown again." xml:space="preserve">
+    <value>A pénzügyi adataidat olyan kulcs titkosítja, amelyet csak a jelszavad vagy ez a helyreállítási kulcs old fel. Ha elfelejted a jelszót, csak ezzel a kulccsal férhetsz hozzá az adataidhoz. Senki, az adminisztrátor sem tudja helyetted helyreállítani őket. Mentsd el most biztonságos, offline helyre. Később nem jelenik meg újra.</value>
+  </data>
+  <data name="Your financial data is encrypted with your password. The recovery key is the only way back to it if you forget the password." xml:space="preserve">
+    <value>A pénzügyi adataidat a jelszavad védi. Ha elfelejted a jelszót, az adatokat csak a helyreállítási kulccsal érheted el.</value>
+  </data>
+  <data name="Your password has been changed." xml:space="preserve">
+    <value>A jelszavad megváltozott.</value>
+  </data>
+  <data name="Your password has been replaced. Your previous recovery key no longer works." xml:space="preserve">
+    <value>A jelszavadat lecseréltük. A korábbi helyreállítási kulcs már érvénytelen.</value>
+  </data>
+  <data name="Your selected avatar is now shown on the account pages too." xml:space="preserve">
+    <value>A választott profilkép a fiókoldalakon is megjelenik.</value>
+  </data>
+  <data name="Your sign-in provider confirms who you are, but PocketLedger also encrypts your financial data with a password that only you know. You will enter it after each sign-in. It is separate from your provider account's password." xml:space="preserve">
+    <value>A bejelentkezési szolgáltató ellenőrzi a személyazonosságodat, a PocketLedger pedig a pénzügyi adataidat egy csak általad ismert jelszóval titkosítja. Minden bejelentkezés után ezt kell megadnod. Ez különbözik a szolgáltatónál használt jelszótól.</value>
+  </data>
+  <data name="a confirmed restore replaces all current PocketLedger data. It runs in a database transaction and rolls back on failure." xml:space="preserve">
+    <value>a megerősített visszaállítás lecseréli az összes jelenlegi PocketLedger-adatot. Adatbázis-tranzakcióban fut, hiba esetén visszagörgetéssel.</value>
+  </data>
+  <data name="and all of their PocketLedger data. This action cannot be undone." xml:space="preserve">
+    <value>. Az összes PocketLedger-adata is törlődik. A művelet nem vonható vissza.</value>
+  </data>
+  <data name="e.g. 203.0.113.10" xml:space="preserve">
+    <value>pl. 203.0.113.10</value>
+  </data>
+  <data name="e.g. Summer holiday" xml:space="preserve">
+    <value>pl. nyári nyaralás</value>
+  </data>
+  <data name="to confirm" xml:space="preserve">
+    <value>a megerősítéshez</value>
+  </data>
+  <data name="{0} can sign in again." xml:space="preserve">
+    <value>A(z) {0} felhasználó újra bejelentkezhet.</value>
+  </data>
+  <data name="{0} days" xml:space="preserve">
+    <value>{0} nap</value>
+  </data>
+  <data name="{0} has been blocked and all of their sessions were terminated." xml:space="preserve">
+    <value>A(z) {0} felhasználót letiltottuk, és minden munkamenetét lezártuk.</value>
+  </data>
+  <data name="{0} has been deleted." xml:space="preserve">
+    <value>A(z) {0} felhasználót töröltük.</value>
+  </data>
+  <data name="{0} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes." xml:space="preserve">
+    <value>A(z) {0} felhasználó tiltását az Identity feloldotta, de az API nem volt elérhető. Az API-hozzáférés néhány percen belül automatikusan helyreáll.</value>
+  </data>
+  <data name="{0} has been unblocked." xml:space="preserve">
+    <value>A(z) {0} felhasználó tiltását feloldottuk.</value>
+  </data>
+  <data name="{0} hours" xml:space="preserve">
+    <value>{0} óra</value>
+  </data>
+  <data name="{0} icon {1}" xml:space="preserve">
+    <value>{0} ikon ({1})</value>
+  </data>
+  <data name="{0} is banned for {1}. Every PocketLedger site starts refusing it within a few seconds." xml:space="preserve">
+    <value>A(z) {0} cím tiltva van erre az időre: {1}. Néhány másodpercen belül minden PocketLedger-oldal elutasítja.</value>
+  </data>
+  <data name="{0} is blocked and can no longer sign in, but the API or web app could not be reached. Their remaining sessions are terminated automatically within {1:0} seconds once it is reachable." xml:space="preserve">
+    <value>A(z) {0} felhasználó tiltva van, és nem tud bejelentkezni, de az API vagy a webalkalmazás nem volt elérhető. A megmaradt munkamenetei automatikusan lezárulnak az elérhetőség helyreállását követő {1:0} másodpercen belül.</value>
+  </data>
+  <data name="{0} left" xml:space="preserve">
+    <value>Még {0}</value>
+  </data>
+  <data name="{0} requests are in the totals but not listed per address because too many addresses were active in an interval." xml:space="preserve">
+    <value>{0} kérés beleszámít az összesítésbe, de címenként nem szerepel, mert az egyik időszakban túl sok cím volt aktív.</value>
+  </data>
+  <data name="{0} requests are not itemized because this address reached the limit of 200 different endpoints in an hour." xml:space="preserve">
+    <value>{0} kérés nincs részletezve, mert a cím elérte az óránkénti 200 különböző végpont korlátját.</value>
+  </data>
+  <data name="{0} requests from {1} addresses; {2} were not signed in." xml:space="preserve">
+    <value>{0} kérés {1} címről, ebből {2} bejelentkezés nélkül.</value>
+  </data>
+  <data name="{0} was not banned because CrowdSec could not be reached or refused the request." xml:space="preserve">
+    <value>A(z) {0} cím tiltása nem sikerült, mert a CrowdSec nem érhető el, vagy elutasította a kérést.</value>
+  </data>
+  <data name="{0}: requests/minute" xml:space="preserve">
+    <value>{0}: kérés/perc</value>
+  </data>
+  <data name="{0}: {1} of {2} requests in the interval." xml:space="preserve">
+    <value>{0}: {1} kérés az időszak {2} kéréséből.</value>
+  </data>
+</root>

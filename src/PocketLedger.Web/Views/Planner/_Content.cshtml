@@ -1,3 +1,4 @@
+@using PocketLedger.Localization
 @model PocketLedger.Services.Interfaces.PlannerMonth
 @using System.Globalization
 @using PocketLedger.Models.Enums
@@ -5,17 +6,17 @@
 @using PocketLedger.Services
 @using PocketLedger.Services.Interfaces
 @{
-    ViewData["Title"] = "Monthly planner";
+    ViewData["Title"] = CommonText.Get("Monthly planner");
     var plannedEvents = Model.Events;
     var previous = Model.Month.AddMonths(-1);
     var next = Model.Month.AddMonths(1);
 }
 <div class="planner-header">
-    <div><h1>Monthly planner</h1><p class="mb-0">Plan your month and see what to expect.</p></div>
-    <nav class="planner-month" aria-label="Select month">
-        @if (previous.Year >= 2) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month" aria-label="Previous month">‹</a> }
-        <strong>@Model.Month.ToString("MMMM yyyy", CultureInfo.GetCultureInfo("en-US"))</strong>
-        @if (next <= new DateOnly(Model.Today.Year, Model.Today.Month, 1).AddYears(10)) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month" aria-label="Next month">›</a> }
+    <div><h1>@CommonText.Get("Monthly planner")</h1><p class="mb-0">@CommonText.Get("Plan your month and see what to expect.")</p></div>
+    <nav class="planner-month" aria-label="@CommonText.Get("Select month")">
+        @if (previous.Year >= 2) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@previous.Year" asp-route-month="@previous.Month" aria-label="@CommonText.Get("Previous month")">‹</a> }
+        <strong>@Model.Month.ToString("MMMM yyyy", CultureInfo.CurrentUICulture)</strong>
+        @if (next <= new DateOnly(Model.Today.Year, Model.Today.Month, 1).AddYears(10)) { <a class="btn btn-sm btn-outline-secondary" asp-route-year="@next.Year" asp-route-month="@next.Month" aria-label="@CommonText.Get("Next month")">›</a> }
     </nav>
 </div>
 @if (Model.IsClosed) { <div class="planner-notice">@(Model.HasSnapshot ? "This month is closed. Its saved plan is read-only." : "No saved plan is available for this month.")</div> }
@@ -33,57 +34,57 @@
         <div class="planner-transfer-stack" id="planner-transfers"><partial name="_Table" model='new PlannerTableViewModel("Transfers", TransactionType.Transfer, Model.Month, plannedEvents.Where(item => item.Type == TransactionType.Transfer).ToList(), Model.IsClosed)' /></div>
         @if (plannedEvents.Any(item => item.Type == TransactionType.Adjustment))
         {
-            <section class="planner-panel"><h2>Balance adjustments</h2><p class="planner-muted">These adjustments affect balances without counting as income or expenses.</p>
+            <section class="planner-panel"><h2>@CommonText.Get("Balance adjustments")</h2><p class="planner-muted">@CommonText.Get("These adjustments affect balances without counting as income or expenses.")</p>
                 @foreach (var item in plannedEvents.Where(item => item.Type == TransactionType.Adjustment)) { <p>@item.Date?.ToString("MM. dd.") · @item.AccountName · @MoneyFormatter.Format(item.SourceChange, item.AccountCurrency)</p> }
             </section>
         }
     </div>
     <div class="planner-stack">
         <section class="planner-panel" id="planner-chart">
-            <div class="planner-panel-header"><h2>Expected balance over time</h2></div>
+            <div class="planner-panel-header"><h2>@CommonText.Get("Expected balance over time")</h2></div>
             @foreach (var currency in Model.Points.Select(point => point.Currency).Distinct())
             {
                 <partial name="_Chart" model="Model.Points.Where(point => point.Currency == currency).ToList()" />
             }
-            @if (Model.Points.Count == 0) { <p class="planner-muted">Include an account in the planner balance to see the chart.</p> }
-            <small class="planner-muted">Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart.</small>
+            @if (Model.Points.Count == 0) { <p class="planner-muted">@CommonText.Get("Include an account in the planner balance to see the chart.")</p> }
+            <small class="planner-muted">@CommonText.Get("Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart.")</small>
         </section>
         <section class="planner-panel" id="planner-accounts">
-            <div class="planner-panel-header"><h2>Expected account balances</h2><a asp-controller="Accounts" asp-action="Index">Details</a></div>
+            <div class="planner-panel-header"><h2>@CommonText.Get("Expected account balances")</h2><a asp-controller="Accounts" asp-action="Index">@CommonText.Get("Details")</a></div>
             <table class="table planner-accounts-table">
-                <thead><tr><th scope="col">Account</th><th scope="col">Opening balance</th><th scope="col">Expected closing balance</th><th scope="col">Change</th><th scope="col">Include</th></tr></thead>
+                <thead><tr><th scope="col">@CommonText.Get("Account")</th><th scope="col">@CommonText.Get("Opening balance")</th><th scope="col">@CommonText.Get("Expected closing balance")</th><th scope="col">@CommonText.Get("Change")</th><th scope="col">@CommonText.Get("Include")</th></tr></thead>
                 <tbody>
                 @foreach (var account in Model.Accounts)
                 {
                     var icon = PocketLedger.Models.AccountIcons.Resolve(account.Icon, AccountType.Other);
                     <tr id="planner-account-@account.Id">
-                        <th scope="row" data-label="Account"><div class="planner-account-identity"><img class="account-icon account-icon-sm" src="@icon.WebPath" alt="@icon.DisplayName" /><div><strong>@account.Name</strong><small title="Current account balance">@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</small>@if (!account.IncludeInMainBalance) { <span class="planner-tag">Excluded</span> }</div></div></th>
-                        <td data-label="Opening balance">
+                        <th scope="row" data-label="@CommonText.Get("Account")"><div class="planner-account-identity"><img class="account-icon account-icon-sm" src="@icon.WebPath" alt="@CommonText.IconLabel(icon.DisplayName)" /><div><strong>@account.Name</strong><small title="@CommonText.Get("Current account balance")">@MoneyFormatter.Format(account.CurrentBalance, account.Currency)</small>@if (!account.IncludeInMainBalance) { <span class="planner-tag">@CommonText.Get("Excluded")</span> }</div></div></th>
+                        <td data-label="@CommonText.Get("Opening balance")">
                             @if (Model.IsClosed) { <span>@MoneyFormatter.Format(account.OpeningBalance, account.Currency)</span> }
                             else
                             {
                                 var format = MoneyFormatter.GetMoneyInputFormat(account.Currency);
                                 <form id="opening-form-@account.Id" class="planner-opening" asp-action="OpeningBalance" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-accountId="@account.Id" method="post">
                                     <input type="hidden" name="UseCurrentBalance" value="false" />
-                                    <button class="planner-opening-edit" type="button" aria-label="Edit opening balance for @account.Name" aria-expanded="false">@MoneyFormatter.Format(account.OpeningBalance, account.Currency) <span aria-hidden="true">✎</span></button>
+                                    <button class="planner-opening-edit" type="button" aria-label="@CommonText.Format("Edit opening balance for {0}", account.Name)" aria-expanded="false">@MoneyFormatter.Format(account.OpeningBalance, account.Currency) <span aria-hidden="true">✎</span></button>
                                     <div class="planner-opening-editor" hidden>
                                         <input id="opening-value-@account.Id" name="Amount" type="hidden" value="@account.OpeningBalance.ToString(CultureInfo.InvariantCulture)" data-current="@account.CurrentBalance.ToString(CultureInfo.InvariantCulture)" data-custom="@((account.CustomOpeningBalance ?? account.OpeningBalance).ToString(CultureInfo.InvariantCulture))" disabled="@account.UseCurrentBalance" />
-                                        <input id="opening-@account.Id" class="form-control form-control-sm" type="text" inputmode="decimal" aria-label="@account.Name opening balance (@account.Currency)" data-money-value="opening-value-@account.Id" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-money-allow-negative="true" data-money-fixed-decimals="true" autocomplete="off" required disabled="@account.UseCurrentBalance" />
-                                        <div class="planner-opening-actions"><button class="btn btn-sm btn-outline-primary" type="submit">Save</button><button class="btn btn-sm btn-outline-secondary planner-opening-cancel" type="button">Cancel</button><button class="btn btn-sm btn-outline-secondary" type="submit" formnovalidate data-follow-current title="Use the current account balance automatically instead of a custom opening balance.">Follow current balance</button></div>
+                                        <input id="opening-@account.Id" class="form-control form-control-sm" type="text" inputmode="decimal" aria-label="@CommonText.Format("{0} opening balance ({1})", account.Name, account.Currency)" data-money-value="opening-value-@account.Id" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-money-allow-negative="true" data-money-fixed-decimals="true" autocomplete="off" required disabled="@account.UseCurrentBalance" />
+                                        <div class="planner-opening-actions"><button class="btn btn-sm btn-outline-primary" type="submit">@CommonText.Get("Save")</button><button class="btn btn-sm btn-outline-secondary planner-opening-cancel" type="button">@CommonText.Get("Cancel")</button><button class="btn btn-sm btn-outline-secondary" type="submit" formnovalidate data-follow-current title="@CommonText.Get("Use the current account balance automatically instead of a custom opening balance.")">@CommonText.Get("Follow current balance")</button></div>
                                         <div class="text-danger planner-opening-error" role="alert" hidden></div>
                                     </div>
                                 </form>
                             }
                         </td>
-                        <td data-label="Expected closing balance"><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong></td>
-                        <td data-label="Change"><div class="@(account.Change < 0 ? "planner-negative" : account.Change > 0 ? "planner-positive" : "planner-muted")">
+                        <td data-label="@CommonText.Get("Expected closing balance")"><strong>@MoneyFormatter.Format(account.ClosingBalance, account.Currency)</strong></td>
+                        <td data-label="@CommonText.Get("Change")"><div class="@(account.Change < 0 ? "planner-negative" : account.Change > 0 ? "planner-positive" : "planner-muted")">
                             <span>@(account.Change > 0 ? "+" : "")@MoneyFormatter.Format(account.Change, account.Currency)</span>
                             <div class="planner-account-percent">@if (account.Change != 0) { <span aria-hidden="true">@(account.Change > 0 ? "↑" : "↓")</span> } @(account.ChangePercent is { } percentage ? $"{percentage:+0.#;-0.#;0}%" : "—")</div>
                         </div></td>
 
-                        <td data-label="Include">
+                        <td data-label="@CommonText.Get("Include")">
                             <form class="planner-inclusion" asp-action="OpeningBalance" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" asp-route-accountId="@account.Id" method="post">
-                                <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" name="IncludeInBalance" value="true" aria-label="Include @account.Name in planner balance" checked="@account.IncludeInMainBalance" disabled="@Model.IsClosed" /></div>
+                                <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" name="IncludeInBalance" value="true" aria-label="@CommonText.Format("Include {0} in planner balance", account.Name)" checked="@account.IncludeInMainBalance" disabled="@Model.IsClosed" /></div>
                                 <div class="text-danger planner-opening-error" role="alert" hidden></div>
                             </form>
                         </td>
@@ -91,27 +92,27 @@
                 }
                 </tbody>
             </table>
-            @if (Model.Accounts.Count == 0) { <p class="planner-muted">Create an account to start planning.</p> }
+            @if (Model.Accounts.Count == 0) { <p class="planner-muted">@CommonText.Get("Create an account to start planning.")</p> }
             <div id="planner-notices">
             @foreach (var total in Model.Totals)
             {
-                @if (total.Expenses > total.Income) { <div class="planner-notice negative"><strong>Negative monthly cash flow · @total.Currency</strong><p class="mb-0">Expenses exceed income this month.</p></div> }
-                else if (total.Available > 0) { <div class="planner-notice positive"><strong>You are on track!</strong><p class="mb-0">After monthly budgets, @MoneyFormatter.Format(total.Available, total.Currency) remains available to spend.</p></div> }
+                @if (total.Expenses > total.Income) { <div class="planner-notice negative"><strong>Negative monthly cash flow · @total.Currency</strong><p class="mb-0">@CommonText.Get("Expenses exceed income this month.")</p></div> }
+                else if (total.Available > 0) { <div class="planner-notice positive"><strong>@CommonText.Get("You are on track!")</strong><p class="mb-0">After monthly budgets, @MoneyFormatter.Format(total.Available, total.Currency) remains available to spend.</p></div> }
             }
-            @foreach (var account in Model.Accounts.Where(account => account.ClosingBalance <= 0)) { <div class="planner-notice negative"><strong>Attention: @account.Name</strong><p class="mb-0">The expected closing balance is zero or negative.</p></div> }
-            <div class="planner-notice"><p class="mb-0">This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates.</p></div>
-            <div class="planner-notice"><p class="mb-0">Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner.</p></div>
+            @foreach (var account in Model.Accounts.Where(account => account.ClosingBalance <= 0)) { <div class="planner-notice negative"><strong>Attention: @account.Name</strong><p class="mb-0">@CommonText.Get("The expected closing balance is zero or negative.")</p></div> }
+            <div class="planner-notice"><p class="mb-0">@CommonText.Get("This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates.")</p></div>
+            <div class="planner-notice"><p class="mb-0">@CommonText.Get("Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner.")</p></div>
             </div>
         </section>
     </div>
     <partial name="_AccountSummary" model="Model" />
     <section class="planner-panel planner-account-summary" id="planner-notes">
         <form asp-action="Notes" asp-route-year="@Model.Month.Year" asp-route-month="@Model.Month.Month" method="post">
-            <div class="planner-panel-header"><h2><label for="planner-notes-text">Notes</label></h2></div>
+            <div class="planner-panel-header"><h2><label for="planner-notes-text">@CommonText.Get("Notes")</label></h2></div>
             <textarea id="planner-notes-text" name="notes" class="form-control" rows="6" maxlength="10000" readonly="@Model.IsClosed">@Model.Notes</textarea>
             @if (!Model.IsClosed)
             {
-                <button class="btn btn-primary mt-3" type="submit">Save</button>
+                <button class="btn btn-primary mt-3" type="submit">@CommonText.Get("Save")</button>
                 <span class="ms-2" role="status" aria-live="polite"></span>
             }
         </form>

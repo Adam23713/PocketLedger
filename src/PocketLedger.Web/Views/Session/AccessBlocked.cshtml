@@ -1,6 +1,7 @@
-@{ ViewData["Title"] = "Access blocked"; }
+@using PocketLedger.Localization
+@{ ViewData["Title"] = CommonText.Get("Access blocked"); }
 
 <div class="alert alert-warning mt-4" role="alert">
-    <h1 class="h4">Access is currently blocked</h1>
-    <p class="mb-0">Access to this account is currently disabled and under review.</p>
+    <h1 class="h4">@CommonText.Get("Access is currently blocked")</h1>
+    <p class="mb-0">@CommonText.Get("Access to this account is currently disabled and under review.")</p>
 </div>

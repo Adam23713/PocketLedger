@@ -1,48 +1,50 @@
+@using PocketLedger.Web.Services
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Transactions.TransactionFormViewModel
 @using PocketLedger.Models.Enums
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 <div class="mb-3">
-    <label asp-for="Type" class="form-label"></label>
+    <label asp-for="Type" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Type))</label>
     <select asp-for="Type" class="form-select" id="transaction-type">
-        <option value="@TransactionType.Income">Income</option>
-        <option value="@TransactionType.Expense">Expense</option>
-        <option value="@TransactionType.Adjustment">Adjustment</option>
-        <option value="@TransactionType.Transfer">Transfer</option>
+        <option value="@TransactionType.Income">@CommonText.Get("Income")</option>
+        <option value="@TransactionType.Expense">@CommonText.Get("Expense")</option>
+        <option value="@TransactionType.Adjustment">@CommonText.Get("Adjustment")</option>
+        <option value="@TransactionType.Transfer">@CommonText.Get("Transfer")</option>
     </select>
 </div>
 <div class="mb-3">
-    <label asp-for="AccountId" class="form-label">Source account</label>
+    <label asp-for="AccountId" class="form-label">@CommonText.Get("Source account")</label>
     <select asp-for="AccountId" class="form-select" id="source-account">
-        <option value="">Select an account</option>
+        <option value="">@CommonText.Get("Select an account")</option>
         @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-currency-marker="@format.CurrencyMarker" data-currency-position="@format.CurrencyPosition" data-use-space="@format.UseSpace.ToString().ToLowerInvariant()">@account.Name — @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</option> }
     </select>
     <span asp-validation-for="AccountId" class="text-danger"></span>
 </div>
 <div class="mb-3" id="target-account-field">
-    <label asp-for="TargetAccountId" class="form-label">Target account</label>
+    <label asp-for="TargetAccountId" class="form-label">@CommonText.Get("Target account")</label>
     <select asp-for="TargetAccountId" class="form-select" id="target-account">
-        <option value="">Select a target account</option>
+        <option value="">@CommonText.Get("Select a target account")</option>
         @foreach (var account in Model.Accounts) { var format = MoneyFormatter.GetMoneyInputFormat(account.Currency); <option value="@account.Id" data-currency="@account.Currency" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-currency-marker="@format.CurrencyMarker" data-currency-position="@format.CurrencyPosition" data-use-space="@format.UseSpace.ToString().ToLowerInvariant()">@account.Name — @MoneyFormatter.Format(account.CurrentBalance, account.Currency)</option> }
     </select>
     <span asp-validation-for="TargetAccountId" class="text-danger"></span>
 </div>
 <div class="row">
     @{ var defaultCurrency = (await MoneyFormatter.GetUserAsync()).DefaultCurrency; var defaultFormat = MoneyFormatter.GetMoneyInputFormat(defaultCurrency); }
-    <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">Amount</label><input asp-for="Amount" type="hidden" id="source-amount" /><div class="input-group"><input class="form-control" id="source-amount-display" type="text" inputmode="decimal" autocomplete="off" data-money-value="source-amount" data-money-account="source-account" data-decimal-places="@defaultFormat.DecimalPlaces" data-decimal-separator="@defaultFormat.DecimalSeparator" data-thousands-separator="@defaultFormat.ThousandsSeparator" /><span class="input-group-text currency-suffix" id="source-currency-suffix" hidden></span></div><span asp-validation-for="Amount" class="text-danger"></span></div>
-    <div class="col-md-6 mb-3" id="exchange-rate-field"><label asp-for="ExchangeRate" class="form-label">Exchange rate</label><input asp-for="ExchangeRate" class="form-control" type="number" min="0.00000001" step="0.00000001" id="exchange-rate" /><div class="form-text" id="exchange-rate-help"></div><span asp-validation-for="ExchangeRate" class="text-danger"></span></div>
-    <div class="col-md-6 mb-3" id="target-amount-field"><label class="form-label">Target amount</label><input asp-for="TargetAmount" type="hidden" id="target-amount" /><input class="form-control" id="target-amount-display" readonly /><div class="form-text">Calculated from amount and exchange rate.</div></div>
-    <div class="col-md-6 mb-3"><label asp-for="TransactionDate" class="form-label">Date</label><input asp-for="TransactionDate" class="form-control" type="date" /><span asp-validation-for="TransactionDate" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="Amount" class="form-label">@CommonText.Get("Amount")</label><input asp-for="Amount" type="hidden" id="source-amount" /><div class="input-group"><input class="form-control" id="source-amount-display" type="text" inputmode="decimal" autocomplete="off" data-money-value="source-amount" data-money-account="source-account" data-decimal-places="@defaultFormat.DecimalPlaces" data-decimal-separator="@defaultFormat.DecimalSeparator" data-thousands-separator="@defaultFormat.ThousandsSeparator" /><span class="input-group-text currency-suffix" id="source-currency-suffix" hidden></span></div><span asp-validation-for="Amount" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3" id="exchange-rate-field"><label asp-for="ExchangeRate" class="form-label">@CommonText.Get("Exchange rate")</label><input asp-for="ExchangeRate" class="form-control" type="number" min="0.00000001" step="0.00000001" id="exchange-rate" /><div class="form-text" id="exchange-rate-help"></div><span asp-validation-for="ExchangeRate" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3" id="target-amount-field"><label class="form-label">@CommonText.Get("Target amount")</label><input asp-for="TargetAmount" type="hidden" id="target-amount" /><input class="form-control" id="target-amount-display" readonly /><div class="form-text">@CommonText.Get("Calculated from amount and exchange rate.")</div></div>
+    <div class="col-md-6 mb-3"><label asp-for="TransactionDate" class="form-label">@CommonText.Get("Date")</label><input asp-for="TransactionDate" class="form-control" type="date" /><span asp-validation-for="TransactionDate" class="text-danger"></span></div>
     <div class="col-md-6 mb-3">
-        <label class="form-label">Time</label>
+        <label class="form-label">@CommonText.Get("Time")</label>
         <div class="d-flex align-items-center gap-2">
-            <select asp-for="TransactionHour" class="form-select" aria-label="Hour">
+            <select asp-for="TransactionHour" class="form-select" aria-label="@CommonText.Get("Hour")">
                 @for (var hour = 0; hour < 24; hour++)
                 {
                     <option value="@hour">@hour.ToString("00")</option>
                 }
             </select>
             <span>:</span>
-            <select asp-for="TransactionMinute" class="form-select" aria-label="Minute">
+            <select asp-for="TransactionMinute" class="form-select" aria-label="@CommonText.Get("Minute")">
                 @for (var minute = 0; minute < 60; minute++)
                 {
                     <option value="@minute">@minute.ToString("00")</option>
@@ -54,17 +56,17 @@
     </div>
 </div>
 <div class="mb-3" id="category-field">
-    <fieldset><legend class="form-label">Category</legend><div class="category-tree" id="category-tree">
+    <fieldset><legend class="form-label">@CommonText.Get("Category")</legend><div class="category-tree" id="category-tree">
         @foreach (var category in Model.Categories)
         {
-            <label class="category-tree-item @(category.IsSubcategory ? "subcategory" : "main-category")" data-category-type="@category.Type"><input name="CategoryId" type="radio" value="@category.Id" checked="@(category.Id == Model.CategoryId)" /><span class="category-tree-content"><img class="category-icon" src="@category.IconPath" alt="@category.IconAlt" /><span>@category.Name</span></span></label>
+            <label class="category-tree-item @(category.IsSubcategory ? "subcategory" : "main-category")" data-category-type="@category.Type"><input name="CategoryId" type="radio" value="@category.Id" checked="@(category.Id == Model.CategoryId)" /><span class="category-tree-content"><img class="category-icon" src="@category.IconPath" alt="@CommonText.IconLabel(category.IconAlt)" /><span>@category.Name</span></span></label>
         }
     </div></fieldset>
     <span asp-validation-for="CategoryId" class="text-danger"></span>
 </div>
 <div class="mb-3" id="adjustment-field">
-    <label asp-for="AdjustmentDirection" class="form-label">Adjustment direction</label>
-    <select asp-for="AdjustmentDirection" asp-items="Html.GetEnumSelectList<AdjustmentDirection>()" class="form-select"><option value="">Select a direction</option></select>
+    <label asp-for="AdjustmentDirection" class="form-label">@CommonText.Get("Adjustment direction")</label>
+    <select asp-for="AdjustmentDirection" asp-items="Html.GetLocalizedEnumSelectList<AdjustmentDirection>()" class="form-select"><option value="">@CommonText.Get("Select a direction")</option></select>
     <span asp-validation-for="AdjustmentDirection" class="text-danger"></span>
 </div>
-<div class="mb-3"><label asp-for="Note" class="form-label"></label><textarea asp-for="Note" class="form-control" rows="3"></textarea><span asp-validation-for="Note" class="text-danger"></span></div>
+<div class="mb-3"><label asp-for="Note" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Note))</label><textarea asp-for="Note" class="form-control" rows="3"></textarea><span asp-validation-for="Note" class="text-danger"></span></div>

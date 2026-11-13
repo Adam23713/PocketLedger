@@ -1,3 +1,4 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Admin.CrowdSecBansViewModel
 @using PocketLedger.Models.ViewModels
 @{
@@ -11,14 +12,14 @@
 }
 
 <section class="mt-5" aria-labelledby="crowdsec-bans-heading">
-    <h2 class="h4 mb-2" id="crowdsec-bans-heading">Active CrowdSec bans</h2>
+    <h2 class="h4 mb-2" id="crowdsec-bans-heading">@CommonText.Get("Active CrowdSec bans")</h2>
     @if (!Model.IsAvailable)
     {
-        <div class="alert alert-info" role="status">CrowdSec decisions are currently unavailable.</div>
+        <div class="alert alert-info" role="status">@CommonText.Get("CrowdSec decisions are currently unavailable.")</div>
     }
     else if (Model.TotalBans == 0)
     {
-        <div class="alert alert-info" role="status">There are no active IP or range bans.</div>
+        <div class="alert alert-info" role="status">@CommonText.Get("There are no active IP or range bans.")</div>
     }
     else
     {
@@ -26,8 +27,8 @@
             <input type="hidden" name="page" value="@Model.UsersPage" />
             <input type="hidden" name="bansSort" value="@table.Sort" />
             <input type="hidden" name="bansDesc" value="@table.Descending.ToString().ToLowerInvariant()" />
-            <div class="col-auto"><div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="bans-merge" name="bansMerge" value="true" checked="@Model.Merge" /><label class="form-check-label" for="bans-merge">Merge identical addresses</label></div></div>
-            <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Apply</button></div>
+            <div class="col-auto"><div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="bans-merge" name="bansMerge" value="true" checked="@Model.Merge" /><label class="form-check-label" for="bans-merge">@CommonText.Get("Merge identical addresses")</label></div></div>
+            <div class="col-auto"><button class="btn btn-outline-primary" type="submit">@CommonText.Get("Apply")</button></div>
         </form>
         <p class="text-muted small mb-2">@table.TotalCount rows from @Model.TotalBans bans@(Model.Merge ? " (merged by address; remaining time shows the ban that expires first)" : "")</p>
         {
@@ -41,20 +42,20 @@
                         <partial name="_SortableHeader" model='Header("Action", "action")' />
                         @if (Model.Merge) { <partial name="_SortableHeader" model='Header("Bans", "count")' /> }
                         <partial name="_SortableHeader" model='Header("Remaining", "remaining")' />
-                        @if (Model.CanManageBans) { <th scope="col"><span class="visually-hidden">Actions</span></th> }
+                        @if (Model.CanManageBans) { <th scope="col"><span class="visually-hidden">@CommonText.Get("Actions")</span></th> }
                     </tr></thead>
                     <tbody>
                         @foreach (var item in table.Items)
                         {
                             <tr>
-                                <td>@if (item.Address.Contains('/')) { <code>@item.Address</code> } else { <a href="@Url.Action("Index", "Admin", new { ip = item.Address }, null, null, "request-activity-heading")" title="Inspect this address"><code>@item.Address</code></a> }</td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td>@if (Model.Merge) { <td>@item.BanCount</td> }<td>@(item.RemainingText ?? "Not available")</td>
+                                <td>@if (item.Address.Contains('/')) { <code>@item.Address</code> } else { <a href="@Url.Action("Index", "Admin", new { ip = item.Address }, null, null, "request-activity-heading")" title="@CommonText.Get("Inspect this address")"><code>@item.Address</code></a> }</td><td>@item.Scope</td><td>@item.Scenario</td><td>@item.Origin</td><td>@item.Action</td>@if (Model.Merge) { <td>@item.BanCount</td> }<td>@(item.RemainingText ?? CommonText.Get("Not available"))</td>
                                 @if (Model.CanManageBans)
                                 {
                                     <td>
                                         <form asp-action="UnbanIp" method="post">
                                             <input type="hidden" name="address" value="@item.Address" />
                                             <input type="hidden" name="page" value="@Model.UsersPage" />
-                                            <button class="btn btn-sm btn-outline-secondary" type="submit">Remove</button>
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">@CommonText.Get("Remove")</button>
                                         </form>
                                     </td>
                                 }
@@ -65,10 +66,10 @@
             </div>
             @if (table.TotalPages > 1)
             {
-                <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="CrowdSec ban pages">
-                    @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page - 1)" rel="prev">Previous</a> } else { <span></span> }
+                <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="@CommonText.Get("CrowdSec ban pages")">
+                    @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page - 1)" rel="prev">@CommonText.Get("Previous")</a> } else { <span></span> }
                     <span class="text-muted">Page @table.Page of @table.TotalPages</span>
-                    @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page + 1)" rel="next">Next</a> } else { <span></span> }
+                    @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@BansUrl(page: table.Page + 1)" rel="next">@CommonText.Get("Next")</a> } else { <span></span> }
                 </nav>
             }
         }

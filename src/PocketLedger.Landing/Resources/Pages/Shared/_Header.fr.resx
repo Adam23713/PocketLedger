@@ -26,4 +26,10 @@
   <data name="Log in" xml:space="preserve">
     <value>Se connecter</value>
   </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Navigation principale</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>Ouvrir PocketLedger</value>
+  </data>
 </root>
