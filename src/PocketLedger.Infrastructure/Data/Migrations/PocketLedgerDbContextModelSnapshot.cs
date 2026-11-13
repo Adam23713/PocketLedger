@@ -138,6 +138,10 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("parent_category_id");
 
+                    b.Property<string>("StarterCategoryKey")
+                        .HasColumnType("text")
+                        .HasColumnName("starter_category_key");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -814,6 +818,11 @@ namespace PocketLedger.Infrastructure.Data.Migrations
                     b.Property<string>("DisplayName")
                         .HasColumnType("text")
                         .HasColumnName("display_name");
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("language");
 
                     b.Property<string>("LastSeenChangelogVersion")
                         .HasMaxLength(20)

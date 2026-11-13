@@ -5,6 +5,7 @@
         return;
     }
 
+    const text = trendDataElement.dataset;
     const trend = JSON.parse(trendDataElement.textContent);
     const colors = ["#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed", "#0891b2", "#db2777", "#4d7c0f", "#9333ea", "#ea580c"];
     const moneyFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 });
@@ -63,7 +64,7 @@
             const category = categories[index];
             selectedCategoryIndex = index;
             breakdownHeading.textContent = category.name;
-            breakdownTotal.textContent = `${formatMoney(category.amount)} total`;
+            breakdownTotal.textContent = `${formatMoney(category.amount)} ${text.total}`;
             breakdownBody.replaceChildren(...category.subcategories.map(subcategory => {
                 const row = document.createElement("tr");
                 const name = document.createElement("td");
@@ -87,11 +88,11 @@
             const row = document.createElement("tr");
             const message = document.createElement("td");
             selectedCategoryIndex = null;
-            breakdownHeading.textContent = "All main categories";
-            breakdownTotal.textContent = `${formatMoney(total)} total`;
+            breakdownHeading.textContent = text.mainCategories;
+            breakdownTotal.textContent = `${formatMoney(total)} ${text.total}`;
             message.className = "text-muted";
             message.colSpan = 3;
-            message.textContent = "Select a category to see the breakdown.";
+            message.textContent = text.selectCategory;
             row.append(message);
             breakdownBody.replaceChildren(row);
             selector.querySelectorAll("button").forEach(button => button.setAttribute("aria-pressed", "false"));
@@ -159,8 +160,8 @@
         data: {
             labels: trend.map(item => `${item.year}-${String(item.month).padStart(2, "0")}`),
             datasets: [
-                { label: "Income", data: trend.map(item => item.income), backgroundColor: "#16a34a" },
-                { label: "Expenses", data: trend.map(item => item.expenses), backgroundColor: "#dc2626" }
+                { label: text.income, data: trend.map(item => item.income), backgroundColor: "#16a34a" },
+                { label: text.expenses, data: trend.map(item => item.expenses), backgroundColor: "#dc2626" }
             ]
         },
         options: {

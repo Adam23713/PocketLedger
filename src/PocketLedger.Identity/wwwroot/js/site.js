@@ -58,3 +58,13 @@
         time.textContent = new Date(time.dateTime).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "medium" });
     });
 })();
+
+
+document.querySelectorAll('[data-ui-language]').forEach(select => {
+    const currentLanguage = select.value;
+    select.addEventListener('change', () => {
+        if (select.value !== currentLanguage) {
+            select.form.requestSubmit();
+        }
+    });
+});

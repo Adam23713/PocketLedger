@@ -1,0 +1,386 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 / ORGANIZE" xml:space="preserve">
+    <value>01 / RENDSZEREZÉS</value>
+  </data>
+  <data name="01 / YOUR PASSWORD" xml:space="preserve">
+    <value>01 / A JELSZAVAD</value>
+  </data>
+  <data name="02 / SERVER KEYS" xml:space="preserve">
+    <value>02 / SZERVERKULCSOK</value>
+  </data>
+  <data name="02 / UNDERSTAND" xml:space="preserve">
+    <value>02 / MEGÉRTÉS</value>
+  </data>
+  <data name="03 / MAKE IT YOURS" xml:space="preserve">
+    <value>03 / SZEMÉLYRE SZABÁS</value>
+  </data>
+  <data name="03 / OCI VAULT" xml:space="preserve">
+    <value>03 / OCI VAULT</value>
+  </data>
+  <data name="04 / TWO-FACTOR" xml:space="preserve">
+    <value>04 / KÉTFAKTOROS VÉDELEM</value>
+  </data>
+  <data name="A LITTLE FURTHER DOWN THE ROAD" xml:space="preserve">
+    <value>A KÉSŐBBI TERVEK</value>
+  </data>
+  <data name="A PERSONAL PROJECT, SHARED OPENLY" xml:space="preserve">
+    <value>EGY SZEMÉLYES PROJEKT, NYÍLTAN MEGOSZTVA</value>
+  </data>
+  <data name="A home for your finances." xml:space="preserve">
+    <value>Egy hely a pénzügyeidnek.</value>
+  </data>
+  <data name="A key only you can open" xml:space="preserve">
+    <value>Kulcs, amelyhez csak te férsz hozzá</value>
+  </data>
+  <data name="A place for every transaction" xml:space="preserve">
+    <value>Minden tranzakciónak van helye</value>
+  </data>
+  <data name="A quick tour of PocketLedger." xml:space="preserve">
+    <value>Rövid PocketLedger-bemutató.</value>
+  </data>
+  <data name="A second lock on every field" xml:space="preserve">
+    <value>Második zár minden titkosított mezőn</value>
+  </data>
+  <data name="A tour of PocketLedger" xml:space="preserve">
+    <value>A PocketLedger bemutatása</value>
+  </data>
+  <data name="Already have an account? You can sign in below." xml:space="preserve">
+    <value>Van már fiókod? Jelentkezz be alább.</value>
+  </data>
+  <data name="Amounts, dates and account types are protected by the server keys and the vault rather than by your password, so balances and statistics can still be calculated. We never sell your data or share it with advertisers, analytics providers or data brokers. See the" xml:space="preserve">
+    <value>Az összegeket, dátumokat és számlatípusokat a szerverkulcsok és a kulcstároló védi, így az egyenlegek és a statisztikák kiszámíthatók. Az adataidat nem adjuk el, és nem osztjuk meg hirdetőkkel, elemző szolgáltatókkal vagy adatbrókerekkel. További információ:</value>
+  </data>
+  <data name="Android application" xml:space="preserve">
+    <value>Android-alkalmazás</value>
+  </data>
+  <data name="Because financial awareness should not be a premium feature." xml:space="preserve">
+    <value>A pénzügyi tudatosságért ne kelljen előfizetni.</value>
+  </data>
+  <data name="Bring accounts, income, expenses and transfers into one overview. Use categories to give every transaction a place." xml:space="preserve">
+    <value>Tekintsd át egy helyen a számlákat, bevételeket, kiadásokat és átvezetéseket. Rendezd a tranzakciókat kategóriákba.</value>
+  </data>
+  <data name="CALENDAR" xml:space="preserve">
+    <value>NAPTÁR</value>
+  </data>
+  <data name="CATEGORIES" xml:space="preserve">
+    <value>KATEGÓRIÁK</value>
+  </data>
+  <data name="CHOOSE WHAT WORKS FOR YOU" xml:space="preserve">
+    <value>VÁLASZD A NEKED MEGFELELŐT</value>
+  </data>
+  <data name="Choose your appearance from multiple themes, set your currencies and number formats, and pick the timezone your dates follow." xml:space="preserve">
+    <value>Válassz témát, állítsd be a pénznemeket és számformátumokat, majd add meg a dátumokhoz használt időzónát.</value>
+  </data>
+  <data name="Click the screenshot to enlarge ↗" xml:space="preserve">
+    <value>Kattints a képernyőképre a nagyításhoz ↗</value>
+  </data>
+  <data name="Close image viewer" xml:space="preserve">
+    <value>Képnézegető bezárása</value>
+  </data>
+  <data name="Close ×" xml:space="preserve">
+    <value>Bezárás ×</value>
+  </data>
+  <data name="Coming soon" xml:space="preserve">
+    <value>Hamarosan</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Create account" xml:space="preserve">
+    <value>Fiók létrehozása</value>
+  </data>
+  <data name="Create an account or sign in below." xml:space="preserve">
+    <value>Hozz létre fiókot, vagy jelentkezz be alább.</value>
+  </data>
+  <data name="Even if we wanted to, we could not read it. Without your password or your recovery key, nobody — including us — can." xml:space="preserve">
+    <value>A jelszavad vagy helyreállítási kulcsod nélkül senki, köztük mi sem tudjuk elolvasni ezeket az adatokat.</value>
+  </data>
+  <data name="Every account is protected by an authenticator app, so a leaked password alone does not get anyone into your account." xml:space="preserve">
+    <value>Minden fiókot hitelesítő alkalmazás véd, így a kiszivárgott jelszó önmagában nem elég a belépéshez.</value>
+  </data>
+  <data name="Every account, in view" xml:space="preserve">
+    <value>Minden számla egy helyen</value>
+  </data>
+  <data name="Everything encrypted — your personal layer included — is encrypted again with separate, service-specific key rings kept outside the database, so a copied database holds only ciphertext." xml:space="preserve">
+    <value>Minden titkosított adatot, a személyes réteget is, külön szolgáltatáskulcsokkal újra titkosítunk. A kulcsok az adatbázison kívül vannak, így az adatbázis másolatában csak titkosított szöveg van.</value>
+  </data>
+  <data name="Explore on GitHub" xml:space="preserve">
+    <value>Megtekintés a GitHubon</value>
+  </data>
+  <data name="Explore statistics, follow your calendar and track recurring transactions, loans and debts." xml:space="preserve">
+    <value>Nézd meg a statisztikákat és a naptárt, kövesd az ismétlődő tranzakciókat, kölcsönöket és tartozásokat.</value>
+  </data>
+  <data name="Explore the details ↗" xml:space="preserve">
+    <value>Részletek megtekintése ↗</value>
+  </data>
+  <data name="FREE HOSTED POCKETLEDGER" xml:space="preserve">
+    <value>INGYENES, ÜZEMELTETETT POCKETLEDGER</value>
+  </data>
+  <data name="Financial security does not necessarily begin when you have more money. It begins when you understand what is happening with what you already have." xml:space="preserve">
+    <value>A pénzügyi biztonság ott kezdődik, hogy érted, mi történik a pénzeddel, akkor is, ha még nincs több belőle.</value>
+  </data>
+  <data name="Fit to screen" xml:space="preserve">
+    <value>Képernyőhöz igazítás</value>
+  </data>
+  <data name="Follow your financial activity day by day. Each day shows its income, expenses and running total, so busy weeks and quiet ones are easy to spot." xml:space="preserve">
+    <value>Kövesd a pénzügyeidet napról napra. A napi bevételek, kiadások és halmozott összegek alapján könnyű felismerni a sűrűbb és nyugodtabb heteket.</value>
+  </data>
+  <data name="From your morning coffee to the bigger picture, keep the details together and the overview clear." xml:space="preserve">
+    <value>A reggeli kávétól az összképig egy helyen láthatod a részleteket és az áttekintést.</value>
+  </data>
+  <data name="I know what it feels like to come from a family where money does not automatically mean security. And I also know how difficult it is, as an adult, to learn the things about money that someone probably should have taught you much earlier." xml:space="preserve">
+    <value>Tudom, milyen olyan családból jönni, ahol a pénz önmagában nem jelent biztonságot. Azt is tudom, milyen nehéz felnőttként megtanulni azokat a pénzügyi dolgokat, amelyeket jó lett volna korábban megismerni.</value>
+  </data>
+  <data name="I run a PocketLedger instance that is currently free to use. I cover the server costs myself, so account availability is limited." xml:space="preserve">
+    <value>Üzemeltetek egy jelenleg ingyenesen használható PocketLedger-példányt. A szerverköltséget én fizetem, ezért a fiókok száma korlátozott.</value>
+  </data>
+  <data name="If you offer a modified version over a network, the license requires making the corresponding source available to its users." xml:space="preserve">
+    <value>Ha hálózaton keresztül elérhetővé teszel egy módosított verziót, a licenc szerint a hozzá tartozó forráskódot is elérhetővé kell tenned a felhasználóknak.</value>
+  </data>
+  <data name="In your pocket, too." xml:space="preserve">
+    <value>A zsebedben is.</value>
+  </data>
+  <data name="Income, expenses &amp; transfers" xml:space="preserve">
+    <value>Bevételek, kiadások és átvezetések</value>
+  </data>
+  <data name="It does not require a subscription." xml:space="preserve">
+    <value>Előfizetés nélkül használható.</value>
+  </data>
+  <data name="Keep track of loans &amp; debts" xml:space="preserve">
+    <value>Kövesd a kölcsönöket és tartozásokat</value>
+  </data>
+  <data name="Keys kept in a vault" xml:space="preserve">
+    <value>Kulcsok a kulcstárolóban</value>
+  </data>
+  <data name="Know what you owe and what is owed to you. Record repayments as they happen and keep the remaining balance of every loan up to date." xml:space="preserve">
+    <value>Lásd, mennyivel tartozol, és mennyivel tartoznak neked. Rögzítsd a törlesztéseket, hogy minden kölcsön hátraléka naprakész maradjon.</value>
+  </data>
+  <data name="LOANS &amp; DEBTS" xml:space="preserve">
+    <value>KÖLCSÖNÖK ÉS TARTOZÁSOK</value>
+  </data>
+  <data name="Layers of protection" xml:space="preserve">
+    <value>Védelmi rétegek</value>
+  </data>
+  <data name="Less guesswork." xml:space="preserve">
+    <value>Kevesebb találgatás.</value>
+  </data>
+  <data name="Let me take care" xml:space="preserve">
+    <value>Bízd rám</value>
+  </data>
+  <data name="Live more confidently tomorrow." xml:space="preserve">
+    <value>Tervezz magabiztosabban holnap.</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Készítette:</value>
+  </data>
+  <data name="Make PocketLedger yours" xml:space="preserve">
+    <value>Szabd személyre a PocketLedgert</value>
+  </data>
+  <data name="Make room for the recurring" xml:space="preserve">
+    <value>Ütemezd az ismétlődő tételeket</value>
+  </data>
+  <data name="More understanding." xml:space="preserve">
+    <value>Tisztább kép.</value>
+  </data>
+  <data name="Native mobile apps are on the horizon." xml:space="preserve">
+    <value>Natív mobilalkalmazásokat tervezünk.</value>
+  </data>
+  <data name="Next screenshot" xml:space="preserve">
+    <value>Következő képernyőkép</value>
+  </data>
+  <data name="Next →" xml:space="preserve">
+    <value>Következő →</value>
+  </data>
+  <data name="ONE APP. YOUR CHOICE OF THEME." xml:space="preserve">
+    <value>EGY APP, TÖBB VÁLASZTHATÓ TÉMA.</value>
+  </data>
+  <data name="OVERVIEW" xml:space="preserve">
+    <value>ÁTTEKINTÉS</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>PocketLedger megnyitása</value>
+  </data>
+  <data name="Organize your finances with your own categories and subcategories, each with its own icon, grouped into income and expenses." xml:space="preserve">
+    <value>Rendezd bevételeidet és kiadásaidat saját kategóriákba és alkategóriákba, ikonokkal.</value>
+  </data>
+  <data name="PERSONAL FINANCE. FREE &amp; OPEN SOURCE." xml:space="preserve">
+    <value>SZEMÉLYES PÉNZÜGYEK. INGYENES ÉS NYÍLT FORRÁSKÓDÚ.</value>
+  </data>
+  <data name="Play the video" xml:space="preserve">
+    <value>Videó lejátszása</value>
+  </data>
+  <data name="PocketLedger dashboard showing account balances, recent transactions and four different appearance themes" xml:space="preserve">
+    <value>PocketLedger-áttekintő számlaegyenlegekkel, legutóbbi tranzakciókkal és négy témával</value>
+  </data>
+  <data name="PocketLedger exists to make" xml:space="preserve">
+    <value>A PocketLedger azért született,</value>
+  </data>
+  <data name="PocketLedger screenshots" xml:space="preserve">
+    <value>PocketLedger-képernyőképek</value>
+  </data>
+  <data name="PocketLedger video" xml:space="preserve">
+    <value>PocketLedger-videó</value>
+  </data>
+  <data name="PocketLedger — See more clearly today" xml:space="preserve">
+    <value>PocketLedger — Láss tisztábban már ma</value>
+  </data>
+  <data name="Previous screenshot" xml:space="preserve">
+    <value>Előző képernyőkép</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Adatvédelem</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Adatvédelmi tájékoztató</value>
+  </data>
+  <data name="RECURRING" xml:space="preserve">
+    <value>ISMÉTLŐDŐ TÉTELEK</value>
+  </data>
+  <data name="Read the license ↗" xml:space="preserve">
+    <value>Licenc megtekintése ↗</value>
+  </data>
+  <data name="Record what comes in, what goes out and what moves between your accounts. Filter by year, month or category, and every day shows its own incoming and outgoing totals." xml:space="preserve">
+    <value>Rögzítsd a beérkező, a kimenő és a számlák között mozgó összegeket. Szűrj év, hónap vagy kategória szerint, és tekintsd át a napi bejövő és kimenő összesítést.</value>
+  </data>
+  <data name="Run PocketLedger on your own server, fork it and change it to suit your needs under the AGPL-3.0-only license. You don’t have to use my hosted instance." xml:space="preserve">
+    <value>Futtasd a PocketLedgert a saját szervereden, készíts belőle elágazást, és alakítsd az igényeidhez az AGPL-3.0-only licenc szerint. A saját példány használata mellett a szolgáltatott példány választható.</value>
+  </data>
+  <data name="SEE IT IN ACTION" xml:space="preserve">
+    <value>NÉZD MEG MŰKÖDÉS KÖZBEN</value>
+  </data>
+  <data name="SELF-HOSTED · AGPL-3.0-ONLY" xml:space="preserve">
+    <value>SAJÁT ÜZEMELTETÉS · AGPL-3.0-ONLY</value>
+  </data>
+  <data name="SETTINGS" xml:space="preserve">
+    <value>BEÁLLÍTÁSOK</value>
+  </data>
+  <data name="STATISTICS" xml:space="preserve">
+    <value>STATISZTIKÁK</value>
+  </data>
+  <data name="Salaries, rent and subscriptions repeat on the schedule you set, and PocketLedger books them for you, so regular income and expenses stay in view." xml:space="preserve">
+    <value>A PocketLedger az általad beállított ütemezés alapján rögzíti a fizetést, a lakbért és az előfizetéseket, így a rendszeres bevételek és kiadások követhetők.</value>
+  </data>
+  <data name="See more clearly today." xml:space="preserve">
+    <value>Láss tisztábban már ma.</value>
+  </data>
+  <data name="See the bigger picture" xml:space="preserve">
+    <value>Lásd az összképet</value>
+  </data>
+  <data name="See where it all goes" xml:space="preserve">
+    <value>Lásd, mire megy el a pénz</value>
+  </data>
+  <data name="Self-hosting guide ↗" xml:space="preserve">
+    <value>Saját üzemeltetési útmutató ↗</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Ugrás a tartalomra</value>
+  </data>
+  <data name="Statistics break your spending and income down by category and account, with a twelve-month trend that shows how your habits change over time." xml:space="preserve">
+    <value>A statisztikák kategóriánként és számlánként bontják a kiadásokat és bevételeket. A tizenkét hónapos trend mutatja a szokásaid változását.</value>
+  </data>
+  <data name="THE EVERYDAY ESSENTIALS" xml:space="preserve">
+    <value>A MINDENNAPI ALAPOK</value>
+  </data>
+  <data name="TRANSACTIONS" xml:space="preserve">
+    <value>TRANZAKCIÓK</value>
+  </data>
+  <data name="Take a look at the source" xml:space="preserve">
+    <value>Nézd meg a forráskódot</value>
+  </data>
+  <data name="The dashboard brings every account balance, your net worth and this month’s income and expenses together on one screen. The latest transactions sit right below, so you always know where things stand." xml:space="preserve">
+    <value>Az áttekintő egy helyen mutatja a számlaegyenlegeket, a nettó vagyont, valamint a havi bevételeket és kiadásokat. A legutóbbi tranzakciók közvetlenül alattuk láthatók.</value>
+  </data>
+  <data name="The video is loaded from YouTube (Google) only after you click. See our" xml:space="preserve">
+    <value>A videó kattintás után töltődik be a YouTube-ról (Google). További információ:</value>
+  </data>
+  <data name="Those key rings are secured through OCI Vault/KMS, so a stolen server disk on its own is not enough to unlock the protected fields." xml:space="preserve">
+    <value>A kulcskészleteket az OCI Vault/KMS védi, így egy ellopott szerverlemez önmagában nem elég a védett mezők feloldásához.</value>
+  </data>
+  <data name="To help you track your money. To help you plan. To help you notice patterns. And over time, to help you make more confident decisions." xml:space="preserve">
+    <value>Segít követni a pénzedet, tervezni és felismerni a visszatérő mintákat. Idővel magabiztosabban hozhatsz döntéseket.</value>
+  </data>
+  <data name="Two steps to every sign-in" xml:space="preserve">
+    <value>Két lépés minden bejelentkezéskor</value>
+  </data>
+  <data name="View PocketLedger dashboard and themes" xml:space="preserve">
+    <value>A PocketLedger áttekintő és témái</value>
+  </data>
+  <data name="Watch a short walkthrough, and switch to full screen if you'd like a closer look." xml:space="preserve">
+    <value>Nézd meg a rövid bemutatót. Ha több részletre vagy kíváncsi, válts teljes képernyőre.</value>
+  </data>
+  <data name="Work with multiple currencies, choose from multiple themes and keep your data portable with backup, import and export." xml:space="preserve">
+    <value>Használj több pénznemet, válassz témát, és vidd magaddal az adataidat mentéssel, importálással és exportálással.</value>
+  </data>
+  <data name="YOUR DATA, PROTECTED BY DESIGN" xml:space="preserve">
+    <value>ADATVÉDELEM A TERVEZÉSTŐL KEZDVE</value>
+  </data>
+  <data name="Your account names, notes, debts and planner history are locked with a key that only your password can open. We never store that password, so nothing we hold can unlock your data — not the database, not our server keys, not our cloud vault." xml:space="preserve">
+    <value>A számlaneveket, megjegyzéseket, tartozásokat és tervezési előzményeket a jelszavaddal feloldható kulcs védi. A jelszót nem tároljuk, így sem az adatbázis, sem a szerverkulcsok, sem a felhős kulcstároló nem tudja feloldani az adatokat.</value>
+  </data>
+  <data name="Your finances stay yours." xml:space="preserve">
+    <value>A pénzügyi adataid a tieid maradnak.</value>
+  </data>
+  <data name="Your finances, on a calendar" xml:space="preserve">
+    <value>Pénzügyeid a naptárban</value>
+  </data>
+  <data name="Your money at a glance" xml:space="preserve">
+    <value>Pénzügyeid egy pillantásra</value>
+  </data>
+  <data name="Your money, your setup" xml:space="preserve">
+    <value>A pénzügyeid, a beállításaid</value>
+  </data>
+  <data name="Your own instance." xml:space="preserve">
+    <value>A saját példányod.</value>
+  </data>
+  <data name="Your sensitive text is encrypted with a personal key, unlocked only by your password or your one-time recovery key. We keep just a one-way hash of the password and never see the recovery key." xml:space="preserve">
+    <value>Az érzékeny szövegeket személyes kulcs titkosítja, amelyet a jelszavad vagy az egyszer használatos helyreállítási kulcsod old fel. A jelszóból csak egyirányú lenyomatot tárolunk, a helyreállítási kulcsot nem látjuk.</value>
+  </data>
+  <data name="Your server." xml:space="preserve">
+    <value>A te szervered.</value>
+  </data>
+  <data name="Zoom in" xml:space="preserve">
+    <value>Nagyítás</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>és</value>
+  </data>
+  <data name="database encryption" xml:space="preserve">
+    <value>adatbázis-titkosítás</value>
+  </data>
+  <data name="documentation on GitHub." xml:space="preserve">
+    <value>a GitHubon.</value>
+  </data>
+  <data name="iOS application" xml:space="preserve">
+    <value>iOS-alkalmazás</value>
+  </data>
+  <data name="of the hosting." xml:space="preserve">
+    <value>az üzemeltetést.</value>
+  </data>
+  <data name="page, or read the" xml:space="preserve">
+    <value>vagy olvasd el ezt:</value>
+  </data>
+  <data name="that journey a little easier." xml:space="preserve">
+    <value>hogy ezt az utat megkönnyítse.</value>
+  </data>
+  <data name="← Previous" xml:space="preserve">
+    <value>← Előző</value>
+  </data>
+  <data name="PocketLedger is a free, open-source personal finance app for tracking accounts, spending, income and debts. Use the hosted instance or run it on your own server." xml:space="preserve">
+    <value>A PocketLedger ingyenes, nyílt forráskódú személyes pénzügyi app a számlák, kiadások, bevételek és tartozások követésére. Használd a szolgáltatott példányt, vagy futtasd saját szerveren.</value>
+  </data>
+  <data name="{0} — PocketLedger application screenshot" xml:space="preserve">
+    <value>{0} — képernyőkép a PocketLedger alkalmazásról</value>
+  </data>
+  <data name="{0} — view full-size screenshot" xml:space="preserve">
+    <value>{0} — teljes méretű képernyőkép megnyitása</value>
+  </data>
+</root>

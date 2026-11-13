@@ -12,7 +12,7 @@
     function setZoom(zoomed) {
         viewer.classList.toggle('is-zoomed', zoomed);
         zoomButton.setAttribute('aria-pressed', String(zoomed));
-        zoomButton.textContent = zoomed ? 'Fit to screen' : 'Zoom in';
+        zoomButton.textContent = zoomed ? document.body.dataset.fitScreen : document.body.dataset.zoomIn;
     }
 
     function showImage(index) {
@@ -62,7 +62,7 @@
     if (!field || !output) return;
     const update = () => {
         const remaining = field.maxLength - field.value.length;
-        output.textContent = remaining < 500 ? `${remaining} characters left` : '';
+        output.textContent = remaining < 500 ? field.dataset.countFormat.replace('{0}', remaining) : '';
     };
     field.addEventListener('input', update);
     update();
@@ -77,16 +77,16 @@
 (() => {
 
     const appUrl = document.body.dataset.appUrl;
-    const links = document.querySelectorAll('[data-app-link]');
+    const links = Array.from(document.querySelectorAll('[data-app-link]'), link => ({ link, label: link.querySelector('[data-app-label]').textContent }));
     const registrationElements = document.querySelectorAll('[data-registration-link], [data-registration-content]');
     async function updateSession() {
         try {
             const response = await fetch(`${appUrl}/Session/Status`, { credentials: 'include', cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(5000) });
             if (!response.ok) return;
             const { authenticated } = await response.json();
-            for (const link of links) {
+            for (const { link, label } of links) {
                 link.href = authenticated === true ? `${appUrl}/` : `${appUrl}/Session/Login`;
-                link.querySelector('[data-app-label]').textContent = authenticated === true ? 'Open PocketLedger' : 'Log in';
+                link.querySelector('[data-app-label]').textContent = authenticated === true ? link.dataset.openApp : label;
             }
             for (const element of registrationElements) element.hidden = authenticated === true;
         } catch {
@@ -104,7 +104,7 @@
             if (event.target.closest('a')) return;
             const iframe = document.createElement('iframe');
             iframe.src = placeholder.dataset.videoSrc;
-            iframe.title = 'PocketLedger video';
+            iframe.title = document.body.dataset.videoTitle;
             iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
             iframe.referrerPolicy = 'strict-origin-when-cross-origin';
             iframe.allowFullscreen = true;
@@ -113,3 +113,26 @@
         });
     });
 })();
+
+
+document.querySelectorAll('[data-ui-language]').forEach(select => {
+    const currentLanguage = select.value;
+    select.addEventListener('change', async () => {
+        if (select.value === currentLanguage) return;
+
+        const form = new FormData(select.form);
+        form.delete('returnUrl');
+        select.disabled = true;
+        try {
+            const response = await fetch(select.form.action, { method: 'POST', body: form });
+            if (response.status === 204) {
+                window.location.reload();
+                return;
+            }
+        } catch (error) {
+            console.error('Could not change the interface language.', error);
+        }
+        select.value = currentLanguage;
+        select.disabled = false;
+    });
+});

@@ -72,6 +72,18 @@ public sealed class FacebookAuthenticationTests : IClassFixture<WebApplicationFa
         Assert.Null(identity.FindFirst("email_verified"));
     }
 
+    [Fact]
+    public async Task CancelledProviderFlow_RedirectsToExternalLoginCallbackWithRemoteError()
+    {
+        using var configuredFactory = ConfigureFactory("facebook-app-id", "facebook-app-secret");
+        using var client = configuredFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/signin-facebook?error=access_denied");
+
+        Assert.Equal(System.Net.HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/ExternalLoginCallback?remoteError=ProviderError", response.Headers.Location?.OriginalString);
+    }
+
     private WebApplicationFactory<Program> ConfigureFactory(string? appId, string? appSecret)
         => factory.WithWebHostBuilder(builder =>
         {

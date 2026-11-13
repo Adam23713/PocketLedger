@@ -1,0 +1,38 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Login" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Welcome back" xml:space="preserve">
+    <value>Üdv újra!</value>
+  </data>
+  <data name="Sign in to your PocketLedger account" xml:space="preserve">
+    <value>Jelentkezz be a PocketLedger-fiókodba</value>
+  </data>
+  <data name="Too many failed sign-in attempts. Sign-in is blocked until" xml:space="preserve">
+    <value>Túl sok sikertelen bejelentkezés. A tiltás lejárata:</value>
+  </data>
+  <data name="or sign in with username" xml:space="preserve">
+    <value>vagy jelentkezz be felhasználónévvel</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Felhasználónév</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Jelszó</value>
+  </data>
+  <data name="Forgot your password? Use your recovery key" xml:space="preserve">
+    <value>Elfelejtetted a jelszavad? Használd a helyreállítási kulcsodat</value>
+  </data>
+  <data name="Need an account?" xml:space="preserve">
+    <value>Még nincs fiókod?</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Regisztráció</value>
+  </data>
+</root>

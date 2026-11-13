@@ -1,15 +1,16 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Account.AuditLogViewModel
 @using PocketLedger.Models.ViewModels
 @{
-    ViewData["Title"] = "Login Events";
+    ViewData["Title"] = CommonText.Get("Login Events");
     var table = Model.Table;
     string EventsUrl(string? sort = null, bool? descending = null, int? page = null) => Url.Action("LoginEvents", new { sort = sort ?? table.Sort, desc = descending ?? table.Descending, page = page ?? table.Page })!;
     SortableHeaderViewModel Header(string label, string column) => new(label, EventsUrl(column, table.Sort == column ? !table.Descending : column == "time", 1), table.Sort == column, table.Descending);
 }
-<h1>Login Events</h1>
+<h1>@CommonText.Get("Login Events")</h1>
 @if (table.Items.Count == 0)
 {
-    <div class="alert alert-info" role="status">No login events yet.</div>
+    <div class="alert alert-info" role="status">@CommonText.Get("No login events yet.")</div>
 }
 else
 {
@@ -23,12 +24,12 @@ else
                 <partial name="_SortableHeader" model='Header("User agent", "agent")' />
                 <partial name="_SortableHeader" model='Header("Reason", "reason")' />
             </tr></thead>
-            <tbody>@foreach (var item in table.Items) { <tr><td>@item.TimestampUtc.ToString("u")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress)</td><td class="text-truncate" style="max-width: 24rem">@item.UserAgent</td><td>@item.FailureReason</td></tr> }</tbody>
+            <tbody>@foreach (var item in table.Items) { <tr><td>@item.TimestampUtc.ToString("u")</td><td>@CommonText.Get(item.EventType)</td><td>@CommonText.Get(item.Outcome)</td><td>@(item.ForwardedClientIpAddress ?? item.RemoteIpAddress)</td><td class="text-truncate" style="max-width: 24rem">@item.UserAgent</td><td>@CommonText.Get(item.FailureReason ?? string.Empty)</td></tr> }</tbody>
         </table>
     </div>
-    <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="Login event pages">
-        @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page - 1)" rel="prev">Previous</a> } else { <span></span> }
+    <nav class="d-flex align-items-center justify-content-between mt-2" aria-label="@CommonText.Get("Login event pages")">
+        @if (table.Page > 1) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page - 1)" rel="prev">@CommonText.Get("Previous")</a> } else { <span></span> }
         <span class="text-muted">Page @table.Page of @table.TotalPages · @table.TotalCount events</span>
-        @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page + 1)" rel="next">Next</a> } else { <span></span> }
+        @if (table.Page < table.TotalPages) { <a class="btn btn-outline-secondary" href="@EventsUrl(page: table.Page + 1)" rel="next">@CommonText.Get("Next")</a> } else { <span></span> }
     </nav>
 }

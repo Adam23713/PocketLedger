@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -17,8 +18,10 @@ using PocketLedger.Web.Data;
 using PocketLedger.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddUiLocalization();
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Web");
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddDataAnnotationsLocalization(options =>
+    options.DataAnnotationLocalizerProvider = (_, factory) => factory.Create("Common", typeof(Program).Assembly.GetName().Name!));
 builder.Services.AddDbContext<WebDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebConnection")));
 builder.Services.AddSingleton<DatabaseTicketStore>();
 builder.Services.AddSingleton<ISessionTicketReader>(services => services.GetRequiredService<DatabaseTicketStore>());
@@ -118,6 +121,7 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Home/Error");
 app.UseStaticFiles();
+app.UseRequestLocalization();
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
@@ -125,9 +129,25 @@ app.UseMiddleware<RevokedSessionMiddleware>();
 app.UseRequestTelemetry();
 app.UseMiddleware<BffSessionExpiredMiddleware>();
 app.UseAuthorization();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true && context.GetEndpoint()?.Metadata.GetMetadata<Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor>() is not null
+        && !context.Request.Path.StartsWithSegments("/Session"))
+    {
+        var profile = await context.RequestServices.GetRequiredService<IUserContextService>().GetUserAsync(context.RequestAborted);
+        if (profile.Language is { } language && language != System.Globalization.CultureInfo.CurrentUICulture.Name)
+        {
+            UiLocalization.UseLanguage(language);
+            UiLocalization.SetCookie(context, language);
+        }
+    }
+    await next(context);
+});
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}").WithStaticAssets();
 app.MapStaticAssets();
 app.MapEncryptionHealthEndpoints();
+app.MapUiLanguageSelection((context, language) => context.RequestServices.GetRequiredService<IPreferencesApiClient>()
+    .SetLanguageAsync(language, context.RequestAborted)).RequireAuthorization();
 app.Run();
 
 void AddApiClient<TService, TImplementation>() where TService : class where TImplementation : class, TService

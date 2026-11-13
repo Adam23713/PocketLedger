@@ -16,5 +16,7 @@ public interface ICategoryService
     Task<Category> CreateAsync(Category category, CancellationToken cancellationToken);
     Task UpdateAsync(Category category, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<CategoryChoice>> GetStarterCandidatesAsync(CancellationToken cancellationToken);
+    Task EnableStarterTranslationsAsync(IReadOnlyList<Guid> categoryIds, CancellationToken cancellationToken);
     Task<IReadOnlyList<CategoryChoice>> GetChoicesAsync(CategoryType? type, Guid? excludeId, CancellationToken cancellationToken);
 }

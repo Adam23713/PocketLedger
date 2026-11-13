@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
 using PocketLedger.Models;
@@ -30,7 +31,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
 
     public async Task<StatisticsSummary> GetSummaryAsync(int year, int month, string currency, CancellationToken cancellationToken)
     {
-        if (cache is not null && await cache.IncludesMonthAsync(year, month, 12, cancellationToken)) return await cache.GetOrCreateAsync("GetSummaryAsync", new { year, month, currency }, () => GetSummaryCoreAsync(year, month, currency, cancellationToken), cancellationToken);
+        if (cache is not null && await cache.IncludesMonthAsync(year, month, 12, cancellationToken)) return await cache.GetOrCreateAsync("GetSummaryAsync", new { year, month, currency, language = CultureInfo.CurrentUICulture.Name }, () => GetSummaryCoreAsync(year, month, currency, cancellationToken), cancellationToken);
         return await GetSummaryCoreAsync(year, month, currency, cancellationToken);
     }
 
@@ -53,9 +54,16 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
                 transaction.Category != null ? transaction.Category.Icon : null,
                 transaction.Category != null ? transaction.Category.ParentCategoryId : null,
                 transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.Name : null,
-                transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.Icon : null))
+                transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.Icon : null,
+                transaction.Category != null ? transaction.Category.StarterCategoryKey : null,
+                transaction.Category != null && transaction.Category.ParentCategory != null ? transaction.Category.ParentCategory.StarterCategoryKey : null))
             .ToListAsync(cancellationToken);
-        var selected = transactions.Where(transaction => transaction.TransactionDate >= selectedStart).ToList();
+        var selected = transactions.Where(transaction => transaction.TransactionDate >= selectedStart)
+            .Select(transaction => transaction with
+            {
+                CategoryName = transaction.CategoryName is { } name ? DefaultCategories.DisplayName(name, transaction.StarterCategoryKey) : null,
+                ParentCategoryName = transaction.ParentCategoryName is { } parentName ? DefaultCategories.DisplayName(parentName, transaction.ParentStarterCategoryKey) : null
+            }).ToList();
         var selectedTotals = PeriodCalculator.Calculate(selected.Select(ToTransaction));
         var accounts = await accountService.GetAllAsync(cancellationToken);
         var balances = await accountService.GetCurrentBalancesAsync(cancellationToken);
@@ -67,13 +75,14 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
                 template.Account.Currency,
                 MainCategoryId = template.Category!.ParentCategoryId ?? template.CategoryId!.Value,
                 MainCategoryName = template.Category!.ParentCategory != null ? template.Category.ParentCategory.Name : template.Category.Name,
+                StarterCategoryKey = template.Category.ParentCategory != null ? template.Category.ParentCategory.StarterCategoryKey : template.Category.StarterCategoryKey,
                 MainCategoryIcon = template.Category.ParentCategory != null ? template.Category.ParentCategory.Icon : template.Category.Icon
             })
             .ToListAsync(cancellationToken);
 
         var recurringExpenses = recurringTemplates.Select(item => new
             {
-                item.MainCategoryName,
+                MainCategoryName = DefaultCategories.DisplayName(item.MainCategoryName, item.StarterCategoryKey),
                 item.MainCategoryIcon,
                 item.MainCategoryId,
                 item.Currency,
@@ -176,7 +185,7 @@ public class StatisticsService(PocketLedgerDbContext dbContext, IAccountService 
         return item.ParentCategoryIcon ?? item.CategoryIcon;
     }
 
-    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, DebtOperationType? DebtOperationType, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon);
+    private record StatisticsTransactionRow(DateOnly TransactionDate, TransactionType Type, decimal Amount, AdjustmentDirection? AdjustmentDirection, DebtOperationType? DebtOperationType, Guid? CategoryId, string? CategoryName, string? CategoryIcon, Guid? ParentCategoryId, string? ParentCategoryName, string? ParentCategoryIcon, string? StarterCategoryKey, string? ParentStarterCategoryKey);
 
     private static Models.Entities.Transaction ToTransaction(StatisticsTransactionRow row) => new() { TransactionDate = row.TransactionDate, Type = row.Type, Amount = row.Amount, AdjustmentDirection = row.AdjustmentDirection, DebtOperationType = row.DebtOperationType };
 

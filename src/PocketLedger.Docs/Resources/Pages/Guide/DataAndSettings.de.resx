@@ -1,0 +1,125 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Back to overview" xml:space="preserve">
+    <value>Zurück zur Übersicht</value>
+  </data>
+  <data name="CHAPTER 06" xml:space="preserve">
+    <value>KAPITEL 06</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Kapitelnavigation</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Daten und Einstellungen</value>
+  </data>
+  <data name="Data and settings" xml:space="preserve">
+    <value>Daten und Einstellungen</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Schulden und Ziele</value>
+  </data>
+  <data name=". Set a display name and avatar, choose your default currency and time zone, then configure how each currency should display decimal places, separators, symbols and spacing." xml:space="preserve">
+    <value>. Lege Anzeigename und Profilbild fest, wähle Standardwährung und Zeitzone und konfiguriere Dezimalstellen, Trennzeichen, Symbole und Abstände pro Währung.</value>
+  </data>
+  <data name="A practical routine" xml:space="preserve">
+    <value>Eine praktische Routine</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Konto und Sicherheit</value>
+  </data>
+  <data name="At month end" xml:space="preserve">
+    <value>Zum Monatsende</value>
+  </data>
+  <data name="Backup passwords cannot be recovered." xml:space="preserve">
+    <value>Sicherungspasswörter können nicht wiederhergestellt werden.</value>
+  </data>
+  <data name="Before the next month" xml:space="preserve">
+    <value>Vor dem nächsten Monat</value>
+  </data>
+  <data name="CSV import" xml:space="preserve">
+    <value>CSV-Import</value>
+  </data>
+  <data name="Choose" xml:space="preserve">
+    <value>Wähle</value>
+  </data>
+  <data name="Create an encrypted backup and verify that you still have its password." xml:space="preserve">
+    <value>Erstelle eine verschlüsselte Sicherung und prüfe, ob du ihr Passwort noch hast.</value>
+  </data>
+  <data name="Creates a password-protected copy of all PocketLedger financial data." xml:space="preserve">
+    <value>Erstellt eine passwortgeschützte Kopie aller PocketLedger-Finanzdaten.</value>
+  </data>
+  <data name="Downloads filtered transactions as a password-protected workbook." xml:space="preserve">
+    <value>Lädt gefilterte Transaktionen als passwortgeschützte Arbeitsmappe herunter.</value>
+  </data>
+  <data name="During the week" xml:space="preserve">
+    <value>Unter der Woche</value>
+  </data>
+  <data name="Encrypted backup" xml:space="preserve">
+    <value>Verschlüsselte Sicherung</value>
+  </data>
+  <data name="Excel export" xml:space="preserve">
+    <value>Excel-Export</value>
+  </data>
+  <data name="Formatting changes presentation only; stored monetary values remain unchanged." xml:space="preserve">
+    <value>Die Formatierung ändert die Anzeige. Gespeicherte Beträge bleiben unverändert.</value>
+  </data>
+  <data name="Import, export and back up" xml:space="preserve">
+    <value>Importieren, exportieren und sichern</value>
+  </data>
+  <data name="Make the interface feel local, move transaction data in or out, and keep an encrypted copy of everything that matters." xml:space="preserve">
+    <value>Passe die Oberfläche an, importiere oder exportiere Transaktionen und bewahre eine verschlüsselte Kopie wichtiger Daten auf.</value>
+  </data>
+  <data name="Manage account security" xml:space="preserve">
+    <value>Kontosicherheit verwalten</value>
+  </data>
+  <data name="Open your avatar menu and choose" xml:space="preserve">
+    <value>Öffne das Profilmenü und wähle</value>
+  </data>
+  <data name="Personalize PocketLedger" xml:space="preserve">
+    <value>PocketLedger personalisieren</value>
+  </data>
+  <data name="Previews an encrypted backup, then replaces the signed-in user’s current finance data after explicit confirmation." xml:space="preserve">
+    <value>Zeigt eine Vorschau der verschlüsselten Sicherung und ersetzt nach Bestätigung die aktuellen Finanzdaten des angemeldeten Benutzers.</value>
+  </data>
+  <data name="Previews bank-exported rows and imports only entries that pass validation." xml:space="preserve">
+    <value>Zeigt exportierte Bankzeilen vorab an und importiert nur gültige Einträge.</value>
+  </data>
+  <data name="Record activity and check recurring entries." xml:space="preserve">
+    <value>Erfasse Aktivitäten und prüfe wiederkehrende Buchungen.</value>
+  </data>
+  <data name="Regularly" xml:space="preserve">
+    <value>Regelmäßig</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Wiederherstellen</value>
+  </data>
+  <data name="Review Transactions, Calendar and Statistics for missing or unusual entries." xml:space="preserve">
+    <value>Prüfe Transaktionen, Kalender und Statistik auf fehlende oder ungewöhnliche Buchungen.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Transaction exchange and full-database backup serve different purposes." xml:space="preserve">
+    <value>Der Austausch von Transaktionen und die vollständige Datensicherung erfüllen unterschiedliche Zwecke.</value>
+  </data>
+  <data name="Update the Monthly planner, debts and goals." xml:space="preserve">
+    <value>Aktualisiere Monatsplaner, Schulden und Ziele.</value>
+  </data>
+  <data name="Use a unique password and store it separately from the backup file. Restoring replaces current finance data, so review the preview before confirming." xml:space="preserve">
+    <value>Nutze ein einzigartiges Passwort und bewahre es getrennt von der Sicherung auf. Die Wiederherstellung ersetzt aktuelle Finanzdaten. Prüfe vorher die Vorschau.</value>
+  </data>
+  <data name="from the avatar menu to manage password access, authenticator settings, recovery material, login events and active security options. Never share QR codes, one-time codes, recovery codes or the data recovery key." xml:space="preserve">
+    <value>im Profilmenü, um Passwort, Authenticator, Wiederherstellungsdaten, Anmeldeereignisse und Sicherheitsoptionen zu verwalten. Teile keine QR-Codes, Einmalcodes, Wiederherstellungscodes oder Datenwiederherstellungsschlüssel.</value>
+  </data>
+  <data name="Import and Export page with encrypted Excel export, CSV import, encrypted backup and restore actions" xml:space="preserve">
+    <value>Import- und Exportseite mit verschlüsseltem Excel-Export, CSV-Import, verschlüsselter Sicherung und Wiederherstellung</value>
+  </data>
+  <data name="Settings page with profile, avatar, default currency, time zone and currency formatting controls" xml:space="preserve">
+    <value>Einstellungen für Profil, Profilbild, Standardwährung, Zeitzone und Währungsformatierung</value>
+  </data>
+</root>

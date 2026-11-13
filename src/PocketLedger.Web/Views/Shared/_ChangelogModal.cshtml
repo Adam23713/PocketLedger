@@ -1,25 +1,26 @@
+@using PocketLedger.Localization
 @model IReadOnlyList<PocketLedger.Models.ChangelogEntry>
 @{ var historyUrl = Context.RequestServices.GetRequiredService<IConfiguration>()["Identity:Authority"]?.TrimEnd('/') + "/Account/Changelog"; }
 <div class="modal fade" id="changelog-modal" tabindex="-1" aria-labelledby="changelog-modal-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content changelog-modal-content">
             <div class="modal-header">
-                <h2 class="modal-title h5" id="changelog-modal-title">What's new in PocketLedger @Model[0].Version</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h2 class="modal-title h5" id="changelog-modal-title">@CommonText.Format("What's new in PocketLedger {0}", Model[0].Version)</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@CommonText.Get("Close")"></button>
             </div>
             <div class="modal-body">
                 @foreach (var entry in Model)
                 {
                     <section class="changelog-entry">
-                        <h3 class="h6 mb-1">@entry.Version · @entry.Title</h3>
+                        <h3 class="h6 mb-1">@entry.Version · @CommonText.Get(entry.Title)</h3>
                         <small class="text-muted">@entry.ReleasedOn.ToString("yyyy-MM-dd")</small>
-                        <ul class="mt-2">@foreach (var change in entry.Changes) { <li>@change</li> }</ul>
+                        <ul class="mt-2">@foreach (var change in entry.Changes) { <li>@CommonText.Get(change)</li> }</ul>
                     </section>
                 }
             </div>
             <div class="modal-footer">
-                <a class="link-secondary me-auto" href="@historyUrl">Changelog history</a>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it</button>
+                <a class="link-secondary me-auto" href="@historyUrl">@CommonText.Get("Changelog history")</a>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">@CommonText.Get("Got it")</button>
             </div>
             <form id="changelog-seen-form" asp-controller="Changelog" asp-action="Seen" method="post" hidden><input type="hidden" name="version" value="@Model[0].Version" /></form>
         </div>

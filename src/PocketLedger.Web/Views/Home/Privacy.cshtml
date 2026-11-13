@@ -1,6 +1,7 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@using PocketLedger.Localization
+@{
+    ViewData["Title"] = CommonText.Get("Privacy Policy");
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<p>@CommonText.Get("Use this page to detail your site's privacy policy.")</p>

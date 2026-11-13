@@ -1,30 +1,31 @@
 @page "/guide"
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
 @{
-    ViewData["Title"] = "Guide";
+    ViewData["Title"] = Text["Guide"].Value;
 }
 <div class="docs-layout shell">
     <partial name="_GuideNavigation" />
     <article class="docs-content" id="overview">
-        <p class="eyebrow">USER GUIDE</p>
-        <h1>Your money, clearly organized.</h1>
-        <p class="lead">This guide takes you from your first account to planning, reporting and encrypted backups. Follow it in order for a complete tour, or jump directly to the task you need.</p>
+        <p class="eyebrow">@Text["User guide"].Value.ToUpperInvariant()</p>
+        <h1>@Text["Your money, clearly organized."]</h1>
+        <p class="lead">@Text["This guide takes you from your first account to planning, reporting and encrypted backups. Follow it in order for a complete tour, or jump directly to the task you need."]</p>
         <figure class="guide-figure guide-figure-hero">
-            <img src="~/images/guide/dashboard.jpg" alt="PocketLedger dashboard showing balances in several currencies, account cards and quick transaction actions" />
-            <figcaption>The dashboard brings balances, monthly activity and everyday actions into one place.</figcaption>
+            <img src="~/images/guide/dashboard.jpg" alt="@Text["PocketLedger dashboard showing balances in several currencies, account cards and quick transaction actions"]" />
+            <figcaption>@Text["The dashboard brings balances, monthly activity and everyday actions into one place."]</figcaption>
         </figure>
-        <div class="guide-path" aria-label="Recommended learning path">
-            <span>01 · Set up</span><span>02 · Record</span><span>03 · Understand</span><span>04 · Protect</span>
+        <div class="guide-path" aria-label="@Text["Recommended learning path"]">
+            <span>@Text["01 · Set up"]</span><span>@Text["02 · Record"]</span><span>@Text["03 · Understand"]</span><span>@Text["04 · Protect"]</span>
         </div>
-        <h2>Choose a chapter</h2>
+        <h2>@Text["Choose a chapter"]</h2>
         <div class="guide-chapter-grid">
-            <a class="guide-chapter" asp-page="/Guide/GettingStarted"><span>01</span><h3>Getting started</h3><p>Register securely, learn the navigation and read the dashboard.</p></a>
-            <a class="guide-chapter" asp-page="/Guide/AccountsAndCategories"><span>02</span><h3>Accounts &amp; categories</h3><p>Build the structure that keeps balances and spending meaningful.</p></a>
-            <a class="guide-chapter" asp-page="/Guide/Transactions"><span>03</span><h3>Transactions</h3><p>Record income, expenses, transfers and balance corrections.</p></a>
-            <a class="guide-chapter" asp-page="/Guide/Planning"><span>04</span><h3>Planning &amp; insights</h3><p>Automate entries, review trends and plan the months ahead.</p></a>
-            <a class="guide-chapter" asp-page="/Guide/DebtsAndGoals"><span>05</span><h3>Debts &amp; goals</h3><p>Track what is owed and make progress towards savings targets.</p></a>
-            <a class="guide-chapter" asp-page="/Guide/DataAndSettings"><span>06</span><h3>Data &amp; settings</h3><p>Personalize PocketLedger and keep portable encrypted copies.</p></a>
+            <a class="guide-chapter" asp-page="/Guide/GettingStarted"><span>01</span><h3>@Text["Getting started"]</h3><p>@Text["Register securely, learn the navigation and read the dashboard."]</p></a>
+            <a class="guide-chapter" asp-page="/Guide/AccountsAndCategories"><span>02</span><h3>@Text["Accounts & categories"]</h3><p>@Text["Build the structure that keeps balances and spending meaningful."]</p></a>
+            <a class="guide-chapter" asp-page="/Guide/Transactions"><span>03</span><h3>@Text["Transactions"]</h3><p>@Text["Record income, expenses, transfers and balance corrections."]</p></a>
+            <a class="guide-chapter" asp-page="/Guide/Planning"><span>04</span><h3>@Text["Planning & insights"]</h3><p>@Text["Automate entries, review trends and plan the months ahead."]</p></a>
+            <a class="guide-chapter" asp-page="/Guide/DebtsAndGoals"><span>05</span><h3>@Text["Debts & goals"]</h3><p>@Text["Track what is owed and make progress towards savings targets."]</p></a>
+            <a class="guide-chapter" asp-page="/Guide/DataAndSettings"><span>06</span><h3>@Text["Data & settings"]</h3><p>@Text["Personalize PocketLedger and keep portable encrypted copies."]</p></a>
         </div>
-        <div class="guide-callout tip"><strong>New to PocketLedger?</strong><p>Start with Getting started, then create your accounts before recording transactions. Most reports become useful as soon as a few categorized entries exist.</p></div>
-        <nav class="chapter-pager chapter-pager-end" aria-label="Chapter navigation"><span></span><a asp-page="/Guide/GettingStarted">Start the guide <span aria-hidden="true">→</span></a></nav>
+        <div class="guide-callout tip"><strong>@Text["New to PocketLedger?"]</strong><p>@Text["Start with Getting started, then create your accounts before recording transactions. Most reports become useful as soon as a few categorized entries exist."]</p></div>
+        <nav class="chapter-pager chapter-pager-end" aria-label="@Text["Chapter navigation"]"><span></span><a asp-page="/Guide/GettingStarted">@Text["Start the guide"] <span aria-hidden="true">→</span></a></nav>
     </article>
 </div>

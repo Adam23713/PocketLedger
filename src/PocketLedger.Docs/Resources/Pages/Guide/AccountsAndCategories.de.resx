@@ -1,0 +1,125 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Konten und Kategorien</value>
+  </data>
+  <data name="Accounts and categories" xml:space="preserve">
+    <value>Konten und Kategorien</value>
+  </data>
+  <data name="CHAPTER 02" xml:space="preserve">
+    <value>KAPITEL 02</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Kapitelnavigation</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Erste Schritte</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Nettovermögen</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transaktionen</value>
+  </data>
+  <data name=", then select" xml:space="preserve">
+    <value>und anschließend</value>
+  </data>
+  <data name=". Give it a clear name, choose its type and currency, and enter the opening balance as of the selected date." xml:space="preserve">
+    <value>. Vergib einen eindeutigen Namen, wähle Typ und Währung und gib den Anfangssaldo zum gewählten Datum ein.</value>
+  </data>
+  <data name="A compact tree keeps transaction entry fast while preserving meaningful reporting detail." xml:space="preserve">
+    <value>Ein kompakter Kategoriebaum hält die Erfassung schnell und die Berichte aussagekräftig.</value>
+  </data>
+  <data name="A short category list is easier to use consistently. Add subcategories only when the distinction will help a decision or report." xml:space="preserve">
+    <value>Eine kurze Kategorienliste lässt sich einheitlicher nutzen. Lege Unterkategorien an, wenn sie Entscheidungen oder Berichte verbessern.</value>
+  </data>
+  <data name="Account details connect the current balance to the entries that produced it." xml:space="preserve">
+    <value>Die Kontodetails verbinden den aktuellen Saldo mit den zugrunde liegenden Buchungen.</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Konten</value>
+  </data>
+  <data name="Accounts hold balances. Categories explain where money came from or where it went. Set up both before entering day-to-day activity." xml:space="preserve">
+    <value>Konten führen Salden. Kategorien zeigen, woher Geld kam und wofür es ausgegeben wurde. Richte beides ein, bevor du den Alltag erfasst.</value>
+  </data>
+  <data name="Allows activity on the account to contribute to reports." xml:space="preserve">
+    <value>Berücksichtigt Kontobewegungen in den Berichten.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategorien</value>
+  </data>
+  <data name="Controls where the account appears in lists and on the dashboard." xml:space="preserve">
+    <value>Bestimmt die Position des Kontos in Listen und in der Übersicht.</value>
+  </data>
+  <data name="Create an account" xml:space="preserve">
+    <value>Konto erstellen</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Anzeigereihenfolge</value>
+  </data>
+  <data name="Each currency keeps its own balance; PocketLedger does not silently convert amounts between currencies." xml:space="preserve">
+    <value>PocketLedger führt für jede Währung einen eigenen Saldo und rechnet Beträge nicht automatisch um.</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bearbeiten</value>
+  </data>
+  <data name="Includes the account in the dashboard net-worth figure." xml:space="preserve">
+    <value>Bezieht das Konto in das Nettovermögen der Übersicht ein.</value>
+  </data>
+  <data name="Includes the account in the headline balance used across the app." xml:space="preserve">
+    <value>Bezieht das Konto in den Hauptsaldo der App ein.</value>
+  </data>
+  <data name="Main balance" xml:space="preserve">
+    <value>Hauptsaldo</value>
+  </data>
+  <data name="Manage account balances" xml:space="preserve">
+    <value>Kontostände verwalten</value>
+  </data>
+  <data name="New account" xml:space="preserve">
+    <value>Neues Konto</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Öffne</value>
+  </data>
+  <data name="Open your avatar menu, choose" xml:space="preserve">
+    <value>Öffne das Profilmenü und wähle</value>
+  </data>
+  <data name="Organize with categories" xml:space="preserve">
+    <value>Mit Kategorien organisieren</value>
+  </data>
+  <data name="Select an account name to open its balance history, recent transactions and quick actions. Use" xml:space="preserve">
+    <value>Wähle einen Kontonamen, um den Saldoverlauf, letzte Transaktionen und Schnellaktionen zu öffnen. Wähle</value>
+  </data>
+  <data name="Start broad." xml:space="preserve">
+    <value>Beginne mit groben Kategorien.</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statistiken</value>
+  </data>
+  <data name="The reporting switches decide where an account contributes; they do not change its real balance." xml:space="preserve">
+    <value>Die Berichtsschalter bestimmen, in welche Auswertungen das Konto einfließt. Der tatsächliche Saldo bleibt gleich.</value>
+  </data>
+  <data name="from the avatar menu. Income and expense categories are separate. Add a main category for a broad purpose, then use subcategories when you need more detail." xml:space="preserve">
+    <value>im Profilmenü. Einnahmen und Ausgaben haben getrennte Kategorien. Lege Oberkategorien für größere Bereiche und Unterkategorien für Details an.</value>
+  </data>
+  <data name="to change presentation and reporting options. Deletion is available only when related financial data does not make it unsafe." xml:space="preserve">
+    <value>, um Anzeige- und Berichtsoptionen zu ändern. Eine Löschung ist nur möglich, wenn verknüpfte Finanzdaten sie erlauben.</value>
+  </data>
+  <data name="Account details with current balance, account properties and recent transactions" xml:space="preserve">
+    <value>Kontodetails mit aktuellem Saldo, Kontoeigenschaften und letzten Transaktionen</value>
+  </data>
+  <data name="Accounts list with bank, credit card, savings and cash accounts in multiple currencies" xml:space="preserve">
+    <value>Liste mit Bankkonten, Kreditkarten, Sparkonten und Bargeldkonten in mehreren Währungen</value>
+  </data>
+  <data name="Income and expense category trees with icons and nested subcategories" xml:space="preserve">
+    <value>Einnahmen- und Ausgabenkategorien mit Symbolen und Unterkategorien</value>
+  </data>
+  <data name="New account form with name, type, currency, opening balance and account display options" xml:space="preserve">
+    <value>Formular für ein neues Konto mit Name, Typ, Währung, Anfangssaldo und Anzeigeoptionen</value>
+  </data>
+</root>

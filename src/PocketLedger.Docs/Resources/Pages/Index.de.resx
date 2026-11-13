@@ -1,0 +1,44 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 / GUIDE" xml:space="preserve">
+    <value>01 / ANLEITUNG</value>
+  </data>
+  <data name="API reference" xml:space="preserve">
+    <value>API-Referenz</value>
+  </data>
+  <data name="Build confidence with PocketLedger." xml:space="preserve">
+    <value>PocketLedger sicher nutzen.</value>
+  </data>
+  <data name="Concepts, endpoints and copyable curl examples for developers building PocketLedger clients." xml:space="preserve">
+    <value>Konzepte, Endpunkte und kopierbare curl-Beispiele für die Entwicklung von PocketLedger-Clients.</value>
+  </data>
+  <data name="Documentation" xml:space="preserve">
+    <value>Dokumentation</value>
+  </data>
+  <data name="Explore the API" xml:space="preserve">
+    <value>API erkunden</value>
+  </data>
+  <data name="Explore the documentation" xml:space="preserve">
+    <value>Dokumentation erkunden</value>
+  </data>
+  <data name="Learn how to use PocketLedger or integrate a client with its API. This documentation is being built alongside the project." xml:space="preserve">
+    <value>Lerne, wie du PocketLedger nutzt oder einen Client mit der API verbindest. Die Dokumentation entsteht parallel zum Projekt.</value>
+  </data>
+  <data name="Open the guide" xml:space="preserve">
+    <value>Anleitung öffnen</value>
+  </data>
+  <data name="START HERE" xml:space="preserve">
+    <value>HIER STARTEN</value>
+  </data>
+  <data name="Step-by-step help for setting up and using PocketLedger in everyday life." xml:space="preserve">
+    <value>Schritt-für-Schritt-Hilfe zur Einrichtung und Nutzung von PocketLedger im Alltag.</value>
+  </data>
+  <data name="User guide" xml:space="preserve">
+    <value>Benutzerhandbuch</value>
+  </data>
+</root>

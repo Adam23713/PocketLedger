@@ -107,7 +107,7 @@ public class PlannerWebTests
         await SavePreviewAsync("planner-form.html", html);
     }
 
-    private static async Task<string> RenderAsync<T>(string path, T model)
+    internal static async Task<string> RenderAsync<T>(string path, T model, string controller = "Planner")
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -121,7 +121,7 @@ public class PlannerWebTests
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();
         var http = new DefaultHttpContext { RequestServices = scope.ServiceProvider, User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Name, "Planner test")], "Test")) };
-        var routes = new RouteData(new RouteValueDictionary { ["controller"] = "Planner", ["action"] = path.EndsWith("Form.cshtml") ? "Create" : "Index" });
+        var routes = new RouteData(new RouteValueDictionary { ["controller"] = controller, ["action"] = path.EndsWith("Form.cshtml") ? "Create" : "Index" });
         routes.Routers.Add(new TestRouter());
         var action = new ActionContext(http, routes, new ActionDescriptor());
         var engine = scope.ServiceProvider.GetRequiredService<ICompositeViewEngine>();

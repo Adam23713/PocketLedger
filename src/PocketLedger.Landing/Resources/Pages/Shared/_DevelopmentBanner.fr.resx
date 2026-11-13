@@ -1,0 +1,29 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="PocketLedger is still under active development." xml:space="preserve">
+    <value>PocketLedger est toujours en cours de développement.</value>
+  </data>
+  <data name="Public registration is open —" xml:space="preserve">
+    <value>Les inscriptions sont ouvertes.</value>
+  </data>
+  <data name="Public registration is open — {0} spot left —" xml:space="preserve">
+    <value>Les inscriptions sont ouvertes. Il reste {0} place.</value>
+  </data>
+  <data name="Public registration is open — {0} spots left —" xml:space="preserve">
+    <value>Les inscriptions sont ouvertes. Il reste {0} places.</value>
+  </data>
+  <data name="Public registration is open, but all spots are currently taken — check back soon." xml:space="preserve">
+    <value>Les inscriptions sont ouvertes, mais toutes les places sont prises. Revenez bientôt.</value>
+  </data>
+  <data name="Public registration isn't open yet — it's coming soon." xml:space="preserve">
+    <value>Les inscriptions publiques ouvriront bientôt.</value>
+  </data>
+  <data name="create your account" xml:space="preserve">
+    <value>créez votre compte</value>
+  </data>
+</root>

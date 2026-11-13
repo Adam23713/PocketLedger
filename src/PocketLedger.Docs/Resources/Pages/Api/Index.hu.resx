@@ -1,0 +1,80 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="API conventions" xml:space="preserve">
+    <value>API-konvenciók</value>
+  </data>
+  <data name="API navigation" xml:space="preserve">
+    <value>API-navigáció</value>
+  </data>
+  <data name="Authentication" xml:space="preserve">
+    <value>Hitelesítés</value>
+  </data>
+  <data name="Client integration" xml:space="preserve">
+    <value>Kliensintegráció</value>
+  </data>
+  <data name="Coming soon" xml:space="preserve">
+    <value>Hamarosan</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Másolva</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Másolás</value>
+  </data>
+  <data name="DEVELOPER DOCUMENTATION" xml:space="preserve">
+    <value>FEJLESZTŐI DOKUMENTÁCIÓ</value>
+  </data>
+  <data name="Endpoint details and executable examples will be added once the public API contract is documented." xml:space="preserve">
+    <value>A végpontok részletei és a futtatható példák a nyilvános API-szerződés dokumentálása után kerülnek ide.</value>
+  </data>
+  <data name="Endpoint reference" xml:space="preserve">
+    <value>Végpontreferencia</value>
+  </data>
+  <data name="Endpoints" xml:space="preserve">
+    <value>Végpontok</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Hibák</value>
+  </data>
+  <data name="Example format" xml:space="preserve">
+    <value>Példaformátum</value>
+  </data>
+  <data name="Examples will be ready to copy and will clearly mark the values that need to be replaced." xml:space="preserve">
+    <value>A példák másolhatók lesznek, a lecserélendő értékeket egyértelműen jelöljük.</value>
+  </data>
+  <data name="Follow a practical path from the first request to a working client." xml:space="preserve">
+    <value>Juss el gyakorlati lépésekben az első kéréstől a működő kliensig.</value>
+  </data>
+  <data name="Obtain and use access tokens safely." xml:space="preserve">
+    <value>Szerezz be és használj biztonságosan hozzáférési tokeneket.</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Áttekintés</value>
+  </data>
+  <data name="Placeholder curl example" xml:space="preserve">
+    <value>Minta curl-parancs</value>
+  </data>
+  <data name="Planned topics" xml:space="preserve">
+    <value>Tervezett témák</value>
+  </data>
+  <data name="See inputs, outputs and copyable curl requests." xml:space="preserve">
+    <value>Nézd meg a bemeneteket, a kimeneteket és a másolható curl-kéréseket.</value>
+  </data>
+  <data name="The API documentation will cover authentication, request and response formats, endpoints and practical examples for client developers." xml:space="preserve">
+    <value>Az API-dokumentáció bemutatja majd a hitelesítést, a kérés- és válaszformátumokat, a végpontokat és a kliensfejlesztőknek szóló gyakorlati példákat.</value>
+  </data>
+  <data name="The API reference is not published yet." xml:space="preserve">
+    <value>Az API-referencia még nem jelent meg.</value>
+  </data>
+  <data name="Understand formats, pagination, validation and errors." xml:space="preserve">
+    <value>Ismerd meg a formátumokat, a lapozást, a validációt és a hibákat.</value>
+  </data>
+  <data name="Copy failed" xml:space="preserve">
+    <value>A másolás sikertelen</value>
+  </data>
+</root>

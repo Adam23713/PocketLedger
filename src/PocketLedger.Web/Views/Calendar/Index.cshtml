@@ -1,32 +1,33 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Calendar.CalendarViewModel
 @{
-    ViewData["Title"] = "Calendar";
+    ViewData["Title"] = CommonText.Get("Calendar");
     var selected = new DateOnly(Model.Year, Model.Month, 1);
     var previous = selected.AddMonths(-1);
     var next = selected.AddMonths(1);
     var currencyMarker = MoneyFormatter.GetMoneyInputFormat(Model.ActiveCurrency).CurrencyMarker;
 }
 <div class="calendar-toolbar mb-3">
-    <h1>Calendar</h1>
-    <div class="calendar-month-picker" aria-label="Selected calendar month">
-        <a class="calendar-month-arrow" asp-route-year="@previous.Year" asp-route-month="@previous.Month" asp-route-currency="@Model.ActiveCurrency" aria-label="Previous month">←</a>
-        <strong>@selected.ToString("MMMM yyyy")</strong>
-        <a class="calendar-month-arrow" asp-route-year="@next.Year" asp-route-month="@next.Month" asp-route-currency="@Model.ActiveCurrency" aria-label="Next month">→</a>
+    <h1>@CommonText.Get("Calendar")</h1>
+    <div class="calendar-month-picker" aria-label="@CommonText.Get("Selected calendar month")">
+        <a class="calendar-month-arrow" asp-route-year="@previous.Year" asp-route-month="@previous.Month" asp-route-currency="@Model.ActiveCurrency" aria-label="@CommonText.Get("Previous month")">←</a>
+        <strong>@selected.ToString("MMMM yyyy", System.Globalization.CultureInfo.CurrentUICulture)</strong>
+        <a class="calendar-month-arrow" asp-route-year="@next.Year" asp-route-month="@next.Month" asp-route-currency="@Model.ActiveCurrency" aria-label="@CommonText.Get("Next month")">→</a>
     </div>
 </div>
 <form method="get" class="calendar-currency-selector mb-3">
     <input type="hidden" name="year" value="@Model.Year" />
     <input type="hidden" name="month" value="@Model.Month" />
-    <label class="form-label" for="calendar-currency">Currency</label>
+    <label class="form-label" for="calendar-currency">@CommonText.Get("Currency")</label>
     <select class="form-select form-select-sm" id="calendar-currency" name="currency" onchange="this.form.submit()" disabled="@(Model.AvailableCurrencies.Count == 0)">
-        @if (Model.AvailableCurrencies.Count == 0) { <option>No transaction currencies this month</option> }
-        else { @foreach (var currency in Model.AvailableCurrencies) { <option value="@currency.Code" selected="@(currency.Code == Model.ActiveCurrency)">@currency.Code — @currency.DisplayName</option> } }
+        @if (Model.AvailableCurrencies.Count == 0) { <option>@CommonText.Get("No transaction currencies this month")</option> }
+        else { @foreach (var currency in Model.AvailableCurrencies) { <option value="@currency.Code" selected="@(currency.Code == Model.ActiveCurrency)" data-currency-label="@currency.Code">@currency.Code — @currency.DisplayName</option> } }
     </select>
 </form>
-<section class="calendar-financial-summary mb-3" aria-label="Calendar financial summary">
+<section class="calendar-financial-summary mb-3" aria-label="@CommonText.Get("Calendar financial summary")">
     <div class="card dashboard-metric dashboard-metric-month calendar-month-summary">
         <div class="card-body">
-            <div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>Monthly overview</span></div>
+            <div class="dashboard-metric-heading"><span class="dashboard-metric-icon"><partial name="_NavigationIcon" model='"Calendar"' /></span><span>@CommonText.Get("Monthly overview")</span></div>
             @{
                 var monthlyIncome = MoneyFormatter.Format(Model.ActiveMonthlyTotal.Income, Model.ActiveCurrency);
                 var monthlyExpenses = MoneyFormatter.Format(Model.ActiveMonthlyTotal.Expenses, Model.ActiveCurrency);
@@ -35,9 +36,9 @@
                 var stackMonthlyTotals = new[] { monthlyIncome, monthlyExpenses, monthlyResult }.Max(value => value.Length) > 12;
             }
             <div class="dashboard-period @(stackMonthlyTotals ? "dashboard-period-stacked" : null)">
-                <span><small>Income</small><strong class="text-success">+@monthlyIncome</strong></span>
-                <span><small>Expenses</small><strong class="text-danger">−@monthlyExpenses</strong></span>
-                <span><small>Result</small><strong>@monthlyResult</strong></span>
+                <span><small>@CommonText.Get("Income")</small><strong class="text-success">+@monthlyIncome</strong></span>
+                <span><small>@CommonText.Get("Expenses")</small><strong class="text-danger">−@monthlyExpenses</strong></span>
+                <span><small>@CommonText.Get("Result")</small><strong>@monthlyResult</strong></span>
             </div>
         </div>
     </div>
@@ -46,10 +47,10 @@
         {
             <div class="card calendar-week-card">
                 <div class="card-body">
-                    <div class="calendar-week-heading"><strong>@week.StartDate.ToString("MMM d")–@week.EndDate.ToString("MMM d") <span aria-hidden="true">·</span> @currencyMarker</strong></div>
+                    <div class="calendar-week-heading"><strong>@week.StartDate.ToString("MMM d", System.Globalization.CultureInfo.CurrentUICulture)–@week.EndDate.ToString("MMM d", System.Globalization.CultureInfo.CurrentUICulture) <span aria-hidden="true">·</span> @currencyMarker</strong></div>
                     <div class="calendar-week-values">
-                        <span><small title="Income" aria-label="Income">↓</small><strong class="text-success">+@MoneyFormatter.FormatNumber(week.Income, Model.ActiveCurrency)</strong></span>
-                        <span><small title="Expenses" aria-label="Expenses">↑</small><strong class="text-danger">−@MoneyFormatter.FormatNumber(week.Expenses, Model.ActiveCurrency)</strong></span>
+                        <span><small title="@CommonText.Get("Income")" aria-label="@CommonText.Get("Income")">↓</small><strong class="text-success">+@MoneyFormatter.FormatNumber(week.Income, Model.ActiveCurrency)</strong></span>
+                        <span><small title="@CommonText.Get("Expenses")" aria-label="@CommonText.Get("Expenses")">↑</small><strong class="text-danger">−@MoneyFormatter.FormatNumber(week.Expenses, Model.ActiveCurrency)</strong></span>
                         <span><small title="Result" aria-label="Result">=</small><strong>@MoneyFormatter.FormatNumber(week.Balance, Model.ActiveCurrency)</strong></span>
                     </div>
                 </div>
@@ -58,7 +59,7 @@
     </div>
 </section>
 <div class="calendar-grid calendar-header text-center fw-semibold">
-    @foreach (var day in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }) { <div>@day</div> }
+    @foreach (var day in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday }) { <div>@System.Globalization.CultureInfo.CurrentUICulture.DateTimeFormat.GetAbbreviatedDayName(day)</div> }
 </div>
 <div class="calendar-grid">
 @foreach (var day in Model.Days)

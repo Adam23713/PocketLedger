@@ -1,0 +1,95 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Számlák és kategóriák</value>
+  </data>
+  <data name="Accounts included in your main balance, grouped by currency." xml:space="preserve">
+    <value>A fő egyenlegbe beszámított számlák pénznemenként csoportosítva.</value>
+  </data>
+  <data name="Accounts marked for net-worth reporting, also grouped by currency." xml:space="preserve">
+    <value>A nettó vagyon számításába bevont számlák, pénznemenként.</value>
+  </data>
+  <data name="CHAPTER 01" xml:space="preserve">
+    <value>01. FEJEZET</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Fejezetnavigáció</value>
+  </data>
+  <data name="Choose a username, provide your email address and create a password of at least 14 characters." xml:space="preserve">
+    <value>Válassz felhasználónevet, add meg az e-mail-címedet és állíts be legalább 14 karakteres jelszót.</value>
+  </data>
+  <data name="Configure an authenticator" xml:space="preserve">
+    <value>Hitelesítő beállítása</value>
+  </data>
+  <data name="Create a protected account, learn the main navigation and understand what the dashboard is telling you." xml:space="preserve">
+    <value>Hozz létre védett fiókot, ismerd meg a fő menüt és az áttekintő adatait.</value>
+  </data>
+  <data name="Create your account" xml:space="preserve">
+    <value>Fiók létrehozása</value>
+  </data>
+  <data name="Find your way around" xml:space="preserve">
+    <value>Tájékozódás az appban</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Első lépések</value>
+  </data>
+  <data name="Guide overview" xml:space="preserve">
+    <value>Útmutató áttekintése</value>
+  </data>
+  <data name="Income, expenses and the resulting change for the current month." xml:space="preserve">
+    <value>Az aktuális hónap bevételei, kiadásai és egyenlegváltozása.</value>
+  </data>
+  <data name="Keep secrets out of screenshots and cloud notes." xml:space="preserve">
+    <value>A titkos adatokat ne tedd képernyőképre vagy felhőben tárolt jegyzetbe.</value>
+  </data>
+  <data name="Meet the dashboard" xml:space="preserve">
+    <value>Ismerd meg az áttekintőt</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Nettó vagyon</value>
+  </data>
+  <data name="Open registration" xml:space="preserve">
+    <value>Regisztráció megnyitása</value>
+  </data>
+  <data name="Privacy toggle" xml:space="preserve">
+    <value>Adatvédelmi kapcsoló</value>
+  </data>
+  <data name="Save the data recovery key" xml:space="preserve">
+    <value>Az adat-helyreállítási kulcs mentése</value>
+  </data>
+  <data name="Scan the QR code with an authenticator app, enter the six-digit code, then save the single-use recovery codes." xml:space="preserve">
+    <value>Olvasd be a QR-kódot a hitelesítő alkalmazásban, írd be a hatjegyű kódot, majd mentsd el az egyszer használatos helyreállítási kódokat.</value>
+  </data>
+  <data name="Store it offline. It is the only recovery path if you forget your password, and PocketLedger shows it only once." xml:space="preserve">
+    <value>Tárold offline. Ha elfelejted a jelszavadat, ezzel tudod helyreállítani az adatokat. A PocketLedger csak egyszer jeleníti meg.</value>
+  </data>
+  <data name="Temporarily hides monetary amounts when somebody else can see your screen." xml:space="preserve">
+    <value>Ideiglenesen elrejti az összegeket, ha más is láthatja a képernyődet.</value>
+  </data>
+  <data name="The main navigation contains daily-use features. Open your avatar menu for Accounts, Categories, Settings, Account &amp; security, Import / Export and Logout. The appearance button lets you switch between the available themes without changing your data." xml:space="preserve">
+    <value>A fő menüben találod a mindennap használt funkciókat. A profilképnél érhetők el a számlák, kategóriák, beállítások, a fiókbiztonság, az importálás és exportálás, valamint a kijelentkezés. A megjelenés gombbal az adatok változtatása nélkül válthatsz témát.</value>
+  </data>
+  <data name="The top row summarizes total balance, net worth, account count and this month’s movement. Account cards show the current balance and provide shortcuts for expenses, income and transfers." xml:space="preserve">
+    <value>A felső sor az összesített egyenleget, a nettó vagyont, a számlák számát és a havi forgalmat mutatja. A számlakártyákon az aktuális egyenleg és a kiadásokhoz, bevételekhez, átvezetésekhez tartozó gyorsműveletek láthatók.</value>
+  </data>
+  <data name="This month" xml:space="preserve">
+    <value>Ebben a hónapban</value>
+  </data>
+  <data name="Total balance" xml:space="preserve">
+    <value>Összesített egyenleg</value>
+  </data>
+  <data name="Use the quick actions on an account card when you already know which account should change." xml:space="preserve">
+    <value>Használd a számlakártya gyorsműveleteit, ha már tudod, melyik számlát érinti a tranzakció.</value>
+  </data>
+  <data name="Your password, authenticator key, recovery codes and data recovery key protect different parts of the account. Store them securely and separately." xml:space="preserve">
+    <value>A jelszó, a hitelesítő kulcsa, a helyreállítási kódok és az adat-helyreállítási kulcs a fiók különböző részeit védik. Tárold őket biztonságosan és elkülönítve.</value>
+  </data>
+  <data name="Dashboard with multi-currency totals and four account cards" xml:space="preserve">
+    <value>Áttekintő több pénznem összesítésével és négy számlakártyával</value>
+  </data>
+</root>

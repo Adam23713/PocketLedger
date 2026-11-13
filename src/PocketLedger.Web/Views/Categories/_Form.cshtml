@@ -1,11 +1,13 @@
+@using PocketLedger.Web.Services
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Categories.CategoryFormViewModel
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
-<div class="mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.CategoryType>()" class="form-select" id="category-type"></select></div>
+<div class="mb-3"><label asp-for="Name" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Name))</label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+<div class="mb-3"><label asp-for="Type" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Type))</label><select asp-for="Type" asp-items="Html.GetLocalizedEnumSelectList<PocketLedger.Models.Enums.CategoryType>()" class="form-select" id="category-type"></select></div>
 <div class="mb-3">
-    <label asp-for="ParentCategoryId" class="form-label">Parent category</label>
+    <label asp-for="ParentCategoryId" class="form-label">@CommonText.Get("Parent category")</label>
     <select asp-for="ParentCategoryId" class="form-select" id="parent-category">
-        <option value="">None (main category)</option>
+        <option value="">@CommonText.Get("None (main category)")</option>
         @foreach (var parent in Model.ParentCategories)
         {
             <option value="@parent.Id" data-category-type="@parent.Type" selected="@(parent.Id == Model.ParentCategoryId)">@parent.Name</option>
@@ -26,8 +28,8 @@
                         <label class="account-icon-option">
                             <input asp-for="Icon" type="radio" value="@icon.Id" />
                             <span class="account-icon-selection">
-                                <img src="@icon.WebPath" alt="@icon.DisplayName" />
-                                <span class="visually-hidden">@icon.DisplayName</span>
+                                <img src="@icon.WebPath" alt="@CommonText.IconLabel(icon.DisplayName)" />
+                                <span class="visually-hidden">@CommonText.IconLabel(icon.DisplayName)</span>
                             </span>
                         </label>
                     }
@@ -35,10 +37,10 @@
             </section>
         }
     </div>
-    <div class="form-text">Only main categories can use icons.</div>
+    <div class="form-text">@CommonText.Get("Only main categories can use icons.")</div>
     <span asp-validation-for="Icon" class="text-danger"></span>
 </fieldset>
-<div class="mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
+<div class="mb-3"><label asp-for="DisplayOrder" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.DisplayOrder))</label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
 <script>
     (() => {
         const type = document.getElementById("category-type");

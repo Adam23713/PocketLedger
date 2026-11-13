@@ -1,7 +1,8 @@
+@using PocketLedger.Localization
 @model PocketLedger.Services.Interfaces.PlannerMonth
-@{ ViewData["Title"] = "Monthly planner"; }
+@{ ViewData["Title"] = CommonText.Get("Monthly planner"); }
 <partial name="_Content" model="Model" />
 @section Scripts {
     <script src="~/js/money-input.js" asp-append-version="true"></script>
-    <script src="~/js/planner-opening.js" asp-append-version="true"></script>
+    <script id="planner-opening-script" data-unsaved="@CommonText.Get("Unsaved changes")" data-saving="@CommonText.Get("Saving…")" data-save-notes-error="@CommonText.Get("Could not save notes. Please try again.")" data-save-planner-error="@CommonText.Get("Could not save the planner changes. Please try again.")" data-refresh-error="@CommonText.Get("Could not refresh the plan. Please reload the page to check the saved settings.")" src="~/js/planner-opening.js" asp-append-version="true"></script>
 }

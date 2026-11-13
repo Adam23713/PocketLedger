@@ -1,14 +1,15 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Account.UnlockDataViewModel
-@{ ViewData["Title"] = "Unlock your data"; ViewData["HideAuthenticatedNavigation"] = true; }
-<h1>Unlock your data</h1>
-<p>@(Model.IsDataPassword ? "Enter the data password you chose for this account. Your financial data is encrypted with it." : "Enter your password to unlock your financial data.")</p>
+@{ ViewData["Title"] = CommonText.Get("Unlock your data"); ViewData["HideAuthenticatedNavigation"] = true; }
+<h1>@CommonText.Get("Unlock your data")</h1>
+<p>@CommonText.Get(Model.IsDataPassword ? "Enter the data password you chose for this account. Your financial data is encrypted with it." : "Enter your password to unlock your financial data.")</p>
 <form method="post">
     <input asp-for="ReturnUrl" type="hidden" />
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-3">
-        <label asp-for="Password">@(Model.IsDataPassword ? "Data password" : "Password")</label>
+        <label asp-for="Password">@CommonText.Get(Model.IsDataPassword ? "Data password" : "Password")</label>
         <input asp-for="Password" class="form-control" autocomplete="current-password" autofocus />
     </div>
-    <button class="btn btn-primary">Continue</button>
+    <button class="btn btn-primary">@CommonText.Get("Continue")</button>
 </form>
-<p class="mt-3"><a asp-action="RecoverAccount">Forgot it? Use your recovery key</a></p>
+<p class="mt-3"><a asp-action="RecoverAccount">@CommonText.Get("Forgot it? Use your recovery key")</a></p>

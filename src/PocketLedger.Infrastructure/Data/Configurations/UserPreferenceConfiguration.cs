@@ -11,6 +11,7 @@ public sealed class UserPreferenceConfiguration : IEntityTypeConfiguration<UserP
         builder.ToTable("user_preferences");
         builder.HasKey(item => item.UserId);
         builder.Property(item => item.UserId).HasColumnName("user_id");
+        builder.Property(item => item.Language).HasColumnName("language").HasMaxLength(2);
         builder.Property(item => item.DisplayName).HasColumnName("display_name").HasColumnType("text");
         builder.Property(item => item.AvatarId).HasColumnName("avatar_id");
         builder.Property(item => item.DefaultCurrency).HasColumnName("default_currency").HasMaxLength(3).IsFixedLength();

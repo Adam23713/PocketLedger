@@ -1,21 +1,23 @@
+@using PocketLedger.Web.Services
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Accounts.AccountFormViewModel
 @{ var initialMoneyFormat = MoneyFormatter.GetMoneyInputFormat(Model.Currency); }
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+<div class="mb-3"><label asp-for="Name" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Name))</label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
 <div class="row">
-    <div class="col-md-6 mb-3"><label asp-for="Type" class="form-label"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<PocketLedger.Models.Enums.AccountType>()" class="form-select"></select></div>
-    <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label"></label>@if (Model.Id == Guid.Empty) { <select asp-for="Currency" class="form-select">@foreach (var currency in Currencies.All) { var format = MoneyFormatter.GetMoneyInputFormat(currency.Code); <option value="@currency.Code" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator">@currency.Code — @currency.DisplayName</option> }</select> } else { <input asp-for="Currency" type="hidden" /><input class="form-control" value="@Model.Currency" disabled /><div class="form-text">Currency cannot be changed after account creation.</div> }<span asp-validation-for="Currency" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="Type" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Type))</label><select asp-for="Type" asp-items="Html.GetLocalizedEnumSelectList<PocketLedger.Models.Enums.AccountType>()" class="form-select"></select></div>
+    <div class="col-md-6 mb-3"><label asp-for="Currency" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Currency))</label>@if (Model.Id == Guid.Empty) { <select asp-for="Currency" class="form-select">@foreach (var currency in Currencies.All) { var format = MoneyFormatter.GetMoneyInputFormat(currency.Code); <option value="@currency.Code" data-decimal-places="@format.DecimalPlaces" data-decimal-separator="@format.DecimalSeparator" data-thousands-separator="@format.ThousandsSeparator" data-currency-label="@currency.Code">@currency.Code — @currency.DisplayName</option> }</select> } else { <input asp-for="Currency" type="hidden" /><input class="form-control" value="@Model.Currency" disabled /><div class="form-text">@CommonText.Get("Currency cannot be changed after account creation.")</div> }<span asp-validation-for="Currency" class="text-danger"></span></div>
 </div>
 @if (Model.Id != Guid.Empty)
 {
     <div class="form-check mb-3" id="initial-balance-adjustment-option" hidden>
         <input asp-for="CreateInitialBalanceAdjustment" class="form-check-input" />
-        <label asp-for="CreateInitialBalanceAdjustment" class="form-check-label">Create an Adjustment transaction (<span id="initial-balance-difference"></span>) instead of changing the initial balance</label>
+        <label asp-for="CreateInitialBalanceAdjustment" class="form-check-label">@CommonText.Get("Create an Adjustment transaction (")<span id="initial-balance-difference"></span>@CommonText.Get(") instead of changing the initial balance")</label>
     </div>
 }
 <div class="row">
-    <div class="col-md-6 mb-3"><label asp-for="InitialBalance" class="form-label" for="initial-balance-display"></label><input asp-for="InitialBalance" type="hidden" id="initial-balance" /><input class="form-control" id="initial-balance-display" type="text" inputmode="decimal" autocomplete="off" data-money-value="initial-balance" data-money-currency="Currency" data-money-allow-negative="true" data-decimal-places="@initialMoneyFormat.DecimalPlaces" data-decimal-separator="@initialMoneyFormat.DecimalSeparator" data-thousands-separator="@initialMoneyFormat.ThousandsSeparator" /><span asp-validation-for="InitialBalance" class="text-danger"></span></div>
-    <div class="col-md-6 mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="InitialBalance" class="form-label" for="initial-balance-display">@CommonText.Get(Html.DisplayNameFor(model => model.InitialBalance))</label><input asp-for="InitialBalance" type="hidden" id="initial-balance" /><input class="form-control" id="initial-balance-display" type="text" inputmode="decimal" autocomplete="off" data-money-value="initial-balance" data-money-currency="Currency" data-money-allow-negative="true" data-decimal-places="@initialMoneyFormat.DecimalPlaces" data-decimal-separator="@initialMoneyFormat.DecimalSeparator" data-thousands-separator="@initialMoneyFormat.ThousandsSeparator" /><span asp-validation-for="InitialBalance" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="DisplayOrder" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.DisplayOrder))</label><input asp-for="DisplayOrder" class="form-control" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
 </div>
 <fieldset class="mb-3" id="account-icon-picker">
     <legend class="form-label">Icon</legend>
@@ -25,16 +27,16 @@
             <label class="account-icon-option">
                 <input asp-for="Icon" type="radio" value="@icon.Id" />
                 <span class="account-icon-selection">
-                    <img src="@icon.WebPath" alt="@icon.DisplayName" />
-                    <span class="visually-hidden">@icon.DisplayName</span>
+                    <img src="@icon.WebPath" alt="@CommonText.IconLabel(icon.DisplayName)" />
+                    <span class="visually-hidden">@CommonText.IconLabel(icon.DisplayName)</span>
                 </span>
             </label>
         }
     </div>
     <span asp-validation-for="Icon" class="text-danger"></span>
 </fieldset>
-<div class="mb-3"><label asp-for="Color" class="form-label"></label><input asp-for="Color" type="color" class="form-control form-control-color w-100" /><span asp-validation-for="Color" class="text-danger"></span></div>
-<div class="form-check mb-2"><input asp-for="IncludeInMainBalance" class="form-check-input" /><label asp-for="IncludeInMainBalance" class="form-check-label"></label></div>
-<div class="form-check mb-2"><input asp-for="IncludeInNetWorth" class="form-check-input" /><label asp-for="IncludeInNetWorth" class="form-check-label"></label></div>
-<div class="form-check mb-3"><input asp-for="IncludeInStatistics" class="form-check-input" /><label asp-for="IncludeInStatistics" class="form-check-label"></label></div>
+<div class="mb-3"><label asp-for="Color" class="form-label">@CommonText.Get(Html.DisplayNameFor(model => model.Color))</label><input asp-for="Color" type="color" class="form-control form-control-color w-100" /><span asp-validation-for="Color" class="text-danger"></span></div>
+<div class="form-check mb-2"><input asp-for="IncludeInMainBalance" class="form-check-input" /><label asp-for="IncludeInMainBalance" class="form-check-label">@CommonText.Get(Html.DisplayNameFor(model => model.IncludeInMainBalance))</label></div>
+<div class="form-check mb-2"><input asp-for="IncludeInNetWorth" class="form-check-input" /><label asp-for="IncludeInNetWorth" class="form-check-label">@CommonText.Get(Html.DisplayNameFor(model => model.IncludeInNetWorth))</label></div>
+<div class="form-check mb-3"><input asp-for="IncludeInStatistics" class="form-check-input" /><label asp-for="IncludeInStatistics" class="form-check-label">@CommonText.Get(Html.DisplayNameFor(model => model.IncludeInStatistics))</label></div>
 <script src="~/js/money-input.js" asp-append-version="true"></script>

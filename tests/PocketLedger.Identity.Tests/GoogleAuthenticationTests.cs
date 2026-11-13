@@ -69,6 +69,18 @@ public sealed class GoogleAuthenticationTests : IClassFixture<WebApplicationFact
         Assert.False(string.Equals(bool.TrueString, identity.FindFirst("email_verified")?.Value, StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public async Task CancelledProviderFlow_RedirectsToExternalLoginCallbackWithRemoteError()
+    {
+        using var configuredFactory = ConfigureFactory("google-client-id", "google-client-secret");
+        using var client = configuredFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        var response = await client.GetAsync("/signin-google?error=access_denied");
+
+        Assert.Equal(System.Net.HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/Account/ExternalLoginCallback?remoteError=ProviderError", response.Headers.Location?.OriginalString);
+    }
+
     private WebApplicationFactory<Program> ConfigureFactory(string? clientId, string? clientSecret)
         => factory.WithWebHostBuilder(builder =>
         {

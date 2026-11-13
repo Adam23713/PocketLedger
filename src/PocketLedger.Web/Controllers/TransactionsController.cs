@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PocketLedger.Models.Entities;
@@ -109,7 +110,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             await PopulateChoicesAsync(model, cancellationToken);
             return View(model);
         }
@@ -171,7 +172,7 @@ public class TransactionsController(ITransactionService transactionService, IAcc
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             await PopulateChoicesAsync(model, cancellationToken);
             return View(model);
         }

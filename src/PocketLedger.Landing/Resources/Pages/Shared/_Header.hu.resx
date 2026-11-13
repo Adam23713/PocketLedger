@@ -1,0 +1,35 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Features" xml:space="preserve">
+    <value>Funkciók</value>
+  </data>
+  <data name="Security" xml:space="preserve">
+    <value>Biztonság</value>
+  </data>
+  <data name="Open source" xml:space="preserve">
+    <value>Nyílt forráskód</value>
+  </data>
+  <data name="Self-hosting" xml:space="preserve">
+    <value>Saját szerveren</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Dokumentáció</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>PocketLedger megnyitása</value>
+  </data>
+</root>

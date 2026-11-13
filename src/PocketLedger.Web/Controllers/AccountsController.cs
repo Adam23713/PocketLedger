@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
@@ -77,7 +78,7 @@ public class AccountsController(IAccountService accountService, IUserContextServ
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             return View(model);
         }
     }
@@ -114,7 +115,7 @@ public class AccountsController(IAccountService accountService, IUserContextServ
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             return View(model);
         }
     }

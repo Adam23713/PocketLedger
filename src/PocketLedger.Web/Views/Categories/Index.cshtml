@@ -1,18 +1,36 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Categories.CategoryListViewModel
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = CommonText.Get("Categories");
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Categories</h1>
-    <a class="btn btn-primary" asp-action="Create">New category</a>
+    <h1>@CommonText.Get("Categories")</h1>
+    <a class="btn btn-primary" asp-action="Create">@CommonText.Get("New category")</a>
 </div>
+@if (Model.StarterCandidates.Count > 0)
+{
+    <details class="card card-body mb-3">
+        <summary>@CommonText.Get("Translate existing starter categories")</summary>
+        <p class="mt-2">@CommonText.Get("Select only categories that came with PocketLedger. Leave your own categories unchecked.")</p>
+        <form method="post" asp-action="EnableStarterTranslations">
+            @foreach (var category in Model.StarterCandidates)
+            {
+                <label class="d-block mb-1">
+                    <input type="checkbox" name="categoryIds" value="@category.Id" />
+                    @(category.ParentName is null ? category.Name : $"{category.ParentName} / {category.Name}")
+                </label>
+            }
+            <button class="btn btn-outline-primary mt-2" type="submit">@CommonText.Get("Enable translations")</button>
+        </form>
+    </details>
+}
 <div class="row g-4">
     <div class="col-lg-6">
-        <h2 class="h4 text-success">Income</h2>
+        <h2 class="h4 text-success">@CommonText.Get("Income")</h2>
         <partial name="_CategoryList" model="Model.IncomeCategories" />
     </div>
     <div class="col-lg-6">
-        <h2 class="h4 text-danger">Expense</h2>
+        <h2 class="h4 text-danger">@CommonText.Get("Expense")</h2>
         <partial name="_CategoryList" model="Model.ExpenseCategories" />
     </div>
 </div>

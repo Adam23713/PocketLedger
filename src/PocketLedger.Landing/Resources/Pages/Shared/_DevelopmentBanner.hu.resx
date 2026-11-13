@@ -1,0 +1,29 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="PocketLedger is still under active development." xml:space="preserve">
+    <value>A PocketLedger fejlesztése folyamatban van.</value>
+  </data>
+  <data name="Public registration is open —" xml:space="preserve">
+    <value>A nyilvános regisztráció nyitva van.</value>
+  </data>
+  <data name="Public registration is open — {0} spot left —" xml:space="preserve">
+    <value>A nyilvános regisztráció nyitva van. Még {0} hely van.</value>
+  </data>
+  <data name="Public registration is open — {0} spots left —" xml:space="preserve">
+    <value>A nyilvános regisztráció nyitva van. Még {0} hely van.</value>
+  </data>
+  <data name="Public registration is open, but all spots are currently taken — check back soon." xml:space="preserve">
+    <value>A nyilvános regisztráció nyitva van, de minden hely betelt. Nézz vissza később.</value>
+  </data>
+  <data name="Public registration isn't open yet — it's coming soon." xml:space="preserve">
+    <value>A nyilvános regisztráció hamarosan megnyílik.</value>
+  </data>
+  <data name="create your account" xml:space="preserve">
+    <value>hozd létre a fiókodat</value>
+  </data>
+</root>

@@ -6,10 +6,10 @@ namespace PocketLedger.Models.ViewModels.Account;
 
 public sealed class SettingsViewModel : IValidatableObject
 {
-    [Display(Name = "Display name"), StringLength(100)] public string? DisplayName { get; set; }
-    [Range(1, 5)] public int AvatarId { get; set; } = 1;
-    [Required] public string DefaultCurrency { get; set; } = "EUR";
-    [Required] public string TimeZoneId { get; set; } = "UTC";
+    [Display(Name = "Display name"), StringLength(100, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string? DisplayName { get; set; }
+    [Range(1, 5, ErrorMessage = "The field {0} must be between {1} and {2}.")] public int AvatarId { get; set; } = 1;
+    [Required(ErrorMessage = "The {0} field is required.")] public string DefaultCurrency { get; set; } = "EUR";
+    [Required(ErrorMessage = "The {0} field is required.")] public string TimeZoneId { get; set; } = "UTC";
     public List<CurrencyFormatViewModel> CurrencyFormats { get; set; } = [];
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -30,7 +30,7 @@ public sealed class SettingsViewModel : IValidatableObject
 public sealed class CurrencyFormatViewModel
 {
     public string CurrencyCode { get; set; } = string.Empty;
-    [Range(0, 4)] public int DecimalPlaces { get; set; }
+    [Range(0, 4, ErrorMessage = "The field {0} must be between {1} and {2}.")] public int DecimalPlaces { get; set; }
     [StringLength(1, MinimumLength = 1), DisplayFormat(ConvertEmptyStringToNull = false)] public string DecimalSeparator { get; set; } = ",";
     [StringLength(1, MinimumLength = 1), DisplayFormat(ConvertEmptyStringToNull = false)] public string ThousandsSeparator { get; set; } = " ";
     public CurrencyDisplay CurrencyDisplay { get; set; }

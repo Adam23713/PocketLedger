@@ -12,5 +12,7 @@ public sealed class CategoriesApiClient(HttpClient client) : ApiClientBase(clien
     public async Task<Category> CreateAsync(Category category, CancellationToken token) => (await PostAsync<CategoryDto, CategoryDto>("api/v1/categories", category.ToDto(), token)).ToEntity();
     public Task UpdateAsync(Category category, CancellationToken token) => PutAsync($"api/v1/categories/{category.Id}", category.ToDto(), token);
     public Task DeleteAsync(Guid id, CancellationToken token) => DeleteAsync($"api/v1/categories/{id}", token);
+    public Task<IReadOnlyList<CategoryChoice>> GetStarterCandidatesAsync(CancellationToken token) => GetAsync<IReadOnlyList<CategoryChoice>>("api/v1/categories/starter-candidates", token);
+    public Task EnableStarterTranslationsAsync(IReadOnlyList<Guid> categoryIds, CancellationToken token) => PostAsync("api/v1/categories/starter-translations", categoryIds, token);
     public Task<IReadOnlyList<CategoryChoice>> GetChoicesAsync(CategoryType? type, Guid? excludeId, CancellationToken token) => GetAsync<IReadOnlyList<CategoryChoice>>(Query("api/v1/categories/choices", new Dictionary<string, string?> { ["type"] = type?.ToString(), ["excludeId"] = excludeId?.ToString() }), token);
 }

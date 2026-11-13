@@ -60,7 +60,7 @@
         const applyDashboardPrivacy = hidden => {
             if (hidden) document.documentElement.dataset.dashboardAmountsHidden = "true";
             else delete document.documentElement.dataset.dashboardAmountsHidden;
-            const label = hidden ? "Show dashboard amounts" : "Hide dashboard amounts";
+            const label = hidden ? dashboardPrivacyButton.dataset.showLabel : dashboardPrivacyButton.dataset.hideLabel;
             dashboardPrivacyButton.setAttribute("aria-label", label);
             dashboardPrivacyButton.setAttribute("aria-pressed", String(hidden));
             dashboardPrivacyButton.title = label;
@@ -123,3 +123,29 @@
         applyAccountFilters();
     }
 })();
+
+
+document.querySelectorAll('[data-ui-language]').forEach(select => {
+    const currentLanguage = select.value;
+    select.addEventListener('change', () => {
+        if (select.value !== currentLanguage) {
+            select.form.requestSubmit();
+        }
+    });
+});
+
+
+if (document.documentElement.lang !== "en" && typeof Intl.DisplayNames === "function") {
+    const currencies = new Intl.DisplayNames([document.documentElement.lang], { type: "currency", fallback: "none" });
+    document.querySelectorAll("[data-currency-label]").forEach(element => {
+        const code = element.dataset.currencyLabel;
+        const name = currencies.of(code);
+        if (!name) return;
+        if (element instanceof HTMLOptionElement) {
+            element.textContent = `${code} — ${name}`;
+            if (element.dataset.name !== undefined) element.dataset.name = name;
+        } else {
+            element.textContent = name;
+        }
+    });
+}

@@ -1,4 +1,5 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.RecurringTransactions.RecurringTransactionFormViewModel
-@{ ViewData["Title"] = "Edit recurring transaction"; }
-<h1>Edit recurring transaction</h1><form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="form-narrow"><input asp-for="Id" type="hidden" /><partial name="_Form" model="Model" /><button class="btn btn-primary">Save</button><a class="btn btn-link" asp-action="Index">Cancel</a></form>
+@{ ViewData["Title"] = CommonText.Get("Edit recurring transaction"); }
+<h1>@CommonText.Get("Edit recurring transaction")</h1><form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="form-narrow"><input asp-for="Id" type="hidden" /><partial name="_Form" model="Model" /><button class="btn btn-primary">@CommonText.Get("Save")</button><a class="btn btn-link" asp-action="Index">@CommonText.Get("Cancel")</a></form>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,1286 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="'{0}' and '{1}' do not match." xml:space="preserve">
+    <value>„{0}“ und „{1}“ stimmen nicht überein.</value>
+  </data>
+  <data name="1 day" xml:space="preserve">
+    <value>1 Tag</value>
+  </data>
+  <data name="1 hour" xml:space="preserve">
+    <value>1 Stunde</value>
+  </data>
+  <data name="A contact link is available in the footer on every page." xml:space="preserve">
+    <value>Im Fußbereich jeder Seite gibt es einen Kontaktlink.</value>
+  </data>
+  <data name="A successful recovery requires configuring a new authenticator." xml:space="preserve">
+    <value>Nach erfolgreicher Wiederherstellung muss ein neuer Authenticator eingerichtet werden.</value>
+  </data>
+  <data name="Access denied" xml:space="preserve">
+    <value>Zugriff verweigert</value>
+  </data>
+  <data name="Access is currently blocked" xml:space="preserve">
+    <value>Der Zugriff ist derzeit gesperrt</value>
+  </data>
+  <data name="Access to this account is currently disabled and under review." xml:space="preserve">
+    <value>Der Zugriff auf dieses Konto wurde vorübergehend gesperrt und wird geprüft.</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="Account details" xml:space="preserve">
+    <value>Kontodetails</value>
+  </data>
+  <data name="Account is required." xml:space="preserve">
+    <value>Ein Konto ist erforderlich.</value>
+  </data>
+  <data name="Account recovery was not completed. Check the username and recovery key and try again." xml:space="preserve">
+    <value>Die Kontowiederherstellung ist fehlgeschlagen. Prüfe Benutzernamen und Wiederherstellungsschlüssel und versuche es erneut.</value>
+  </data>
+  <data name="AccountRecovery" xml:space="preserve">
+    <value>Kontowiederherstellung</value>
+  </data>
+  <data name="Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart." xml:space="preserve">
+    <value>Im Planersaldo enthaltene Konten nach Währung. Einträge ohne Datum sind im Tagesdiagramm nicht enthalten.</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
+  <data name="Active CrowdSec bans" xml:space="preserve">
+    <value>Aktive CrowdSec-Sperren</value>
+  </data>
+  <data name="Activity owner" xml:space="preserve">
+    <value>Inhaber der Aktivität</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>Adresse</value>
+  </data>
+  <data name="Addresses" xml:space="preserve">
+    <value>Adressen</value>
+  </data>
+  <data name="Adjustment direction" xml:space="preserve">
+    <value>Korrekturrichtung</value>
+  </data>
+  <data name="AdjustmentDirection" xml:space="preserve">
+    <value>Korrekturrichtung</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Verwaltung</value>
+  </data>
+  <data name="Admin dashboard" xml:space="preserve">
+    <value>Admin-Übersicht</value>
+  </data>
+  <data name="All activity (includes anonymous/unattributed)" xml:space="preserve">
+    <value>Alle Aktivitäten (auch anonym oder ohne Zuordnung)</value>
+  </data>
+  <data name="All available accounts are currently taken." xml:space="preserve">
+    <value>Derzeit sind alle Kontoplätze belegt.</value>
+  </data>
+  <data name="All available accounts are taken" xml:space="preserve">
+    <value>Alle verfügbaren Kontoplätze sind belegt</value>
+  </data>
+  <data name="All requests in the interval" xml:space="preserve">
+    <value>Alle Anfragen im Zeitraum</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Betrag</value>
+  </data>
+  <data name="Amount credited to target account" xml:space="preserve">
+    <value>Auf dem Zielkonto gutgeschriebener Betrag</value>
+  </data>
+  <data name="Amount credited to target account ·" xml:space="preserve">
+    <value>Auf dem Zielkonto gutgeschriebener Betrag ·</value>
+  </data>
+  <data name="Amount in account currency" xml:space="preserve">
+    <value>Betrag in Kontowährung</value>
+  </data>
+  <data name="Amount in account currency ·" xml:space="preserve">
+    <value>Betrag in Kontowährung ·</value>
+  </data>
+  <data name="Amounts are shown in each account's currency. Paused items are excluded." xml:space="preserve">
+    <value>Beträge werden in der jeweiligen Kontowährung angezeigt. Pausierte Einträge sind ausgeschlossen.</value>
+  </data>
+  <data name="An account already exists for this email address." xml:space="preserve">
+    <value>Für diese E-Mail-Adresse gibt es bereits ein Konto.</value>
+  </data>
+  <data name="An account already exists for this email address. Sign in with the existing account instead." xml:space="preserve">
+    <value>Für diese E-Mail-Adresse gibt es bereits ein Konto. Melde dich mit diesem Konto an.</value>
+  </data>
+  <data name="Anonymous" xml:space="preserve">
+    <value>Anonym</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Darstellung</value>
+  </data>
+  <data name="Application" xml:space="preserve">
+    <value>Anwendung</value>
+  </data>
+  <data name="Application / host" xml:space="preserve">
+    <value>Anwendung / Host</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Anwenden</value>
+  </data>
+  <data name="Authenticator QR code" xml:space="preserve">
+    <value>Authenticator-QR-Code</value>
+  </data>
+  <data name="Authenticator code" xml:space="preserve">
+    <value>Authenticator-Code</value>
+  </data>
+  <data name="Authenticator recovery" xml:space="preserve">
+    <value>Authenticator wiederherstellen</value>
+  </data>
+  <data name="AuthenticatorResetThroughRecovery" xml:space="preserve">
+    <value>Authenticator per Wiederherstellung zurückgesetzt</value>
+  </data>
+  <data name="AuthenticatorSetup" xml:space="preserve">
+    <value>Authenticator-Einrichtung</value>
+  </data>
+  <data name="AuthenticatorSetupCompleted" xml:space="preserve">
+    <value>Authenticator-Einrichtung abgeschlossen</value>
+  </data>
+  <data name="Automatic payment amount" xml:space="preserve">
+    <value>Automatischer Zahlungsbetrag</value>
+  </data>
+  <data name="Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner." xml:space="preserve">
+    <value>Der verfügbare Betrag ist der erwartete Rest nach geplanten Einnahmen, Ausgaben und Umbuchungen. Nur einbezogene Konten zählen. Jede Währung wird separat anhand der Anfangssalden im Planer berechnet.</value>
+  </data>
+  <data name="Avatar" xml:space="preserve">
+    <value>Profilbild</value>
+  </data>
+  <data name="Back to login" xml:space="preserve">
+    <value>Zurück zur Anmeldung</value>
+  </data>
+  <data name="Ban address" xml:space="preserve">
+    <value>Adresse sperren</value>
+  </data>
+  <data name="Ban for" xml:space="preserve">
+    <value>Sperrdauer</value>
+  </data>
+  <data name="Ban {0} for {1}? Every PocketLedger site will refuse this address." xml:space="preserve">
+    <value>{0} für {1} sperren? Alle PocketLedger-Websites werden diese Adresse abweisen.</value>
+  </data>
+  <data name="Banking App" xml:space="preserve">
+    <value>Banking-App</value>
+  </data>
+  <data name="Banned" xml:space="preserve">
+    <value>Gesperrt</value>
+  </data>
+  <data name="Banner color" xml:space="preserve">
+    <value>Bannerfarbe</value>
+  </data>
+  <data name="Banning from this page is off because no CrowdSec machine account is configured (" xml:space="preserve">
+    <value>Sperren auf dieser Seite sind deaktiviert, weil kein CrowdSec-Maschinenkonto konfiguriert ist (</value>
+  </data>
+  <data name="Banning is not configured: set CROWDSEC_IDENTITY_MACHINE_PASSWORD on the server." xml:space="preserve">
+    <value>Sperren sind nicht konfiguriert. Setze CROWDSEC_IDENTITY_MACHINE_PASSWORD auf dem Server.</value>
+  </data>
+  <data name="Bills" xml:space="preserve">
+    <value>Rechnungen</value>
+  </data>
+  <data name="Busiest address" xml:space="preserve">
+    <value>Aktivste Adresse</value>
+  </data>
+  <data name="Calendar financial summary" xml:space="preserve">
+    <value>Finanzübersicht des Kalenders</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Change password" xml:space="preserve">
+    <value>Passwort ändern</value>
+  </data>
+  <data name="Change your password while keeping your current signed-in session active. Your data stays readable; only its key is re-wrapped." xml:space="preserve">
+    <value>Ändere dein Passwort, ohne die aktuelle Sitzung zu beenden. Die Daten bleiben lesbar und nur ihr Schlüssel wird neu geschützt.</value>
+  </data>
+  <data name="Choose a data password" xml:space="preserve">
+    <value>Wähle ein Datenpasswort</value>
+  </data>
+  <data name="Choose a valid color." xml:space="preserve">
+    <value>Wähle eine gültige Farbe.</value>
+  </data>
+  <data name="Choose appearance theme" xml:space="preserve">
+    <value>Design auswählen</value>
+  </data>
+  <data name="Clear" xml:space="preserve">
+    <value>Leeren</value>
+  </data>
+  <data name="Clear lockout" xml:space="preserve">
+    <value>Kontosperre aufheben</value>
+  </data>
+  <data name="Client IP address" xml:space="preserve">
+    <value>Client-IP-Adresse</value>
+  </data>
+  <data name="Client address" xml:space="preserve">
+    <value>Clientadresse</value>
+  </data>
+  <data name="Client address data is currently unavailable; totals below are still accurate." xml:space="preserve">
+    <value>Clientadressdaten sind derzeit nicht verfügbar. Die Summen unten sind weiterhin korrekt.</value>
+  </data>
+  <data name="Client addresses" xml:space="preserve">
+    <value>Clientadressen</value>
+  </data>
+  <data name="ClientAddressBanRemoved" xml:space="preserve">
+    <value>Clientadresssperre aufgehoben</value>
+  </data>
+  <data name="ClientAddressBanned" xml:space="preserve">
+    <value>Clientadresse gesperrt</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Cloudflare edge" xml:space="preserve">
+    <value>Cloudflare-Edge</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Coffee" xml:space="preserve">
+    <value>Kaffee</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Farbe</value>
+  </data>
+  <data name="Color must be a valid hexadecimal color." xml:space="preserve">
+    <value>Die Farbe muss ein gültiger Hexadezimalwert sein.</value>
+  </data>
+  <data name="Configure Microsoft Authenticator" xml:space="preserve">
+    <value>Microsoft Authenticator einrichten</value>
+  </data>
+  <data name="Confirm data password" xml:space="preserve">
+    <value>Datenpasswort bestätigen</value>
+  </data>
+  <data name="Confirm new password" xml:space="preserve">
+    <value>Neues Passwort bestätigen</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Passwort bestätigen</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kontakt</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Continue with {0}" xml:space="preserve">
+    <value>Mit {0} fortfahren</value>
+  </data>
+  <data name="Contribution direction" xml:space="preserve">
+    <value>Einzahlung oder Entnahme</value>
+  </data>
+  <data name="Control public sign-up and how many accounts the instance can hold." xml:space="preserve">
+    <value>Steuere die öffentliche Registrierung und die maximale Kontenzahl dieser Instanz.</value>
+  </data>
+  <data name="Create a new data recovery key if you lost the previous one or think someone else has seen it. The previous key stops working immediately." xml:space="preserve">
+    <value>Erstelle einen neuen Datenwiederherstellungsschlüssel, wenn der alte verloren ging oder möglicherweise gesehen wurde. Der alte Schlüssel wird sofort ungültig.</value>
+  </data>
+  <data name="Create a new one. You'll need your current password, and the old key stops working." xml:space="preserve">
+    <value>Erstelle einen neuen Schlüssel. Du benötigst dein aktuelles Passwort und der alte Schlüssel wird ungültig.</value>
+  </data>
+  <data name="Create a new recovery key" xml:space="preserve">
+    <value>Neuen Wiederherstellungsschlüssel erstellen</value>
+  </data>
+  <data name="Create new recovery key" xml:space="preserve">
+    <value>Neuen Wiederherstellungsschlüssel erstellen</value>
+  </data>
+  <data name="CrowdSec ban pages" xml:space="preserve">
+    <value>Seiten der CrowdSec-Sperren</value>
+  </data>
+  <data name="CrowdSec cannot be reached, so the ban status of this address is unknown." xml:space="preserve">
+    <value>CrowdSec ist nicht erreichbar. Der Sperrstatus dieser Adresse ist unbekannt.</value>
+  </data>
+  <data name="CrowdSec decisions are currently unavailable." xml:space="preserve">
+    <value>CrowdSec-Entscheidungen sind derzeit nicht verfügbar.</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Währung</value>
+  </data>
+  <data name="Currency must contain exactly three letters." xml:space="preserve">
+    <value>Der Währungscode muss genau drei Buchstaben enthalten.</value>
+  </data>
+  <data name="Currency settings were redesigned: pick a currency from the list to adjust its format, and choose your default currency." xml:space="preserve">
+    <value>Die Währungseinstellungen wurden überarbeitet. Wähle eine Währung aus der Liste, passe ihr Format an und lege die Standardwährung fest.</value>
+  </data>
+  <data name="Current account balance" xml:space="preserve">
+    <value>Aktueller Kontostand</value>
+  </data>
+  <data name="Current password" xml:space="preserve">
+    <value>Aktuelles Passwort</value>
+  </data>
+  <data name="Danger zone" xml:space="preserve">
+    <value>Gefahrenbereich</value>
+  </data>
+  <data name="Data encryption" xml:space="preserve">
+    <value>Datenverschlüsselung</value>
+  </data>
+  <data name="Data password" xml:space="preserve">
+    <value>Datenpasswort</value>
+  </data>
+  <data name="Data recovery key" xml:space="preserve">
+    <value>Datenwiederherstellungsschlüssel</value>
+  </data>
+  <data name="DataKeyCreated" xml:space="preserve">
+    <value>Datenschlüssel erstellt</value>
+  </data>
+  <data name="DataKeyUnlock" xml:space="preserve">
+    <value>Datenschlüssel entsperrt</value>
+  </data>
+  <data name="DataRecoveryKeyRegenerated" xml:space="preserve">
+    <value>Neuer Datenwiederherstellungsschlüssel</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Datum</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Konto löschen</value>
+  </data>
+  <data name="Deleting your account permanently removes your PocketLedger identity and all financial data. This action cannot be undone." xml:space="preserve">
+    <value>Beim Löschen deines Kontos werden dein PocketLedger-Konto und alle Finanzdaten endgültig entfernt. Dies kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="Detected (UTC)" xml:space="preserve">
+    <value>Erkannt (UTC)</value>
+  </data>
+  <data name="Detection window" xml:space="preserve">
+    <value>Erkennungszeitraum</value>
+  </data>
+  <data name="Direction" xml:space="preserve">
+    <value>Richtung</value>
+  </data>
+  <data name="Display name" xml:space="preserve">
+    <value>Anzeigename</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Anzeigereihenfolge</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Anzeigereihenfolge</value>
+  </data>
+  <data name="Download a password-protected backup before deleting your account. The backup does not contain your login, social account connection, password, authenticator, or recovery key." xml:space="preserve">
+    <value>Lade vor der Kontolöschung eine passwortgeschützte Sicherung herunter. Sie enthält keine Anmeldedaten, verknüpften externen Konten, Passwörter, Authenticator-Daten oder Wiederherstellungsschlüssel.</value>
+  </data>
+  <data name="Download encrypted backup" xml:space="preserve">
+    <value>Verschlüsselte Sicherung herunterladen</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Fälligkeit</value>
+  </data>
+  <data name="Edit item" xml:space="preserve">
+    <value>Eintrag bearbeiten</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+  <data name="EmailCollision" xml:space="preserve">
+    <value>E-Mail-Adresse bereits belegt</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Aktiviert</value>
+  </data>
+  <data name="Endpoints requested" xml:space="preserve">
+    <value>Angefragte Endpunkte</value>
+  </data>
+  <data name="Enter the data password you chose for this account. Your financial data is encrypted with it." xml:space="preserve">
+    <value>Gib das für dieses Konto gewählte Datenpasswort ein. Damit sind deine Finanzdaten verschlüsselt.</value>
+  </data>
+  <data name="Enter your password to unlock your financial data." xml:space="preserve">
+    <value>Gib dein Passwort ein, um deine Finanzdaten zu entsperren.</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>Ereignis</value>
+  </data>
+  <data name="Every account counts toward the limit, including the administrator and blocked accounts. Leave the limit empty for no limit." xml:space="preserve">
+    <value>Alle Konten zählen, auch das Administratorkonto und gesperrte Konten. Lasse das Limit leer, um es aufzuheben.</value>
+  </data>
+  <data name="ExistingEmail" xml:space="preserve">
+    <value>Vorhandene E-Mail-Adresse</value>
+  </data>
+  <data name="ExternalLogin" xml:space="preserve">
+    <value>Externe Anmeldung</value>
+  </data>
+  <data name="ExternalLoginLinkFailed" xml:space="preserve">
+    <value>Verknüpfung des externen Kontos fehlgeschlagen</value>
+  </data>
+  <data name="ExternalLoginTotpRequired" xml:space="preserve">
+    <value>Zwei-Faktor-Prüfung bei externer Anmeldung</value>
+  </data>
+  <data name="ExternalRegistration" xml:space="preserve">
+    <value>Externe Registrierung</value>
+  </data>
+  <data name="Failed (4xx/5xx)" xml:space="preserve">
+    <value>Fehlgeschlagen (4xx/5xx)</value>
+  </data>
+  <data name="Failed (4xx/5xx): requests/minute" xml:space="preserve">
+    <value>Fehlgeschlagen (4xx/5xx): Anfragen/Minute</value>
+  </data>
+  <data name="Failure" xml:space="preserve">
+    <value>Fehlgeschlagen</value>
+  </data>
+  <data name="Filter accounts by type" xml:space="preserve">
+    <value>Konten nach Typ filtern</value>
+  </data>
+  <data name="Find an address in this list" xml:space="preserve">
+    <value>Adresse in dieser Liste suchen</value>
+  </data>
+  <data name="Find an address…" xml:space="preserve">
+    <value>Adresse suchen…</value>
+  </data>
+  <data name="First seen" xml:space="preserve">
+    <value>Zuerst gesehen</value>
+  </data>
+  <data name="First seen (UTC)" xml:space="preserve">
+    <value>Zuerst gesehen (UTC)</value>
+  </data>
+  <data name="FirstOccurrence" xml:space="preserve">
+    <value>Erster Termin</value>
+  </data>
+  <data name="Forgot it? Use your recovery key" xml:space="preserve">
+    <value>Vergessen? Verwende deinen Wiederherstellungsschlüssel</value>
+  </data>
+  <data name="Forgot your password?" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="Free" xml:space="preserve">
+    <value>Frei</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Häufigkeit</value>
+  </data>
+  <data name="Gift" xml:space="preserve">
+    <value>Geschenk</value>
+  </data>
+  <data name="Glassmorphism" xml:space="preserve">
+    <value>Glasoptik</value>
+  </data>
+  <data name="Goal progress" xml:space="preserve">
+    <value>Zielfortschritt</value>
+  </data>
+  <data name="Goals, more currencies and starter categories" xml:space="preserve">
+    <value>Ziele, mehr Währungen und Standardkategorien</value>
+  </data>
+  <data name="Health" xml:space="preserve">
+    <value>Gesundheit</value>
+  </data>
+  <data name="Hide dashboard amounts" xml:space="preserve">
+    <value>Beträge in der Übersicht ausblenden</value>
+  </data>
+  <data name="Hour" xml:space="preserve">
+    <value>Stunde</value>
+  </data>
+  <data name="I saved the recovery codes" xml:space="preserve">
+    <value>Ich habe die Wiederherstellungscodes gespeichert</value>
+  </data>
+  <data name="I saved the recovery key" xml:space="preserve">
+    <value>Ich habe den Wiederherstellungsschlüssel gespeichert</value>
+  </data>
+  <data name="Identity navigation" xml:space="preserve">
+    <value>Kontonavigation</value>
+  </data>
+  <data name="IdentityError.ConcurrencyFailure" xml:space="preserve">
+    <value>Die Daten wurden in der Zwischenzeit geändert. Versuche es erneut.</value>
+  </data>
+  <data name="IdentityError.DefaultError" xml:space="preserve">
+    <value>Der Kontovorgang konnte nicht abgeschlossen werden.</value>
+  </data>
+  <data name="IdentityError.DuplicateEmail" xml:space="preserve">
+    <value>Diese E-Mail-Adresse wird bereits verwendet.</value>
+  </data>
+  <data name="IdentityError.DuplicateUserName" xml:space="preserve">
+    <value>Der Benutzername ist bereits vergeben.</value>
+  </data>
+  <data name="IdentityError.InvalidEmail" xml:space="preserve">
+    <value>Die E-Mail-Adresse ist ungültig.</value>
+  </data>
+  <data name="IdentityError.InvalidToken" xml:space="preserve">
+    <value>Der Bestätigungscode ist ungültig.</value>
+  </data>
+  <data name="IdentityError.InvalidUserName" xml:space="preserve">
+    <value>Der Benutzername ist ungültig oder enthält ein unzulässiges Zeichen.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresDigit" xml:space="preserve">
+    <value>Das Passwort muss mindestens eine Ziffer enthalten.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresLower" xml:space="preserve">
+    <value>Das Passwort muss mindestens einen Kleinbuchstaben enthalten.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresNonAlphanumeric" xml:space="preserve">
+    <value>Das Passwort muss mindestens ein Sonderzeichen enthalten.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresUniqueChars" xml:space="preserve">
+    <value>Das Passwort muss mindestens {1} unterschiedliche Zeichen enthalten.</value>
+  </data>
+  <data name="IdentityError.PasswordRequiresUpper" xml:space="preserve">
+    <value>Das Passwort muss mindestens einen Großbuchstaben enthalten.</value>
+  </data>
+  <data name="IdentityError.PasswordTooShort" xml:space="preserve">
+    <value>Das Passwort muss mindestens {0} Zeichen lang sein.</value>
+  </data>
+  <data name="IdentityValidationFailed" xml:space="preserve">
+    <value>Kontoprüfung fehlgeschlagen</value>
+  </data>
+  <data name="Include in main balance" xml:space="preserve">
+    <value>In Hauptsaldo einbeziehen</value>
+  </data>
+  <data name="Include in net worth" xml:space="preserve">
+    <value>In Nettovermögen einbeziehen</value>
+  </data>
+  <data name="Include in statistics" xml:space="preserve">
+    <value>In Statistik einbeziehen</value>
+  </data>
+  <data name="Incorrect data password." xml:space="preserve">
+    <value>Falsches Datenpasswort.</value>
+  </data>
+  <data name="Incorrect password." xml:space="preserve">
+    <value>Falsches Passwort.</value>
+  </data>
+  <data name="Initial balance" xml:space="preserve">
+    <value>Anfangssaldo</value>
+  </data>
+  <data name="Inspect" xml:space="preserve">
+    <value>Untersuchen</value>
+  </data>
+  <data name="Inspect this address" xml:space="preserve">
+    <value>Diese Adresse untersuchen</value>
+  </data>
+  <data name="Internal network" xml:space="preserve">
+    <value>Internes Netzwerk</value>
+  </data>
+  <data name="Internet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="Interval start (UTC)" xml:space="preserve">
+    <value>Intervallbeginn (UTC)</value>
+  </data>
+  <data name="Invalid authentication attempt." xml:space="preserve">
+    <value>Ungültiger Authentifizierungsversuch.</value>
+  </data>
+  <data name="Invalid authentication code." xml:space="preserve">
+    <value>Ungültiger Authentifizierungscode.</value>
+  </data>
+  <data name="Invalid login attempt." xml:space="preserve">
+    <value>Ungültiger Anmeldeversuch.</value>
+  </data>
+  <data name="JavaScript is required to load the request activity chart and its tabular alternative." xml:space="preserve">
+    <value>Für das Diagramm und die Tabellenansicht der Anfragen ist JavaScript erforderlich.</value>
+  </data>
+  <data name="Keep your financial data if you may return later." xml:space="preserve">
+    <value>Bewahre deine Finanzdaten auf, wenn du später zurückkehren möchtest.</value>
+  </data>
+  <data name="Large amounts in the calendar's monthly overview are listed under each other so they stay readable." xml:space="preserve">
+    <value>Große Beträge stehen in der Kalender-Monatsübersicht untereinander, damit sie lesbar bleiben.</value>
+  </data>
+  <data name="Last payment date" xml:space="preserve">
+    <value>Letztes Zahlungsdatum</value>
+  </data>
+  <data name="Last seen" xml:space="preserve">
+    <value>Zuletzt gesehen</value>
+  </data>
+  <data name="Last seen (UTC hour)" xml:space="preserve">
+    <value>Zuletzt gesehen (UTC-Stunde)</value>
+  </data>
+  <data name="Last seen (UTC)" xml:space="preserve">
+    <value>Zuletzt gesehen (UTC)</value>
+  </data>
+  <data name="Last successful login (UTC)" xml:space="preserve">
+    <value>Letzte erfolgreiche Anmeldung (UTC)</value>
+  </data>
+  <data name="LastOccurrence" xml:space="preserve">
+    <value>Letzter Termin</value>
+  </data>
+  <data name="Latest five" xml:space="preserve">
+    <value>Letzte fünf</value>
+  </data>
+  <data name="Limit" xml:space="preserve">
+    <value>Limit</value>
+  </data>
+  <data name="Loading address details…" xml:space="preserve">
+    <value>Adressdetails werden geladen…</value>
+  </data>
+  <data name="Loading request activity…" xml:space="preserve">
+    <value>Anfragen werden geladen…</value>
+  </data>
+  <data name="Locked out until (UTC)" xml:space="preserve">
+    <value>Gesperrt bis (UTC)</value>
+  </data>
+  <data name="Login Events" xml:space="preserve">
+    <value>Anmeldeereignisse</value>
+  </data>
+  <data name="Login event pages" xml:space="preserve">
+    <value>Seiten der Anmeldeereignisse</value>
+  </data>
+  <data name="Login events can be filtered, sorted and paged." xml:space="preserve">
+    <value>Anmeldeereignisse lassen sich filtern, sortieren und seitenweise anzeigen.</value>
+  </data>
+  <data name="LoginBlocked" xml:space="preserve">
+    <value>Anmeldung blockiert</value>
+  </data>
+  <data name="LoginLockout" xml:space="preserve">
+    <value>Anmeldesperre</value>
+  </data>
+  <data name="LoginLockoutCleared" xml:space="preserve">
+    <value>Anmeldesperre aufgehoben</value>
+  </data>
+  <data name="LoginSucceeded" xml:space="preserve">
+    <value>Erfolgreiche Anmeldung</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="Lookback" xml:space="preserve">
+    <value>Betrachtungszeitraum</value>
+  </data>
+  <data name="Lost the key, or someone saw it?" xml:space="preserve">
+    <value>Schlüssel verloren oder möglicherweise offengelegt?</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Hauptnavigation</value>
+  </data>
+  <data name="Maximum number of accounts" xml:space="preserve">
+    <value>Maximale Kontenzahl</value>
+  </data>
+  <data name="Merge identical addresses" xml:space="preserve">
+    <value>Identische Adressen zusammenfassen</value>
+  </data>
+  <data name="Method" xml:space="preserve">
+    <value>Methode</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Minute</value>
+  </data>
+  <data name="MissingExternalLoginInfo" xml:space="preserve">
+    <value>Fehlende externe Anmeldedaten</value>
+  </data>
+  <data name="More than 150 currencies are now supported." xml:space="preserve">
+    <value>Über 150 Währungen werden jetzt unterstützt.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="New password" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="New recovery key" xml:space="preserve">
+    <value>Neuer Wiederherstellungsschlüssel</value>
+  </data>
+  <data name="New users start with default categories and subcategories." xml:space="preserve">
+    <value>Neue Nutzer starten mit Standardkategorien und Unterkategorien.</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+  <data name="Next month" xml:space="preserve">
+    <value>Nächster Monat</value>
+  </data>
+  <data name="Next payment date" xml:space="preserve">
+    <value>Nächstes Zahlungsdatum</value>
+  </data>
+  <data name="No address matches." xml:space="preserve">
+    <value>Keine passende Adresse.</value>
+  </data>
+  <data name="No ban was created because the address is not a complete IPv4 or IPv6 address." xml:space="preserve">
+    <value>Es wurde keine Sperre erstellt, da keine vollständige IPv4- oder IPv6-Adresse angegeben wurde.</value>
+  </data>
+  <data name="No ban was created. {0}" xml:space="preserve">
+    <value>Es wurde keine Sperre erstellt. {0}</value>
+  </data>
+  <data name="No ban was removed because the address is not valid." xml:space="preserve">
+    <value>Es wurde keine Sperre aufgehoben, da die Adresse ungültig ist.</value>
+  </data>
+  <data name="No client addresses were recorded in this interval." xml:space="preserve">
+    <value>In diesem Zeitraum wurden keine Clientadressen erfasst.</value>
+  </data>
+  <data name="No endpoints were recorded for this address in this interval." xml:space="preserve">
+    <value>Für diese Adresse wurden im Zeitraum keine Endpunkte erfasst.</value>
+  </data>
+  <data name="No login events are available for your account yet." xml:space="preserve">
+    <value>Für dein Konto liegen noch keine Anmeldeereignisse vor.</value>
+  </data>
+  <data name="No login events yet." xml:space="preserve">
+    <value>Noch keine Anmeldeereignisse.</value>
+  </data>
+  <data name="No requests from {0} during this interval." xml:space="preserve">
+    <value>Keine Anfragen von {0} in diesem Zeitraum.</value>
+  </data>
+  <data name="No requests matched the selected activity view during this interval." xml:space="preserve">
+    <value>In diesem Zeitraum entsprach keine Anfrage der gewählten Ansicht.</value>
+  </data>
+  <data name="No signed-in account was seen from this address." xml:space="preserve">
+    <value>Von dieser Adresse wurde kein angemeldetes Konto erkannt.</value>
+  </data>
+  <data name="No suspicious request bursts were detected recently." xml:space="preserve">
+    <value>In letzter Zeit wurden keine verdächtigen Anfragehäufungen erkannt.</value>
+  </data>
+  <data name="No traffic in this interval." xml:space="preserve">
+    <value>In diesem Zeitraum gab es keinen Verkehr.</value>
+  </data>
+  <data name="No users are available." xml:space="preserve">
+    <value>Keine Benutzer vorhanden.</value>
+  </data>
+  <data name="Not available" xml:space="preserve">
+    <value>Nicht verfügbar</value>
+  </data>
+  <data name="Not banned. A ban blocks this address on every PocketLedger site." xml:space="preserve">
+    <value>Nicht gesperrt. Eine Sperre blockiert die Adresse auf allen PocketLedger-Websites.</value>
+  </data>
+  <data name="Not banned. Signed-in accounts used this address, so a ban also locks out those people while they are on it." xml:space="preserve">
+    <value>Nicht gesperrt. Angemeldete Konten haben diese Adresse verwendet. Eine Sperre würde auch sie von dort aussperren.</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Notiz</value>
+  </data>
+  <data name="Only part of the requested request-activity interval is available." xml:space="preserve">
+    <value>Nur ein Teil des angeforderten Aktivitätszeitraums ist verfügbar.</value>
+  </data>
+  <data name="Open profile menu" xml:space="preserve">
+    <value>Profilmenü öffnen</value>
+  </data>
+  <data name="Operational overview and user access management for the bootstrap administrator." xml:space="preserve">
+    <value>Betriebsübersicht und Zugriffsverwaltung für das initiale Administratorkonto.</value>
+  </data>
+  <data name="Original amount" xml:space="preserve">
+    <value>Ursprünglicher Betrag</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="Password change was not completed. Check your current password and try again." xml:space="preserve">
+    <value>Die Passwortänderung ist fehlgeschlagen. Prüfe dein aktuelles Passwort und versuche es erneut.</value>
+  </data>
+  <data name="PasswordChange" xml:space="preserve">
+    <value>Passwortänderung</value>
+  </data>
+  <data name="Path" xml:space="preserve">
+    <value>Pfad</value>
+  </data>
+  <data name="Permanently delete" xml:space="preserve">
+    <value>Endgültig löschen</value>
+  </data>
+  <data name="Permanently delete account" xml:space="preserve">
+    <value>Konto endgültig löschen</value>
+  </data>
+  <data name="Permanently delete user?" xml:space="preserve">
+    <value>Möchtest du diesen Benutzer endgültig löschen?</value>
+  </data>
+  <data name="Permanently delete your account?" xml:space="preserve">
+    <value>Möchtest du dein Konto endgültig löschen?</value>
+  </data>
+  <data name="Person or bank name" xml:space="preserve">
+    <value>Name der Person oder Bank</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Please wait" xml:space="preserve">
+    <value>Bitte warten</value>
+  </data>
+  <data name="PocketLedger app" xml:space="preserve">
+    <value>PocketLedger-App</value>
+  </data>
+  <data name="PocketLedger website" xml:space="preserve">
+    <value>PocketLedger-Website</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Previous month" xml:space="preserve">
+    <value>Vorheriger Monat</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Protected administrator" xml:space="preserve">
+    <value>Geschützter Administrator</value>
+  </data>
+  <data name="ProviderError" xml:space="preserve">
+    <value>Anbieterfehler</value>
+  </data>
+  <data name="Public registration is open" xml:space="preserve">
+    <value>Öffentliche Registrierung ist geöffnet</value>
+  </data>
+  <data name="RateLimitRejected" xml:space="preserve">
+    <value>Anfragelimit erreicht</value>
+  </data>
+  <data name="RateLimited" xml:space="preserve">
+    <value>Anfragen begrenzt</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Grund</value>
+  </data>
+  <data name="Recent login events" xml:space="preserve">
+    <value>Letzte Anmeldeereignisse</value>
+  </data>
+  <data name="Recover account" xml:space="preserve">
+    <value>Konto wiederherstellen</value>
+  </data>
+  <data name="Recovery code" xml:space="preserve">
+    <value>Wiederherstellungscode</value>
+  </data>
+  <data name="Recovery codes" xml:space="preserve">
+    <value>Wiederherstellungscodes</value>
+  </data>
+  <data name="Recovery key" xml:space="preserve">
+    <value>Wiederherstellungsschlüssel</value>
+  </data>
+  <data name="RecoveryCodeAuthentication" xml:space="preserve">
+    <value>Authentifizierung per Wiederherstellungscode</value>
+  </data>
+  <data name="RecoveryCodesRegenerated" xml:space="preserve">
+    <value>Neue Wiederherstellungscodes</value>
+  </data>
+  <data name="Registered" xml:space="preserve">
+    <value>Registriert</value>
+  </data>
+  <data name="Registered with" xml:space="preserve">
+    <value>Registriert mit</value>
+  </data>
+  <data name="Registration" xml:space="preserve">
+    <value>Registrierung</value>
+  </data>
+  <data name="Registration is currently unavailable." xml:space="preserve">
+    <value>Die Registrierung ist derzeit nicht verfügbar.</value>
+  </data>
+  <data name="Registration is open, but every available account has already been created. Please check back later." xml:space="preserve">
+    <value>Die Registrierung ist geöffnet, aber alle Kontoplätze sind belegt. Schau später wieder vorbei.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is closed." xml:space="preserve">
+    <value>Registrierungseinstellungen gespeichert. Die öffentliche Registrierung ist geschlossen.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is open with {0} of {1} accounts available." xml:space="preserve">
+    <value>Registrierungseinstellungen gespeichert. Die öffentliche Registrierung ist offen. {0} von {1} Kontoplätzen sind frei.</value>
+  </data>
+  <data name="Registration settings saved. Public registration is open without an account limit." xml:space="preserve">
+    <value>Registrierungseinstellungen gespeichert. Die öffentliche Registrierung ist ohne Kontolimit geöffnet.</value>
+  </data>
+  <data name="RegistrationSettingsChanged" xml:space="preserve">
+    <value>Registrierungseinstellungen geändert</value>
+  </data>
+  <data name="Release notes for every PocketLedger version, newest first." xml:space="preserve">
+    <value>Versionshinweise zu allen PocketLedger-Versionen, neueste zuerst.</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Remove ban on this address" xml:space="preserve">
+    <value>Sperre für diese Adresse aufheben</value>
+  </data>
+  <data name="Request activity" xml:space="preserve">
+    <value>Anfrageaktivität</value>
+  </data>
+  <data name="Request activity could not be loaded. The rest of the admin dashboard remains available." xml:space="preserve">
+    <value>Die Anfrageaktivität konnte nicht geladen werden. Der Rest der Admin-Übersicht bleibt verfügbar.</value>
+  </data>
+  <data name="Request telemetry is currently unavailable. The rest of the admin dashboard remains available." xml:space="preserve">
+    <value>Die Anfragetelemetrie ist derzeit nicht verfügbar. Der Rest der Admin-Übersicht bleibt verfügbar.</value>
+  </data>
+  <data name="Requests" xml:space="preserve">
+    <value>Anfragen</value>
+  </data>
+  <data name="Requests / attempts" xml:space="preserve">
+    <value>Anfragen / Versuche</value>
+  </data>
+  <data name="Requests per minute by five-minute UTC interval" xml:space="preserve">
+    <value>Anfragen pro Minute je Fünf-Minuten-Intervall in UTC</value>
+  </data>
+  <data name="Requests reaching the web app, API and Identity, in five-minute UTC intervals. Filter by account or client address to see who generated the traffic." xml:space="preserve">
+    <value>Anfragen an Web-App, API und Identity in fünfminütigen UTC-Intervallen. Filtere nach Konto oder Clientadresse, um die Quelle zu sehen.</value>
+  </data>
+  <data name="Requests/minute" xml:space="preserve">
+    <value>Anfragen/Minute</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Ergebnis</value>
+  </data>
+  <data name="Review recent account activity and manage your sign-in security." xml:space="preserve">
+    <value>Prüfe die letzten Kontoaktivitäten und verwalte deine Anmeldesicherheit.</value>
+  </data>
+  <data name="Review your account details and manage your PocketLedger account." xml:space="preserve">
+    <value>Prüfe deine Kontodaten und verwalte dein PocketLedger-Konto.</value>
+  </data>
+  <data name="Save registration settings" xml:space="preserve">
+    <value>Registrierungseinstellungen speichern</value>
+  </data>
+  <data name="Save these single-use codes now. They will not be shown again." xml:space="preserve">
+    <value>Speichere diese Einmalcodes jetzt. Sie werden nicht erneut angezeigt.</value>
+  </data>
+  <data name="Saved so far" xml:space="preserve">
+    <value>Bisher gespart</value>
+  </data>
+  <data name="SavedAmount" xml:space="preserve">
+    <value>Gesparter Betrag</value>
+  </data>
+  <data name="Savings goals: set a target amount, pick a banner color or image and follow your progress." xml:space="preserve">
+    <value>Sparziele: Lege einen Zielbetrag fest, wähle Farbe oder Bild und verfolge deinen Fortschritt.</value>
+  </data>
+  <data name="Scan this QR code, or enter the shared key manually." xml:space="preserve">
+    <value>Scanne den QR-Code oder gib den gemeinsamen Schlüssel manuell ein.</value>
+  </data>
+  <data name="SecurityStampInvalidation" xml:space="preserve">
+    <value>Sicherheitsstempel ungültig gemacht</value>
+  </data>
+  <data name="Select a main category" xml:space="preserve">
+    <value>Hauptkategorie auswählen</value>
+  </data>
+  <data name="Select month" xml:space="preserve">
+    <value>Monat auswählen</value>
+  </data>
+  <data name="Selected calendar month" xml:space="preserve">
+    <value>Ausgewählter Kalendermonat</value>
+  </data>
+  <data name="Selected statistics month" xml:space="preserve">
+    <value>Ausgewählter Statistikmonat</value>
+  </data>
+  <data name="Show dashboard amounts" xml:space="preserve">
+    <value>Beträge in der Übersicht anzeigen</value>
+  </data>
+  <data name="Showing the {0} busiest of {1} addresses." xml:space="preserve">
+    <value>Angezeigt werden die {0} aktivsten von {1} Adressen.</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="Sign out and choose &quot;Use your recovery key&quot; on the sign-in page. You'll set a new password there." xml:space="preserve">
+    <value>Melde dich ab und wähle auf der Anmeldeseite „Wiederherstellungsschlüssel verwenden“. Dort kannst du ein neues Passwort festlegen.</value>
+  </data>
+  <data name="Sign-in" xml:space="preserve">
+    <value>Anmeldung</value>
+  </data>
+  <data name="Sign-in &amp; security" xml:space="preserve">
+    <value>Anmeldung und Sicherheit</value>
+  </data>
+  <data name="Signed in" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="Signed in as" xml:space="preserve">
+    <value>Angemeldet als</value>
+  </data>
+  <data name="Signed-in accounts seen from this address: {0}." xml:space="preserve">
+    <value>Angemeldete Konten von dieser Adresse: {0}.</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Startdatum</value>
+  </data>
+  <data name="Statistics now shows income by main category in a doughnut chart, just like expenses." xml:space="preserve">
+    <value>Die Statistik zeigt Einnahmen wie Ausgaben nach Hauptkategorie in einem Ringdiagramm.</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Erfolgreich</value>
+  </data>
+  <data name="Suspicious request bursts" xml:space="preserve">
+    <value>Verdächtige Anfragehäufungen</value>
+  </data>
+  <data name="Suspicious request detection is currently unavailable." xml:space="preserve">
+    <value>Die Erkennung verdächtiger Anfragen ist derzeit nicht verfügbar.</value>
+  </data>
+  <data name="Target amount" xml:space="preserve">
+    <value>Zielbetrag</value>
+  </data>
+  <data name="Target date" xml:space="preserve">
+    <value>Zieldatum</value>
+  </data>
+  <data name="The Development environment shouldn't be enabled for deployed applications." xml:space="preserve">
+    <value>Die Entwicklungsumgebung darf in bereitgestellten Anwendungen nicht aktiviert sein.</value>
+  </data>
+  <data name="The account limit must be between 1 and {0:N0}, or left empty for no limit." xml:space="preserve">
+    <value>Das Kontolimit muss zwischen 1 und {0:N0} liegen oder für unbegrenzte Konten leer bleiben.</value>
+  </data>
+  <data name="The bans on {0} were not removed because CrowdSec could not be reached or refused the request." xml:space="preserve">
+    <value>Die Sperren für {0} wurden nicht aufgehoben, weil CrowdSec nicht erreichbar war oder die Anfrage ablehnte.</value>
+  </data>
+  <data name="The bans on {0} were removed. Every PocketLedger site accepts it again within a few seconds." xml:space="preserve">
+    <value>Die Sperren für {0} wurden aufgehoben. Alle PocketLedger-Websites akzeptieren die Adresse in wenigen Sekunden wieder.</value>
+  </data>
+  <data name="The bootstrap administrator account is protected and cannot delete itself." xml:space="preserve">
+    <value>Das initiale Administratorkonto ist geschützt und kann sich nicht selbst löschen.</value>
+  </data>
+  <data name="The details of this address could not be loaded." xml:space="preserve">
+    <value>Die Details dieser Adresse konnten nicht geladen werden.</value>
+  </data>
+  <data name="The endpoints of this address could not be loaded." xml:space="preserve">
+    <value>Die Endpunkte dieser Adresse konnten nicht geladen werden.</value>
+  </data>
+  <data name="The external account could not be registered." xml:space="preserve">
+    <value>Das externe Konto konnte nicht registriert werden.</value>
+  </data>
+  <data name="The external login could not be completed." xml:space="preserve">
+    <value>Die externe Anmeldung konnte nicht abgeschlossen werden.</value>
+  </data>
+  <data name="The external login response could not be validated." xml:space="preserve">
+    <value>Die Antwort der externen Anmeldung konnte nicht geprüft werden.</value>
+  </data>
+  <data name="The external login was cancelled or rejected by the provider." xml:space="preserve">
+    <value>Die externe Anmeldung wurde abgebrochen oder vom Anbieter abgelehnt.</value>
+  </data>
+  <data name="The external provider must supply a verified email address." xml:space="preserve">
+    <value>Der externe Anbieter muss eine bestätigte E-Mail-Adresse übermitteln.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a minimum length of '{1}'." xml:space="preserve">
+    <value>Das Feld „{0}“ muss mindestens {1} Zeichen oder Elemente enthalten.</value>
+  </data>
+  <data name="The field {0} must be a string with a maximum length of {1}." xml:space="preserve">
+    <value>Das Feld „{0}“ darf höchstens {1} Zeichen enthalten.</value>
+  </data>
+  <data name="The field {0} must be between {1} and {2}." xml:space="preserve">
+    <value>„{0}“ muss zwischen {1} und {2} liegen.</value>
+  </data>
+  <data name="The filter is not valid." xml:space="preserve">
+    <value>Der Filter ist ungültig.</value>
+  </data>
+  <data name="The initial balance on the account form now follows your currency format." xml:space="preserve">
+    <value>Der Anfangssaldo im Kontoformular folgt jetzt deinem Währungsformat.</value>
+  </data>
+  <data name="The list may be incomplete because the hourly storage limit was reached during this interval." xml:space="preserve">
+    <value>Die Liste ist möglicherweise unvollständig, weil das stündliche Speicherlimit erreicht wurde.</value>
+  </data>
+  <data name="The passwords do not match." xml:space="preserve">
+    <value>Die Passwörter stimmen nicht überein.</value>
+  </data>
+  <data name="The recovery key was not replaced. Check your current password and try again." xml:space="preserve">
+    <value>Der Wiederherstellungsschlüssel wurde nicht ersetzt. Prüfe dein aktuelles Passwort und versuche es erneut.</value>
+  </data>
+  <data name="The selected ban duration is not supported." xml:space="preserve">
+    <value>Die gewählte Sperrdauer wird nicht unterstützt.</value>
+  </data>
+  <data name="The transaction list shows the category first, with the type and note underneath." xml:space="preserve">
+    <value>Die Transaktionsliste zeigt zuerst die Kategorie und darunter Typ und Notiz.</value>
+  </data>
+  <data name="The user was not deleted because the confirmation text did not match DELETE." xml:space="preserve">
+    <value>Der Benutzer wurde nicht gelöscht, da der Bestätigungstext nicht DELETE lautete.</value>
+  </data>
+  <data name="The {0} field is not a valid e-mail address." xml:space="preserve">
+    <value>Das Feld „{0}“ enthält keine gültige E-Mail-Adresse.</value>
+  </data>
+  <data name="The {0} field is required." xml:space="preserve">
+    <value>Das Feld „{0}“ ist erforderlich.</value>
+  </data>
+  <data name="There are more registered accounts than the limit allows. Existing accounts are kept; new registrations stay blocked until the count drops below the limit." xml:space="preserve">
+    <value>Es gibt mehr registrierte Konten als erlaubt. Bestehende Konten bleiben erhalten. Neue Registrierungen sind gesperrt, bis die Zahl unter das Limit fällt.</value>
+  </data>
+  <data name="There are no active IP or range bans." xml:space="preserve">
+    <value>Keine aktiven IP- oder Bereichssperren vorhanden.</value>
+  </data>
+  <data name="This address is banned on every PocketLedger site." xml:space="preserve">
+    <value>Diese Adresse ist auf allen PocketLedger-Websites gesperrt.</value>
+  </data>
+  <data name="This changelog: see what's new after an update, and browse earlier releases from your account page." xml:space="preserve">
+    <value>Im Änderungsprotokoll siehst du nach einem Update die Neuerungen. Frühere Versionen findest du auf deiner Kontoseite.</value>
+  </data>
+  <data name="This permanently deletes" xml:space="preserve">
+    <value>Dadurch wird folgendes Konto endgültig gelöscht:</value>
+  </data>
+  <data name="This permanently deletes your PocketLedger account and all financial data. This action cannot be undone." xml:space="preserve">
+    <value>Dadurch werden dein PocketLedger-Konto und alle Finanzdaten endgültig gelöscht. Dies kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates." xml:space="preserve">
+    <value>Der Planer verwendet geplante Einträge sowie aktive wiederkehrende Einnahmen und Ausgaben einschließlich Kreditraten. Die Beträge sind Schätzungen.</value>
+  </data>
+  <data name="Timeline: intervals with traffic, newest first" xml:space="preserve">
+    <value>Zeitachse: Intervalle mit Verkehr, neueste zuerst</value>
+  </data>
+  <data name="To restore the backup later, create a new PocketLedger account and upload the file from Import / Export." xml:space="preserve">
+    <value>Für eine spätere Wiederherstellung erstelle ein neues PocketLedger-Konto und lade die Datei unter Import / Export hoch.</value>
+  </data>
+  <data name="Toggle navigation" xml:space="preserve">
+    <value>Navigation ein- oder ausblenden</value>
+  </data>
+  <data name="Too many authentication requests. Wait a minute, then go back and try again. Signing in on another device also counts toward this limit." xml:space="preserve">
+    <value>Zu viele Authentifizierungsanfragen. Warte eine Minute, gehe zurück und versuche es erneut. Anmeldungen auf anderen Geräten zählen ebenfalls.</value>
+  </data>
+  <data name="Totals by currency" xml:space="preserve">
+    <value>Summen nach Währung</value>
+  </data>
+  <data name="TotpChallenge" xml:space="preserve">
+    <value>Zwei-Faktor-Abfrage</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="UTC time" xml:space="preserve">
+    <value>UTC-Zeit</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Unbegrenzt</value>
+  </data>
+  <data name="Unlock your data" xml:space="preserve">
+    <value>Daten entsperren</value>
+  </data>
+  <data name="UnsupportedProvider" xml:space="preserve">
+    <value>Nicht unterstützter Anbieter</value>
+  </data>
+  <data name="Use a recovery code" xml:space="preserve">
+    <value>Wiederherstellungscode verwenden</value>
+  </data>
+  <data name="Use a recovery code to replace the authenticator registered to your account." xml:space="preserve">
+    <value>Ersetze den für dein Konto registrierten Authenticator mit einem Wiederherstellungscode.</value>
+  </data>
+  <data name="Use the current account balance automatically instead of a custom opening balance." xml:space="preserve">
+    <value>Verwende automatisch den aktuellen Kontostand anstelle eines benutzerdefinierten Anfangssaldos.</value>
+  </data>
+  <data name="Use the data recovery key you saved when you created your account to choose a new password. You will still need your authenticator app to sign in afterwards. If you signed up with an external provider, this replaces your data password." xml:space="preserve">
+    <value>Lege mit dem bei der Kontoerstellung gespeicherten Datenwiederherstellungsschlüssel ein neues Passwort fest. Die Authenticator-App wird danach weiterhin zur Anmeldung benötigt. Bei Registrierung über einen externen Anbieter wird dein Datenpasswort ersetzt.</value>
+  </data>
+  <data name="Use this page to detail your site's privacy policy." xml:space="preserve">
+    <value>Auf dieser Seite kannst du die Datenschutzrichtlinie der Website angeben.</value>
+  </data>
+  <data name="User overview pages" xml:space="preserve">
+    <value>Seiten der Benutzerübersicht</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Benutzername</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+  <data name="ValidationFailed" xml:space="preserve">
+    <value>Validierung fehlgeschlagen</value>
+  </data>
+  <data name="Verification code" xml:space="preserve">
+    <value>Bestätigungscode</value>
+  </data>
+  <data name="VerifiedEmailRequired" xml:space="preserve">
+    <value>Bestätigte E-Mail-Adresse erforderlich</value>
+  </data>
+  <data name="Verify" xml:space="preserve">
+    <value>Bestätigen</value>
+  </data>
+  <data name="What's new" xml:space="preserve">
+    <value>Was ist neu?</value>
+  </data>
+  <data name="What's new in PocketLedger {0}" xml:space="preserve">
+    <value>Neues in PocketLedger {0}</value>
+  </data>
+  <data name="You" xml:space="preserve">
+    <value>Du</value>
+  </data>
+  <data name="You do not have access to this resource." xml:space="preserve">
+    <value>Du hast keinen Zugriff auf diese Ressource.</value>
+  </data>
+  <data name="You have {0} attempt left before sign-in is blocked for {1:0} minutes." xml:space="preserve">
+    <value>Du hast noch {0} Versuch, bevor die Anmeldung für {1:0} Minuten gesperrt wird.</value>
+  </data>
+  <data name="You have {0} attempts left before sign-in is blocked for {1:0} minutes." xml:space="preserve">
+    <value>Du hast noch {0} Versuche, bevor die Anmeldung für {1:0} Minuten gesperrt wird.</value>
+  </data>
+  <data name="You must confirm that the recovery codes were saved." xml:space="preserve">
+    <value>Bestätige, dass du die Wiederherstellungscodes gespeichert hast.</value>
+  </data>
+  <data name="Your account and all PocketLedger data have been permanently deleted." xml:space="preserve">
+    <value>Dein Konto und alle PocketLedger-Daten wurden endgültig gelöscht.</value>
+  </data>
+  <data name="Your account was not deleted because the confirmation text did not match DELETE." xml:space="preserve">
+    <value>Dein Konto wurde nicht gelöscht, da der Bestätigungstext nicht DELETE lautete.</value>
+  </data>
+  <data name="Your data could not be unlocked. Contact the administrator." xml:space="preserve">
+    <value>Deine Daten konnten nicht entsperrt werden. Wende dich an den Administrator.</value>
+  </data>
+  <data name="Your financial data is encrypted with a key that only your password and this recovery key can open. If you forget your password, this key is the only way to get your data back. Nobody, including the administrator, can recover it for you. Save it somewhere safe and offline now. It will not be shown again." xml:space="preserve">
+    <value>Deine Finanzdaten sind mit einem Schlüssel verschlüsselt, den nur dein Passwort oder dieser Wiederherstellungsschlüssel öffnet. Wenn du dein Passwort vergisst, ist dieser Schlüssel der einzige Zugang zu deinen Daten. Niemand, auch der Administrator nicht, kann sie für dich wiederherstellen. Speichere ihn jetzt sicher und offline. Er wird nicht erneut angezeigt.</value>
+  </data>
+  <data name="Your financial data is encrypted with your password. The recovery key is the only way back to it if you forget the password." xml:space="preserve">
+    <value>Deine Finanzdaten sind mit deinem Passwort verschlüsselt. Falls du es vergisst, kannst du nur mit dem Wiederherstellungsschlüssel wieder darauf zugreifen.</value>
+  </data>
+  <data name="Your password has been changed." xml:space="preserve">
+    <value>Dein Passwort wurde geändert.</value>
+  </data>
+  <data name="Your password has been replaced. Your previous recovery key no longer works." xml:space="preserve">
+    <value>Dein Passwort wurde ersetzt. Der bisherige Wiederherstellungsschlüssel ist ungültig.</value>
+  </data>
+  <data name="Your selected avatar is now shown on the account pages too." xml:space="preserve">
+    <value>Dein gewähltes Profilbild wird jetzt auch auf den Kontoseiten angezeigt.</value>
+  </data>
+  <data name="Your sign-in provider confirms who you are, but PocketLedger also encrypts your financial data with a password that only you know. You will enter it after each sign-in. It is separate from your provider account's password." xml:space="preserve">
+    <value>Dein Anmeldeanbieter bestätigt deine Identität. PocketLedger verschlüsselt deine Finanzdaten zusätzlich mit einem Passwort, das nur du kennst. Gib es nach jeder Anmeldung ein. Es ist unabhängig vom Passwort deines Anbieterkontos.</value>
+  </data>
+  <data name="a confirmed restore replaces all current PocketLedger data. It runs in a database transaction and rolls back on failure." xml:space="preserve">
+    <value>Eine bestätigte Wiederherstellung ersetzt alle aktuellen PocketLedger-Daten. Sie läuft in einer Datenbanktransaktion und wird bei einem Fehler zurückgerollt.</value>
+  </data>
+  <data name="and all of their PocketLedger data. This action cannot be undone." xml:space="preserve">
+    <value>. Auch alle PocketLedger-Daten werden gelöscht. Dies kann nicht rückgängig gemacht werden.</value>
+  </data>
+  <data name="e.g. 203.0.113.10" xml:space="preserve">
+    <value>z. B. 203.0.113.10</value>
+  </data>
+  <data name="e.g. Summer holiday" xml:space="preserve">
+    <value>z. B. Sommerurlaub</value>
+  </data>
+  <data name="to confirm" xml:space="preserve">
+    <value>zur Bestätigung ein</value>
+  </data>
+  <data name="{0} can sign in again." xml:space="preserve">
+    <value>{0} kann sich wieder anmelden.</value>
+  </data>
+  <data name="{0} days" xml:space="preserve">
+    <value>{0} Tage</value>
+  </data>
+  <data name="{0} has been blocked and all of their sessions were terminated." xml:space="preserve">
+    <value>{0} wurde gesperrt und alle Sitzungen wurden beendet.</value>
+  </data>
+  <data name="{0} has been deleted." xml:space="preserve">
+    <value>{0} wurde gelöscht.</value>
+  </data>
+  <data name="{0} has been unblocked in Identity, but the API could not be reached. API access is restored automatically within a few minutes." xml:space="preserve">
+    <value>Die Sperre für {0} wurde in Identity aufgehoben, aber die API war nicht erreichbar. Der API-Zugriff wird in wenigen Minuten automatisch wiederhergestellt.</value>
+  </data>
+  <data name="{0} has been unblocked." xml:space="preserve">
+    <value>Die Sperre für {0} wurde aufgehoben.</value>
+  </data>
+  <data name="{0} hours" xml:space="preserve">
+    <value>{0} Stunden</value>
+  </data>
+  <data name="{0} icon {1}" xml:space="preserve">
+    <value>{0}-Symbol {1}</value>
+  </data>
+  <data name="{0} is banned for {1}. Every PocketLedger site starts refusing it within a few seconds." xml:space="preserve">
+    <value>{0} ist für {1} gesperrt. Alle PocketLedger-Websites weisen die Adresse in wenigen Sekunden ab.</value>
+  </data>
+  <data name="{0} is blocked and can no longer sign in, but the API or web app could not be reached. Their remaining sessions are terminated automatically within {1:0} seconds once it is reachable." xml:space="preserve">
+    <value>{0} ist gesperrt und kann sich nicht mehr anmelden, aber die API oder Web-App war nicht erreichbar. Verbleibende Sitzungen enden automatisch innerhalb von {1:0} Sekunden, sobald der Dienst wieder erreichbar ist.</value>
+  </data>
+  <data name="{0} left" xml:space="preserve">
+    <value>Noch {0}</value>
+  </data>
+  <data name="{0} requests are in the totals but not listed per address because too many addresses were active in an interval." xml:space="preserve">
+    <value>{0} Anfragen sind in den Summen enthalten, aber nicht pro Adresse aufgeführt, weil in einem Intervall zu viele Adressen aktiv waren.</value>
+  </data>
+  <data name="{0} requests are not itemized because this address reached the limit of 200 different endpoints in an hour." xml:space="preserve">
+    <value>{0} Anfragen fehlen in der Einzelauflistung, weil die Adresse 200 unterschiedliche Endpunkte in einer Stunde erreicht hat.</value>
+  </data>
+  <data name="{0} requests from {1} addresses; {2} were not signed in." xml:space="preserve">
+    <value>{0} Anfragen von {1} Adressen, davon {2} ohne Anmeldung.</value>
+  </data>
+  <data name="{0} was not banned because CrowdSec could not be reached or refused the request." xml:space="preserve">
+    <value>{0} wurde nicht gesperrt, weil CrowdSec nicht erreichbar war oder die Anfrage abgelehnt hat.</value>
+  </data>
+  <data name="{0}: requests/minute" xml:space="preserve">
+    <value>{0}: Anfragen/Minute</value>
+  </data>
+  <data name="{0}: {1} of {2} requests in the interval." xml:space="preserve">
+    <value>{0}: {1} von {2} Anfragen im Zeitraum.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Konten</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategorien</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Konto und Sicherheit</value>
+  </data>
+  <data name="Import / Export" xml:space="preserve">
+    <value>Import / Export</value>
+  </data>
+</root>
