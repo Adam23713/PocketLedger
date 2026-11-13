@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.ComponentModel.DataAnnotations;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.Transactions;
@@ -35,17 +36,17 @@ public class DebtListItemViewModel
 public class DebtFormViewModel : IValidatableObject
 {
     public Guid Id { get; set; }
-    [Required, StringLength(200)] public string Name { get; set; } = string.Empty;
-    [Required, StringLength(100)] public string Icon { get; set; } = string.Empty;
+    [Required(ErrorMessage = "The {0} field is required."), StringLength(200, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string Name { get; set; } = string.Empty;
+    [Required(ErrorMessage = "The {0} field is required."), StringLength(100, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string Icon { get; set; } = string.Empty;
     public IReadOnlyList<CategoryIconDefinition> AvailableIcons { get; init; } = CategoryIcons.All;
-    [Required] public DebtDirection Direction { get; set; }
-    [Required] public DebtType Type { get; set; }
-    [Required, StringLength(200), Display(Name = "Person or bank name")] public string CounterpartyName { get; set; } = string.Empty;
-    [Display(Name = "Original amount"), Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal OriginalAmount { get; set; }
-    [Required, StringLength(3, MinimumLength = 3)] public string Currency { get; set; } = "EUR";
-    [Required] public DateOnly StartDate { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public DebtDirection Direction { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public DebtType Type { get; set; }
+    [Required(ErrorMessage = "The {0} field is required."), StringLength(200, ErrorMessage = "The field {0} must be a string with a maximum length of {1}."), Display(Name = "Person or bank name")] public string CounterpartyName { get; set; } = string.Empty;
+    [Display(Name = "Original amount"), Range(typeof(decimal), "0.0001", "999999999999999.9999", ErrorMessage = "The field {0} must be between {1} and {2}.")] public decimal OriginalAmount { get; set; }
+    [Required(ErrorMessage = "The {0} field is required."), StringLength(3, MinimumLength = 3)] public string Currency { get; set; } = "EUR";
+    [Required(ErrorMessage = "The {0} field is required.")] public DateOnly StartDate { get; set; }
     public DateOnly? DueDate { get; set; }
-    [StringLength(500)] public string? Note { get; set; }
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string? Note { get; set; }
     public Guid? AccountId { get; set; }
     public bool AutomaticPaymentEnabled { get; set; }
     [Display(Name = "Automatic payment amount")]
@@ -60,9 +61,9 @@ public class DebtFormViewModel : IValidatableObject
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (AutomaticPaymentEnabled && AccountId is null) yield return new ValidationResult("An account is required for automatic payment.", [nameof(AccountId)]);
-        if (AutomaticPaymentEnabled && AutomaticPaymentAmount is not > 0) yield return new ValidationResult("A positive automatic payment amount is required.", [nameof(AutomaticPaymentAmount)]);
-        if (AutomaticPaymentEnabled && NextPaymentDate is null) yield return new ValidationResult("Next payment date is required.", [nameof(NextPaymentDate)]);
+        if (AutomaticPaymentEnabled && AccountId is null) yield return new ValidationResult(CommonText.Get("An account is required for automatic payment."), [nameof(AccountId)]);
+        if (AutomaticPaymentEnabled && AutomaticPaymentAmount is not > 0) yield return new ValidationResult(CommonText.Get("A positive automatic payment amount is required."), [nameof(AutomaticPaymentAmount)]);
+        if (AutomaticPaymentEnabled && NextPaymentDate is null) yield return new ValidationResult(CommonText.Get("Next payment date is required."), [nameof(NextPaymentDate)]);
     }
 }
 
@@ -103,11 +104,11 @@ public class DebtOperationFormViewModel
     public Guid TransactionId { get; set; }
     public Guid DebtId { get; set; }
     public DebtDirection Direction { get; set; }
-    [Required] public DebtOperationType Type { get; set; }
-    [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal Amount { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public DebtOperationType Type { get; set; }
+    [Range(typeof(decimal), "0.0001", "999999999999999.9999", ErrorMessage = "The field {0} must be between {1} and {2}.")] public decimal Amount { get; set; }
     public Guid? AccountId { get; set; }
-    [Required] public DateOnly Date { get; set; }
-    [StringLength(500)] public string? Note { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public DateOnly Date { get; set; }
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string? Note { get; set; }
     public DebtOverpaymentResolution? OverpaymentResolution { get; set; }
     public bool RequiresOverpaymentResolution { get; set; }
     public decimal OverpaymentDifference { get; set; }

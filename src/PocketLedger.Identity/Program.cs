@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -19,8 +20,10 @@ using PocketLedger.Services;
 using PocketLedger.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddUiLocalization();
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Identity");
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddViewLocalization().AddDataAnnotationsLocalization(options =>
+    options.DataAnnotationLocalizerProvider = (_, factory) => factory.Create("Common", typeof(Program).Assembly.GetName().Name!));
 builder.Services.AddOptions<AuthenticationSecurityOptions>().BindConfiguration("Authentication").ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<PublicRegistrationOptions>().BindConfiguration(PublicRegistrationOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<ForwardedHeadersOptionsConfig>().BindConfiguration("ForwardedHeaders");
@@ -198,15 +201,23 @@ app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseStaticFiles();
+app.UseRequestLocalization();
 app.UseRouting();
 if (app.Environment.IsDevelopment()) app.UseCors("Swagger");
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.Features.Get<Microsoft.AspNetCore.Localization.IRequestCultureFeature>()?.Provider is not Microsoft.AspNetCore.Localization.CookieRequestCultureProvider)
+        UiLocalization.UseLanguage(context.User.FindFirst("locale")?.Value);
+    await next(context);
+});
 app.UseBlockedUserRedirect();
 app.UseRequestTelemetry();
 app.UseMiddleware<MandatoryTwoFactorMiddleware>();
 app.UseAuthorization();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.MapEncryptionHealthEndpoints();
+app.MapUiLanguageSelection().AllowAnonymous();
 app.Run();
 
 public partial class Program;

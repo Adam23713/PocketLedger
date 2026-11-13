@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PocketLedger.Localization;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models;
@@ -15,9 +16,26 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         var categories = await categoryService.GetAllAsync(cancellationToken);
         return View(new CategoryListViewModel
         {
+            StarterCandidates = await categoryService.GetStarterCandidatesAsync(cancellationToken),
             IncomeCategories = categories.Where(category => category.Type == CategoryType.Income).Select(category => ToListItem(category)).ToList(),
             ExpenseCategories = categories.Where(category => category.Type == CategoryType.Expense).Select(category => ToListItem(category)).ToList()
         });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EnableStarterTranslations(Guid[] categoryIds, CancellationToken cancellationToken)
+    {
+        if (categoryIds.Length == 0) return RedirectToAction(nameof(Index));
+        try
+        {
+            await categoryService.EnableStarterTranslationsAsync(categoryIds, cancellationToken);
+            TempData["SuccessMessage"] = CommonText.Get("Starter category translations enabled.");
+        }
+        catch (BusinessRuleException exception)
+        {
+            TempData["ErrorMessage"] = CommonText.Get(exception.Message);
+        }
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
@@ -45,7 +63,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             await PopulateParentsAsync(model, cancellationToken);
             return View(model);
         }
@@ -99,7 +117,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, exception.Message);
+            ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message));
             await PopulateParentsAsync(model, cancellationToken);
             return View(model);
         }

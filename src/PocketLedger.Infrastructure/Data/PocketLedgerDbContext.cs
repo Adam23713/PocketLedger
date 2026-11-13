@@ -71,6 +71,7 @@ public class PocketLedgerDbContext : DbContext, IEncryptedDbContext
             UserField(modelBuilder.Entity<PlannerMonthRecord>().Property(item => item.OpeningBalancesJson), "PlannerMonthRecord.OpeningBalancesJson", "PlannerOpeningBalances");
             UserField(modelBuilder.Entity<Account>().Property(item => item.Name), "Account.Name", "AccountName", 100);
             UserField(modelBuilder.Entity<Category>().Property(item => item.Name), "Category.Name", "CategoryName", 100);
+            UserField(modelBuilder.Entity<Category>().Property(item => item.StarterCategoryKey), "Category.StarterCategoryKey", "StarterCategoryKey", 100);
             UserField(modelBuilder.Entity<Debt>().Property(item => item.Name), "Debt.Name", "DebtName", 200);
             UserField(modelBuilder.Entity<Debt>().Property(item => item.CounterpartyName), "Debt.CounterpartyName", "DebtCounterparty", 200);
             UserField(modelBuilder.Entity<UserPreference>().Property(item => item.DisplayName), "UserPreference.DisplayName", "DisplayName", 100);

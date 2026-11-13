@@ -1,3 +1,4 @@
+@using PocketLedger.Localization
 @model PocketLedger.Services.Interfaces.PlannerMonth
 @using PocketLedger.Models
 @using PocketLedger.Models.Enums
@@ -9,15 +10,15 @@
     var accounts = Model.Accounts.Where(account => incomingTransfers.Contains(account.Id) || sourceEvents[account.Id].Any(item => item.Type == TransactionType.Transfer || item.Classification is TransactionReportingClassification.Income or TransactionReportingClassification.Expense)).ToList();
 }
 <section class="planner-panel planner-account-summary" id="planner-account-summary">
-    <div class="planner-panel-header"><h2>Account summary</h2></div>
+    <div class="planner-panel-header"><h2>@CommonText.Get("Account summary")</h2></div>
     @if (accounts.Count == 0)
     {
-        <p class="planner-muted">No active income, expenses or transfers for this month.</p>
+        <p class="planner-muted">@CommonText.Get("No active income, expenses or transfers for this month.")</p>
     }
     else
     {
         <div class="table-responsive"><table class="table planner-table">
-            <thead><tr><th scope="col">Account</th><th scope="col">Incoming</th><th scope="col">Incoming transfers</th><th scope="col">Outgoing transfers</th><th scope="col">Outgoing expense</th><th scope="col">Expected closing balance</th></tr></thead>
+            <thead><tr><th scope="col">@CommonText.Get("Account")</th><th scope="col">@CommonText.Get("Incoming")</th><th scope="col">@CommonText.Get("Incoming transfers")</th><th scope="col">@CommonText.Get("Outgoing transfers")</th><th scope="col">@CommonText.Get("Outgoing expense")</th><th scope="col">@CommonText.Get("Expected closing balance")</th></tr></thead>
             <tbody>
             @foreach (var account in accounts)
             {
@@ -28,7 +29,7 @@
                 var transferredIn = incomingTransfers[account.Id].Sum(item => item.TargetAmount ?? 0m);
                 var transferredOut = movements.Where(item => item.Type == TransactionType.Transfer).Sum(item => item.AccountAmount);
                 <tr>
-                    <th scope="row"><span class="planner-summary-account"><img class="account-icon planner-summary-account-icon" src="@icon.WebPath" alt="@icon.DisplayName" /><span>@account.Name</span></span></th>
+                    <th scope="row"><span class="planner-summary-account"><img class="account-icon planner-summary-account-icon" src="@icon.WebPath" alt="@CommonText.IconLabel(icon.DisplayName)" /><span>@account.Name</span></span></th>
                     <td class="planner-money planner-positive">@MoneyFormatter.Format(income, account.Currency)</td>
                     <td class="planner-money planner-positive">@MoneyFormatter.Format(transferredIn, account.Currency)</td>
                     <td class="planner-money planner-negative">@MoneyFormatter.Format(transferredOut, account.Currency)</td>
@@ -38,6 +39,6 @@
             }
             </tbody>
         </table></div>
-        <small class="planner-muted">Amounts are shown in each account's currency. Paused items are excluded.</small>
+        <small class="planner-muted">@CommonText.Get("Amounts are shown in each account's currency. Paused items are excluded.")</small>
     }
 </section>

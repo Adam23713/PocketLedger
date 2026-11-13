@@ -1,0 +1,35 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Comptes et catégories</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Données et paramètres</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Dettes et objectifs</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Premiers pas</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Vue d’ensemble</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Planification et analyse</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="User guide" xml:space="preserve">
+    <value>Guide d’utilisation</value>
+  </data>
+  <data name="User guide navigation" xml:space="preserve">
+    <value>Navigation du guide d’utilisation</value>
+  </data>
+</root>

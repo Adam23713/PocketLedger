@@ -7,6 +7,7 @@ public class Category
     public Guid OwnerId { get; set; }
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string? StarterCategoryKey { get; set; }
     public CategoryType Type { get; set; }
     public string? Icon { get; set; }
     public Guid? ParentCategoryId { get; set; }

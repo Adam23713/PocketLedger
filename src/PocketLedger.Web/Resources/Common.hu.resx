@@ -1,0 +1,1949 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="'{0}' and '{1}' do not match." xml:space="preserve">
+    <value>A(z) {0} és a(z) {1} nem egyezik.</value>
+  </data>
+  <data name=") instead of changing the initial balance" xml:space="preserve">
+    <value>) a kezdőegyenleg módosítása helyett</value>
+  </data>
+  <data name="+ Add item" xml:space="preserve">
+    <value>+ Tétel hozzáadása</value>
+  </data>
+  <data name=", shortfall" xml:space="preserve">
+    <value>, hiány</value>
+  </data>
+  <data name="A category cannot be its own parent." xml:space="preserve">
+    <value>A kategória nem lehet a saját szülőkategóriája.</value>
+  </data>
+  <data name="A category containing subcategories cannot become a subcategory." xml:space="preserve">
+    <value>Az alkategóriákat tartalmazó kategória nem alakítható alkategóriává.</value>
+  </data>
+  <data name="A category is required for income and expense transactions." xml:space="preserve">
+    <value>A bevételi és kiadási tranzakciókhoz kategória szükséges.</value>
+  </data>
+  <data name="A contact link is available in the footer on every page." xml:space="preserve">
+    <value>Minden oldal láblécében elérhető a kapcsolatfelvételi hivatkozás.</value>
+  </data>
+  <data name="A main category containing subcategories cannot change type." xml:space="preserve">
+    <value>Az alkategóriákat tartalmazó főkategória típusa nem módosítható.</value>
+  </data>
+  <data name="A note is required for a manual correction." xml:space="preserve">
+    <value>A kézi korrekcióhoz megjegyzés szükséges.</value>
+  </data>
+  <data name="A planned date is required for transfers." xml:space="preserve">
+    <value>Átvezetéshez tervezett dátum szükséges.</value>
+  </data>
+  <data name="A planned date is required." xml:space="preserve">
+    <value>Tervezett dátum szükséges.</value>
+  </data>
+  <data name="A positive amount and date are required." xml:space="preserve">
+    <value>Pozitív összeg és dátum szükséges.</value>
+  </data>
+  <data name="A positive automatic payment amount is required." xml:space="preserve">
+    <value>Az automatikus fizetés összege legyen pozitív.</value>
+  </data>
+  <data name="A subcategory cannot contain another subcategory." xml:space="preserve">
+    <value>Egy alkategória nem tartalmazhat újabb alkategóriát.</value>
+  </data>
+  <data name="A transfer's source amount must use the source account currency." xml:space="preserve">
+    <value>Az átvezetés forrásösszegét a forrásszámla pénznemében kell megadni.</value>
+  </data>
+  <data name="Access blocked" xml:space="preserve">
+    <value>Hozzáférés letiltva</value>
+  </data>
+  <data name="Access is currently blocked" xml:space="preserve">
+    <value>A hozzáférés jelenleg le van tiltva</value>
+  </data>
+  <data name="Access to this account is currently disabled and under review." xml:space="preserve">
+    <value>A fiókhoz való hozzáférés felülvizsgálat miatt szünetel.</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Számla</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Fiók és biztonság</value>
+  </data>
+  <data name="Account (required for real money movement)" xml:space="preserve">
+    <value>Számla (tényleges pénzmozgáshoz kötelező)</value>
+  </data>
+  <data name="Account / source account" xml:space="preserve">
+    <value>Számla / forrásszámla</value>
+  </data>
+  <data name="Account balances" xml:space="preserve">
+    <value>Számlaegyenlegek</value>
+  </data>
+  <data name="Account created successfully." xml:space="preserve">
+    <value>A számla létrejött.</value>
+  </data>
+  <data name="Account currency cannot be changed after creation." xml:space="preserve">
+    <value>A számla pénzneme létrehozás után nem módosítható.</value>
+  </data>
+  <data name="Account deleted successfully." xml:space="preserve">
+    <value>A számla törölve.</value>
+  </data>
+  <data name="Account is required." xml:space="preserve">
+    <value>A számla kötelező.</value>
+  </data>
+  <data name="Account name is required." xml:space="preserve">
+    <value>A számla neve kötelező.</value>
+  </data>
+  <data name="Account not found." xml:space="preserve">
+    <value>A számla nem található.</value>
+  </data>
+  <data name="Account summary" xml:space="preserve">
+    <value>Számlaösszesítő</value>
+  </data>
+  <data name="Account updated successfully." xml:space="preserve">
+    <value>A számla módosítva.</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Számlák</value>
+  </data>
+  <data name="Accounts included in the planner balance, grouped by currency. Undated items are excluded from the daily chart." xml:space="preserve">
+    <value>A tervező egyenlegébe bevont számlák pénznemenként. A dátum nélküli tételek nem szerepelnek a napi diagramon.</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Műveletek</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Aktív</value>
+  </data>
+  <data name="Active financial accounts" xml:space="preserve">
+    <value>Aktív pénzügyi számlák</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Hozzáadás</value>
+  </data>
+  <data name="Add Transaction" xml:space="preserve">
+    <value>Tranzakció hozzáadása</value>
+  </data>
+  <data name="Add a currency…" xml:space="preserve">
+    <value>Pénznem hozzáadása…</value>
+  </data>
+  <data name="Add an item to your monthly plan." xml:space="preserve">
+    <value>Adj hozzá tételt a havi tervedhez.</value>
+  </data>
+  <data name="Adjustment" xml:space="preserve">
+    <value>Korrekció</value>
+  </data>
+  <data name="Adjustment direction" xml:space="preserve">
+    <value>Korrekció iránya</value>
+  </data>
+  <data name="Adjustment direction is only valid for adjustments." xml:space="preserve">
+    <value>Korrekciós irány csak korrekcióhoz adható meg.</value>
+  </data>
+  <data name="Adjustment direction is required." xml:space="preserve">
+    <value>A korrekció iránya kötelező.</value>
+  </data>
+  <data name="AdjustmentDirection" xml:space="preserve">
+    <value>Korrekció iránya</value>
+  </data>
+  <data name="Adjustments cannot use a category." xml:space="preserve">
+    <value>Korrekcióhoz nem adható meg kategória.</value>
+  </data>
+  <data name="After" xml:space="preserve">
+    <value>Utána</value>
+  </data>
+  <data name="All" xml:space="preserve">
+    <value>Mind</value>
+  </data>
+  <data name="All main categories" xml:space="preserve">
+    <value>Minden főkategória</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Összeg</value>
+  </data>
+  <data name="Amount added to the goal." xml:space="preserve">
+    <value>Az összeget hozzáadtuk a célhoz.</value>
+  </data>
+  <data name="Amount credited to target account" xml:space="preserve">
+    <value>Célszámlán jóváírt összeg</value>
+  </data>
+  <data name="Amount credited to target account ·" xml:space="preserve">
+    <value>Célszámlán jóváírt összeg ·</value>
+  </data>
+  <data name="Amount filters cannot be negative." xml:space="preserve">
+    <value>Az összegszűrők nem lehetnek negatívak.</value>
+  </data>
+  <data name="Amount in account currency" xml:space="preserve">
+    <value>Összeg a számla pénznemében</value>
+  </data>
+  <data name="Amount in account currency ·" xml:space="preserve">
+    <value>Összeg a számla pénznemében ·</value>
+  </data>
+  <data name="Amount must be greater than zero." xml:space="preserve">
+    <value>Az összegnek nullánál nagyobbnak kell lennie.</value>
+  </data>
+  <data name="Amount withdrawn from the goal." xml:space="preserve">
+    <value>Az összeget levontuk a célból.</value>
+  </data>
+  <data name="Amounts are shown in each account's currency. Paused items are excluded." xml:space="preserve">
+    <value>Az összegek az adott számla pénznemében jelennek meg. A szüneteltetett tételek nem szerepelnek az összesítésben.</value>
+  </data>
+  <data name="Amounts must be positive, at most 999999999999999.9999, with at most four decimal places." xml:space="preserve">
+    <value>Az összegeknek pozitívnak kell lenniük, legfeljebb 999999999999999,9999 értékkel és négy tizedesjeggyel.</value>
+  </data>
+  <data name="An account is required for automatic payment." xml:space="preserve">
+    <value>Az automatikus fizetéshez számla szükséges.</value>
+  </data>
+  <data name="An account is required for this operation." xml:space="preserve">
+    <value>Ehhez a művelethez számla szükséges.</value>
+  </data>
+  <data name="An error occurred while processing your request." xml:space="preserve">
+    <value>Hiba történt a kérés feldolgozásakor.</value>
+  </data>
+  <data name="Appearance" xml:space="preserve">
+    <value>Megjelenés</value>
+  </data>
+  <data name="Authenticator QR code" xml:space="preserve">
+    <value>Hitelesítő QR-kód</value>
+  </data>
+  <data name="Automatic payment" xml:space="preserve">
+    <value>Automatikus fizetés</value>
+  </data>
+  <data name="Automatic payment amount" xml:space="preserve">
+    <value>Automatikus fizetés összege</value>
+  </data>
+  <data name="Automatic payment requires a positive scheduled and remaining amount." xml:space="preserve">
+    <value>Az automatikus fizetéshez az ütemezett és a hátralévő összegnek is pozitívnak kell lennie.</value>
+  </data>
+  <data name="Automatic payment settings are invalid." xml:space="preserve">
+    <value>Az automatikus fizetés beállításai érvénytelenek.</value>
+  </data>
+  <data name="Automatically generated operations cannot be edited. Delete the operation or edit its recurring payment instead." xml:space="preserve">
+    <value>Az automatikusan létrehozott művelet nem szerkeszthető. Töröld a műveletet, vagy módosítsd az ismétlődő fizetését.</value>
+  </data>
+  <data name="Available to spend" xml:space="preserve">
+    <value>Elkölthető összeg</value>
+  </data>
+  <data name="Available to spend shows what is expected to remain after planned income, expenses and transfers. Only accounts marked Include contribute to this total. Each currency is calculated separately, using the opening balances set in this planner." xml:space="preserve">
+    <value>Az elkölthető összeg a tervezett bevételek, kiadások és átvezetések utáni várható maradvány. Csak a bevont számlák számítanak bele. A számítás pénznemenként, a tervező nyitóegyenlegeiből indul ki.</value>
+  </data>
+  <data name="Avatar" xml:space="preserve">
+    <value>Profilkép</value>
+  </data>
+  <data name="Avatar {0}" xml:space="preserve">
+    <value>{0}. profilkép</value>
+  </data>
+  <data name="Back to accounts" xml:space="preserve">
+    <value>Vissza a számlákhoz</value>
+  </data>
+  <data name="Back to transactions" xml:space="preserve">
+    <value>Vissza a tranzakciókhoz</value>
+  </data>
+  <data name="Backup file is empty or invalid." xml:space="preserve">
+    <value>A mentésfájl üres vagy érvénytelen.</value>
+  </data>
+  <data name="Backup password" xml:space="preserve">
+    <value>Biztonsági mentés jelszava</value>
+  </data>
+  <data name="Backup password contains invalid Unicode characters." xml:space="preserve">
+    <value>A mentés jelszava érvénytelen Unicode-karaktereket tartalmaz.</value>
+  </data>
+  <data name="Backup password is required." xml:space="preserve">
+    <value>A mentés jelszava kötelező.</value>
+  </data>
+  <data name="Backup restored successfully." xml:space="preserve">
+    <value>A mentés visszaállítása sikerült.</value>
+  </data>
+  <data name="Balance" xml:space="preserve">
+    <value>Egyenleg</value>
+  </data>
+  <data name="Balance adjustments" xml:space="preserve">
+    <value>Egyenlegkorrekciók</value>
+  </data>
+  <data name="Bank" xml:space="preserve">
+    <value>Bank</value>
+  </data>
+  <data name="Bank Account" xml:space="preserve">
+    <value>Bankszámla</value>
+  </data>
+  <data name="BankAccount" xml:space="preserve">
+    <value>Bankszámla</value>
+  </data>
+  <data name="Banking App" xml:space="preserve">
+    <value>Banki app</value>
+  </data>
+  <data name="Banner color" xml:space="preserve">
+    <value>Borítószín</value>
+  </data>
+  <data name="Banner color must be a hex color such as #2563eb." xml:space="preserve">
+    <value>A borítószínt hexadecimális formátumban add meg, például #2563eb.</value>
+  </data>
+  <data name="Banner image" xml:space="preserve">
+    <value>Borítókép</value>
+  </data>
+  <data name="Before" xml:space="preserve">
+    <value>Előtte</value>
+  </data>
+  <data name="Bills" xml:space="preserve">
+    <value>Számlák és díjak</value>
+  </data>
+  <data name="CSV contains an unterminated quoted field." xml:space="preserve">
+    <value>A CSV-ben lezáratlan idézőjeles mező található.</value>
+  </data>
+  <data name="Calculated from amount and exchange rate." xml:space="preserve">
+    <value>Az összegből és az árfolyamból számítva.</value>
+  </data>
+  <data name="Calendar" xml:space="preserve">
+    <value>Naptár</value>
+  </data>
+  <data name="Calendar financial summary" xml:space="preserve">
+    <value>Naptári pénzügyi összesítő</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Mégse</value>
+  </data>
+  <data name="Cash" xml:space="preserve">
+    <value>Készpénz</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategóriák</value>
+  </data>
+  <data name="Categories referenced by transactions or containing subcategories cannot be deleted." xml:space="preserve">
+    <value>A tranzakcióhoz kapcsolt vagy alkategóriákat tartalmazó kategória nem törölhető.</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Kategória</value>
+  </data>
+  <data name="Category / subcategory" xml:space="preserve">
+    <value>Kategória / alkategória</value>
+  </data>
+  <data name="Category created successfully." xml:space="preserve">
+    <value>A kategória létrejött.</value>
+  </data>
+  <data name="Category deleted successfully." xml:space="preserve">
+    <value>A kategória törölve.</value>
+  </data>
+  <data name="Category is required." xml:space="preserve">
+    <value>A kategória kötelező.</value>
+  </data>
+  <data name="Category name is required." xml:space="preserve">
+    <value>A kategória neve kötelező.</value>
+  </data>
+  <data name="Category not found." xml:space="preserve">
+    <value>A kategória nem található.</value>
+  </data>
+  <data name="Category type does not match transaction type." xml:space="preserve">
+    <value>A kategória típusa nem egyezik a tranzakció típusával.</value>
+  </data>
+  <data name="Category updated successfully." xml:space="preserve">
+    <value>A kategória módosítva.</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Változás</value>
+  </data>
+  <data name="Changelog history" xml:space="preserve">
+    <value>Változásnapló</value>
+  </data>
+  <data name="Choose a valid color." xml:space="preserve">
+    <value>Válassz érvényes színt.</value>
+  </data>
+  <data name="Choose appearance theme" xml:space="preserve">
+    <value>Téma választása</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Bezárás</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Lezárt</value>
+  </data>
+  <data name="Closed months are read-only." xml:space="preserve">
+    <value>A lezárt hónapok csak olvashatók.</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Kód</value>
+  </data>
+  <data name="Coffee" xml:space="preserve">
+    <value>Kávé</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Szín</value>
+  </data>
+  <data name="Color must be a valid hexadecimal color." xml:space="preserve">
+    <value>A színnek érvényes hexadecimális színnek kell lennie.</value>
+  </data>
+  <data name="Color only" xml:space="preserve">
+    <value>Csak szín</value>
+  </data>
+  <data name="Confirm Excel password" xml:space="preserve">
+    <value>Excel-jelszó megerősítése</value>
+  </data>
+  <data name="Confirm backup password" xml:space="preserve">
+    <value>Biztonsági mentés jelszavának megerősítése</value>
+  </data>
+  <data name="Confirm data password" xml:space="preserve">
+    <value>Adatvédelmi jelszó megerősítése</value>
+  </data>
+  <data name="Confirm new password" xml:space="preserve">
+    <value>Új jelszó megerősítése</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Jelszó megerősítése</value>
+  </data>
+  <data name="Continue with {0}" xml:space="preserve">
+    <value>Folytatás ezzel: {0}</value>
+  </data>
+  <data name="Contribution amount cannot be zero." xml:space="preserve">
+    <value>A befizetés összege nem lehet nulla.</value>
+  </data>
+  <data name="Contribution direction" xml:space="preserve">
+    <value>Hozzájárulás iránya</value>
+  </data>
+  <data name="Could not refresh the plan. Please reload the page to check the saved settings." xml:space="preserve">
+    <value>A tervet nem sikerült frissíteni. Töltsd újra az oldalt a mentett beállítások ellenőrzéséhez.</value>
+  </data>
+  <data name="Could not save notes. Please try again." xml:space="preserve">
+    <value>A megjegyzéseket nem sikerült menteni. Próbáld újra.</value>
+  </data>
+  <data name="Could not save the planner changes. Please try again." xml:space="preserve">
+    <value>A tervező módosításait nem sikerült menteni. Próbáld újra.</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Létrehozás</value>
+  </data>
+  <data name="Create an Adjustment transaction (" xml:space="preserve">
+    <value>Korrekciós tranzakció létrehozása (</value>
+  </data>
+  <data name="Create an account to start planning." xml:space="preserve">
+    <value>A tervezéshez hozz létre egy számlát.</value>
+  </data>
+  <data name="Create your first goal" xml:space="preserve">
+    <value>Hozd létre az első célodat</value>
+  </data>
+  <data name="Credit Card" xml:space="preserve">
+    <value>Hitelkártya</value>
+  </data>
+  <data name="CreditCard" xml:space="preserve">
+    <value>Hitelkártya</value>
+  </data>
+  <data name="CrowdSec ban pages" xml:space="preserve">
+    <value>CrowdSec-tiltások lapozása</value>
+  </data>
+  <data name="Currencies" xml:space="preserve">
+    <value>Pénznemek</value>
+  </data>
+  <data name="Currency" xml:space="preserve">
+    <value>Pénznem</value>
+  </data>
+  <data name="Currency cannot be changed after account creation." xml:space="preserve">
+    <value>A számla létrehozása után a pénznem nem módosítható.</value>
+  </data>
+  <data name="Currency cannot be changed after debt creation." xml:space="preserve">
+    <value>A tartozás létrehozása után a pénznem nem módosítható.</value>
+  </data>
+  <data name="Currency does not match the account." xml:space="preserve">
+    <value>A pénznem eltér a számla pénznemétől.</value>
+  </data>
+  <data name="Currency must contain exactly three letters." xml:space="preserve">
+    <value>A pénznemkód pontosan három betűből állhat.</value>
+  </data>
+  <data name="Currency settings were redesigned: pick a currency from the list to adjust its format, and choose your default currency." xml:space="preserve">
+    <value>Megújultak a pénznembeállítások. Válassz pénznemet a formátum beállításához, és add meg az alapértelmezett pénznemet.</value>
+  </data>
+  <data name="Currency to add" xml:space="preserve">
+    <value>Hozzáadandó pénznem</value>
+  </data>
+  <data name="Current account balance" xml:space="preserve">
+    <value>Aktuális számlaegyenleg</value>
+  </data>
+  <data name="Current balance" xml:space="preserve">
+    <value>Aktuális egyenleg</value>
+  </data>
+  <data name="Current password" xml:space="preserve">
+    <value>Jelenlegi jelszó</value>
+  </data>
+  <data name="Daily" xml:space="preserve">
+    <value>Naponta</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+    <value>Áttekintés</value>
+  </data>
+  <data name="Data password" xml:space="preserve">
+    <value>Adatvédelmi jelszó</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Dátum</value>
+  </data>
+  <data name="Date and time" xml:space="preserve">
+    <value>Dátum és idő</value>
+  </data>
+  <data name="Debt and account currencies must match." xml:space="preserve">
+    <value>A tartozás és a számla pénznemének egyeznie kell.</value>
+  </data>
+  <data name="Debt closed." xml:space="preserve">
+    <value>A tartozás lezárva.</value>
+  </data>
+  <data name="Debt created." xml:space="preserve">
+    <value>A tartozás létrejött.</value>
+  </data>
+  <data name="Debt deleted successfully." xml:space="preserve">
+    <value>A tartozás törölve.</value>
+  </data>
+  <data name="Debt direction cannot be changed after operations have been recorded." xml:space="preserve">
+    <value>A tartozás iránya művelet rögzítése után nem módosítható.</value>
+  </data>
+  <data name="Debt name is required." xml:space="preserve">
+    <value>A tartozás neve kötelező.</value>
+  </data>
+  <data name="Debt operation" xml:space="preserve">
+    <value>Tartozásművelet</value>
+  </data>
+  <data name="Debt operation deleted." xml:space="preserve">
+    <value>A tartozásművelet törölve.</value>
+  </data>
+  <data name="Debt operation recorded." xml:space="preserve">
+    <value>A tartozásművelet rögzítve.</value>
+  </data>
+  <data name="Debt operation updated." xml:space="preserve">
+    <value>A tartozásművelet módosítva.</value>
+  </data>
+  <data name="Debt reopened." xml:space="preserve">
+    <value>A tartozás újranyitva.</value>
+  </data>
+  <data name="Debt transactions must be created from the debt page." xml:space="preserve">
+    <value>A tartozáshoz kapcsolt tranzakciót a tartozás oldalán hozhatod létre.</value>
+  </data>
+  <data name="Debt transactions must be deleted from the debt page." xml:space="preserve">
+    <value>A tartozáshoz kapcsolt tranzakciót a tartozás oldalán törölheted.</value>
+  </data>
+  <data name="Debt transactions must be edited from the debt page." xml:space="preserve">
+    <value>A tartozáshoz kapcsolt tranzakciót a tartozás oldalán szerkesztheted.</value>
+  </data>
+  <data name="Debt updated." xml:space="preserve">
+    <value>A tartozás módosítva.</value>
+  </data>
+  <data name="DebtEntry" xml:space="preserve">
+    <value>Tartozástétel</value>
+  </data>
+  <data name="Decimal places" xml:space="preserve">
+    <value>Tizedesjegyek</value>
+  </data>
+  <data name="Decimal separator" xml:space="preserve">
+    <value>Tizedeselválasztó</value>
+  </data>
+  <data name="Decrease" xml:space="preserve">
+    <value>Csökkentés</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Alapértelmezett</value>
+  </data>
+  <data name="Default currency" xml:space="preserve">
+    <value>Alapértelmezett pénznem</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Számla törlése</value>
+  </data>
+  <data name="Delete category" xml:space="preserve">
+    <value>Kategória törlése</value>
+  </data>
+  <data name="Delete debt" xml:space="preserve">
+    <value>Tartozás törlése</value>
+  </data>
+  <data name="Delete debt and related transactions" xml:space="preserve">
+    <value>Tartozás és kapcsolódó tranzakciók törlése</value>
+  </data>
+  <data name="Delete goal" xml:space="preserve">
+    <value>Cél törlése</value>
+  </data>
+  <data name="Delete planned item" xml:space="preserve">
+    <value>Tervezett tétel törlése</value>
+  </data>
+  <data name="Delete recurring transaction" xml:space="preserve">
+    <value>Ismétlődő tranzakció törlése</value>
+  </data>
+  <data name="Delete the planner items referencing this account before deleting the account." xml:space="preserve">
+    <value>A számla törlése előtt töröld a rá hivatkozó tervezett tételeket.</value>
+  </data>
+  <data name="Delete this item from the monthly plan?" xml:space="preserve">
+    <value>Törlöd ezt a tételt a havi tervből?</value>
+  </data>
+  <data name="Delete this {0} transaction?" xml:space="preserve">
+    <value>Törlöd ezt a tranzakciót ({0})?</value>
+  </data>
+  <data name="Delete this {0} {1} template?" xml:space="preserve">
+    <value>Törlöd ezt a sablont ({0}, {1})?</value>
+  </data>
+  <data name="Delete transaction" xml:space="preserve">
+    <value>Tranzakció törlése</value>
+  </data>
+  <data name="Delete {0}?" xml:space="preserve">
+    <value>Törlöd ezt: {0}?</value>
+  </data>
+  <data name="Deleting" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="Deleting {0}?" xml:space="preserve">
+    <value>Biztosan törlöd ezt: {0}?</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Részletek</value>
+  </data>
+  <data name="Development" xml:space="preserve">
+    <value>Fejlesztés</value>
+  </data>
+  <data name="Development Mode" xml:space="preserve">
+    <value>Fejlesztői mód</value>
+  </data>
+  <data name="Direction" xml:space="preserve">
+    <value>Irány</value>
+  </data>
+  <data name="Display name" xml:space="preserve">
+    <value>Megjelenített név</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Megjelenítési sorrend</value>
+  </data>
+  <data name="Display order cannot be negative." xml:space="preserve">
+    <value>A megjelenítési sorrend nem lehet negatív.</value>
+  </data>
+  <data name="DisplayOrder" xml:space="preserve">
+    <value>Megjelenítési sorrend</value>
+  </data>
+  <data name="Download a password-protected backup of the complete PocketLedger database." xml:space="preserve">
+    <value>Tölts le jelszóval védett biztonsági mentést a teljes PocketLedger-adatbázisról.</value>
+  </data>
+  <data name="Download encrypted Excel" xml:space="preserve">
+    <value>Titkosított Excel letöltése</value>
+  </data>
+  <data name="Download encrypted backup" xml:space="preserve">
+    <value>Titkosított mentés letöltése</value>
+  </data>
+  <data name="Due date cannot be before start date." xml:space="preserve">
+    <value>Az esedékesség nem előzheti meg a kezdődátumot.</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Esedékesség</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Ismétlődés</value>
+  </data>
+  <data name="EarlyRepayment" xml:space="preserve">
+    <value>Előtörlesztés</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Szerkesztés</value>
+  </data>
+  <data name="Edit account" xml:space="preserve">
+    <value>Számla szerkesztése</value>
+  </data>
+  <data name="Edit category" xml:space="preserve">
+    <value>Kategória szerkesztése</value>
+  </data>
+  <data name="Edit debt" xml:space="preserve">
+    <value>Tartozás szerkesztése</value>
+  </data>
+  <data name="Edit debt operation" xml:space="preserve">
+    <value>Tartozásművelet szerkesztése</value>
+  </data>
+  <data name="Edit goal" xml:space="preserve">
+    <value>Cél szerkesztése</value>
+  </data>
+  <data name="Edit item" xml:space="preserve">
+    <value>Tétel szerkesztése</value>
+  </data>
+  <data name="Edit opening balance for {0}" xml:space="preserve">
+    <value>Nyitóegyenleg szerkesztése: {0}</value>
+  </data>
+  <data name="Edit recurring transaction" xml:space="preserve">
+    <value>Ismétlődő tranzakció szerkesztése</value>
+  </data>
+  <data name="Edit transaction" xml:space="preserve">
+    <value>Tranzakció szerkesztése</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail-cím</value>
+  </data>
+  <data name="Enable automatic payment" xml:space="preserve">
+    <value>Automatikus fizetés bekapcsolása</value>
+  </data>
+  <data name="Enable translations" xml:space="preserve">
+    <value>Fordítások bekapcsolása</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Aktív</value>
+  </data>
+  <data name="Enabled templates are processed automatically (Europe/Budapest)." xml:space="preserve">
+    <value>Az aktív sablonok feldolgozása automatikus (Europe/Budapest).</value>
+  </data>
+  <data name="Encrypted PocketLedger backup" xml:space="preserve">
+    <value>Titkosított PocketLedger-mentés</value>
+  </data>
+  <data name="Encrypted backup file" xml:space="preserve">
+    <value>Titkosított biztonsági mentés</value>
+  </data>
+  <data name="Enter the amount credited to the target account." xml:space="preserve">
+    <value>Add meg a célszámlán jóváírt összeget.</value>
+  </data>
+  <data name="Enter the backup password again" xml:space="preserve">
+    <value>Add meg újra a mentés jelszavát</value>
+  </data>
+  <data name="Enter valid notes." xml:space="preserve">
+    <value>Adj meg érvényes megjegyzést.</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Hiba</value>
+  </data>
+  <data name="Error." xml:space="preserve">
+    <value>Hiba.</value>
+  </data>
+  <data name="Excel export password contains invalid Unicode characters." xml:space="preserve">
+    <value>Az Excel-export jelszava érvénytelen Unicode-karaktereket tartalmaz.</value>
+  </data>
+  <data name="Excel export password is required." xml:space="preserve">
+    <value>Az Excel-export jelszava kötelező.</value>
+  </data>
+  <data name="Excel password" xml:space="preserve">
+    <value>Excel-jelszó</value>
+  </data>
+  <data name="Exchange rate" xml:space="preserve">
+    <value>Árfolyam</value>
+  </data>
+  <data name="Exchange rate must be greater than zero." xml:space="preserve">
+    <value>Az árfolyamnak nullánál nagyobbnak kell lennie.</value>
+  </data>
+  <data name="Excluded" xml:space="preserve">
+    <value>Kizárva</value>
+  </data>
+  <data name="Expected 7 columns." xml:space="preserve">
+    <value>A sorban 7 oszlopnak kell lennie.</value>
+  </data>
+  <data name="Expected account balances" xml:space="preserve">
+    <value>Várható számlaegyenlegek</value>
+  </data>
+  <data name="Expected balance over time" xml:space="preserve">
+    <value>Várható egyenleg alakulása</value>
+  </data>
+  <data name="Expected closing balance" xml:space="preserve">
+    <value>Várható záróegyenleg</value>
+  </data>
+  <data name="Expected expenses" xml:space="preserve">
+    <value>Várható kiadások</value>
+  </data>
+  <data name="Expected income" xml:space="preserve">
+    <value>Várható bevétel</value>
+  </data>
+  <data name="Expense" xml:space="preserve">
+    <value>Kiadás</value>
+  </data>
+  <data name="Expenses" xml:space="preserve">
+    <value>Kiadások</value>
+  </data>
+  <data name="Expenses by category" xml:space="preserve">
+    <value>Kiadások kategóriánként</value>
+  </data>
+  <data name="Expenses exceed income this month." xml:space="preserve">
+    <value>Ebben a hónapban a kiadások meghaladják a bevételeket.</value>
+  </data>
+  <data name="Explicit confirmation is required." xml:space="preserve">
+    <value>Külön megerősítés szükséges.</value>
+  </data>
+  <data name="Export Excel" xml:space="preserve">
+    <value>Excel exportálása</value>
+  </data>
+  <data name="Export transactions to a password-protected Excel workbook, or preview and import a CSV file." xml:space="preserve">
+    <value>Exportáld a tranzakciókat jelszóval védett Excel-fájlba, vagy nézd meg és importáld a CSV-fájlt.</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Szűrés</value>
+  </data>
+  <data name="Filter accounts by type" xml:space="preserve">
+    <value>Számlák szűrése típus szerint</value>
+  </data>
+  <data name="Financial data cannot be assigned to another owner." xml:space="preserve">
+    <value>A pénzügyi adatok nem rendelhetők másik tulajdonoshoz.</value>
+  </data>
+  <data name="Financial data must have an owner." xml:space="preserve">
+    <value>A pénzügyi adatokhoz tulajdonos szükséges.</value>
+  </data>
+  <data name="Financial data owned by another user cannot be modified." xml:space="preserve">
+    <value>Más felhasználó pénzügyi adatai nem módosíthatók.</value>
+  </data>
+  <data name="Find an address…" xml:space="preserve">
+    <value>Cím keresése…</value>
+  </data>
+  <data name="First occurrence is required." xml:space="preserve">
+    <value>Az első előfordulás dátuma kötelező.</value>
+  </data>
+  <data name="FirstOccurrence" xml:space="preserve">
+    <value>Első előfordulás</value>
+  </data>
+  <data name="Fixed expenses" xml:space="preserve">
+    <value>Fix kiadások</value>
+  </data>
+  <data name="Follow current balance" xml:space="preserve">
+    <value>Aktuális egyenleg követése</value>
+  </data>
+  <data name="For local debugging, set {0} to {1} and restart the app." xml:space="preserve">
+    <value>Helyi hibakereséshez állítsd a(z) {0} változót {1} értékre, majd indítsd újra az appot.</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Gyakoriság</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Ettől</value>
+  </data>
+  <data name="Gift" xml:space="preserve">
+    <value>Ajándék</value>
+  </data>
+  <data name="Glassmorphism" xml:space="preserve">
+    <value>Üveghatás</value>
+  </data>
+  <data name="Goal created." xml:space="preserve">
+    <value>A cél létrejött.</value>
+  </data>
+  <data name="Goal deleted." xml:space="preserve">
+    <value>A cél törölve.</value>
+  </data>
+  <data name="Goal name cannot be longer than 200 characters." xml:space="preserve">
+    <value>A cél neve legfeljebb 200 karakteres lehet.</value>
+  </data>
+  <data name="Goal name is required." xml:space="preserve">
+    <value>A cél neve kötelező.</value>
+  </data>
+  <data name="Goal progress" xml:space="preserve">
+    <value>Cél előrehaladása</value>
+  </data>
+  <data name="Goal saved." xml:space="preserve">
+    <value>A cél mentve.</value>
+  </data>
+  <data name="Goals" xml:space="preserve">
+    <value>Célok</value>
+  </data>
+  <data name="Goals, more currencies and starter categories" xml:space="preserve">
+    <value>Célok, több pénznem és gyári kategóriák</value>
+  </data>
+  <data name="Got it" xml:space="preserve">
+    <value>Értem</value>
+  </data>
+  <data name="Health" xml:space="preserve">
+    <value>Egészség</value>
+  </data>
+  <data name="Hide dashboard amounts" xml:space="preserve">
+    <value>Összegek elrejtése az áttekintőn</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>Előzmények</value>
+  </data>
+  <data name="Hour" xml:space="preserve">
+    <value>Óra</value>
+  </data>
+  <data name="I understand that current data will be replaced." xml:space="preserve">
+    <value>Tudomásul veszem, hogy a jelenlegi adatok lecserélődnek.</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Ikon</value>
+  </data>
+  <data name="Identity navigation" xml:space="preserve">
+    <value>Fiókoldali navigáció</value>
+  </data>
+  <data name="Images are drawn over your banner color." xml:space="preserve">
+    <value>A képek a borítószín fölött jelennek meg.</value>
+  </data>
+  <data name="Import / Export" xml:space="preserve">
+    <value>Importálás / Exportálás</value>
+  </data>
+  <data name="Import CSV" xml:space="preserve">
+    <value>CSV importálása</value>
+  </data>
+  <data name="Import valid rows" xml:space="preserve">
+    <value>Érvényes sorok importálása</value>
+  </data>
+  <data name="Imported {0} rows; skipped {1} duplicates and {2} invalid rows." xml:space="preserve">
+    <value>Importálva: {0} sor. Kihagyva: {1} ismétlődés és {2} érvénytelen sor.</value>
+  </data>
+  <data name="Include" xml:space="preserve">
+    <value>Belefoglalás</value>
+  </data>
+  <data name="Include an account in the planner balance to see the chart." xml:space="preserve">
+    <value>A diagram megjelenítéséhez vonj be egy számlát a tervező egyenlegébe.</value>
+  </data>
+  <data name="Include in main balance" xml:space="preserve">
+    <value>Beleszámít a fő egyenlegbe</value>
+  </data>
+  <data name="Include in net worth" xml:space="preserve">
+    <value>Beleszámít a nettó vagyonba</value>
+  </data>
+  <data name="Include in statistics" xml:space="preserve">
+    <value>Beleszámít a statisztikákba</value>
+  </data>
+  <data name="Include {0} in planner balance" xml:space="preserve">
+    <value>{0} bevonása a tervező egyenlegébe</value>
+  </data>
+  <data name="Included in" xml:space="preserve">
+    <value>Beleszámít</value>
+  </data>
+  <data name="Income" xml:space="preserve">
+    <value>Bevétel</value>
+  </data>
+  <data name="Income and expenses over the last 12 months" xml:space="preserve">
+    <value>Bevételek és kiadások az elmúlt 12 hónapban</value>
+  </data>
+  <data name="Income by category" xml:space="preserve">
+    <value>Bevételek kategóriánként</value>
+  </data>
+  <data name="Incoming" xml:space="preserve">
+    <value>Beérkező</value>
+  </data>
+  <data name="Incoming transfers" xml:space="preserve">
+    <value>Beérkező átvezetések</value>
+  </data>
+  <data name="Increase" xml:space="preserve">
+    <value>Növelés</value>
+  </data>
+  <data name="Increase original amount by the difference" xml:space="preserve">
+    <value>Eredeti összeg növelése a különbözettel</value>
+  </data>
+  <data name="Initial balance" xml:space="preserve">
+    <value>Kezdőegyenleg</value>
+  </data>
+  <data name="Inspect this address" xml:space="preserve">
+    <value>Cím megtekintése</value>
+  </data>
+  <data name="Insufficient funds for" xml:space="preserve">
+    <value>Nincs elegendő fedezet ehhez:</value>
+  </data>
+  <data name="Internet" xml:space="preserve">
+    <value>Internet</value>
+  </data>
+  <data name="Invalid" xml:space="preserve">
+    <value>Érvénytelen</value>
+  </data>
+  <data name="Invalid date." xml:space="preserve">
+    <value>Érvénytelen dátum.</value>
+  </data>
+  <data name="Invalid planner copy day." xml:space="preserve">
+    <value>A tervezett tétel másolási napja érvénytelen.</value>
+  </data>
+  <data name="Invalid planner opening balances." xml:space="preserve">
+    <value>A tervező nyitóegyenlegei érvénytelenek.</value>
+  </data>
+  <data name="Invalid saved planner month." xml:space="preserve">
+    <value>A mentett tervezési hónap érvénytelen.</value>
+  </data>
+  <data name="It can result in displaying sensitive information from exceptions to end users." xml:space="preserve">
+    <value>A kivételek érzékeny adatai megjelenhetnek a felhasználóknak.</value>
+  </data>
+  <data name="Large amounts in the calendar's monthly overview are listed under each other so they stay readable." xml:space="preserve">
+    <value>A naptár havi áttekintőjében a nagy összegek egymás alatt jelennek meg, hogy olvashatók maradjanak.</value>
+  </data>
+  <data name="Last 12 months" xml:space="preserve">
+    <value>Az elmúlt 12 hónap</value>
+  </data>
+  <data name="Last occurrence cannot be before first occurrence." xml:space="preserve">
+    <value>Az utolsó előfordulás nem előzheti meg az elsőt.</value>
+  </data>
+  <data name="Last occurrence cannot be before the next occurrence." xml:space="preserve">
+    <value>Az utolsó előfordulás nem előzheti meg a következőt.</value>
+  </data>
+  <data name="Last occurrence is required when an end date is selected." xml:space="preserve">
+    <value>Ha befejezési dátumot választasz, az utolsó előfordulás kötelező.</value>
+  </data>
+  <data name="Last payment date" xml:space="preserve">
+    <value>Utolsó fizetés dátuma</value>
+  </data>
+  <data name="LastOccurrence" xml:space="preserve">
+    <value>Utolsó előfordulás</value>
+  </data>
+  <data name="Latest transactions" xml:space="preserve">
+    <value>Legfrissebb tranzakciók</value>
+  </data>
+  <data name="Limit operation to the remaining debt" xml:space="preserve">
+    <value>Művelet korlátozása a fennmaradó tartozásra</value>
+  </data>
+  <data name="Linked account" xml:space="preserve">
+    <value>Kapcsolt számla</value>
+  </data>
+  <data name="Linked/source account" xml:space="preserve">
+    <value>Kapcsolt / forrásszámla</value>
+  </data>
+  <data name="Loan Recurring Transactions" xml:space="preserve">
+    <value>Ismétlődő hiteltörlesztések</value>
+  </data>
+  <data name="LoanDisbursement" xml:space="preserve">
+    <value>Kölcsön folyósítása</value>
+  </data>
+  <data name="Loans / Debts" xml:space="preserve">
+    <value>Kölcsönök és tartozások</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Login event pages" xml:space="preserve">
+    <value>Bejelentkezési események lapozása</value>
+  </data>
+  <data name="Login events can be filtered, sorted and paged." xml:space="preserve">
+    <value>A bejelentkezési események szűrhetők, rendezhetők és lapozhatók.</value>
+  </data>
+  <data name="Main balance" xml:space="preserve">
+    <value>Fő egyenleg</value>
+  </data>
+  <data name="Main category" xml:space="preserve">
+    <value>Főkategória</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="ManualCorrectionDecrease" xml:space="preserve">
+    <value>Kézi csökkentés</value>
+  </data>
+  <data name="ManualCorrectionIncrease" xml:space="preserve">
+    <value>Kézi növelés</value>
+  </data>
+  <data name="Max amount" xml:space="preserve">
+    <value>Maximális összeg</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Üzenet</value>
+  </data>
+  <data name="Min amount" xml:space="preserve">
+    <value>Minimális összeg</value>
+  </data>
+  <data name="Minimum amount cannot exceed maximum amount." xml:space="preserve">
+    <value>A minimális összeg nem lehet nagyobb a maximálisnál.</value>
+  </data>
+  <data name="Minute" xml:space="preserve">
+    <value>Perc</value>
+  </data>
+  <data name="Month" xml:space="preserve">
+    <value>Hónap</value>
+  </data>
+  <data name="Month must be between 1 and 12." xml:space="preserve">
+    <value>A hónap értékének 1 és 12 között kell lennie.</value>
+  </data>
+  <data name="Monthly" xml:space="preserve">
+    <value>Havonta</value>
+  </data>
+  <data name="Monthly expense" xml:space="preserve">
+    <value>Havi kiadás</value>
+  </data>
+  <data name="Monthly overview" xml:space="preserve">
+    <value>Havi áttekintés</value>
+  </data>
+  <data name="Monthly planner" xml:space="preserve">
+    <value>Havi tervező</value>
+  </data>
+  <data name="More filters" xml:space="preserve">
+    <value>További szűrők</value>
+  </data>
+  <data name="More than 150 currencies are now supported." xml:space="preserve">
+    <value>Már több mint 150 pénznem támogatott.</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Név</value>
+  </data>
+  <data name="Name / category" xml:space="preserve">
+    <value>Név / kategória</value>
+  </data>
+  <data name="Name / note" xml:space="preserve">
+    <value>Név / megjegyzés</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Nettó vagyon</value>
+  </data>
+  <data name="New account" xml:space="preserve">
+    <value>Új számla</value>
+  </data>
+  <data name="New category" xml:space="preserve">
+    <value>Új kategória</value>
+  </data>
+  <data name="New debt" xml:space="preserve">
+    <value>Új tartozás</value>
+  </data>
+  <data name="New debt operation" xml:space="preserve">
+    <value>Új tartozásművelet</value>
+  </data>
+  <data name="New goal" xml:space="preserve">
+    <value>Új cél</value>
+  </data>
+  <data name="New operation" xml:space="preserve">
+    <value>Új művelet</value>
+  </data>
+  <data name="New password" xml:space="preserve">
+    <value>Új jelszó</value>
+  </data>
+  <data name="New recurring transaction" xml:space="preserve">
+    <value>Új ismétlődő tranzakció</value>
+  </data>
+  <data name="New template" xml:space="preserve">
+    <value>Új sablon</value>
+  </data>
+  <data name="New transaction" xml:space="preserve">
+    <value>Új tranzakció</value>
+  </data>
+  <data name="New users start with default categories and subcategories." xml:space="preserve">
+    <value>Az új felhasználók gyári kategóriákat és alkategóriákat kapnak.</value>
+  </data>
+  <data name="Next month" xml:space="preserve">
+    <value>Következő hónap</value>
+  </data>
+  <data name="Next payment" xml:space="preserve">
+    <value>Következő fizetés</value>
+  </data>
+  <data name="Next payment date" xml:space="preserve">
+    <value>Következő fizetés dátuma</value>
+  </data>
+  <data name="Next payment date is required." xml:space="preserve">
+    <value>A következő fizetés dátuma kötelező.</value>
+  </data>
+  <data name="Next: {0}" xml:space="preserve">
+    <value>Következő: {0}</value>
+  </data>
+  <data name="No account types are selected." xml:space="preserve">
+    <value>Nincs kiválasztott számlatípus.</value>
+  </data>
+  <data name="No accounts have been created." xml:space="preserve">
+    <value>Még nem hoztál létre számlát.</value>
+  </data>
+  <data name="No accounts yet." xml:space="preserve">
+    <value>Még nincsenek számlák.</value>
+  </data>
+  <data name="No accounts yet. Create your first account to get started." xml:space="preserve">
+    <value>Még nincsenek számlák. Hozd létre az első számládat a kezdéshez.</value>
+  </data>
+  <data name="No active debts." xml:space="preserve">
+    <value>Nincs aktív tartozás.</value>
+  </data>
+  <data name="No active income, expenses or transfers for this month." xml:space="preserve">
+    <value>Ebben a hónapban nincs aktív bevétel, kiadás vagy átvezetés.</value>
+  </data>
+  <data name="No categories." xml:space="preserve">
+    <value>Nincsenek kategóriák.</value>
+  </data>
+  <data name="No category" xml:space="preserve">
+    <value>Nincs kategória</value>
+  </data>
+  <data name="No closed debts." xml:space="preserve">
+    <value>Nincs lezárt tartozás.</value>
+  </data>
+  <data name="No currency selected." xml:space="preserve">
+    <value>Nincs kiválasztott pénznem.</value>
+  </data>
+  <data name="No data." xml:space="preserve">
+    <value>Nincs adat.</value>
+  </data>
+  <data name="No end date" xml:space="preserve">
+    <value>Nincs befejezési dátum</value>
+  </data>
+  <data name="No goals yet" xml:space="preserve">
+    <value>Még nincsenek célok</value>
+  </data>
+  <data name="No items for this month yet." xml:space="preserve">
+    <value>Még nincsenek tételek ebben a hónapban.</value>
+  </data>
+  <data name="No items." xml:space="preserve">
+    <value>Nincsenek tételek.</value>
+  </data>
+  <data name="No loan recurring transactions." xml:space="preserve">
+    <value>Nincsenek ismétlődő hitelműveletek.</value>
+  </data>
+  <data name="No matching transactions." xml:space="preserve">
+    <value>Nincs a szűrésnek megfelelő tranzakció.</value>
+  </data>
+  <data name="No note." xml:space="preserve">
+    <value>Nincs megjegyzés.</value>
+  </data>
+  <data name="No operations yet." xml:space="preserve">
+    <value>Még nincsenek műveletek.</value>
+  </data>
+  <data name="No recurring expenses are scheduled for this month." xml:space="preserve">
+    <value>Erre a hónapra nincs ütemezett ismétlődő kiadás.</value>
+  </data>
+  <data name="No regular recurring templates." xml:space="preserve">
+    <value>Nincsenek rendszeres ismétlődő sablonok.</value>
+  </data>
+  <data name="No transaction currencies this month" xml:space="preserve">
+    <value>Ebben a hónapban nincs tranzakciós pénznem</value>
+  </data>
+  <data name="No transactions for this account." xml:space="preserve">
+    <value>Ehhez a számlához nincs tranzakció.</value>
+  </data>
+  <data name="No transactions yet." xml:space="preserve">
+    <value>Még nincsenek tranzakciók.</value>
+  </data>
+  <data name="No upcoming occurrence" xml:space="preserve">
+    <value>Nincs közelgő előfordulás</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Nincs</value>
+  </data>
+  <data name="None (main category)" xml:space="preserve">
+    <value>Nincs (főkategória)</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Megjegyzés</value>
+  </data>
+  <data name="Note cannot be longer than 500 characters." xml:space="preserve">
+    <value>A megjegyzés legfeljebb 500 karakteres lehet.</value>
+  </data>
+  <data name="Note cannot exceed 500 characters." xml:space="preserve">
+    <value>A megjegyzés legfeljebb 500 karakteres lehet.</value>
+  </data>
+  <data name="Note contains" xml:space="preserve">
+    <value>Megjegyzés tartalmazza</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Megjegyzések</value>
+  </data>
+  <data name="Notes cannot exceed 10000 characters." xml:space="preserve">
+    <value>A megjegyzés legfeljebb 10 000 karakteres lehet.</value>
+  </data>
+  <data name="Notes saved." xml:space="preserve">
+    <value>Megjegyzések elmentve.</value>
+  </data>
+  <data name="Occurrences" xml:space="preserve">
+    <value>Előfordulások</value>
+  </data>
+  <data name="One or more selected categories no longer match a starter category." xml:space="preserve">
+    <value>Egy vagy több kiválasztott kategória már nem egyezik gyári kategóriával.</value>
+  </data>
+  <data name="Only a fully repaid debt can be closed." xml:space="preserve">
+    <value>Csak teljesen visszafizetett tartozás zárható le.</value>
+  </data>
+  <data name="Only adjustments can define an adjustment direction." xml:space="preserve">
+    <value>Korrekciós irány csak korrekcióhoz adható meg.</value>
+  </data>
+  <data name="Only income and expense CSV rows are supported." xml:space="preserve">
+    <value>A CSV-ben csak bevételi és kiadási sorok támogatottak.</value>
+  </data>
+  <data name="Only main categories can use icons." xml:space="preserve">
+    <value>Csak a főkategóriákhoz tartozhat ikon.</value>
+  </data>
+  <data name="Only transfers can define a target amount." xml:space="preserve">
+    <value>Célösszeg csak átvezetéshez adható meg.</value>
+  </data>
+  <data name="Open profile menu" xml:space="preserve">
+    <value>Profilmenü megnyitása</value>
+  </data>
+  <data name="Opening balance" xml:space="preserve">
+    <value>Nyitóegyenleg</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Művelet</value>
+  </data>
+  <data name="Optional." xml:space="preserve">
+    <value>Opcionális.</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Sorrend</value>
+  </data>
+  <data name="Original" xml:space="preserve">
+    <value>Eredeti</value>
+  </data>
+  <data name="Original amount" xml:space="preserve">
+    <value>Eredeti összeg</value>
+  </data>
+  <data name="Original amount cannot be lower than the already repaid amount." xml:space="preserve">
+    <value>Az eredeti összeg nem lehet kisebb a már visszafizetett összegnél.</value>
+  </data>
+  <data name="Original amount must be greater than zero." xml:space="preserve">
+    <value>Az eredeti összegnek nullánál nagyobbnak kell lennie.</value>
+  </data>
+  <data name="Original currency" xml:space="preserve">
+    <value>Eredeti pénznem</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Egyéb</value>
+  </data>
+  <data name="Outgoing expense" xml:space="preserve">
+    <value>Kimenő kiadás</value>
+  </data>
+  <data name="Outgoing transfers" xml:space="preserve">
+    <value>Kimenő átvezetések</value>
+  </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Szülőkategória</value>
+  </data>
+  <data name="Parent and subcategory must have the same category type." xml:space="preserve">
+    <value>A szülő- és alkategória típusának egyeznie kell.</value>
+  </data>
+  <data name="Parent category" xml:space="preserve">
+    <value>Szülőkategória</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Jelszó</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Szüneteltetés</value>
+  </data>
+  <data name="Paused" xml:space="preserve">
+    <value>Szünetel</value>
+  </data>
+  <data name="Paused items are excluded from totals and forecasts." xml:space="preserve">
+    <value>A szüneteltetett tételek nem számítanak bele az összesítésekbe és előrejelzésekbe.</value>
+  </data>
+  <data name="Payable" xml:space="preserve">
+    <value>Fizetendő</value>
+  </data>
+  <data name="Payment" xml:space="preserve">
+    <value>Fizetés</value>
+  </data>
+  <data name="Person or bank name" xml:space="preserve">
+    <value>Személy vagy bank neve</value>
+  </data>
+  <data name="Person or bank name is required." xml:space="preserve">
+    <value>A személy vagy bank neve kötelező.</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Plan your month and see what to expect." xml:space="preserve">
+    <value>Tervezd meg a hónapod, és nézd meg, mire számíthatsz.</value>
+  </data>
+  <data name="Planned date" xml:space="preserve">
+    <value>Tervezett dátum</value>
+  </data>
+  <data name="Planned expenses" xml:space="preserve">
+    <value>Tervezett kiadások</value>
+  </data>
+  <data name="Planned income" xml:space="preserve">
+    <value>Tervezett bevétel</value>
+  </data>
+  <data name="Planned item saved." xml:space="preserve">
+    <value>A tervezett tétel mentve.</value>
+  </data>
+  <data name="Planned transfers" xml:space="preserve">
+    <value>Tervezett átvezetések</value>
+  </data>
+  <data name="Planner months must be unique." xml:space="preserve">
+    <value>Egy tervezési hónap csak egyszer szerepelhet.</value>
+  </data>
+  <data name="Plans can be viewed up to ten years ahead." xml:space="preserve">
+    <value>A tervek legfeljebb tíz évre előre tekinthetők meg.</value>
+  </data>
+  <data name="PocketLedger website" xml:space="preserve">
+    <value>PocketLedger-weboldal</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Elhelyezés</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Előnézet</value>
+  </data>
+  <data name="Previous month" xml:space="preserve">
+    <value>Előző hónap</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Adatvédelmi tájékoztató</value>
+  </data>
+  <data name="Private Person" xml:space="preserve">
+    <value>Magánszemély</value>
+  </data>
+  <data name="PrivatePerson" xml:space="preserve">
+    <value>Magánszemély</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Reached" xml:space="preserve">
+    <value>Elérve</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Importálható</value>
+  </data>
+  <data name="Receivable" xml:space="preserve">
+    <value>Követelés</value>
+  </data>
+  <data name="Receivables can currently only belong to a private person." xml:space="preserve">
+    <value>A követelés jelenleg csak magánszemélyhez kapcsolható.</value>
+  </data>
+  <data name="ReceivedRepayment" xml:space="preserve">
+    <value>Beérkezett törlesztés</value>
+  </data>
+  <data name="Recent transactions" xml:space="preserve">
+    <value>Legutóbbi tranzakciók</value>
+  </data>
+  <data name="Record" xml:space="preserve">
+    <value>Rögzítés</value>
+  </data>
+  <data name="Recovery code" xml:space="preserve">
+    <value>Helyreállítási kód</value>
+  </data>
+  <data name="Recovery key" xml:space="preserve">
+    <value>Helyreállítási kulcs</value>
+  </data>
+  <data name="Recurring" xml:space="preserve">
+    <value>Ismétlődő tételek</value>
+  </data>
+  <data name="Recurring expenses by main category" xml:space="preserve">
+    <value>Ismétlődő kiadások főkategóriánként</value>
+  </data>
+  <data name="Recurring transaction created." xml:space="preserve">
+    <value>Az ismétlődő tranzakció létrejött.</value>
+  </data>
+  <data name="Recurring transaction deleted." xml:space="preserve">
+    <value>Az ismétlődő tranzakció törölve.</value>
+  </data>
+  <data name="Recurring transaction updated." xml:space="preserve">
+    <value>Az ismétlődő tranzakció módosítva.</value>
+  </data>
+  <data name="Recurring transactions" xml:space="preserve">
+    <value>Ismétlődő tranzakciók</value>
+  </data>
+  <data name="Recurring transfers are not supported yet." xml:space="preserve">
+    <value>Az ismétlődő átvezetések még nem támogatottak.</value>
+  </data>
+  <data name="Recurring · read-only" xml:space="preserve">
+    <value>Ismétlődő · csak olvasható</value>
+  </data>
+  <data name="Referenced financial data must belong to the same owner." xml:space="preserve">
+    <value>A hivatkozott pénzügyi adatoknak ugyanahhoz a tulajdonoshoz kell tartozniuk.</value>
+  </data>
+  <data name="Remaining" xml:space="preserve">
+    <value>Hátralévő</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Eltávolítás</value>
+  </data>
+  <data name="Reopen" xml:space="preserve">
+    <value>Újranyitás</value>
+  </data>
+  <data name="Request ID:" xml:space="preserve">
+    <value>Kérésazonosító:</value>
+  </data>
+  <data name="Requests per minute by five-minute UTC interval" xml:space="preserve">
+    <value>Percenkénti kérések ötperces UTC-időszakokban</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Visszaállítás</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Visszaállítás</value>
+  </data>
+  <data name="Restore backup" xml:space="preserve">
+    <value>Mentés visszaállítása</value>
+  </data>
+  <data name="Result" xml:space="preserve">
+    <value>Eredmény</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Folytatás</value>
+  </data>
+  <data name="Row" xml:space="preserve">
+    <value>Sor</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Mentés</value>
+  </data>
+  <data name="Save item" xml:space="preserve">
+    <value>Tétel mentése</value>
+  </data>
+  <data name="Save settings" xml:space="preserve">
+    <value>Beállítások mentése</value>
+  </data>
+  <data name="Saved amount cannot be negative." xml:space="preserve">
+    <value>A megtakarított összeg nem lehet negatív.</value>
+  </data>
+  <data name="Saved so far" xml:space="preserve">
+    <value>Eddig megtakarítva</value>
+  </data>
+  <data name="SavedAmount" xml:space="preserve">
+    <value>Megtakarított összeg</value>
+  </data>
+  <data name="Savings" xml:space="preserve">
+    <value>Megtakarítás</value>
+  </data>
+  <data name="Savings goals: set a target amount, pick a banner color or image and follow your progress." xml:space="preserve">
+    <value>Megtakarítási célok: adj meg célösszeget, válassz borítószínt vagy képet, és kövesd az előrehaladást.</value>
+  </data>
+  <data name="Saving…" xml:space="preserve">
+    <value>Mentés folyamatban…</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Válassz</value>
+  </data>
+  <data name="Select Income, Expense or Transfer." xml:space="preserve">
+    <value>Válaszd a Bevétel, Kiadás vagy Átvezetés típust.</value>
+  </data>
+  <data name="Select a .plbackup file." xml:space="preserve">
+    <value>Válassz .plbackup fájlt.</value>
+  </data>
+  <data name="Select a CSV file." xml:space="preserve">
+    <value>Válassz CSV-fájlt.</value>
+  </data>
+  <data name="Select a category to see the breakdown." xml:space="preserve">
+    <value>Válassz kategóriát a bontás megtekintéséhez.</value>
+  </data>
+  <data name="Select a currency to adjust how its amounts are displayed. Currencies that are not in the list use the standard format." xml:space="preserve">
+    <value>Válassz pénznemet az összegek megjelenítésének beállításához. A listán nem szereplő pénznemek a szokásos formátumot használják.</value>
+  </data>
+  <data name="Select a direction" xml:space="preserve">
+    <value>Válassz irányt</value>
+  </data>
+  <data name="Select a main category" xml:space="preserve">
+    <value>Válassz főkategóriát</value>
+  </data>
+  <data name="Select a target account" xml:space="preserve">
+    <value>Válassz célszámlát</value>
+  </data>
+  <data name="Select a valid planning month." xml:space="preserve">
+    <value>Válassz érvényes tervezési hónapot.</value>
+  </data>
+  <data name="Select account" xml:space="preserve">
+    <value>Válassz számlát</value>
+  </data>
+  <data name="Select an account" xml:space="preserve">
+    <value>Válassz számlát</value>
+  </data>
+  <data name="Select month" xml:space="preserve">
+    <value>Hónap kiválasztása</value>
+  </data>
+  <data name="Select only categories that came with PocketLedger. Leave your own categories unchecked." xml:space="preserve">
+    <value>Csak a PocketLedger gyári kategóriáit jelöld be. A saját kategóriáidat hagyd üresen.</value>
+  </data>
+  <data name="Select target account" xml:space="preserve">
+    <value>Válassz célszámlát</value>
+  </data>
+  <data name="Selected calendar month" xml:space="preserve">
+    <value>Kiválasztott naptári hónap</value>
+  </data>
+  <data name="Selected statistics month" xml:space="preserve">
+    <value>Statisztika kiválasztott hónapja</value>
+  </data>
+  <data name="Set a target amount for something you are saving for and follow your progress." xml:space="preserve">
+    <value>Adj meg egy célösszeget ahhoz, amire gyűjtesz, és kövesd az előrehaladást.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Beállítások</value>
+  </data>
+  <data name="Settings saved." xml:space="preserve">
+    <value>A beállítások mentve.</value>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Arány</value>
+  </data>
+  <data name="Show" xml:space="preserve">
+    <value>Megjelenítés</value>
+  </data>
+  <data name="Show dashboard amounts" xml:space="preserve">
+    <value>Összegek megjelenítése az áttekintőn</value>
+  </data>
+  <data name="Sign in" xml:space="preserve">
+    <value>Bejelentkezés</value>
+  </data>
+  <data name="Sign in again" xml:space="preserve">
+    <value>Jelentkezz be újra</value>
+  </data>
+  <data name="Source account" xml:space="preserve">
+    <value>Forrásszámla</value>
+  </data>
+  <data name="Source and target accounts are required." xml:space="preserve">
+    <value>Forrás- és célszámla is szükséges.</value>
+  </data>
+  <data name="Source and target accounts must be different." xml:space="preserve">
+    <value>A forrás- és célszámlának különböznie kell.</value>
+  </data>
+  <data name="Space between value and currency" xml:space="preserve">
+    <value>Szóköz az érték és a pénznem között</value>
+  </data>
+  <data name="Start / due" xml:space="preserve">
+    <value>Kezdés / esedékesség</value>
+  </data>
+  <data name="Start date cannot be after end date." xml:space="preserve">
+    <value>A kezdődátum nem lehet a befejezés után.</value>
+  </data>
+  <data name="Start date is required." xml:space="preserve">
+    <value>A kezdődátum kötelező.</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Kezdődátum</value>
+  </data>
+  <data name="Starter category translations enabled." xml:space="preserve">
+    <value>A gyári kategóriák fordítása bekapcsolva.</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statisztikák</value>
+  </data>
+  <data name="Statistics now shows income by main category in a doughnut chart, just like expenses." xml:space="preserve">
+    <value>A statisztikában a bevételek is gyűrűdiagramon láthatók főkategóriánként, akárcsak a kiadások.</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Állapot</value>
+  </data>
+  <data name="Still needed" xml:space="preserve">
+    <value>Még szükséges</value>
+  </data>
+  <data name="Streaming" xml:space="preserve">
+    <value>Streaming</value>
+  </data>
+  <data name="Subcategories cannot use an icon." xml:space="preserve">
+    <value>Alkategóriához nem adható meg ikon.</value>
+  </data>
+  <data name="Subcategory" xml:space="preserve">
+    <value>Alkategória</value>
+  </data>
+  <data name="Switching to the {0} environment displays more details about the error." xml:space="preserve">
+    <value>A(z) {0} környezetre váltva részletesebb hibainformáció jelenik meg.</value>
+  </data>
+  <data name="Symbol" xml:space="preserve">
+    <value>Jel</value>
+  </data>
+  <data name="Symbol: {0}" xml:space="preserve">
+    <value>Jel: {0}</value>
+  </data>
+  <data name="Target" xml:space="preserve">
+    <value>Cél</value>
+  </data>
+  <data name="Target account" xml:space="preserve">
+    <value>Célszámla</value>
+  </data>
+  <data name="Target account and target amount must be empty for non-transfer transactions." xml:space="preserve">
+    <value>A célszámla és a célösszeg csak átvezetés esetén adható meg.</value>
+  </data>
+  <data name="Target amount" xml:space="preserve">
+    <value>Célösszeg</value>
+  </data>
+  <data name="Target amount must be greater than zero." xml:space="preserve">
+    <value>A célösszegnek nullánál nagyobbnak kell lennie.</value>
+  </data>
+  <data name="Target amount must equal source amount when account currencies match." xml:space="preserve">
+    <value>Azonos számlapénznem esetén a cél- és forrásösszegnek egyeznie kell.</value>
+  </data>
+  <data name="Target date" xml:space="preserve">
+    <value>Céldátum</value>
+  </data>
+  <data name="The Development environment shouldn't be enabled for deployed applications." xml:space="preserve">
+    <value>Telepített alkalmazásban a fejlesztői környezetet ki kell kapcsolni.</value>
+  </data>
+  <data name="The Excel export password contains invalid Unicode characters." xml:space="preserve">
+    <value>Az Excel-export jelszava érvénytelen Unicode-karaktereket tartalmaz.</value>
+  </data>
+  <data name="The account amount must equal the original amount when currencies match." xml:space="preserve">
+    <value>Azonos pénznem esetén a számla összegének egyeznie kell az eredeti összeggel.</value>
+  </data>
+  <data name="The account cannot be deleted because transactions reference it." xml:space="preserve">
+    <value>A számla nem törölhető, mert tranzakciók kapcsolódnak hozzá.</value>
+  </data>
+  <data name="The adjustment financial semantics are invalid." xml:space="preserve">
+    <value>A korrekció pénzügyi adatai érvénytelenek.</value>
+  </data>
+  <data name="The amount expected to be credited or debited in the account currency." xml:space="preserve">
+    <value>A jóváírás vagy terhelés várható összege a számla pénznemében.</value>
+  </data>
+  <data name="The backup exceeds the 64 MiB limit." xml:space="preserve">
+    <value>A mentés meghaladja a 64 MiB-os korlátot.</value>
+  </data>
+  <data name="The backup exceeds the 64 MiB payload limit." xml:space="preserve">
+    <value>A mentés meghaladja a 64 MiB-os adatméretkorlátot.</value>
+  </data>
+  <data name="The backup password contains invalid Unicode characters." xml:space="preserve">
+    <value>A mentés jelszava érvénytelen Unicode-karaktereket tartalmaz.</value>
+  </data>
+  <data name="The category cannot be deleted because transactions reference it." xml:space="preserve">
+    <value>A kategória nem törölhető, mert tranzakciók hivatkoznak rá.</value>
+  </data>
+  <data name="The category cannot be deleted while it contains subcategories." xml:space="preserve">
+    <value>A kategória nem törölhető, amíg alkategóriákat tartalmaz.</value>
+  </data>
+  <data name="The debt entry operation is invalid." xml:space="preserve">
+    <value>A tartozástétel művelete érvénytelen.</value>
+  </data>
+  <data name="The debt is closed." xml:space="preserve">
+    <value>A tartozás le van zárva.</value>
+  </data>
+  <data name="The debt operation type is invalid." xml:space="preserve">
+    <value>A tartozásművelet típusa érvénytelen.</value>
+  </data>
+  <data name="The encrypted backup data is invalid." xml:space="preserve">
+    <value>A titkosított mentés adatai érvénytelenek.</value>
+  </data>
+  <data name="The expected closing balance is zero or negative." xml:space="preserve">
+    <value>A várható záróegyenleg nulla vagy negatív.</value>
+  </data>
+  <data name="The expense debt operation is invalid." xml:space="preserve">
+    <value>A kiadással járó tartozásművelet érvénytelen.</value>
+  </data>
+  <data name="The field {0} must be a string or array type with a minimum length of '{1}'." xml:space="preserve">
+    <value>A(z) {0} mezőnek legalább {1} karakterből vagy elemből kell állnia.</value>
+  </data>
+  <data name="The field {0} must be a string with a maximum length of {1}." xml:space="preserve">
+    <value>A(z) {0} mező legfeljebb {1} karakterből állhat.</value>
+  </data>
+  <data name="The field {0} must be between {1} and {2}." xml:space="preserve">
+    <value>A(z) {0} értékének {1} és {2} között kell lennie.</value>
+  </data>
+  <data name="The income debt operation is invalid." xml:space="preserve">
+    <value>A bevétellel járó tartozásművelet érvénytelen.</value>
+  </data>
+  <data name="The initial balance on the account form now follows your currency format." xml:space="preserve">
+    <value>A számlaűrlap kezdőegyenlege a beállított pénznemformátumot használja.</value>
+  </data>
+  <data name="The opening balance supports at most four decimal places." xml:space="preserve">
+    <value>A nyitóegyenleg legfeljebb négy tizedesjegyet tartalmazhat.</value>
+  </data>
+  <data name="The operation amount exceeds the remaining debt. Choose whether to increase the original amount or limit the operation." xml:space="preserve">
+    <value>A művelet összege meghaladja a hátralévő tartozást. Válaszd ki, hogy növeled az eredeti összeget, vagy korlátozod a műveletet.</value>
+  </data>
+  <data name="The operation does not match the debt direction." xml:space="preserve">
+    <value>A művelet nem felel meg a tartozás irányának.</value>
+  </data>
+  <data name="The passwords do not match." xml:space="preserve">
+    <value>A jelszavak nem egyeznek.</value>
+  </data>
+  <data name="The plan month must be the first day of the month." xml:space="preserve">
+    <value>A tervezési hónap dátumának a hónap első napjának kell lennie.</value>
+  </data>
+  <data name="The planned date must belong to the selected month." xml:space="preserve">
+    <value>A tervezett dátumnak a kiválasztott hónapra kell esnie.</value>
+  </data>
+  <data name="The saved plan is invalid." xml:space="preserve">
+    <value>A mentett terv érvénytelen.</value>
+  </data>
+  <data name="The selected account does not exist." xml:space="preserve">
+    <value>A kiválasztott számla nem létezik.</value>
+  </data>
+  <data name="The selected account type is invalid." xml:space="preserve">
+    <value>A kiválasztott számlatípus érvénytelen.</value>
+  </data>
+  <data name="The selected banner image is invalid." xml:space="preserve">
+    <value>A kiválasztott borítókép érvénytelen.</value>
+  </data>
+  <data name="The selected category does not exist." xml:space="preserve">
+    <value>A kiválasztott kategória nem létezik.</value>
+  </data>
+  <data name="The selected category icon is invalid." xml:space="preserve">
+    <value>A kiválasztott kategóriaikon érvénytelen.</value>
+  </data>
+  <data name="The selected category type is invalid." xml:space="preserve">
+    <value>A kiválasztott kategóriatípus érvénytelen.</value>
+  </data>
+  <data name="The selected currency is not supported." xml:space="preserve">
+    <value>A kiválasztott pénznem nem támogatott.</value>
+  </data>
+  <data name="The selected debt direction or type is invalid." xml:space="preserve">
+    <value>A kiválasztott tartozásirány vagy -típus érvénytelen.</value>
+  </data>
+  <data name="The selected debt operation is invalid." xml:space="preserve">
+    <value>A kiválasztott tartozásművelet érvénytelen.</value>
+  </data>
+  <data name="The selected file is not a PocketLedger encrypted backup." xml:space="preserve">
+    <value>A kiválasztott fájl nem titkosított PocketLedger-mentés.</value>
+  </data>
+  <data name="The selected frequency is invalid." xml:space="preserve">
+    <value>A kiválasztott gyakoriság érvénytelen.</value>
+  </data>
+  <data name="The selected icon is invalid." xml:space="preserve">
+    <value>A kiválasztott ikon érvénytelen.</value>
+  </data>
+  <data name="The selected icon is not valid for this category type." xml:space="preserve">
+    <value>A kiválasztott ikon nem használható ennél a kategóriatípusnál.</value>
+  </data>
+  <data name="The selected local time does not exist because of a daylight-saving transition." xml:space="preserve">
+    <value>A kiválasztott helyi idő az óraátállítás miatt nem létezik.</value>
+  </data>
+  <data name="The selected month is invalid." xml:space="preserve">
+    <value>A kiválasztott hónap érvénytelen.</value>
+  </data>
+  <data name="The selected parent category does not exist." xml:space="preserve">
+    <value>A kiválasztott szülőkategória nem létezik.</value>
+  </data>
+  <data name="The transaction financial semantics are unsupported." xml:space="preserve">
+    <value>A tranzakció pénzügyi típusa nem támogatott.</value>
+  </data>
+  <data name="The transaction list shows the category first, with the type and note underneath." xml:space="preserve">
+    <value>A tranzakciólista először a kategóriát mutatja, alatta a típust és a megjegyzést.</value>
+  </data>
+  <data name="The transaction type is invalid." xml:space="preserve">
+    <value>A tranzakciótípus érvénytelen.</value>
+  </data>
+  <data name="The transfer financial semantics are invalid." xml:space="preserve">
+    <value>Az átvezetés pénzügyi adatai érvénytelenek.</value>
+  </data>
+  <data name="The {0} field is not a valid e-mail address." xml:space="preserve">
+    <value>A(z) {0} mezőben megadott e-mail-cím érvénytelen.</value>
+  </data>
+  <data name="The {0} field is required." xml:space="preserve">
+    <value>A(z) {0} mező kötelező.</value>
+  </data>
+  <data name="These adjustments affect balances without counting as income or expenses." xml:space="preserve">
+    <value>Ezek a korrekciók módosítják az egyenleget, de nem számítanak bevételnek vagy kiadásnak.</value>
+  </data>
+  <data name="This action cannot be undone." xml:space="preserve">
+    <value>A művelet nem vonható vissza.</value>
+  </data>
+  <data name="This changelog: see what's new after an update, and browse earlier releases from your account page." xml:space="preserve">
+    <value>Ebben a változásnaplóban frissítés után megnézheted az újdonságokat, a fiókoldalon pedig a korábbi kiadásokat.</value>
+  </data>
+  <data name="This is not a debt transaction." xml:space="preserve">
+    <value>Ez nem tartozáshoz kapcsolódó tranzakció.</value>
+  </data>
+  <data name="This month" xml:space="preserve">
+    <value>Ebben a hónapban</value>
+  </data>
+  <data name="This operation cannot use an account." xml:space="preserve">
+    <value>Ehhez a művelethez nem adható meg számla.</value>
+  </data>
+  <data name="This planner uses planned items and active recurring income and expenses, including loan payments. Figures are estimates." xml:space="preserve">
+    <value>A tervező a tervezett tételeket és az aktív ismétlődő bevételeket és kiadásokat, köztük a törlesztéseket használja. Az összegek becslések.</value>
+  </data>
+  <data name="Thousands separator" xml:space="preserve">
+    <value>Ezreselválasztó</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>Idő</value>
+  </data>
+  <data name="Time zone" xml:space="preserve">
+    <value>Időzóna</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Eddig</value>
+  </data>
+  <data name="Toggle navigation" xml:space="preserve">
+    <value>Navigáció megnyitása vagy bezárása</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Összesen</value>
+  </data>
+  <data name="Total balance" xml:space="preserve">
+    <value>Összesített egyenleg</value>
+  </data>
+  <data name="Total monthly loan payments" xml:space="preserve">
+    <value>Havi hiteltörlesztések összesen</value>
+  </data>
+  <data name="Totals by currency" xml:space="preserve">
+    <value>Összesítések pénznemenként</value>
+  </data>
+  <data name="Transaction created successfully." xml:space="preserve">
+    <value>A tranzakció létrejött.</value>
+  </data>
+  <data name="Transaction date is required." xml:space="preserve">
+    <value>A tranzakció dátuma kötelező.</value>
+  </data>
+  <data name="Transaction deleted successfully." xml:space="preserve">
+    <value>A tranzakció törölve.</value>
+  </data>
+  <data name="Transaction details" xml:space="preserve">
+    <value>Tranzakció részletei</value>
+  </data>
+  <data name="Transaction updated successfully." xml:space="preserve">
+    <value>A tranzakció módosítva.</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Tranzakciók</value>
+  </data>
+  <data name="Transfer" xml:space="preserve">
+    <value>Átvezetés</value>
+  </data>
+  <data name="Transfer in" xml:space="preserve">
+    <value>Beérkező átvezetés</value>
+  </data>
+  <data name="Transfer into {0}" xml:space="preserve">
+    <value>Átvezetés ide: {0}</value>
+  </data>
+  <data name="Transfer out" xml:space="preserve">
+    <value>Kimenő átvezetés</value>
+  </data>
+  <data name="Transfer out of {0}" xml:space="preserve">
+    <value>Átvezetés innen: {0}</value>
+  </data>
+  <data name="Transfers" xml:space="preserve">
+    <value>Átvezetések</value>
+  </data>
+  <data name="Transfers are not supported yet." xml:space="preserve">
+    <value>Az átvezetések még nem támogatottak.</value>
+  </data>
+  <data name="Transfers cannot use a category." xml:space="preserve">
+    <value>Átvezetéshez nem adható meg kategória.</value>
+  </data>
+  <data name="Transfers cannot use an adjustment direction." xml:space="preserve">
+    <value>Átvezetéshez nem adható meg korrekciós irány.</value>
+  </data>
+  <data name="Translate existing starter categories" xml:space="preserve">
+    <value>Meglévő gyári kategóriák fordítása</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Típus</value>
+  </data>
+  <data name="Undated" xml:space="preserve">
+    <value>Dátum nélkül</value>
+  </data>
+  <data name="Unlimited" xml:space="preserve">
+    <value>Korlátlan</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Mentetlen módosítások</value>
+  </data>
+  <data name="Update savings" xml:space="preserve">
+    <value>Megtakarítás frissítése</value>
+  </data>
+  <data name="Use between 10 and 128 characters. A forgotten password cannot be recovered." xml:space="preserve">
+    <value>Használj 10–128 karaktert. Az elfelejtett jelszó nem állítható helyre.</value>
+  </data>
+  <data name="Use the current account balance automatically instead of a custom opening balance." xml:space="preserve">
+    <value>A kézzel megadott nyitóegyenleg helyett automatikusan az aktuális számlaegyenleget használd.</value>
+  </data>
+  <data name="Use this page to detail your site's privacy policy." xml:space="preserve">
+    <value>Ezen az oldalon adhatod meg a webhely adatvédelmi szabályzatát.</value>
+  </data>
+  <data name="Used for new accounts and as the preselected currency in forms." xml:space="preserve">
+    <value>Az új számlák és az űrlapok alapértelmezett pénzneme.</value>
+  </data>
+  <data name="User overview pages" xml:space="preserve">
+    <value>Felhasználólista lapozása</value>
+  </data>
+  <data name="Username" xml:space="preserve">
+    <value>Felhasználónév</value>
+  </data>
+  <data name="View all" xml:space="preserve">
+    <value>Összes megtekintése</value>
+  </data>
+  <data name="View debt" xml:space="preserve">
+    <value>Tartozás megtekintése</value>
+  </data>
+  <data name="Warning:" xml:space="preserve">
+    <value>Figyelem:</value>
+  </data>
+  <data name="We couldn't complete your sign-in. Your login request may have expired or already been used. Please start again from this browser and allow cookies." xml:space="preserve">
+    <value>A bejelentkezés nem fejeződött be. Lehet, hogy a kérés lejárt vagy már felhasználtad. Indítsd újra ebben a böngészőben, és engedélyezd a sütiket.</value>
+  </data>
+  <data name="Weekly" xml:space="preserve">
+    <value>Hetente</value>
+  </data>
+  <data name="What's new in PocketLedger {0}" xml:space="preserve">
+    <value>A PocketLedger {0} újdonságai</value>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>Kivét</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Év</value>
+  </data>
+  <data name="Yearly" xml:space="preserve">
+    <value>Évente</value>
+  </data>
+  <data name="You are on track!" xml:space="preserve">
+    <value>Jól haladsz!</value>
+  </data>
+  <data name="You cannot withdraw more than the saved amount." xml:space="preserve">
+    <value>A megtakarított összegnél többet nem vehetsz ki.</value>
+  </data>
+  <data name="Your selected avatar is now shown on the account pages too." xml:space="preserve">
+    <value>A választott profilkép a fiókoldalakon is megjelenik.</value>
+  </data>
+  <data name="a confirmed restore replaces all current PocketLedger data. It runs in a database transaction and rolls back on failure." xml:space="preserve">
+    <value>a megerősített visszaállítás lecseréli az összes jelenlegi PocketLedger-adatot. Adatbázis-tranzakcióban fut, hiba esetén visszagörgetéssel.</value>
+  </data>
+  <data name="e.g. 203.0.113.10" xml:space="preserve">
+    <value>pl. 203.0.113.10</value>
+  </data>
+  <data name="e.g. Summer holiday" xml:space="preserve">
+    <value>pl. nyári nyaralás</value>
+  </data>
+  <data name="no due date" xml:space="preserve">
+    <value>nincs esedékesség</value>
+  </data>
+  <data name="{0} icon {1}" xml:space="preserve">
+    <value>{0} ikon ({1})</value>
+  </data>
+  <data name="{0} opening balance ({1})" xml:space="preserve">
+    <value>{0} nyitóegyenlege ({1})</value>
+  </data>
+</root>

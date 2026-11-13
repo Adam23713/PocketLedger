@@ -55,7 +55,7 @@
         item.type = "button";
         item.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2";
         item.dataset.currencyItem = code;
-        item.innerHTML = `<span><strong>${escape(code)}</strong> <small class="text-muted">${escape(option.dataset.name)}</small></span><span class="badge text-bg-primary" data-default-badge hidden>Default</span>`;
+        item.innerHTML = `<span><strong>${escape(code)}</strong> <small class="text-muted">${escape(option.dataset.name)}</small></span><span class="badge text-bg-primary" data-default-badge hidden>${escape(list.closest("form").dataset.defaultLabel)}</span>`;
         item.addEventListener("click", () => select(code));
         list.append(item);
 

@@ -1,0 +1,35 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Features" xml:space="preserve">
+    <value>Fonctionnalités</value>
+  </data>
+  <data name="Security" xml:space="preserve">
+    <value>Sécurité</value>
+  </data>
+  <data name="Open source" xml:space="preserve">
+    <value>Open source</value>
+  </data>
+  <data name="Self-hosting" xml:space="preserve">
+    <value>Auto-hébergement</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Navigation principale</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>Ouvrir PocketLedger</value>
+  </data>
+</root>

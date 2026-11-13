@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models;
 using PocketLedger.Models.Enums;
@@ -83,7 +84,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         catch (EntityNotFoundException) { return NotFound(); }
         catch (BusinessRuleException exception)
         {
-            if (ajax) return BadRequest(new { message = exception.Message });
+            if (ajax) return BadRequest(new { message = CommonText.Get(exception.Message) });
             TempData["ErrorMessage"] = exception.Message;
         }
         if (ajax) return PartialView("_Content", await plannerService.GetMonthAsync(year, month, cancellationToken));
@@ -104,7 +105,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         catch (EntityNotFoundException) { return NotFound(); }
         catch (BusinessRuleException exception)
         {
-            if (ajax) return BadRequest(new { message = exception.Message });
+            if (ajax) return BadRequest(new { message = CommonText.Get(exception.Message) });
             TempData["ErrorMessage"] = exception.Message;
         }
         if (ajax) return PartialView("_Content", await plannerService.GetMonthAsync(item.Month.Year, item.Month.Month, cancellationToken));
@@ -122,11 +123,11 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
         }
         catch (BusinessRuleException exception)
         {
-            if (ajax) return BadRequest(new { message = exception.Message });
+            if (ajax) return BadRequest(new { message = CommonText.Get(exception.Message) });
             TempData["ErrorMessage"] = exception.Message;
             return RedirectToAction(nameof(Index), new { year, month });
         }
-        if (ajax) return Ok(new { message = "Notes saved." });
+        if (ajax) return Ok(new { message = CommonText.Get("Notes saved.") });
         TempData["SuccessMessage"] = "Notes saved.";
         return RedirectToAction(nameof(Index), new { year, month });
     }
@@ -143,7 +144,7 @@ public class PlannerController(IPlannerService plannerService, IAccountService a
                 return RedirectToAction(nameof(Index), new { year = model.Month.Year, month = model.Month.Month });
             }
             catch (EntityNotFoundException) { return NotFound(); }
-            catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); }
+            catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); }
         }
         await PopulateAsync(model, cancellationToken);
         return View("Form", model);

@@ -1,0 +1,15 @@
+@using System.Globalization
+@using PocketLedger.Localization
+@{
+    var flags = new Dictionary<string, string> { ["en"] = "🇬🇧", ["hu"] = "🇭🇺", ["de"] = "🇩🇪", ["fr"] = "🇫🇷" };
+}
+<form class="language-selector" method="post" action="@Url.Content("~/ui-language")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)" />
+    <select name="language" aria-label="@UiLocalization.LanguageLabel" class="form-select form-select-sm" data-ui-language>
+        @foreach (var language in UiLocalization.Languages)
+        {
+            <option value="@language.Key" lang="@language.Key" selected="@(language.Key == CultureInfo.CurrentUICulture.Name)">@flags[language.Key] @language.Value</option>
+        }
+    </select>
+</form>

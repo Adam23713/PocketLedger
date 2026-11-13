@@ -1,29 +1,30 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.RecurringTransactions.RecurringTransactionIndexViewModel
 @using PocketLedger.Models.Enums
-@{ ViewData["Title"] = "Recurring transactions"; }
-<div class="d-flex justify-content-between align-items-center mb-3"><h1>Recurring transactions</h1><a class="btn btn-primary" asp-action="Create">New template</a></div>
-<p class="text-muted">Enabled templates are processed automatically (Europe/Budapest).</p>
-@if (Model.FrequencyGroups.Count == 0) { <div class="alert alert-info">No regular recurring templates.</div> }
+@{ ViewData["Title"] = CommonText.Get("Recurring transactions"); }
+<div class="d-flex justify-content-between align-items-center mb-3"><h1>@CommonText.Get("Recurring transactions")</h1><a class="btn btn-primary" asp-action="Create">@CommonText.Get("New template")</a></div>
+<p class="text-muted">@CommonText.Get("Enabled templates are processed automatically (Europe/Budapest).")</p>
+@if (Model.FrequencyGroups.Count == 0) { <div class="alert alert-info">@CommonText.Get("No regular recurring templates.")</div> }
 @foreach (var frequencyGroup in Model.FrequencyGroups)
 {
-    <h2 class="h4 mt-4">@frequencyGroup.Frequency</h2>
+    <h2 class="h4 mt-4">@CommonText.EnumLabel(frequencyGroup.Frequency)</h2>
     <div class="list-group recurring-transaction-list">
     @foreach (var item in frequencyGroup.Items)
     {
         var negative = item.Type == TransactionType.Expense || item.Type == TransactionType.Adjustment && item.AdjustmentDirection == AdjustmentDirection.Decrease;
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
-                @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@item.CategoryIconAlt" /> }
+                @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@CommonText.IconLabel(item.CategoryIconAlt)" /> }
                 <span>
-                    <strong>@item.Type</strong> · @(item.CategoryName ?? "No category")
+                    <strong>@CommonText.EnumLabel(item.Type)</strong> · @(item.CategoryName ?? CommonText.Get("No category"))
                     <br />
-                    <small class="text-muted">@(item.NextOccurrence is null ? "No upcoming occurrence" : $"Next: {item.NextOccurrence:yyyy-MM-dd}") · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")@(string.IsNullOrWhiteSpace(item.Note) ? "" : " · " + item.Note)</small>
+                    <small class="text-muted">@(item.NextOccurrence is null ? CommonText.Get("No upcoming occurrence") : CommonText.Format("Next: {0}", item.NextOccurrence?.ToString("yyyy-MM-dd"))) · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")@(string.IsNullOrWhiteSpace(item.Note) ? "" : " · " + item.Note)</small>
                 </span>
             </div>
             <div class="d-flex align-items-center gap-3 ms-auto">
                 <span class="@(negative ? "text-danger" : "text-success")">@(negative ? "−" : "+")@MoneyFormatter.Format(item.Amount, item.Currency)</span>
                 <span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span>
-                <span><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a></span>
+                <span><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@item.Id">@CommonText.Get("Edit")</a> <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">@CommonText.Get("Delete")</a></span>
             </div>
         </div>
     }
@@ -36,8 +37,8 @@
     }
     </div>
 }
-<h2 class="h4 mt-5">Loan Recurring Transactions</h2>
-@if (Model.LoanItems.Count == 0) { <p class="text-muted">No loan recurring transactions.</p> }
+<h2 class="h4 mt-5">@CommonText.Get("Loan Recurring Transactions")</h2>
+@if (Model.LoanItems.Count == 0) { <p class="text-muted">@CommonText.Get("No loan recurring transactions.")</p> }
 else
 {
     <div class="list-group recurring-transaction-list">
@@ -45,15 +46,15 @@ else
     {
         <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
-                @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@item.CategoryIconAlt" /> }
-                <span><strong><a asp-controller="Debts" asp-action="Details" asp-route-id="@item.DebtId">@item.DebtName</a></strong><br /><small class="text-muted">@(item.NextOccurrence is null ? "No upcoming occurrence" : $"Next: {item.NextOccurrence:yyyy-MM-dd}") · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")</small></span>
+                @if (!string.IsNullOrWhiteSpace(item.CategoryIconPath)) { <img class="category-icon" src="@item.CategoryIconPath" alt="@CommonText.IconLabel(item.CategoryIconAlt)" /> }
+                <span><strong><a asp-controller="Debts" asp-action="Details" asp-route-id="@item.DebtId">@item.DebtName</a></strong><br /><small class="text-muted">@(item.NextOccurrence is null ? CommonText.Get("No upcoming occurrence") : CommonText.Format("Next: {0}", item.NextOccurrence?.ToString("yyyy-MM-dd"))) · @item.Frequency · @item.AccountName@(item.LastOccurrence is null ? " · No end date" : $" · Until {item.LastOccurrence:yyyy-MM-dd}")</small></span>
             </div>
             <div class="d-flex align-items-center gap-3 ms-auto"><span class="text-danger">−@MoneyFormatter.Format(item.Amount, item.Currency)</span><span class="badge @(item.Enabled ? "text-bg-success" : "text-bg-secondary")">@(item.Enabled ? "Enabled" : "Disabled")</span></div>
         </div>
     }
     @if (Model.MonthlyLoanPaymentTotals.Count > 0)
     {
-        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold"><span>Total monthly loan payments</span><span class="d-flex flex-wrap gap-3">@foreach (var total in Model.MonthlyLoanPaymentTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span></div>
+        <div class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 fw-semibold"><span>@CommonText.Get("Total monthly loan payments")</span><span class="d-flex flex-wrap gap-3">@foreach (var total in Model.MonthlyLoanPaymentTotals) { <span class="text-danger">−@MoneyFormatter.Format(total.Amount, total.Currency)</span> }</span></div>
     }
     </div>
 }

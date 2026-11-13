@@ -13,6 +13,7 @@ public sealed class ApplicationUserClaimsPrincipalFactory(UserManager<Applicatio
     {
         var identity = await base.GenerateClaimsAsync(user);
         if (user.IsBootstrapAdministrator) identity.AddClaim(new Claim(BootstrapAdministratorAuthorization.ClaimType, bool.TrueString));
+        if (user.PreferredLanguage is { } language) identity.AddClaim(new Claim("locale", language));
         return identity;
     }
 }

@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.ComponentModel.DataAnnotations;
 using PocketLedger.Services;
 
@@ -27,10 +28,10 @@ public class ExcelExportViewModel : IValidatableObject
 {
     public TransactionFilter Filter { get; set; } = new();
 
-    [Required, DataType(DataType.Password)]
+    [Required(ErrorMessage = "The {0} field is required."), DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
-    [Required, DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
+    [Required(ErrorMessage = "The {0} field is required."), DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -40,7 +41,7 @@ public class ExcelExportViewModel : IValidatableObject
         try { length = BackupProtectionFormat.PasswordLength(Password); }
         catch (ArgumentException)
         {
-            return [new ValidationResult("The Excel export password contains invalid Unicode characters.", [nameof(Password)])];
+            return [new ValidationResult(CommonText.Get("The Excel export password contains invalid Unicode characters."), [nameof(Password)])];
         }
         if (length is < BackupProtectionFormat.MinimumPasswordLength or > BackupProtectionFormat.MaximumPasswordLength)
             return [new ValidationResult($"The Excel export password must contain between {BackupProtectionFormat.MinimumPasswordLength} and {BackupProtectionFormat.MaximumPasswordLength} characters.", [nameof(Password)])];
@@ -50,10 +51,10 @@ public class ExcelExportViewModel : IValidatableObject
 
 public class EncryptedBackupExportViewModel : IValidatableObject
 {
-    [Required, DataType(DataType.Password)]
+    [Required(ErrorMessage = "The {0} field is required."), DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
-    [Required, DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
+    [Required(ErrorMessage = "The {0} field is required."), DataType(DataType.Password), Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -63,7 +64,7 @@ public class EncryptedBackupExportViewModel : IValidatableObject
         try { length = BackupProtectionFormat.PasswordLength(Password); }
         catch (ArgumentException)
         {
-            return [new ValidationResult("The backup password contains invalid Unicode characters.", [nameof(Password)])];
+            return [new ValidationResult(CommonText.Get("The backup password contains invalid Unicode characters."), [nameof(Password)])];
         }
         if (length is < BackupProtectionFormat.MinimumPasswordLength or > BackupProtectionFormat.MaximumPasswordLength)
             return [new ValidationResult($"The backup password must contain between {BackupProtectionFormat.MinimumPasswordLength} and {BackupProtectionFormat.MaximumPasswordLength} characters.", [nameof(Password)])];

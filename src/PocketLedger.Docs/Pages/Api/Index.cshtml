@@ -1,36 +1,37 @@
 @page "/api"
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Text
 @{
     ViewData["Title"] = "API";
 }
 <div class="docs-layout shell">
-    <aside class="sidebar" aria-label="API navigation">
+    <aside class="sidebar" aria-label="@Text["API navigation"]">
         <p class="sidebar-title">API</p>
-        <a href="#overview" aria-current="page">Overview</a>
-        <span>Authentication <small>Coming soon</small></span>
-        <span>Endpoints <small>Coming soon</small></span>
-        <span>Errors <small>Coming soon</small></span>
+        <a href="#overview" aria-current="page">@Text["Overview"]</a>
+        <span>@Text["Authentication"] <small>@Text["Coming soon"]</small></span>
+        <span>@Text["Endpoints"] <small>@Text["Coming soon"]</small></span>
+        <span>@Text["Errors"] <small>@Text["Coming soon"]</small></span>
     </aside>
     <article class="docs-content" id="overview">
-        <p class="eyebrow">DEVELOPER DOCUMENTATION</p>
+        <p class="eyebrow">@Text["DEVELOPER DOCUMENTATION"]</p>
         <h1>PocketLedger API</h1>
-        <p class="lead">The API documentation will cover authentication, request and response formats, endpoints and practical examples for client developers.</p>
+        <p class="lead">@Text["The API documentation will cover authentication, request and response formats, endpoints and practical examples for client developers."]</p>
         <div class="notice">
-            <strong>The API reference is not published yet.</strong>
-            <p>Endpoint details and executable examples will be added once the public API contract is documented.</p>
+            <strong>@Text["The API reference is not published yet."]</strong>
+            <p>@Text["Endpoint details and executable examples will be added once the public API contract is documented."]</p>
         </div>
-        <h2>Example format</h2>
-        <p>Examples will be ready to copy and will clearly mark the values that need to be replaced.</p>
+        <h2>@Text["Example format"]</h2>
+        <p>@Text["Examples will be ready to copy and will clearly mark the values that need to be replaced."]</p>
         <div class="code-block">
-            <button type="button" class="copy-button" data-copy-code aria-live="polite">Copy</button>
-            <pre aria-label="Placeholder curl example"><code>curl https://api.example.com/resource \
+            <button type="button" class="copy-button" data-copy-code data-copied="@Text["Copied"]" data-copy-failed="@Text["Copy failed"]" aria-live="polite">@Text["Copy"]</button>
+            <pre aria-label="@Text["Placeholder curl example"]"><code>curl https://api.example.com/resource \
   --header "Authorization: Bearer &lt;access-token&gt;"</code></pre>
         </div>
-        <h2>Planned topics</h2>
+        <h2>@Text["Planned topics"]</h2>
         <ul class="topic-list">
-            <li><strong>Authentication</strong><span>Obtain and use access tokens safely.</span></li>
-            <li><strong>API conventions</strong><span>Understand formats, pagination, validation and errors.</span></li>
-            <li><strong>Endpoint reference</strong><span>See inputs, outputs and copyable curl requests.</span></li>
-            <li><strong>Client integration</strong><span>Follow a practical path from the first request to a working client.</span></li>
+            <li><strong>@Text["Authentication"]</strong><span>@Text["Obtain and use access tokens safely."]</span></li>
+            <li><strong>@Text["API conventions"]</strong><span>@Text["Understand formats, pagination, validation and errors."]</span></li>
+            <li><strong>@Text["Endpoint reference"]</strong><span>@Text["See inputs, outputs and copyable curl requests."]</span></li>
+            <li><strong>@Text["Client integration"]</strong><span>@Text["Follow a practical path from the first request to a working client."]</span></li>
         </ul>
     </article>
 </div>

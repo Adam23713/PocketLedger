@@ -1,10 +1,11 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Categories.CategoryFormViewModel
-@{ ViewData["Title"] = "Edit category"; }
-<h1>Edit category</h1>
+@{ ViewData["Title"] = CommonText.Get("Edit category"); }
+<h1>@CommonText.Get("Edit category")</h1>
 <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="form-narrow">
     <input asp-for="Id" type="hidden" />
     <partial name="_Form" model="Model" />
-    <button class="btn btn-primary" type="submit">Save</button>
-    <a class="btn btn-link" asp-action="Index">Cancel</a>
+    <button class="btn btn-primary" type="submit">@CommonText.Get("Save")</button>
+    <a class="btn btn-link" asp-action="Index">@CommonText.Get("Cancel")</a>
 </form>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

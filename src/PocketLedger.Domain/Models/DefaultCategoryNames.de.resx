@@ -1,0 +1,269 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Housing" xml:space="preserve">
+    <value>Wohnen</value>
+  </data>
+  <data name="Rent" xml:space="preserve">
+    <value>Miete</value>
+  </data>
+  <data name="Mortgage" xml:space="preserve">
+    <value>Hypothek</value>
+  </data>
+  <data name="Maintenance" xml:space="preserve">
+    <value>Instandhaltung</value>
+  </data>
+  <data name="Furniture" xml:space="preserve">
+    <value>Möbel</value>
+  </data>
+  <data name="Common charges" xml:space="preserve">
+    <value>Gemeinschaftskosten</value>
+  </data>
+  <data name="Utilities" xml:space="preserve">
+    <value>Nebenkosten</value>
+  </data>
+  <data name="Electricity" xml:space="preserve">
+    <value>Strom</value>
+  </data>
+  <data name="Gas" xml:space="preserve">
+    <value>Gas</value>
+  </data>
+  <data name="Water" xml:space="preserve">
+    <value>Wasser</value>
+  </data>
+  <data name="Heating" xml:space="preserve">
+    <value>Heizung</value>
+  </data>
+  <data name="Waste collection" xml:space="preserve">
+    <value>Müllabfuhr</value>
+  </data>
+  <data name="Food" xml:space="preserve">
+    <value>Essen</value>
+  </data>
+  <data name="Groceries" xml:space="preserve">
+    <value>Lebensmittel</value>
+  </data>
+  <data name="Restaurants" xml:space="preserve">
+    <value>Restaurants</value>
+  </data>
+  <data name="Takeaway" xml:space="preserve">
+    <value>Essen zum Mitnehmen</value>
+  </data>
+  <data name="Cafés" xml:space="preserve">
+    <value>Cafés</value>
+  </data>
+  <data name="Transportation" xml:space="preserve">
+    <value>Verkehr</value>
+  </data>
+  <data name="Public transport" xml:space="preserve">
+    <value>Öffentliche Verkehrsmittel</value>
+  </data>
+  <data name="Taxi" xml:space="preserve">
+    <value>Taxi</value>
+  </data>
+  <data name="Fuel" xml:space="preserve">
+    <value>Kraftstoff</value>
+  </data>
+  <data name="Parking" xml:space="preserve">
+    <value>Parken</value>
+  </data>
+  <data name="Car service" xml:space="preserve">
+    <value>Autowerkstatt</value>
+  </data>
+  <data name="Tolls" xml:space="preserve">
+    <value>Maut</value>
+  </data>
+  <data name="Healthcare" xml:space="preserve">
+    <value>Gesundheit</value>
+  </data>
+  <data name="Doctor" xml:space="preserve">
+    <value>Arzt</value>
+  </data>
+  <data name="Dentist" xml:space="preserve">
+    <value>Zahnarzt</value>
+  </data>
+  <data name="Pharmacy" xml:space="preserve">
+    <value>Apotheke</value>
+  </data>
+  <data name="Optician" xml:space="preserve">
+    <value>Optiker</value>
+  </data>
+  <data name="Therapy" xml:space="preserve">
+    <value>Therapie</value>
+  </data>
+  <data name="Lab tests" xml:space="preserve">
+    <value>Laboruntersuchungen</value>
+  </data>
+  <data name="Insurance" xml:space="preserve">
+    <value>Versicherungen</value>
+  </data>
+  <data name="Health insurance" xml:space="preserve">
+    <value>Krankenversicherung</value>
+  </data>
+  <data name="Life insurance" xml:space="preserve">
+    <value>Lebensversicherung</value>
+  </data>
+  <data name="Home insurance" xml:space="preserve">
+    <value>Wohngebäudeversicherung</value>
+  </data>
+  <data name="Car insurance" xml:space="preserve">
+    <value>Kfz-Versicherung</value>
+  </data>
+  <data name="Travel insurance" xml:space="preserve">
+    <value>Reiseversicherung</value>
+  </data>
+  <data name="Streaming &amp; subscriptions" xml:space="preserve">
+    <value>Streaming und Abos</value>
+  </data>
+  <data name="Video streaming" xml:space="preserve">
+    <value>Videostreaming</value>
+  </data>
+  <data name="Music streaming" xml:space="preserve">
+    <value>Musikstreaming</value>
+  </data>
+  <data name="Gaming" xml:space="preserve">
+    <value>Videospiele</value>
+  </data>
+  <data name="Software &amp; apps" xml:space="preserve">
+    <value>Software und Apps</value>
+  </data>
+  <data name="News &amp; magazines" xml:space="preserve">
+    <value>Nachrichten und Zeitschriften</value>
+  </data>
+  <data name="Phone &amp; internet" xml:space="preserve">
+    <value>Telefon und Internet</value>
+  </data>
+  <data name="Mobile plan" xml:space="preserve">
+    <value>Mobilfunktarif</value>
+  </data>
+  <data name="Home internet" xml:space="preserve">
+    <value>Internet zu Hause</value>
+  </data>
+  <data name="TV" xml:space="preserve">
+    <value>Fernsehen</value>
+  </data>
+  <data name="Shopping" xml:space="preserve">
+    <value>Einkäufe</value>
+  </data>
+  <data name="Clothing" xml:space="preserve">
+    <value>Kleidung</value>
+  </data>
+  <data name="Electronics" xml:space="preserve">
+    <value>Elektronik</value>
+  </data>
+  <data name="Household" xml:space="preserve">
+    <value>Haushalt</value>
+  </data>
+  <data name="Personal care" xml:space="preserve">
+    <value>Körperpflege</value>
+  </data>
+  <data name="Entertainment" xml:space="preserve">
+    <value>Unterhaltung</value>
+  </data>
+  <data name="Cinema" xml:space="preserve">
+    <value>Kino</value>
+  </data>
+  <data name="Concerts &amp; events" xml:space="preserve">
+    <value>Konzerte und Veranstaltungen</value>
+  </data>
+  <data name="Hobbies" xml:space="preserve">
+    <value>Hobbys</value>
+  </data>
+  <data name="Sports &amp; fitness" xml:space="preserve">
+    <value>Sport und Fitness</value>
+  </data>
+  <data name="Books" xml:space="preserve">
+    <value>Bücher</value>
+  </data>
+  <data name="Travel" xml:space="preserve">
+    <value>Reisen</value>
+  </data>
+  <data name="Flights" xml:space="preserve">
+    <value>Flüge</value>
+  </data>
+  <data name="Accommodation" xml:space="preserve">
+    <value>Unterkunft</value>
+  </data>
+  <data name="Activities" xml:space="preserve">
+    <value>Aktivitäten</value>
+  </data>
+  <data name="Gifts &amp; donations" xml:space="preserve">
+    <value>Geschenke und Spenden</value>
+  </data>
+  <data name="Gifts" xml:space="preserve">
+    <value>Geschenke</value>
+  </data>
+  <data name="Donations" xml:space="preserve">
+    <value>Spenden</value>
+  </data>
+  <data name="Bank fees" xml:space="preserve">
+    <value>Bankgebühren</value>
+  </data>
+  <data name="Account fees" xml:space="preserve">
+    <value>Kontoführungsgebühren</value>
+  </data>
+  <data name="Card fees" xml:space="preserve">
+    <value>Kartengebühren</value>
+  </data>
+  <data name="Transfer fees" xml:space="preserve">
+    <value>Überweisungsgebühren</value>
+  </data>
+  <data name="Other expense" xml:space="preserve">
+    <value>Sonstige Ausgaben</value>
+  </data>
+  <data name="Salary" xml:space="preserve">
+    <value>Gehalt</value>
+  </data>
+  <data name="Wages" xml:space="preserve">
+    <value>Lohn</value>
+  </data>
+  <data name="Bonus" xml:space="preserve">
+    <value>Bonus</value>
+  </data>
+  <data name="Overtime" xml:space="preserve">
+    <value>Überstunden</value>
+  </data>
+  <data name="Investment" xml:space="preserve">
+    <value>Kapitalanlagen</value>
+  </data>
+  <data name="Dividends" xml:space="preserve">
+    <value>Dividenden</value>
+  </data>
+  <data name="Capital gains" xml:space="preserve">
+    <value>Kursgewinne</value>
+  </data>
+  <data name="Rental income" xml:space="preserve">
+    <value>Mieteinnahmen</value>
+  </data>
+  <data name="Interest" xml:space="preserve">
+    <value>Zinsen</value>
+  </data>
+  <data name="Savings interest" xml:space="preserve">
+    <value>Sparzinsen</value>
+  </data>
+  <data name="Cashback" xml:space="preserve">
+    <value>Cashback</value>
+  </data>
+  <data name="Card cashback" xml:space="preserve">
+    <value>Karten-Cashback</value>
+  </data>
+  <data name="Rewards" xml:space="preserve">
+    <value>Prämien</value>
+  </data>
+  <data name="Other income" xml:space="preserve">
+    <value>Sonstige Einnahmen</value>
+  </data>
+  <data name="Gifts received" xml:space="preserve">
+    <value>Erhaltene Geschenke</value>
+  </data>
+  <data name="Refunds" xml:space="preserve">
+    <value>Erstattungen</value>
+  </data>
+  <data name="Sales" xml:space="preserve">
+    <value>Verkäufe</value>
+  </data>
+</root>

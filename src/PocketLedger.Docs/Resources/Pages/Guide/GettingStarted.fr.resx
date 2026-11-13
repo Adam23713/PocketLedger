@@ -1,0 +1,95 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Comptes et catégories</value>
+  </data>
+  <data name="Accounts included in your main balance, grouped by currency." xml:space="preserve">
+    <value>Les comptes inclus dans le solde principal, regroupés par devise.</value>
+  </data>
+  <data name="Accounts marked for net-worth reporting, also grouped by currency." xml:space="preserve">
+    <value>Les comptes pris en compte dans le patrimoine net, également regroupés par devise.</value>
+  </data>
+  <data name="CHAPTER 01" xml:space="preserve">
+    <value>CHAPITRE 01</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Navigation des chapitres</value>
+  </data>
+  <data name="Choose a username, provide your email address and create a password of at least 14 characters." xml:space="preserve">
+    <value>Choisissez un nom d’utilisateur, indiquez votre adresse e-mail et créez un mot de passe d’au moins 14 caractères.</value>
+  </data>
+  <data name="Configure an authenticator" xml:space="preserve">
+    <value>Configurer une application d’authentification</value>
+  </data>
+  <data name="Create a protected account, learn the main navigation and understand what the dashboard is telling you." xml:space="preserve">
+    <value>Créez un compte protégé, découvrez la navigation principale et apprenez à lire le tableau de bord.</value>
+  </data>
+  <data name="Create your account" xml:space="preserve">
+    <value>Créer votre compte</value>
+  </data>
+  <data name="Find your way around" xml:space="preserve">
+    <value>Se repérer dans l’application</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Premiers pas</value>
+  </data>
+  <data name="Guide overview" xml:space="preserve">
+    <value>Vue d’ensemble du guide</value>
+  </data>
+  <data name="Income, expenses and the resulting change for the current month." xml:space="preserve">
+    <value>Les revenus, les dépenses et la variation du mois en cours.</value>
+  </data>
+  <data name="Keep secrets out of screenshots and cloud notes." xml:space="preserve">
+    <value>Évitez de conserver des secrets dans des captures d’écran ou des notes en ligne.</value>
+  </data>
+  <data name="Meet the dashboard" xml:space="preserve">
+    <value>Découvrir le tableau de bord</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Patrimoine net</value>
+  </data>
+  <data name="Open registration" xml:space="preserve">
+    <value>Ouvrir l’inscription</value>
+  </data>
+  <data name="Privacy toggle" xml:space="preserve">
+    <value>Masquage des montants</value>
+  </data>
+  <data name="Save the data recovery key" xml:space="preserve">
+    <value>Enregistrer la clé de récupération des données</value>
+  </data>
+  <data name="Scan the QR code with an authenticator app, enter the six-digit code, then save the single-use recovery codes." xml:space="preserve">
+    <value>Scannez le code QR avec une application d’authentification, saisissez le code à six chiffres et enregistrez les codes de récupération à usage unique.</value>
+  </data>
+  <data name="Store it offline. It is the only recovery path if you forget your password, and PocketLedger shows it only once." xml:space="preserve">
+    <value>Conservez-la hors ligne. C’est le seul moyen de récupérer vos données si vous oubliez votre mot de passe. PocketLedger ne l’affiche qu’une fois.</value>
+  </data>
+  <data name="Temporarily hides monetary amounts when somebody else can see your screen." xml:space="preserve">
+    <value>Masque temporairement les montants lorsque quelqu’un peut voir votre écran.</value>
+  </data>
+  <data name="The main navigation contains daily-use features. Open your avatar menu for Accounts, Categories, Settings, Account &amp; security, Import / Export and Logout. The appearance button lets you switch between the available themes without changing your data." xml:space="preserve">
+    <value>La navigation principale regroupe les fonctions courantes. Le menu du profil donne accès aux comptes, aux catégories, aux paramètres, à la sécurité du compte, à l’importation, à l’exportation et à la déconnexion. Le bouton d’apparence change le thème sans modifier vos données.</value>
+  </data>
+  <data name="The top row summarizes total balance, net worth, account count and this month’s movement. Account cards show the current balance and provide shortcuts for expenses, income and transfers." xml:space="preserve">
+    <value>La rangée supérieure résume le solde total, le patrimoine net, le nombre de comptes et l’activité du mois. Les cartes affichent le solde courant et des raccourcis pour les dépenses, revenus et virements.</value>
+  </data>
+  <data name="This month" xml:space="preserve">
+    <value>Ce mois-ci</value>
+  </data>
+  <data name="Total balance" xml:space="preserve">
+    <value>Solde total</value>
+  </data>
+  <data name="Use the quick actions on an account card when you already know which account should change." xml:space="preserve">
+    <value>Utilisez les raccourcis d’une carte si vous savez déjà quel compte doit être modifié.</value>
+  </data>
+  <data name="Your password, authenticator key, recovery codes and data recovery key protect different parts of the account. Store them securely and separately." xml:space="preserve">
+    <value>Le mot de passe, la clé d’authentification, les codes de récupération et la clé de récupération des données protègent différentes parties du compte. Conservez-les séparément et en lieu sûr.</value>
+  </data>
+  <data name="Dashboard with multi-currency totals and four account cards" xml:space="preserve">
+    <value>Tableau de bord avec des totaux multidevises et quatre cartes de compte</value>
+  </data>
+</root>

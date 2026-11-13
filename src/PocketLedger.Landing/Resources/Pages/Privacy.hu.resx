@@ -1,0 +1,500 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Close image viewer" xml:space="preserve">
+    <value>Képnézegető bezárása</value>
+  </data>
+  <data name="Close ×" xml:space="preserve">
+    <value>Bezárás ×</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Készítette:</value>
+  </data>
+  <data name="Next screenshot" xml:space="preserve">
+    <value>Következő képernyőkép</value>
+  </data>
+  <data name="Next →" xml:space="preserve">
+    <value>Következő →</value>
+  </data>
+  <data name="PocketLedger screenshots" xml:space="preserve">
+    <value>PocketLedger-képernyőképek</value>
+  </data>
+  <data name="Previous screenshot" xml:space="preserve">
+    <value>Előző képernyőkép</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Adatvédelem</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Adatvédelmi tájékoztató</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Ugrás a tartalomra</value>
+  </data>
+  <data name="Zoom in" xml:space="preserve">
+    <value>Nagyítás</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>és</value>
+  </data>
+  <data name="← Previous" xml:space="preserve">
+    <value>← Előző</value>
+  </data>
+  <data name="Fit to screen" xml:space="preserve">
+    <value>Képernyőhöz igazítás</value>
+  </data>
+  <data name="(Hungary), who is the data controller responsible for your personal data under the GDPR for this purpose." xml:space="preserve">
+    <value>(Magyarország), aki e célból a GDPR szerinti adatkezelő.</value>
+  </data>
+  <data name=", why we collect it, who we share it with, and the rights you have over it under the EU General Data Protection Regulation (GDPR). It does not apply to an instance of PocketLedger that you or someone else self-hosts — the operator of that instance is responsible for its own privacy notice." xml:space="preserve">
+    <value>. Kitérünk a gyűjtés céljára, az adatok címzettjeire és az uniós általános adatvédelmi rendelet (GDPR) szerinti jogaidra. A tájékoztató nem vonatkozik a saját vagy más által üzemeltetett PocketLedger-példányokra. Az adott példány üzemeltetője felel a saját tájékoztatójáért.</value>
+  </data>
+  <data name="Account &amp; authentication data" xml:space="preserve">
+    <value>Fiók- és hitelesítési adatok</value>
+  </data>
+  <data name="Accounts, transactions and their notes, categories, recurring entries, loans and debts, planner/budget entries, your display name, and preferences such as currency, timezone, icons and colours" xml:space="preserve">
+    <value>Számlák, tranzakciók és megjegyzéseik, kategóriák, ismétlődő tételek, kölcsönök, tartozások, tervezési és költségvetési tételek, megjelenített név és beállítások, például pénznem, időzóna, ikonok és színek</value>
+  </data>
+  <data name="An encrypted, password-protected export of your finance data, generated only if and when you use the Import/Export feature. It never includes your password, TOTP secret, recovery codes or session data" xml:space="preserve">
+    <value>Pénzügyi adataid titkosított, jelszóval védett exportja, amely az Importálás/Exportálás használatakor készül. Nem tartalmazza a jelszavadat, TOTP-titkodat, helyreállítási kódjaidat vagy munkamenetadataidat.</value>
+  </data>
+  <data name="Automated decision-making" xml:space="preserve">
+    <value>Automatizált döntéshozatal</value>
+  </data>
+  <data name="Backup files you create" xml:space="preserve">
+    <value>Általad létrehozott mentésfájlok</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Kategória</value>
+  </data>
+  <data name="Changes to this notice" xml:space="preserve">
+    <value>A tájékoztató változásai</value>
+  </data>
+  <data name="Children" xml:space="preserve">
+    <value>Gyermekek</value>
+  </data>
+  <data name="Contact form messages" xml:space="preserve">
+    <value>Kapcsolatfelvételi üzenetek</value>
+  </data>
+  <data name="Contact us" xml:space="preserve">
+    <value>Kapcsolatfelvétel</value>
+  </data>
+  <data name="Cookies" xml:space="preserve">
+    <value>Sütik</value>
+  </data>
+  <data name="Creating and running your account; storing, showing and letting you import/export your financial data" xml:space="preserve">
+    <value>Fiók létrehozása és működtetése, valamint a pénzügyi adatok tárolása, megjelenítése, importálása és exportálása</value>
+  </data>
+  <data name="Detecting and blocking abusive, fraudulent or high-volume traffic (rate limiting, automated ban rules)" xml:space="preserve">
+    <value>Visszaélésszerű, csalárd vagy túlzott forgalom észlelése és blokkolása (forgalomkorlátozás és automatikus tiltások)</value>
+  </data>
+  <data name="Effective date: 5 November 2026 · Applies to pocketledger.dev and the PocketLedger application" xml:space="preserve">
+    <value>Hatályos: 2026. november 5. · A pocketledger.dev oldalra és a PocketLedger alkalmazásra vonatkozik</value>
+  </data>
+  <data name="Examples" xml:space="preserve">
+    <value>Példák</value>
+  </data>
+  <data name="Financial data you enter" xml:space="preserve">
+    <value>Általad megadott pénzügyi adatok</value>
+  </data>
+  <data name="Generated automatically as you use the Service" xml:space="preserve">
+    <value>Automatikusan keletkezik a szolgáltatás használatakor</value>
+  </data>
+  <data name="Generated automatically by our edge infrastructure for every request, including from visitors who are not registered users" xml:space="preserve">
+    <value>A pereminfrastruktúra automatikusan hozza létre minden kérésnél, a nem regisztrált látogatók esetében is</value>
+  </data>
+  <data name="Google, Meta (Facebook) or GitHub, when you choose to sign in with them" xml:space="preserve">
+    <value>A Google, a Meta (Facebook) vagy a GitHub, ha velük jelentkezel be</value>
+  </data>
+  <data name="How long we keep it" xml:space="preserve">
+    <value>Meddig őrizzük meg az adatokat</value>
+  </data>
+  <data name="How we protect your data" xml:space="preserve">
+    <value>Hogyan védjük az adataidat</value>
+  </data>
+  <data name="IP address, requested URL, timestamp and response status for each request to our servers" xml:space="preserve">
+    <value>IP-cím, kért URL, időbélyeg és válaszállapot a szervereinkhez érkező minden kéréshez</value>
+  </data>
+  <data name="International data transfers" xml:space="preserve">
+    <value>Nemzetközi adattovábbítás</value>
+  </data>
+  <data name="Keeping your account secure: two-factor authentication, recovery codes, sign-in auditing" xml:space="preserve">
+    <value>A fiók védelme kétfaktoros hitelesítéssel, helyreállítási kódokkal és a bejelentkezések naplózásával</value>
+  </data>
+  <data name="LEGAL" xml:space="preserve">
+    <value>JOGI TÁJÉKOZTATÓ</value>
+  </data>
+  <data name="Legal basis (GDPR Art. 6)" xml:space="preserve">
+    <value>Jogalap (GDPR 6. cikk)</value>
+  </data>
+  <data name="Letting you sign in with Google, Facebook or GitHub, if you choose to" xml:space="preserve">
+    <value>Google-, Facebook- vagy GitHub-bejelentkezés, ha ezt választod</value>
+  </data>
+  <data name="On this page" xml:space="preserve">
+    <value>Az oldal tartalma</value>
+  </data>
+  <data name="Only if you choose to sign in with Google, Facebook or GitHub: the provider's identifier for your account, your email address and whether the provider has verified it. We don't request your name, profile picture, contacts, friends list or any other profile data" xml:space="preserve">
+    <value>Ha a Google, a Facebook vagy a GitHub segítségével jelentkezel be: a szolgáltatónál használt fiókazonosítód, az e-mail-címed és annak ellenőrzési állapota. Nevet, profilképet, névjegyeket, ismerőslistát vagy más profiladatot nem kérünk.</value>
+  </data>
+  <data name="Our legitimate interest in protecting the Service and its users from abuse (Art. 6(1)(f))" xml:space="preserve">
+    <value>A szolgáltatás és felhasználói visszaélésekkel szembeni védelméhez fűződő jogos érdekünk (6. cikk (1) bekezdés f) pont)</value>
+  </data>
+  <data name="Performance of a contract with you (Art. 6(1)(b))" xml:space="preserve">
+    <value>A veled kötött szerződés teljesítése (6. cikk (1) bekezdés b) pont)</value>
+  </data>
+  <data name="Performance of a contract, and our legitimate interest in keeping accounts secure (Art. 6(1)(b) and (f))" xml:space="preserve">
+    <value>Szerződés teljesítése és a fiókok védelméhez fűződő jogos érdekünk (6. cikk (1) bekezdés b) és f) pont)</value>
+  </data>
+  <data name="PocketLedger is a personal project, not a registered company. The hosted service at pocketledger.dev is operated by" xml:space="preserve">
+    <value>A PocketLedger személyes projekt, bejegyzett vállalkozás nélkül. A pocketledger.dev szolgáltatás üzemeltetője</value>
+  </data>
+  <data name="Purpose" xml:space="preserve">
+    <value>Cél</value>
+  </data>
+  <data name="Responding when you contact us for support" xml:space="preserve">
+    <value>Válaszadás, amikor segítséget kérsz</value>
+  </data>
+  <data name="Security &amp; activity data" xml:space="preserve">
+    <value>Biztonsági és aktivitási adatok</value>
+  </data>
+  <data name="Sign-in timestamps and outcomes, the IP address and browser/device identifier (user agent) of your most recent successful login, and security audit events such as password or 2FA changes" xml:space="preserve">
+    <value>Bejelentkezési időpontok és eredmények, az utolsó sikeres bejelentkezés IP-címe és böngésző- vagy eszközazonosítója (user agent), valamint biztonsági naplóesemények, például jelszó- vagy 2FA-módosítások</value>
+  </data>
+  <data name="Social sign-in data" xml:space="preserve">
+    <value>Külső bejelentkezési adatok</value>
+  </data>
+  <data name="Steps taken at your request, and our legitimate interest in providing support (Art. 6(1)(b) and (f))" xml:space="preserve">
+    <value>A kérésedre tett lépések és a segítségnyújtáshoz fűződő jogos érdekünk (6. cikk (1) bekezdés b) és f) pont)</value>
+  </data>
+  <data name="Table of contents" xml:space="preserve">
+    <value>Tartalomjegyzék</value>
+  </data>
+  <data name="Technical &amp; connection data" xml:space="preserve">
+    <value>Technikai és kapcsolati adatok</value>
+  </data>
+  <data name="The email address you give us to reply to and the text of your message. The website itself does not store them: they are forwarded straight to our mailbox at our email provider (see" xml:space="preserve">
+    <value>A válaszhoz megadott e-mail-cím és az üzenet szövege. A weboldal nem tárolja őket, közvetlenül a levelezőszolgáltatónknál lévő postaládába kerülnek (lásd</value>
+  </data>
+  <data name="This notice explains, in plain language, what personal data PocketLedger collects when you use our hosted service at" xml:space="preserve">
+    <value>Ez a tájékoztató közérthetően bemutatja, milyen személyes adatokat gyűjt a PocketLedger, amikor az általunk üzemeltetett szolgáltatást használod itt:</value>
+  </data>
+  <data name="Username, email address, phone number (only if you choose to provide one), a one-way hash of your password (we never store it in plain text), your TOTP two-factor secret and recovery codes" xml:space="preserve">
+    <value>Felhasználónév, e-mail-cím, telefonszám (ha megadod), a jelszó egyirányú lenyomata (nyílt szövegben nem tároljuk), a kétfaktoros hitelesítés TOTP-titka és a helyreállítási kódok</value>
+  </data>
+  <data name="We do not ask for or knowingly collect bank account numbers, card numbers, or credentials for any outside financial institution — PocketLedger is a manual ledger, not a service that connects to your bank." xml:space="preserve">
+    <value>Nem kérünk és tudatosan nem gyűjtünk bankszámlaszámot, kártyaszámot vagy külső pénzügyi intézményhez tartozó belépési adatokat. A PocketLedger kézi nyilvántartás, és nem kapcsolódik a bankodhoz.</value>
+  </data>
+  <data name="We have not appointed a Data Protection Officer: at our current size and the kind of data we process, one is not legally required. You can reach us directly using the contact details in" xml:space="preserve">
+    <value>Nem neveztünk ki adatvédelmi tisztviselőt, mert a jelenlegi méretünk és a kezelt adatok jellege alapján ez jogilag nem kötelező. Közvetlen elérhetőségeink itt találhatók:</value>
+  </data>
+  <data name="We only collect data that lets the Service work, keeps your account secure, or that you choose to give us." xml:space="preserve">
+    <value>Csak a szolgáltatás működéséhez és a fiókod biztonságához szükséges, vagy általad önként megadott adatokat gyűjtjük.</value>
+  </data>
+  <data name="What data we collect" xml:space="preserve">
+    <value>Milyen adatokat gyűjtünk</value>
+  </data>
+  <data name="Where it comes from" xml:space="preserve">
+    <value>Az adatok forrása</value>
+  </data>
+  <data name="Who we are" xml:space="preserve">
+    <value>Kik vagyunk</value>
+  </data>
+  <data name="Who we share it with" xml:space="preserve">
+    <value>Kikkel osztjuk meg az adatokat</value>
+  </data>
+  <data name="Why we use it, and on what legal basis" xml:space="preserve">
+    <value>Az adatkezelés célja és jogalapja</value>
+  </data>
+  <data name="You, directly, as you use the Service" xml:space="preserve">
+    <value>Közvetlenül tőled a szolgáltatás használatakor</value>
+  </data>
+  <data name="You, on request" xml:space="preserve">
+    <value>Tőled, kérésre</value>
+  </data>
+  <data name="You, when you register or manage your account" xml:space="preserve">
+    <value>Tőled, a fiók regisztrációjakor vagy kezelésekor</value>
+  </data>
+  <data name="You, when you use the" xml:space="preserve">
+    <value>Tőled, ezen keresztül:</value>
+  </data>
+  <data name="Your rights, and how to use them" xml:space="preserve">
+    <value>Jogaid és azok gyakorlása</value>
+  </data>
+  <data name="contact form" xml:space="preserve">
+    <value>kapcsolatfelvételi űrlap</value>
+  </data>
+  <data name="for anything related to your data or this notice." xml:space="preserve">
+    <value>. Ezeket használhatod az adataiddal vagy e tájékoztatóval kapcsolatos ügyekben.</value>
+  </data>
+  <data name="section 13" xml:space="preserve">
+    <value>13. szakasz</value>
+  </data>
+  <data name="section 2" xml:space="preserve">
+    <value>2. szakasz</value>
+  </data>
+  <data name="section 4" xml:space="preserve">
+    <value>4. szakasz</value>
+  </data>
+  <data name="(Facebook) and" xml:space="preserve">
+    <value>(Facebook) és</value>
+  </data>
+  <data name="(YouTube), only if you choose to play the video on our home page. Until you click play, nothing is loaded from YouTube. Once you do, the video is loaded from YouTube's privacy-enhanced domain (youtube-nocookie.com), and YouTube receives your IP address and the technical details of your browser, and may store data in your browser, as described in" xml:space="preserve">
+    <value>(YouTube), csak ha elindítod a kezdőlapi videót. A lejátszásig semmi nem töltődik be a YouTube-ról. Kattintás után a videó a fokozott adatvédelmű youtube-nocookie.com domainről töltődik be. A YouTube megkapja az IP-címedet és a böngésződ technikai adatait, és adatokat tárolhat a böngésződben, az itt leírtak szerint:</value>
+  </data>
+  <data name=", only if you choose to sign in with them. When you do, the provider learns that you signed in to PocketLedger, and sends us the limited data listed in" xml:space="preserve">
+    <value>, csak ha velük jelentkezel be. A szolgáltató ekkor megtudja, hogy beléptél a PocketLedgerbe, és továbbítja az itt felsorolt korlátozott adatokat:</value>
+  </data>
+  <data name=", our email provider, which hosts our mailboxes on servers within the EEA. Emails you send us — including messages from the" xml:space="preserve">
+    <value> a levelezőszolgáltatónk, amely EGT-n belüli szervereken tárolja a postaládáinkat. Az általad küldött e-maileket, beleértve a</value>
+  </data>
+  <data name=", then go to" xml:space="preserve">
+    <value>. Ezután nyisd meg ezt:</value>
+  </data>
+  <data name=", which is delivered through its mail servers — and our replies are stored there." xml:space="preserve">
+    <value> segítségével küldött üzeneteket, valamint a válaszainkat ott tároljuk. Az űrlapüzenetek a szolgáltató levelezőszerverein keresztül érkeznek.</value>
+  </data>
+  <data name=", which sits in front of our servers to provide content delivery, DDoS protection and bot/abuse filtering. As part of this, Cloudflare sees connection-level metadata — such as your IP address and the host and path you're requesting — for every request to the Service. Cloudflare's data processing terms are built into its standard customer agreement; see" xml:space="preserve">
+    <value> a szervereink előtt biztosít tartalomkézbesítést, DDoS-védelmet, valamint bot- és visszaélésszűrést. Emiatt minden kéréshez látja a kapcsolati metaadatokat, például az IP-címet és a kért kiszolgálót és útvonalat. Adatkezelési feltételei az általános ügyfélszerződésének részei. Lásd:</value>
+  </data>
+  <data name=", who runs the physical servers your data is stored and processed on, located within the European Economic Area (EEA)." xml:space="preserve">
+    <value>, amely az adataid tárolásához és feldolgozásához használt fizikai szervereket az Európai Gazdasági Térségben (EGT) üzemelteti.</value>
+  </data>
+  <data name=". Before you confirm, you can download an encrypted backup of your financial data. Deletion removes your account, your financial data, any connected Google or Facebook sign-in, your sign-in history and your encryption keys, and ends all of your active sessions. The only thing we keep is your account's random internal identifier and the time of deletion, with no name, email or other personal data attached, so that any session still open elsewhere is refused." xml:space="preserve">
+    <value>. Megerősítés előtt titkosított mentést tölthetsz le a pénzügyi adataidról. A törlés eltávolítja a fiókot, a pénzügyi adatokat, a kapcsolt Google- vagy Facebook-bejelentkezést, a bejelentkezési előzményeket és a titkosítási kulcsokat, és lezár minden aktív munkamenetet. Csak a fiók véletlenszerű belső azonosítóját és a törlés idejét őrizzük meg, név, e-mail és más személyes adat nélkül, hogy a máshol nyitva maradt munkameneteket elutasíthassuk.</value>
+  </data>
+  <data name=". If you can't sign in, contact us using the details in" xml:space="preserve">
+    <value>. Ha nem tudsz bejelentkezni, keresd a kapcsolatot az itt megadott elérhetőségeken:</value>
+  </data>
+  <data name=". On the contact form, Cloudflare Turnstile checks that the message is sent by a person rather than a bot; to do so it evaluates signals from your browser for that page only, without setting advertising or tracking cookies." xml:space="preserve">
+    <value>. Az űrlapnál a Cloudflare Turnstile ellenőrzi, hogy az üzenetet ember küldi. Ehhez csak azon az oldalon értékel böngészőjeleket, reklám- vagy követősütik beállítása nélkül.</value>
+  </data>
+  <data name=". We never send them your financial data. Their own handling of your data is covered by" xml:space="preserve">
+    <value>. Pénzügyi adatokat nem küldünk nekik. Saját adatkezelésükről ezek a tájékoztatók szólnak:</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Fiók</value>
+  </data>
+  <data name="Account &amp; security" xml:space="preserve">
+    <value>Fiók és biztonság</value>
+  </data>
+  <data name="Apart from the email provider above, we use no third-party email delivery service, and we have no analytics or advertising partners. We do not sell your data, rent it out, or share it with data brokers. We may disclose data where required by law, or to protect the rights, property or safety of PocketLedger, our users, or others." xml:space="preserve">
+    <value>A fenti szolgáltatón kívül nem használunk külső levélkézbesítőt, és nincsenek analitikai vagy hirdetési partnereink. Az adataidat nem adjuk el, nem adjuk bérbe és nem adjuk át adatbrókereknek. Adatot közölhetünk, ha ezt jogszabály írja elő, vagy ha a PocketLedger, felhasználóink vagy mások jogainak, tulajdonának vagy biztonságának védelme ezt indokolja.</value>
+  </data>
+  <data name="Cloudflare's GDPR information ↗" xml:space="preserve">
+    <value>A Cloudflare GDPR-tájékoztatója ↗</value>
+  </data>
+  <data name="Contact form messages are kept in our mailbox only as long as needed to answer you and handle any follow-up, and you can ask us to delete them at any time." xml:space="preserve">
+    <value>Az űrlapon küldött üzeneteket addig őrizzük a postaládában, amíg válaszolunk és lezárjuk a kapcsolódó egyeztetést. Bármikor kérheted a törlésüket.</value>
+  </data>
+  <data name="Delete account" xml:space="preserve">
+    <value>Fiók törlése</value>
+  </data>
+  <data name="Deleting your PocketLedger account doesn't change anything in your Google, Facebook or GitHub account. To also remove PocketLedger from the apps connected there, use" xml:space="preserve">
+    <value>A PocketLedger-fiók törlése nem módosítja a Google-, Facebook- vagy GitHub-fiókodat. A PocketLedger eltávolításához a kapcsolt alkalmazások közül használd ezeket:</value>
+  </data>
+  <data name="Facebook's Apps and Websites settings ↗" xml:space="preserve">
+    <value>Facebook: alkalmazások és webhelyek ↗</value>
+  </data>
+  <data name="GitHub's Authorized OAuth Apps ↗" xml:space="preserve">
+    <value>GitHub: engedélyezett OAuth-alkalmazások ↗</value>
+  </data>
+  <data name="GitHub's Privacy Statement ↗" xml:space="preserve">
+    <value>A GitHub adatvédelmi nyilatkozata ↗</value>
+  </data>
+  <data name="Google's Privacy Policy ↗" xml:space="preserve">
+    <value>A Google adatvédelmi irányelvei ↗</value>
+  </data>
+  <data name="Google's third-party connections ↗" xml:space="preserve">
+    <value>Google: külső kapcsolatok ↗</value>
+  </data>
+  <data name="How to delete your account" xml:space="preserve">
+    <value>A fiók törlése</value>
+  </data>
+  <data name="If we ever perform routine technical backups of our servers for disaster-recovery purposes, these are rotated on a short cycle and are not used to restore data you've asked us to delete." xml:space="preserve">
+    <value>Ha katasztrófa utáni helyreállításhoz rendszeres műszaki mentést készítünk a szerverekről, rövid ciklusban cseréljük, és nem használjuk olyan adatok visszaállítására, amelyek törlését kérted.</value>
+  </data>
+  <data name="Meta's Privacy Policy ↗" xml:space="preserve">
+    <value>A Meta adatvédelmi szabályzata ↗</value>
+  </data>
+  <data name="Our automated abuse-detection system (CrowdSec) runs entirely on our own servers, and its optional community threat-sharing feature is switched off — it does not send your data anywhere outside our infrastructure." xml:space="preserve">
+    <value>A visszaéléseket automatikusan észlelő CrowdSec teljes egészében a szervereinken fut. A közösségi fenyegetésmegosztás ki van kapcsolva, ezért az adataid nem kerülnek az infrastruktúránkon kívülre.</value>
+  </data>
+  <data name="Our hosting provider" xml:space="preserve">
+    <value>A tárhelyszolgáltatónk</value>
+  </data>
+  <data name="Raw technical access logs used for abuse detection are kept for a short, fixed window (currently up to seven days) and then automatically deleted; they are not linked to your account beyond that window." xml:space="preserve">
+    <value>A visszaélések észleléséhez használt nyers hozzáférési naplókat rövid, rögzített ideig, jelenleg legfeljebb hét napig tároljuk, majd automatikusan töröljük. Ezen túl nem kapcsolódnak a fiókodhoz.</value>
+  </data>
+  <data name="Sign in, open the profile menu, choose" xml:space="preserve">
+    <value>Jelentkezz be, nyisd meg a profilmenüt, majd válaszd ezt:</value>
+  </data>
+  <data name="We do not use your data for advertising or behavioural profiling, we run no analytics or tracking on the Service, and we do not send marketing emails. If that ever changes, we will update this notice and ask for your consent wherever the law requires it, rather than relying on this notice to cover it retroactively." xml:space="preserve">
+    <value>Az adataidat nem használjuk reklámozásra vagy viselkedési profilalkotásra. A szolgáltatásban nincs analitika vagy követés, és marketing e-maileket sem küldünk. Ha ez megváltozik, frissítjük a tájékoztatót és hozzájárulást kérünk, ahol azt a jog előírja. E tájékoztatóra visszamenőleg nem támaszkodunk.</value>
+  </data>
+  <data name="We keep the list of parties who can see your data short and deliberately:" xml:space="preserve">
+    <value>Tudatosan kevés fél férhet hozzá az adataidhoz:</value>
+  </data>
+  <data name="When you delete your account, your account, authentication, and financial data is deleted immediately — we don't keep a separate retention window &quot;just in case.&quot; An encrypted backup you've exported yourself is yours to keep or delete; we don't retain a copy of it after you download it." xml:space="preserve">
+    <value>A fiók törlésekor a fiók-, hitelesítési és pénzügyi adatok azonnal törlődnek. Külön megőrzési idő nincs. A saját magad által exportált titkosított mentést megtarthatod vagy törölheted. Letöltés után nem őrzünk róla másolatot.</value>
+  </data>
+  <data name="Your account and financial data is stored and primarily processed on servers located within the EEA. The transfers outside the EEA we're aware of are the connection-level metadata described above that necessarily passes through Cloudflare, Inc. as part of its edge and security service, only if you choose social sign-in, the sign-in exchange with Google LLC, Meta Platforms, Inc. or GitHub, Inc., and, only if you choose to play the home page video, the video request to Google LLC (YouTube). All of these companies are headquartered in the United States. These transfers rely on the EU–U.S. Data Privacy Framework, with Standard Contractual Clauses as a fallback safeguard where the Framework doesn't apply." xml:space="preserve">
+    <value>A fiók- és pénzügyi adatokat az EGT-n belüli szervereken tároljuk, és elsősorban ott dolgozzuk fel. Tudomásunk szerint az EGT-n kívülre a Cloudflare, Inc. perem- és biztonsági szolgáltatásán átmenő kapcsolati metaadatok, külső bejelentkezés esetén a Google LLC, a Meta Platforms, Inc. vagy a GitHub, Inc. felé küldött bejelentkezési adatok, valamint a kezdőlapi videó lejátszásakor a Google LLC (YouTube) felé küldött videókérés kerülnek. E vállalatok székhelye az Egyesült Államokban van. A továbbítás az EU–USA adatvédelmi keret alapján történik. Ahol ez nem alkalmazható, általános szerződési feltételek (SCC-k) szolgálnak biztosítékként.</value>
+  </data>
+  <data name="and use" xml:space="preserve">
+    <value>és válaszd ezt:</value>
+  </data>
+  <data name="and we'll delete your account for you." xml:space="preserve">
+    <value>. A kérésedre töröljük a fiókot.</value>
+  </data>
+  <data name="or" xml:space="preserve">
+    <value>vagy</value>
+  </data>
+  <data name=", with no setting to turn this off and no plaintext fallback on error." xml:space="preserve">
+    <value>. A titkosítás nem kapcsolható ki, és hiba esetén nincs nyílt szöveges mentés.</value>
+  </data>
+  <data name=". We'll respond within one month, as required by the GDPR." xml:space="preserve">
+    <value>. A GDPR előírása szerint egy hónapon belül válaszolunk.</value>
+  </data>
+  <data name="1055 Budapest, Falk Miksa utca 9-11, Hungary (postal: 1363 Budapest, Pf.: 9.)" xml:space="preserve">
+    <value>1055 Budapest, Falk Miksa utca 9–11. (postacím: 1363 Budapest, Pf. 9.)</value>
+  </data>
+  <data name="Access" xml:space="preserve">
+    <value>Hozzáférés</value>
+  </data>
+  <data name="Data controller" xml:space="preserve">
+    <value>Adatkezelő</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Erase" xml:space="preserve">
+    <value>Törlés</value>
+  </data>
+  <data name="Every account is protected by" xml:space="preserve">
+    <value>Minden fiókot véd a</value>
+  </data>
+  <data name="Every internal connection between our services is itself encrypted with a private TLS certificate authority, independent of the public HTTPS connection your browser uses." xml:space="preserve">
+    <value>A szolgáltatásaink közötti minden belső kapcsolat titkosított, saját TLS-hitelesítésszolgáltatóval, a böngésződ nyilvános HTTPS-kapcsolatától függetlenül.</value>
+  </data>
+  <data name="Export your data" xml:space="preserve">
+    <value>Adathordozhatóság</value>
+  </data>
+  <data name="For anything about this notice or your personal data — access, correction, deletion, or just a question — reach out directly:" xml:space="preserve">
+    <value>A tájékoztatóval vagy személyes adataiddal kapcsolatos ügyekben, például hozzáférés, helyesbítés, törlés vagy kérdés esetén közvetlenül itt kereshetsz minket:</value>
+  </data>
+  <data name="Full technical detail:" xml:space="preserve">
+    <value>Műszaki részletek:</value>
+  </data>
+  <data name="Hungarian supervisory authority" xml:space="preserve">
+    <value>Magyar felügyeleti hatóság</value>
+  </data>
+  <data name="Lodge a complaint" xml:space="preserve">
+    <value>Panasztétel</value>
+  </data>
+  <data name="PocketLedger automatically posts recurring transactions on the schedule you set up yourself — that's carrying out your own instructions, not a decision made about you. We do not use automated decision-making or profiling that produces legal or similarly significant effects on you." xml:space="preserve">
+    <value>A PocketLedger az általad megadott ütemezés szerint automatikusan rögzíti az ismétlődő tranzakciókat. Ezzel a te utasításaidat hajtja végre, és nem hoz rólad döntést. Nem használunk rád nézve joghatással vagy hasonlóan jelentős következménnyel járó automatizált döntéshozatalt vagy profilalkotást.</value>
+  </data>
+  <data name="PocketLedger is open source, so you don't have to take our word for this — you can read exactly how it's built:" xml:space="preserve">
+    <value>A PocketLedger nyílt forráskódú, így pontosan megnézheted, hogyan épül fel:</value>
+  </data>
+  <data name="Privacy Policy — PocketLedger" xml:space="preserve">
+    <value>Adatvédelmi tájékoztató — PocketLedger</value>
+  </data>
+  <data name="Project" xml:space="preserve">
+    <value>Projekt</value>
+  </data>
+  <data name="Rectify" xml:space="preserve">
+    <value>Helyesbítés</value>
+  </data>
+  <data name="Restrict or object" xml:space="preserve">
+    <value>Korlátozás vagy tiltakozás</value>
+  </data>
+  <data name="Sensitive fields (transaction notes, account and category names, debts, your TOTP secret, recovery codes) are" xml:space="preserve">
+    <value>Az érzékeny mezőket (tranzakciós megjegyzések, számla- és kategórianevek, tartozások, TOTP-titok, helyreállítási kódok)</value>
+  </data>
+  <data name="Signing in sets two cookies on the application domain: an encrypted session cookie that keeps you signed in, and an anti-forgery cookie that protects your account from cross-site request forgery. If you sign in with Google, Facebook or GitHub, short-lived cookies also protect that sign-in from tampering and are removed once it completes. All of these are strictly necessary for the Service to function, contain no advertising or tracking identifiers, and are not shared with any third party. Because they're strictly necessary, they don't require a cookie-consent banner under EU ePrivacy rules. Preference cookies remember the appearance theme, avatar and language you choose. They only store those choices. We set no analytics, advertising or tracking cookies." xml:space="preserve">
+    <value>A belépéskor egy titkosított munkamenetsüti tart bejelentkezve, egy másik süti pedig a más webhelyről indított kérés-hamisítás ellen véd. Google-, Facebook- vagy GitHub-belépéskor rövid életű sütik is védik a folyamatot a manipulációtól, és a belépés végén eltávolításra kerülnek. Ezek a működéshez feltétlenül szükségesek, nem tartalmaznak reklám- vagy követőazonosítót, és nem osztjuk meg őket harmadik féllel. Az uniós ePrivacy-szabályok szerint a feltétlenül szükséges sütikhez nincs szükség hozzájárulási sávra. A preferenciákhoz használt sütik csak a választott témát, profilképet és nyelvet jegyzik meg. Analitikai, reklám- vagy követősütiket nem használunk.</value>
+  </data>
+  <data name="TOTP-based two-factor authentication" xml:space="preserve">
+    <value>TOTP-alapú kétfaktoros hitelesítés</value>
+  </data>
+  <data name="The Service isn't directed at, and shouldn't be used by, anyone under the age of 16. We don't knowingly collect data from children. If you believe a child has provided us with personal data, contact us and we'll delete it." xml:space="preserve">
+    <value>A szolgáltatás nem 16 éven aluliaknak szól, és ők nem használhatják. Tudatosan nem gyűjtünk gyermekektől adatokat. Ha úgy gondolod, hogy egy gyermek személyes adatot adott meg, lépj kapcsolatba velünk, és töröljük.</value>
+  </data>
+  <data name="The application also keeps short-lived security statistics for at most 48 hours, after which they expire automatically: request counts in five-minute intervals, broken down by account and by IP address; for each IP address, the request method, the path without its query string or record identifiers, the response status and the accounts seen from that address, in hourly groups; and the IP address of every request for a rolling three-minute window so unusually high request volumes can be detected. When an IP address exceeds that threshold, we record an incident containing the address, the accounts and the parts of the Service involved, the request count and the time, so the traffic can be reviewed and blocked if necessary. An IP address that an administrator bans from this data stays on the block list for the chosen period, at most 30 days." xml:space="preserve">
+    <value>Az alkalmazás legfeljebb 48 órán át tárol biztonsági statisztikákat, amelyek automatikusan lejárnak. Ötperces időszakokban, fiókonként és IP-címenként számoljuk a kéréseket. IP-címenként órás csoportokban rögzítjük a kérés metódusát, a lekérdezési paraméterek és rekordazonosítók nélküli útvonalat, a válasz állapotát és az adott címről látott fiókokat. A szokatlanul nagy forgalom észleléséhez gördülő háromperces ablakban tároljuk minden kérés IP-címét. Ha egy cím átlépi a küszöböt, az incidensben rögzítjük a címet, az érintett fiókokat és szolgáltatásrészeket, a kérésszámot és az időpontot, hogy a forgalmat ellenőrizhessük és szükség esetén blokkolhassuk. A rendszergazda által letiltott IP-cím a választott ideig, legfeljebb 30 napig marad a tiltólistán.</value>
+  </data>
+  <data name="The home page video is the only third-party content we embed, and it stays unloaded until you click play. After that, YouTube (Google LLC) may store data in your browser under its own policy; see" xml:space="preserve">
+    <value>A kezdőlapi videó az egyetlen beágyazott külső tartalom, és a lejátszás elindításáig nem töltődik be. Ezután a YouTube (Google LLC) saját szabályzata alapján adatokat tárolhat a böngésződben. Lásd:</value>
+  </data>
+  <data name="To exercise any of these rights, contact us using the details in" xml:space="preserve">
+    <value>Jogaid gyakorlásához keresd a következő szakaszban megadott elérhetőségeinket:</value>
+  </data>
+  <data name="Traffic to the Service passes through a rate-limiting and automated-ban layer that blocks abusive or high-volume requests before they reach the application." xml:space="preserve">
+    <value>A szolgáltatáshoz érkező forgalom korlátozó és automatikus tiltási rétegen halad át. A visszaélésszerű vagy túlzott számú kéréseket az alkalmazás előtt blokkoljuk.</value>
+  </data>
+  <data name="Under the GDPR, you have the right to:" xml:space="preserve">
+    <value>A GDPR szerint a következő jogaid vannak:</value>
+  </data>
+  <data name="We may update this notice as the Service changes. The effective date at the top always reflects the latest version. If a change is material, we'll make that clear on the Service itself, not just here." xml:space="preserve">
+    <value>A szolgáltatás változásakor frissíthetjük a tájékoztatót. A fenti hatálybalépési dátum a legfrissebb verziót jelzi. A lényeges változásokat a szolgáltatásban is jól láthatóan jelezzük.</value>
+  </data>
+  <data name="Withdraw consent" xml:space="preserve">
+    <value>Hozzájárulás visszavonása</value>
+  </data>
+  <data name="Your encryption key can only be unlocked with your PocketLedger password or your data recovery key. If you sign in with Google, Facebook or GitHub, you set a separate" xml:space="preserve">
+    <value>A titkosítási kulcsot csak a PocketLedger-jelszavad vagy az adat-helyreállítási kulcsod oldhatja fel. Ha a Google, a Facebook vagy a GitHub segítségével jelentkezel be, külön beállítandó az</value>
+  </data>
+  <data name="and one-time recovery codes, including accounts that sign in with Google, Facebook or GitHub. When public registration is enabled, new users can create their own account." xml:space="preserve">
+    <value>és az egyszer használatos helyreállítási kódok, a Google, Facebook vagy GitHub használatával belépő fiókokat is. Nyilvános regisztráció esetén új felhasználók saját fiókot hozhatnak létre.</value>
+  </data>
+  <data name="at any time, for any processing that is ever based on consent (we currently have none)." xml:space="preserve">
+    <value>bármikor, ha egy adatkezelés hozzájáruláson alapul. Jelenleg nincs ilyen adatkezelésünk.</value>
+  </data>
+  <data name="data password" xml:space="preserve">
+    <value>adatvédelmi jelszó</value>
+  </data>
+  <data name="database encryption ↗" xml:space="preserve">
+    <value>Adatbázis-titkosítás ↗</value>
+  </data>
+  <data name="edge security ↗" xml:space="preserve">
+    <value>Peremvédelem ↗</value>
+  </data>
+  <data name="encrypted before they're ever written to the database" xml:space="preserve">
+    <value>az adatbázisba írás előtt titkosítjuk</value>
+  </data>
+  <data name="for this, so the social provider alone can never unlock your financial data." xml:space="preserve">
+    <value>. A külső szolgáltató így önmagában nem fér hozzá a pénzügyi adataidhoz.</value>
+  </data>
+  <data name="in a portable format — use the built-in encrypted backup under Import/Export at any time; it covers your complete financial dataset." xml:space="preserve">
+    <value>Hordozható formátumú exportot bármikor készíthetsz az Importálás/Exportálás menü titkosított mentésével. A teljes pénzügyi adatállományt tartalmazza.</value>
+  </data>
+  <data name="inaccurate or incomplete data — most of this you can already edit directly in the app." xml:space="preserve">
+    <value>a pontatlan vagy hiányos adatoknál. Ezek többségét az appban is módosíthatod.</value>
+  </data>
+  <data name="key management ↗" xml:space="preserve">
+    <value>Kulcskezelés ↗</value>
+  </data>
+  <data name="the personal data we hold about you." xml:space="preserve">
+    <value>a rólad tárolt személyes adatokhoz.</value>
+  </data>
+  <data name="to certain processing, in particular any processing based on our legitimate interest." xml:space="preserve">
+    <value>bizonyos adatkezeléseknél, különösen ha azok a jogos érdekünkön alapulnak.</value>
+  </data>
+  <data name="with a supervisory authority, including the one below or the one in your own country of residence within the EU/EEA." xml:space="preserve">
+    <value>felügyeleti hatóságnál, például az alábbinál vagy a lakóhelyed szerinti EU- vagy EGT-tagállam hatóságánál.</value>
+  </data>
+  <data name="your data (&quot;right to be forgotten&quot;) by deleting your account — see" xml:space="preserve">
+    <value>a fiókod törlésével (az elfeledtetéshez való jog). Lásd:</value>
+  </data>
+  <data name="Ádám Kertész, Hungary" xml:space="preserve">
+    <value>Kertész Ádám, Magyarország</value>
+  </data>
+</root>

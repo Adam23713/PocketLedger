@@ -15,6 +15,11 @@ using PocketLedger.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDatabaseEncryption(builder.Configuration, builder.Environment, "PocketLedger.Api");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture("en").AddSupportedCultures("en").AddSupportedUICultures("en", "hu", "de", "fr");
+    options.RequestCultureProviders = [new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider()];
+});
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddOpenApi(options =>
 {
@@ -116,6 +121,7 @@ if (builder.Configuration.GetValue<bool>("ForwardedHeaders:TrustAll")) { forward
 foreach (var proxy in builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? []) if (IPAddress.TryParse(proxy, out var address)) forwarded.KnownProxies.Add(address);
 app.UseForwardedHeaders(forwarded);
 app.UseEncryptionReadinessGate();
+app.UseRequestLocalization();
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<UserSessionKeyMiddleware>();

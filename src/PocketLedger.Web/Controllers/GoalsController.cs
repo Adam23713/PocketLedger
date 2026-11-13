@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models;
 using PocketLedger.Models.Entities;
@@ -30,7 +31,7 @@ public class GoalsController(IGoalService goalService, IUserContextService userC
             TempData["SuccessMessage"] = "Goal created.";
             return RedirectToAction(nameof(Details), new { id = created.Id });
         }
-        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); return View(model); }
+        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); return View(model); }
     }
 
     [HttpGet]
@@ -53,7 +54,7 @@ public class GoalsController(IGoalService goalService, IUserContextService userC
             return RedirectToAction(nameof(Details), new { id });
         }
         catch (EntityNotFoundException) { return NotFound(); }
-        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); return View(model); }
+        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); return View(model); }
     }
 
     [HttpPost, ValidateAntiForgeryToken]

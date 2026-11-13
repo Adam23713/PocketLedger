@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.ImportExport;
@@ -26,7 +27,7 @@ public class ImportExportController(IImportExportService importExportService, IU
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(nameof(ImportExportIndexViewModel.ExcelExport), exception.Message);
+            ModelState.AddModelError(nameof(ImportExportIndexViewModel.ExcelExport), CommonText.Get(exception.Message));
             return View("Index", new ImportExportIndexViewModel { ExcelExport = model });
         }
     }
@@ -39,7 +40,7 @@ public class ImportExportController(IImportExportService importExportService, IU
     {
         if (file is null || file.Length == 0)
         {
-            ModelState.AddModelError(string.Empty, "Select a CSV file.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("Select a CSV file."));
             return View("Import", new CsvImportViewModel());
         }
 
@@ -53,7 +54,7 @@ public class ImportExportController(IImportExportService importExportService, IU
     {
         if (string.IsNullOrWhiteSpace(model.Csv)) return BadRequest();
         var result = await importExportService.ImportCsvAsync(model.Csv, cancellationToken);
-        TempData["SuccessMessage"] = $"Imported {result.ImportedCount} rows; skipped {result.DuplicateCount} duplicates and {result.InvalidCount} invalid rows.";
+        TempData["SuccessMessage"] = CommonText.Format("Imported {0} rows; skipped {1} duplicates and {2} invalid rows.", result.ImportedCount, result.DuplicateCount, result.InvalidCount);
         return RedirectToAction(nameof(Import));
     }
 
@@ -70,7 +71,7 @@ public class ImportExportController(IImportExportService importExportService, IU
         }
         catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(nameof(ImportExportIndexViewModel.EncryptedBackup), exception.Message);
+            ModelState.AddModelError(nameof(ImportExportIndexViewModel.EncryptedBackup), CommonText.Get(exception.Message));
             return View("Index", new ImportExportIndexViewModel { EncryptedBackup = model });
         }
     }
@@ -84,13 +85,13 @@ public class ImportExportController(IImportExportService importExportService, IU
     {
         if (file is null || file.Length == 0)
         {
-            ModelState.AddModelError(string.Empty, "Select a .plbackup file.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("Select a .plbackup file."));
             return View("Restore", new RestoreViewModel());
         }
 
         if (file.Length > BackupProtectionFormat.MaximumFileBytes)
         {
-            ModelState.AddModelError(string.Empty, "The backup exceeds the 64 MiB limit.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The backup exceeds the 64 MiB limit."));
             return View("Restore", new RestoreViewModel());
         }
 
@@ -100,14 +101,14 @@ public class ImportExportController(IImportExportService importExportService, IU
         var content = buffer.ToArray();
         if (!BackupProtectionFormat.HasMagic(content))
         {
-            ModelState.AddModelError(string.Empty, "The selected file is not a PocketLedger encrypted backup.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The selected file is not a PocketLedger encrypted backup."));
             return View("Restore", new RestoreViewModel());
         }
 
         var password = Request.Form["Password"].ToString();
         if (string.IsNullOrEmpty(password))
         {
-            ModelState.AddModelError(nameof(RestoreViewModel.Password), "Backup password is required.");
+            ModelState.AddModelError(nameof(RestoreViewModel.Password), CommonText.Get("Backup password is required."));
             return View("Restore", new RestoreViewModel());
         }
 
@@ -122,21 +123,21 @@ public class ImportExportController(IImportExportService importExportService, IU
     {
         if (!model.Confirm)
         {
-            ModelState.AddModelError(nameof(model.Confirm), "Explicit confirmation is required.");
+            ModelState.AddModelError(nameof(model.Confirm), CommonText.Get("Explicit confirmation is required."));
             model.Preview = Preview(model);
             return View("Restore", model);
         }
 
         try
         {
-            if (string.IsNullOrEmpty(model.Password)) throw new BusinessRuleException("Backup password is required.");
+            if (string.IsNullOrEmpty(model.Password)) throw new BusinessRuleException(CommonText.Get("Backup password is required."));
             await EncryptedBackups().RestoreEncryptedAsync(Convert.FromBase64String(model.EncryptedContent), model.Password, cancellationToken);
             TempData["SuccessMessage"] = "Backup restored successfully.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception exception) when (exception is BusinessRuleException or FormatException)
         {
-            ModelState.AddModelError(string.Empty, exception is FormatException ? "The encrypted backup data is invalid." : exception.Message);
+            ModelState.AddModelError(string.Empty, exception is FormatException ? CommonText.Get("The encrypted backup data is invalid.") : CommonText.Get(exception.Message));
             model.Preview = Preview(model);
             ModelState.Remove(nameof(RestoreViewModel.Password));
             model.Password = string.Empty;
@@ -146,9 +147,9 @@ public class ImportExportController(IImportExportService importExportService, IU
 
     private RestorePreview Preview(RestoreViewModel model)
     {
-        if (string.IsNullOrEmpty(model.Password)) return model.Preview ?? new RestorePreview(false, 0, 0, 0, 0, ["Backup password is required."]);
+        if (string.IsNullOrEmpty(model.Password)) return model.Preview ?? new RestorePreview(false, 0, 0, 0, 0, [CommonText.Get("Backup password is required.")]);
         try { return EncryptedBackups().PreviewEncryptedRestore(Convert.FromBase64String(model.EncryptedContent), model.Password); }
-        catch (FormatException) { return new RestorePreview(false, 0, 0, 0, 0, ["The encrypted backup data is invalid."]); }
+        catch (FormatException) { return new RestorePreview(false, 0, 0, 0, 0, [CommonText.Get("The encrypted backup data is invalid.")]); }
     }
 
     private IEncryptedBackupService EncryptedBackups() => encryptedBackupService ?? throw new InvalidOperationException("Encrypted backup service is not configured.");

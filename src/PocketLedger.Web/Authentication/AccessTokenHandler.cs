@@ -22,6 +22,7 @@ public sealed class AccessTokenHandler(IHttpContextAccessor contextAccessor, IHt
         {
             accessToken = await GetRefreshedAccessTokenAsync(context, authentication, cancellationToken);
         }
+        request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         request.Headers.Add(PocketLedger.Security.UserSessionKeyProtocol.SessionKeyHeader, dataKey.SessionKey);
         request.Headers.Add(PocketLedger.Security.UserSessionKeyProtocol.WrappedKeyHeader, dataKey.WrappedKey);

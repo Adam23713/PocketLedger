@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
@@ -59,7 +60,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             {
                 await signInManager.SignOutAsync();
                 if (unlock == DataKeyUnlock.Busy) return TooManyRequests();
-                ModelState.AddModelError(string.Empty, DataUnlockFailedMessage);
+                ModelState.AddModelError(string.Empty, CommonText.Get(DataUnlockFailedMessage));
                 return View(await BuildLoginModelAsync(model.ReturnUrl, model));
             }
         }
@@ -81,7 +82,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         await audit.WriteAsync(reason == "LockedOut" ? "LoginLockout" : "LoginFailed", "Failure", user?.Id, normalized, reason, cancellationToken: cancellationToken);
         var status = user is null ? unknownUserAttempts.RecordFailure(normalized) : await GetLoginAttemptStatusAsync(user);
         model.LockedUntilUtc = status.LockedUntilUtc;
-        if (status.LockedUntilUtc is null) ModelState.AddModelError(string.Empty, $"Invalid login attempt. {AttemptsLeftMessage(status.RemainingAttempts)}");
+        if (status.LockedUntilUtc is null) ModelState.AddModelError(string.Empty, CommonText.Get("Invalid login attempt.") + " " + AttemptsLeftMessage(status.RemainingAttempts));
         return View(await BuildLoginModelAsync(model.ReturnUrl, model));
     }
 
@@ -110,7 +111,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (await EmailExistsAsync(model.Email, cancellationToken))
         {
             await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "ExistingEmail", cancellationToken: cancellationToken);
-            ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
+            ModelState.AddModelError(nameof(model.Email), CommonText.Get("An account already exists for this email address."));
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
         }
 
@@ -123,7 +124,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return status.IsOpen ? View("RegistrationFull") : NotFound();
         }
 
-        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false, RegistrationProvider = "Password" };
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = model.Username.Trim(), Email = model.Email.Trim(), EmailConfirmed = false, PreferredLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, RegistrationProvider = "Password" };
         IdentityResult? result = null;
         CreatedUserDataKey? created = null;
         try
@@ -154,13 +155,13 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (result is null)
         {
             await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "EmailCollision", cancellationToken: cancellationToken);
-            ModelState.AddModelError(nameof(model.Email), "An account already exists for this email address.");
+            ModelState.AddModelError(nameof(model.Email), CommonText.Get("An account already exists for this email address."));
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
         }
         if (!result.Succeeded)
         {
             await audit.WriteAsync("Registration", "Failure", normalizedUsername: userManager.NormalizeName(model.Username.Trim()), failureReason: "IdentityValidationFailed", cancellationToken: cancellationToken);
-            foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, error.Description);
+            foreach (var error in result.Errors) ModelState.AddModelError(string.Empty, LocalizeIdentityError(error));
             return View(await BuildRegisterModelAsync(model.ReturnUrl, model));
         }
 
@@ -185,7 +186,9 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             return BadRequest("The selected external login provider is unavailable.");
         }
         var redirectUrl = Url.Action(nameof(ExternalLoginCallback), new { returnUrl });
-        return Challenge(signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl), provider);
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        properties.Items["locale"] = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        return Challenge(properties, provider);
     }
 
     [AllowAnonymous, HttpGet]
@@ -195,7 +198,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!string.IsNullOrWhiteSpace(remoteError))
         {
             await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "ProviderError", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "The external login was cancelled or rejected by the provider.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The external login was cancelled or rejected by the provider."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
 
@@ -203,7 +206,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (info is null)
         {
             await audit.WriteAsync("ExternalLogin", "Failure", failureReason: "MissingExternalLoginInfo", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "The external login response could not be validated.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The external login response could not be validated."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
         var linkedUser = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
@@ -229,7 +232,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             }
 
             await audit.WriteAsync("ExternalLogin", "Failure", linkedUser.Id, linkedUser.NormalizedUserName, result.IsLockedOut ? "LockedOut" : "SignInRejected", cancellationToken: cancellationToken);
-            if (!result.IsLockedOut) ModelState.AddModelError(string.Empty, "The external login could not be completed.");
+            if (!result.IsLockedOut) ModelState.AddModelError(string.Empty, CommonText.Get("The external login could not be completed."));
             var loginModel = await BuildLoginModelAsync(returnUrl);
             if (result.IsLockedOut) loginModel.LockedUntilUtc = await userManager.GetLockoutEndDateAsync(linkedUser);
             return View(nameof(Login), loginModel);
@@ -238,7 +241,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!TryGetVerifiedEmail(info.Principal, out var email))
         {
             await audit.WriteAsync("ExternalRegistration", "Failure", failureReason: "VerifiedEmailRequired", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "The external provider must supply a verified email address.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The external provider must supply a verified email address."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
         using var registrationLock = await registrationSettings.AcquireRegistrationLockAsync(cancellationToken);
@@ -247,17 +250,19 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         {
             await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email),
                 failureReason: registrationStatus.IsOpen ? "RegistrationFull" : "RegistrationDisabled", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, registrationStatus.IsOpen ? "All available accounts are currently taken." : "Registration is currently unavailable.");
+            ModelState.AddModelError(string.Empty, registrationStatus.IsOpen ? CommonText.Get("All available accounts are currently taken.") : CommonText.Get("Registration is currently unavailable."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
         if (await EmailExistsAsync(email, cancellationToken))
         {
             await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "ExistingEmail", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "An account already exists for this email address. Sign in with the existing account instead.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("An account already exists for this email address. Sign in with the existing account instead."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
 
-        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = email, Email = email, EmailConfirmed = true, RegistrationProvider = info.LoginProvider };
+        var language = info.AuthenticationProperties?.Items.TryGetValue("locale", out var selectedLanguage) == true && selectedLanguage is not null
+            && UiLocalization.Languages.ContainsKey(selectedLanguage) ? selectedLanguage : System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = email, Email = email, EmailConfirmed = true, PreferredLanguage = language, RegistrationProvider = info.LoginProvider };
         IdentityResult createResult;
         try
         {
@@ -267,13 +272,13 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         {
             dbContext.Entry(user).State = EntityState.Detached;
             await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "EmailCollision", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "An account already exists for this email address. Sign in with the existing account instead.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("An account already exists for this email address. Sign in with the existing account instead."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
         if (!createResult.Succeeded)
         {
             await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "IdentityValidationFailed", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "The external account could not be registered.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The external account could not be registered."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
 
@@ -282,7 +287,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         {
             await userManager.DeleteAsync(user);
             await audit.WriteAsync("ExternalRegistration", "Failure", normalizedUsername: userManager.NormalizeEmail(email), failureReason: "ExternalLoginLinkFailed", cancellationToken: cancellationToken);
-            ModelState.AddModelError(string.Empty, "The external account could not be registered.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("The external account could not be registered."));
             return View(nameof(Login), await BuildLoginModelAsync(returnUrl));
         }
 
@@ -327,7 +332,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                 return await SignInLockedOutAsync(user, model.ReturnUrl);
             }
             var status = await GetLoginAttemptStatusAsync(user);
-            ModelState.AddModelError(nameof(model.Password), $"{(model.IsDataPassword ? "Incorrect data password." : "Incorrect password.")} {AttemptsLeftMessage(status.RemainingAttempts)}");
+            ModelState.AddModelError(nameof(model.Password), CommonText.Get(model.IsDataPassword ? "Incorrect data password." : "Incorrect password.") + " " + AttemptsLeftMessage(status.RemainingAttempts));
             return View(model);
         }
         await userManager.ResetAccessFailedCountAsync(user);
@@ -394,7 +399,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             }
             return ContinueAfterAuthentication(model.ReturnUrl);
         }
-        ModelState.AddModelError(string.Empty, "Invalid authentication attempt.");
+        ModelState.AddModelError(string.Empty, CommonText.Get("Invalid authentication attempt."));
         return View(model);
     }
 
@@ -417,7 +422,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         await audit.WriteAsync("RecoveryCodeAuthentication", succeeded ? "Success" : "Failure", user?.Id, user?.NormalizedUserName, succeeded ? null : "InvalidCode", cancellationToken: cancellationToken);
         if (!succeeded || user is null)
         {
-            ModelState.AddModelError(string.Empty, "Invalid authentication attempt.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("Invalid authentication attempt."));
             return View(model);
         }
         await userManager.ResetAuthenticatorKeyAsync(user);
@@ -454,7 +459,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (!valid)
         {
             await audit.WriteAsync("AuthenticatorSetup", "Failure", user.Id, user.NormalizedUserName, "InvalidCode", cancellationToken: cancellationToken);
-            ModelState.AddModelError(nameof(model.Code), "Invalid authentication code.");
+            ModelState.AddModelError(nameof(model.Code), CommonText.Get("Invalid authentication code."));
             return View(BuildSetupModel(user, key, model.Code, model.ReturnUrl));
         }
         await userManager.SetTwoFactorEnabledAsync(user, true);
@@ -509,7 +514,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
 
         IActionResult InvalidCurrentPassword()
         {
-            ModelState.AddModelError(nameof(model.CurrentPassword), "Password change was not completed. Check your current password and try again.");
+            ModelState.AddModelError(nameof(model.CurrentPassword), CommonText.Get("Password change was not completed. Check your current password and try again."));
             return View(model);
         }
         if (hasPassword && !await userManager.CheckPasswordAsync(user, model.CurrentPassword))
@@ -541,7 +546,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, hasPassword ? "DataKeyUnavailable" : "InvalidCurrentPassword", cancellationToken: cancellationToken);
             if (hasPassword)
             {
-                ModelState.AddModelError(string.Empty, DataUnlockFailedMessage);
+                ModelState.AddModelError(string.Empty, CommonText.Get(DataUnlockFailedMessage));
                 return View(model);
             }
             return InvalidCurrentPassword();
@@ -569,7 +574,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                 var invalidCurrentPassword = result.Errors.Any(error => error.Code == "PasswordMismatch");
                 await audit.WriteAsync("PasswordChange", "Failure", user.Id, user.NormalizedUserName, invalidCurrentPassword ? "InvalidCurrentPassword" : "InvalidNewPassword", cancellationToken: cancellationToken);
                 if (invalidCurrentPassword) return InvalidCurrentPassword();
-                foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), LocalizeIdentityError(error));
                 return View(model);
             }
         }
@@ -577,7 +582,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         await signInManager.RefreshSignInAsync(user);
         await audit.WriteAsync("PasswordChange", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
         await audit.WriteAsync("SecurityStampInvalidation", "Success", user.Id, user.NormalizedUserName, cancellationToken: cancellationToken);
-        TempData["PasswordChangeStatus"] = "Your password has been changed.";
+        TempData["PasswordChangeStatus"] = CommonText.Get("Your password has been changed.");
         return RedirectToAction(nameof(ChangePassword));
     }
 
@@ -596,7 +601,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         var user = await userManager.FindByNameAsync(model.Username.Trim());
         IActionResult Rejected()
         {
-            ModelState.AddModelError(string.Empty, "Account recovery was not completed. Check the username and recovery key and try again.");
+            ModelState.AddModelError(string.Empty, CommonText.Get("Account recovery was not completed. Check the username and recovery key and try again."));
             return View(model);
         }
         if (user is null || user.IsAccessBlocked || await userManager.IsLockedOutAsync(user))
@@ -641,7 +646,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
                     : await userManager.UpdateSecurityStampAsync(user);
                 if (!result.Succeeded)
                 {
-                    foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), error.Description);
+                    foreach (var error in result.Errors) ModelState.AddModelError(nameof(model.NewPassword), LocalizeIdentityError(error));
                     return View(model);
                 }
                 await dataKeys.ReplacePasswordAsync(key, model.NewPassword, cancellationToken);
@@ -692,7 +697,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (key is null)
         {
             await audit.WriteAsync("DataRecoveryKeyRegenerated", "Failure", user.Id, user.NormalizedUserName, "InvalidCurrentPassword", cancellationToken: cancellationToken);
-            ModelState.AddModelError(nameof(model.CurrentPassword), "The recovery key was not replaced. Check your current password and try again.");
+            ModelState.AddModelError(nameof(model.CurrentPassword), CommonText.Get("The recovery key was not replaced. Check your current password and try again."));
             return View(model);
         }
         string recoveryKey;
@@ -729,7 +734,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         if (user.IsBootstrapAdministrator) return Forbid();
         if (!string.Equals(confirmation, "DELETE", StringComparison.Ordinal))
         {
-            TempData["AccountWarning"] = "Your account was not deleted because the confirmation text did not match DELETE.";
+            TempData["AccountWarning"] = CommonText.Get("Your account was not deleted because the confirmation text did not match DELETE.");
             return RedirectToAction(nameof(Manage));
         }
 
@@ -737,7 +742,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         pendingKeys.Clear(HttpContext);
         await signInManager.SignOutAsync();
         HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
-        TempData["LoginSuccessMessage"] = "Your account and all PocketLedger data have been permanently deleted.";
+        TempData["LoginSuccessMessage"] = CommonText.Get("Your account and all PocketLedger data have been permanently deleted.");
         return RedirectToAction(nameof(Login));
     }
 
@@ -886,8 +891,19 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
         ? new LoginAttemptStatus(0, await userManager.GetLockoutEndDateAsync(user))
         : new LoginAttemptStatus(userManager.Options.Lockout.MaxFailedAccessAttempts - await userManager.GetAccessFailedCountAsync(user), null);
 
+    private string LocalizeIdentityError(IdentityError error)
+    {
+        var key = "IdentityError." + error.Code;
+        var translation = CommonText.Get(key);
+        return translation == key ? error.Description : string.Format(System.Globalization.CultureInfo.CurrentUICulture, translation,
+            userManager.Options.Password.RequiredLength, userManager.Options.Password.RequiredUniqueChars);
+    }
+
     private string AttemptsLeftMessage(int remaining) =>
-        $"You have {remaining} {(remaining == 1 ? "attempt" : "attempts")} left before sign-in is blocked for {userManager.Options.Lockout.DefaultLockoutTimeSpan.TotalMinutes:0} minutes.";
+        CommonText.Format(remaining == 1
+            ? "You have {0} attempt left before sign-in is blocked for {1:0} minutes."
+            : "You have {0} attempts left before sign-in is blocked for {1:0} minutes.",
+            remaining, userManager.Options.Lockout.DefaultLockoutTimeSpan.TotalMinutes);
 
     private async Task<bool> ValidateNewPasswordAsync(ApplicationUser user, string password, string field)
     {
@@ -897,7 +913,7 @@ public class AccountController(UserManager<ApplicationUser> userManager, SignInM
             var result = await validator.ValidateAsync(userManager, user, password);
             if (result.Succeeded) continue;
             valid = false;
-            foreach (var error in result.Errors) ModelState.AddModelError(field, error.Description);
+            foreach (var error in result.Errors) ModelState.AddModelError(field, LocalizeIdentityError(error));
         }
         return valid;
     }

@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using System.ComponentModel.DataAnnotations;
 using PocketLedger.Models.Enums;
 using PocketLedger.Models.ViewModels.Transactions;
@@ -39,22 +40,22 @@ public class RecurringTransactionListItemViewModel
 public class RecurringTransactionFormViewModel : IValidatableObject
 {
     public Guid Id { get; set; }
-    [Required] public TransactionType Type { get; set; } = TransactionType.Expense;
-    [Required] public Guid? AccountId { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public TransactionType Type { get; set; } = TransactionType.Expense;
+    [Required(ErrorMessage = "The {0} field is required.")] public Guid? AccountId { get; set; }
     public Guid? CategoryId { get; set; }
-    [Range(typeof(decimal), "0.0001", "999999999999999.9999")] public decimal Amount { get; set; }
+    [Range(typeof(decimal), "0.0001", "999999999999999.9999", ErrorMessage = "The field {0} must be between {1} and {2}.")] public decimal Amount { get; set; }
     public AdjustmentDirection? AdjustmentDirection { get; set; }
-    [StringLength(500)] public string? Note { get; set; }
-    [Required] public DateOnly FirstOccurrence { get; set; }
+    [StringLength(500, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")] public string? Note { get; set; }
+    [Required(ErrorMessage = "The {0} field is required.")] public DateOnly FirstOccurrence { get; set; }
     public DateOnly? LastOccurrence { get; set; }
     public bool NoEndDate { get; set; } = true;
-    [Required] public RecurringFrequency Frequency { get; set; } = RecurringFrequency.Monthly;
+    [Required(ErrorMessage = "The {0} field is required.")] public RecurringFrequency Frequency { get; set; } = RecurringFrequency.Monthly;
     public bool Enabled { get; set; } = true;
     public IReadOnlyList<AccountOptionViewModel> Accounts { get; set; } = [];
     public IReadOnlyList<CategoryOptionViewModel> Categories { get; set; } = [];
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        if (!NoEndDate && LastOccurrence is null) yield return new ValidationResult("Last occurrence is required when an end date is selected.", [nameof(LastOccurrence)]);
+        if (!NoEndDate && LastOccurrence is null) yield return new ValidationResult(CommonText.Get("Last occurrence is required when an end date is selected."), [nameof(LastOccurrence)]);
     }
 }

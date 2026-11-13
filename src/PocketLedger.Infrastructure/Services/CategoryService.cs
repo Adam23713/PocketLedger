@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PocketLedger.Data;
+using PocketLedger.Models;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 using PocketLedger.Services.Interfaces;
@@ -50,7 +51,11 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
             throw new BusinessRuleException("A main category containing subcategories cannot change type.");
         }
 
-        existing.Name = category.Name;
+        if (!string.Equals(category.Name, DefaultCategories.DisplayName(existing), StringComparison.Ordinal))
+        {
+            existing.Name = category.Name;
+            existing.StarterCategoryKey = null;
+        }
         existing.Type = category.Type;
         existing.Icon = category.Icon;
         existing.ParentCategoryId = category.ParentCategoryId;
@@ -86,7 +91,7 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
 
         var categories = await query.Include(category => category.ParentCategory).ToListAsync(cancellationToken);
         var choices = categories.OrderBy(category => category.Type).ThenBy(category => category.ParentCategoryId).ThenBy(category => category.DisplayOrder).ThenBy(category => category.Name)
-            .Select(category => new CategoryChoice(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.ParentCategory?.Name, category.ParentCategory?.Icon)).ToList();
+            .Select(category => new CategoryChoice(category.Id, DefaultCategories.DisplayName(category), category.Type, category.Icon, category.ParentCategoryId, category.ParentCategory is { } parent ? DefaultCategories.DisplayName(parent) : null, category.ParentCategory?.Icon)).ToList();
 
         var ordered = new List<CategoryChoice>();
         foreach (var parent in choices.Where(choice => !choice.IsSubcategory))
@@ -97,6 +102,34 @@ public class CategoryService(PocketLedgerDbContext dbContext) : ICategoryService
 
         return ordered;
     }
+
+    public async Task<IReadOnlyList<CategoryChoice>> GetStarterCandidatesAsync(CancellationToken cancellationToken)
+    {
+        var candidates = await dbContext.Categories.AsNoTracking().Include(category => category.ParentCategory)
+            .Where(category => category.StarterCategoryKey == null).ToListAsync(cancellationToken);
+        return candidates.Where(IsStarterCandidate).OrderBy(category => category.ParentCategory?.Name ?? category.Name)
+            .ThenBy(category => category.ParentCategoryId is not null).ThenBy(category => category.Name)
+            .Select(category => new CategoryChoice(category.Id, category.Name, category.Type, category.Icon, category.ParentCategoryId, category.ParentCategory?.Name, category.ParentCategory?.Icon))
+            .ToArray();
+    }
+
+    public async Task EnableStarterTranslationsAsync(IReadOnlyList<Guid> categoryIds, CancellationToken cancellationToken)
+    {
+        var ids = categoryIds.Distinct().ToArray();
+        var categories = await dbContext.Categories.Include(category => category.ParentCategory)
+            .Where(category => ids.Contains(category.Id)).ToListAsync(cancellationToken);
+        if (categories.Count != ids.Length || categories.Any(category => !IsStarterCandidate(category)))
+            throw new BusinessRuleException("One or more selected categories no longer match a starter category.");
+
+        foreach (var category in categories)
+            category.StarterCategoryKey = category.Name;
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static bool IsStarterCandidate(Category category) => DefaultCategories.All.Any(definition =>
+        definition.Type == category.Type && (category.ParentCategory is { } parent
+            ? parent.ParentCategoryId is null && parent.Type == definition.Type && parent.Name == definition.Name && definition.Subcategories.Contains(category.Name)
+            : category.ParentCategoryId is null && category.Name == definition.Name));
 
     private async Task<Category?> LoadParentAsync(Guid? parentId, CancellationToken cancellationToken)
     {

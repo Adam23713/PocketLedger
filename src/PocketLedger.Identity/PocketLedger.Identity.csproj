@@ -26,4 +26,9 @@
     <ProjectReference Include="../PocketLedger.Domain/PocketLedger.Domain.csproj" />
     <ProjectReference Include="../PocketLedger.Security/PocketLedger.Security.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Localization/UiLocalization.cs" Link="Localization/UiLocalization.cs" />
+    <Compile Include="../Localization/CommonText.cs" Link="Localization/CommonText.cs" />
+    <Content Include="../Localization/_LanguageSelector.cshtml" Link="Views/Shared/_LanguageSelector.cshtml" />
+  </ItemGroup>
 </Project>

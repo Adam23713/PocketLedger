@@ -1,3 +1,5 @@
+using System.Resources;
+using PocketLedger.Models.Entities;
 using PocketLedger.Models.Enums;
 
 namespace PocketLedger.Models;
@@ -7,6 +9,16 @@ public sealed record DefaultCategoryDefinition(string Name, CategoryType Type, s
 // Starter categories offered to every user. Subcategories inherit the icon of their main category.
 public static class DefaultCategories
 {
+    private static readonly ResourceManager Names = new("PocketLedger.Domain.Models.DefaultCategoryNames", typeof(DefaultCategories).Assembly);
+
+    public static bool IsStarterCategoryKey(string? key) =>
+        key is not null && All.Any(category => category.Name == key || category.Subcategories.Contains(key));
+
+    public static string DisplayName(Category category) => DisplayName(category.Name, category.StarterCategoryKey);
+
+    public static string DisplayName(string name, string? starterCategoryKey) =>
+        starterCategoryKey == name ? Names.GetString(name) ?? name : name;
+
     public static IReadOnlyList<DefaultCategoryDefinition> All { get; } =
     [
         new("Housing", CategoryType.Expense, "accommodation-1", ["Rent", "Mortgage", "Maintenance", "Furniture", "Common charges"]),

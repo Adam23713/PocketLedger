@@ -1,0 +1,386 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 / ORGANIZE" xml:space="preserve">
+    <value>01 / ORGANISER</value>
+  </data>
+  <data name="01 / YOUR PASSWORD" xml:space="preserve">
+    <value>01 / VOTRE MOT DE PASSE</value>
+  </data>
+  <data name="02 / SERVER KEYS" xml:space="preserve">
+    <value>02 / CLÉS SERVEUR</value>
+  </data>
+  <data name="02 / UNDERSTAND" xml:space="preserve">
+    <value>02 / COMPRENDRE</value>
+  </data>
+  <data name="03 / MAKE IT YOURS" xml:space="preserve">
+    <value>03 / PERSONNALISER</value>
+  </data>
+  <data name="03 / OCI VAULT" xml:space="preserve">
+    <value>03 / OCI VAULT</value>
+  </data>
+  <data name="04 / TWO-FACTOR" xml:space="preserve">
+    <value>04 / DEUX FACTEURS</value>
+  </data>
+  <data name="A LITTLE FURTHER DOWN THE ROAD" xml:space="preserve">
+    <value>UN PEU PLUS LOIN</value>
+  </data>
+  <data name="A PERSONAL PROJECT, SHARED OPENLY" xml:space="preserve">
+    <value>UN PROJET PERSONNEL, PARTAGÉ OUVERTEMENT</value>
+  </data>
+  <data name="A home for your finances." xml:space="preserve">
+    <value>Un espace pour vos finances.</value>
+  </data>
+  <data name="A key only you can open" xml:space="preserve">
+    <value>Une clé que vous seul pouvez déverrouiller</value>
+  </data>
+  <data name="A place for every transaction" xml:space="preserve">
+    <value>Une place pour chaque transaction</value>
+  </data>
+  <data name="A quick tour of PocketLedger." xml:space="preserve">
+    <value>Une visite rapide de PocketLedger.</value>
+  </data>
+  <data name="A second lock on every field" xml:space="preserve">
+    <value>Une seconde protection pour chaque champ chiffré</value>
+  </data>
+  <data name="A tour of PocketLedger" xml:space="preserve">
+    <value>Visite de PocketLedger</value>
+  </data>
+  <data name="Already have an account? You can sign in below." xml:space="preserve">
+    <value>Vous avez déjà un compte ? Connectez-vous ci-dessous.</value>
+  </data>
+  <data name="Amounts, dates and account types are protected by the server keys and the vault rather than by your password, so balances and statistics can still be calculated. We never sell your data or share it with advertisers, analytics providers or data brokers. See the" xml:space="preserve">
+    <value>Les montants, les dates et les types de comptes sont protégés par les clés serveur et le coffre afin de permettre le calcul des soldes et statistiques. Nous ne vendons pas vos données et ne les partageons pas avec les annonceurs, services d’analyse ou courtiers en données. Consultez la page</value>
+  </data>
+  <data name="Android application" xml:space="preserve">
+    <value>Application Android</value>
+  </data>
+  <data name="Because financial awareness should not be a premium feature." xml:space="preserve">
+    <value>La compréhension de ses finances ne devrait pas être une option payante.</value>
+  </data>
+  <data name="Bring accounts, income, expenses and transfers into one overview. Use categories to give every transaction a place." xml:space="preserve">
+    <value>Réunissez comptes, revenus, dépenses et virements dans une seule vue. Classez vos transactions par catégorie.</value>
+  </data>
+  <data name="CALENDAR" xml:space="preserve">
+    <value>CALENDRIER</value>
+  </data>
+  <data name="CATEGORIES" xml:space="preserve">
+    <value>CATÉGORIES</value>
+  </data>
+  <data name="CHOOSE WHAT WORKS FOR YOU" xml:space="preserve">
+    <value>CHOISISSEZ CE QUI VOUS CONVIENT</value>
+  </data>
+  <data name="Choose your appearance from multiple themes, set your currencies and number formats, and pick the timezone your dates follow." xml:space="preserve">
+    <value>Choisissez un thème, configurez les devises et formats numériques, puis sélectionnez le fuseau horaire utilisé pour vos dates.</value>
+  </data>
+  <data name="Click the screenshot to enlarge ↗" xml:space="preserve">
+    <value>Cliquez sur la capture pour l’agrandir ↗</value>
+  </data>
+  <data name="Close image viewer" xml:space="preserve">
+    <value>Fermer la visionneuse</value>
+  </data>
+  <data name="Close ×" xml:space="preserve">
+    <value>Fermer ×</value>
+  </data>
+  <data name="Coming soon" xml:space="preserve">
+    <value>Bientôt disponible</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="Create account" xml:space="preserve">
+    <value>Créer un compte</value>
+  </data>
+  <data name="Create an account or sign in below." xml:space="preserve">
+    <value>Créez un compte ou connectez-vous ci-dessous.</value>
+  </data>
+  <data name="Even if we wanted to, we could not read it. Without your password or your recovery key, nobody — including us — can." xml:space="preserve">
+    <value>Sans votre mot de passe ni votre clé de récupération, personne ne peut lire ces données, nous compris.</value>
+  </data>
+  <data name="Every account is protected by an authenticator app, so a leaked password alone does not get anyone into your account." xml:space="preserve">
+    <value>Une application d’authentification protège chaque compte. Un mot de passe divulgué ne suffit pas pour se connecter.</value>
+  </data>
+  <data name="Every account, in view" xml:space="preserve">
+    <value>Tous vos comptes en un coup d’œil</value>
+  </data>
+  <data name="Everything encrypted — your personal layer included — is encrypted again with separate, service-specific key rings kept outside the database, so a copied database holds only ciphertext." xml:space="preserve">
+    <value>Toutes les données chiffrées, y compris votre couche personnelle, sont chiffrées à nouveau avec des trousseaux distincts stockés hors de la base. Une copie de la base ne contient que du texte chiffré.</value>
+  </data>
+  <data name="Explore on GitHub" xml:space="preserve">
+    <value>Découvrir sur GitHub</value>
+  </data>
+  <data name="Explore statistics, follow your calendar and track recurring transactions, loans and debts." xml:space="preserve">
+    <value>Consultez les statistiques et le calendrier, et suivez les transactions récurrentes, les prêts et les dettes.</value>
+  </data>
+  <data name="Explore the details ↗" xml:space="preserve">
+    <value>Voir les détails ↗</value>
+  </data>
+  <data name="FREE HOSTED POCKETLEDGER" xml:space="preserve">
+    <value>POCKETLEDGER HÉBERGÉ GRATUITEMENT</value>
+  </data>
+  <data name="Financial security does not necessarily begin when you have more money. It begins when you understand what is happening with what you already have." xml:space="preserve">
+    <value>La sécurité financière ne commence pas forcément avec plus d’argent. Elle commence lorsque vous comprenez ce qui arrive à celui dont vous disposez déjà.</value>
+  </data>
+  <data name="Fit to screen" xml:space="preserve">
+    <value>Adapter à l’écran</value>
+  </data>
+  <data name="Follow your financial activity day by day. Each day shows its income, expenses and running total, so busy weeks and quiet ones are easy to spot." xml:space="preserve">
+    <value>Suivez vos finances jour après jour. Les revenus, les dépenses et les cumuls permettent de repérer les semaines chargées et les semaines calmes.</value>
+  </data>
+  <data name="From your morning coffee to the bigger picture, keep the details together and the overview clear." xml:space="preserve">
+    <value>Du café du matin à la vue d’ensemble, gardez les détails au même endroit.</value>
+  </data>
+  <data name="I know what it feels like to come from a family where money does not automatically mean security. And I also know how difficult it is, as an adult, to learn the things about money that someone probably should have taught you much earlier." xml:space="preserve">
+    <value>Je sais ce que c’est de venir d’une famille où l’argent ne signifie pas forcément la sécurité. Je sais aussi combien il est difficile d’apprendre à l’âge adulte ce qu’on aurait aimé savoir bien plus tôt sur l’argent.</value>
+  </data>
+  <data name="I run a PocketLedger instance that is currently free to use. I cover the server costs myself, so account availability is limited." xml:space="preserve">
+    <value>J’exploite une instance PocketLedger actuellement gratuite. Je prends en charge les frais de serveur, donc le nombre de comptes est limité.</value>
+  </data>
+  <data name="If you offer a modified version over a network, the license requires making the corresponding source available to its users." xml:space="preserve">
+    <value>Si vous proposez une version modifiée sur un réseau, la licence exige que son code source correspondant soit accessible à ses utilisateurs.</value>
+  </data>
+  <data name="In your pocket, too." xml:space="preserve">
+    <value>Dans votre poche aussi.</value>
+  </data>
+  <data name="Income, expenses &amp; transfers" xml:space="preserve">
+    <value>Revenus, dépenses et virements</value>
+  </data>
+  <data name="It does not require a subscription." xml:space="preserve">
+    <value>Aucun abonnement nécessaire.</value>
+  </data>
+  <data name="Keep track of loans &amp; debts" xml:space="preserve">
+    <value>Suivez vos prêts et dettes</value>
+  </data>
+  <data name="Keys kept in a vault" xml:space="preserve">
+    <value>Clés conservées dans un coffre</value>
+  </data>
+  <data name="Know what you owe and what is owed to you. Record repayments as they happen and keep the remaining balance of every loan up to date." xml:space="preserve">
+    <value>Voyez ce que vous devez et ce qu’on vous doit. Enregistrez les remboursements et gardez le solde de chaque prêt à jour.</value>
+  </data>
+  <data name="LOANS &amp; DEBTS" xml:space="preserve">
+    <value>PRÊTS ET DETTES</value>
+  </data>
+  <data name="Layers of protection" xml:space="preserve">
+    <value>Couches de protection</value>
+  </data>
+  <data name="Less guesswork." xml:space="preserve">
+    <value>Moins d’incertitude.</value>
+  </data>
+  <data name="Let me take care" xml:space="preserve">
+    <value>Je m’occupe</value>
+  </data>
+  <data name="Live more confidently tomorrow." xml:space="preserve">
+    <value>Avancez avec plus de confiance demain.</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
+  <data name="Made by" xml:space="preserve">
+    <value>Créé par</value>
+  </data>
+  <data name="Make PocketLedger yours" xml:space="preserve">
+    <value>Personnalisez PocketLedger</value>
+  </data>
+  <data name="Make room for the recurring" xml:space="preserve">
+    <value>Planifiez les opérations récurrentes</value>
+  </data>
+  <data name="More understanding." xml:space="preserve">
+    <value>Plus de clarté.</value>
+  </data>
+  <data name="Native mobile apps are on the horizon." xml:space="preserve">
+    <value>Des applications mobiles natives sont prévues.</value>
+  </data>
+  <data name="Next screenshot" xml:space="preserve">
+    <value>Capture suivante</value>
+  </data>
+  <data name="Next →" xml:space="preserve">
+    <value>Suivant →</value>
+  </data>
+  <data name="ONE APP. YOUR CHOICE OF THEME." xml:space="preserve">
+    <value>UNE APPLICATION, LE THÈME DE VOTRE CHOIX.</value>
+  </data>
+  <data name="OVERVIEW" xml:space="preserve">
+    <value>VUE D’ENSEMBLE</value>
+  </data>
+  <data name="Open PocketLedger" xml:space="preserve">
+    <value>Ouvrir PocketLedger</value>
+  </data>
+  <data name="Organize your finances with your own categories and subcategories, each with its own icon, grouped into income and expenses." xml:space="preserve">
+    <value>Organisez vos revenus et dépenses avec vos propres catégories, sous-catégories et icônes.</value>
+  </data>
+  <data name="PERSONAL FINANCE. FREE &amp; OPEN SOURCE." xml:space="preserve">
+    <value>FINANCES PERSONNELLES. GRATUIT ET OPEN SOURCE.</value>
+  </data>
+  <data name="Play the video" xml:space="preserve">
+    <value>Lire la vidéo</value>
+  </data>
+  <data name="PocketLedger dashboard showing account balances, recent transactions and four different appearance themes" xml:space="preserve">
+    <value>Tableau de bord PocketLedger avec soldes, transactions récentes et quatre thèmes</value>
+  </data>
+  <data name="PocketLedger exists to make" xml:space="preserve">
+    <value>PocketLedger existe pour</value>
+  </data>
+  <data name="PocketLedger screenshots" xml:space="preserve">
+    <value>Captures d’écran de PocketLedger</value>
+  </data>
+  <data name="PocketLedger video" xml:space="preserve">
+    <value>Vidéo PocketLedger</value>
+  </data>
+  <data name="PocketLedger — See more clearly today" xml:space="preserve">
+    <value>PocketLedger — Voyez plus clair dès aujourd’hui</value>
+  </data>
+  <data name="Previous screenshot" xml:space="preserve">
+    <value>Capture précédente</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Confidentialité</value>
+  </data>
+  <data name="Privacy Policy" xml:space="preserve">
+    <value>Politique de confidentialité</value>
+  </data>
+  <data name="RECURRING" xml:space="preserve">
+    <value>OPÉRATIONS RÉCURRENTES</value>
+  </data>
+  <data name="Read the license ↗" xml:space="preserve">
+    <value>Lire la licence ↗</value>
+  </data>
+  <data name="Record what comes in, what goes out and what moves between your accounts. Filter by year, month or category, and every day shows its own incoming and outgoing totals." xml:space="preserve">
+    <value>Enregistrez les entrées, les sorties et les virements entre vos comptes. Filtrez par année, mois ou catégorie et consultez les totaux quotidiens.</value>
+  </data>
+  <data name="Run PocketLedger on your own server, fork it and change it to suit your needs under the AGPL-3.0-only license. You don’t have to use my hosted instance." xml:space="preserve">
+    <value>Exécutez PocketLedger sur votre serveur, créez un fork et adaptez-le sous la licence AGPL-3.0-only. Mon instance hébergée est facultative.</value>
+  </data>
+  <data name="SEE IT IN ACTION" xml:space="preserve">
+    <value>VOIR EN ACTION</value>
+  </data>
+  <data name="SELF-HOSTED · AGPL-3.0-ONLY" xml:space="preserve">
+    <value>AUTO-HÉBERGÉ · AGPL-3.0-ONLY</value>
+  </data>
+  <data name="SETTINGS" xml:space="preserve">
+    <value>PARAMÈTRES</value>
+  </data>
+  <data name="STATISTICS" xml:space="preserve">
+    <value>STATISTIQUES</value>
+  </data>
+  <data name="Salaries, rent and subscriptions repeat on the schedule you set, and PocketLedger books them for you, so regular income and expenses stay in view." xml:space="preserve">
+    <value>PocketLedger enregistre salaires, loyers et abonnements selon votre calendrier pour suivre les revenus et dépenses réguliers.</value>
+  </data>
+  <data name="See more clearly today." xml:space="preserve">
+    <value>Voyez plus clair dès aujourd’hui.</value>
+  </data>
+  <data name="See the bigger picture" xml:space="preserve">
+    <value>Voir l’ensemble</value>
+  </data>
+  <data name="See where it all goes" xml:space="preserve">
+    <value>Voyez où va votre argent</value>
+  </data>
+  <data name="Self-hosting guide ↗" xml:space="preserve">
+    <value>Guide d’auto-hébergement ↗</value>
+  </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Aller au contenu</value>
+  </data>
+  <data name="Statistics break your spending and income down by category and account, with a twelve-month trend that shows how your habits change over time." xml:space="preserve">
+    <value>Les statistiques ventilent dépenses et revenus par catégorie et par compte. La tendance sur douze mois montre l’évolution de vos habitudes.</value>
+  </data>
+  <data name="THE EVERYDAY ESSENTIALS" xml:space="preserve">
+    <value>L’ESSENTIEL AU QUOTIDIEN</value>
+  </data>
+  <data name="TRANSACTIONS" xml:space="preserve">
+    <value>TRANSACTIONS</value>
+  </data>
+  <data name="Take a look at the source" xml:space="preserve">
+    <value>Consultez le code source</value>
+  </data>
+  <data name="The dashboard brings every account balance, your net worth and this month’s income and expenses together on one screen. The latest transactions sit right below, so you always know where things stand." xml:space="preserve">
+    <value>Le tableau de bord réunit les soldes, le patrimoine net, les revenus et les dépenses du mois. Les dernières transactions apparaissent juste en dessous.</value>
+  </data>
+  <data name="The video is loaded from YouTube (Google) only after you click. See our" xml:space="preserve">
+    <value>La vidéo est chargée depuis YouTube (Google) seulement après votre clic. Consultez notre</value>
+  </data>
+  <data name="Those key rings are secured through OCI Vault/KMS, so a stolen server disk on its own is not enough to unlock the protected fields." xml:space="preserve">
+    <value>OCI Vault/KMS protège les trousseaux. Un disque serveur volé ne suffit pas pour déchiffrer les champs protégés.</value>
+  </data>
+  <data name="To help you track your money. To help you plan. To help you notice patterns. And over time, to help you make more confident decisions." xml:space="preserve">
+    <value>Il vous aide à suivre votre argent, à planifier et à repérer des tendances. Avec le temps, vous pourrez prendre des décisions avec plus de confiance.</value>
+  </data>
+  <data name="Two steps to every sign-in" xml:space="preserve">
+    <value>Deux étapes à chaque connexion</value>
+  </data>
+  <data name="View PocketLedger dashboard and themes" xml:space="preserve">
+    <value>Voir le tableau de bord et les thèmes PocketLedger</value>
+  </data>
+  <data name="Watch a short walkthrough, and switch to full screen if you'd like a closer look." xml:space="preserve">
+    <value>Regardez cette courte présentation. Passez en plein écran pour voir les détails.</value>
+  </data>
+  <data name="Work with multiple currencies, choose from multiple themes and keep your data portable with backup, import and export." xml:space="preserve">
+    <value>Utilisez plusieurs devises, choisissez un thème et emportez vos données grâce à la sauvegarde, à l’importation et à l’exportation.</value>
+  </data>
+  <data name="YOUR DATA, PROTECTED BY DESIGN" xml:space="preserve">
+    <value>VOS DONNÉES PROTÉGÉES DÈS LA CONCEPTION</value>
+  </data>
+  <data name="Your account names, notes, debts and planner history are locked with a key that only your password can open. We never store that password, so nothing we hold can unlock your data — not the database, not our server keys, not our cloud vault." xml:space="preserve">
+    <value>Les noms de comptes, notes, dettes et l’historique du planificateur sont protégés par une clé que votre mot de passe déverrouille. Nous ne stockons pas ce mot de passe. La base de données, les clés serveur et le coffre cloud ne peuvent donc pas déchiffrer ces données.</value>
+  </data>
+  <data name="Your finances stay yours." xml:space="preserve">
+    <value>Vos finances restent les vôtres.</value>
+  </data>
+  <data name="Your finances, on a calendar" xml:space="preserve">
+    <value>Vos finances dans un calendrier</value>
+  </data>
+  <data name="Your money at a glance" xml:space="preserve">
+    <value>Vos finances en un coup d’œil</value>
+  </data>
+  <data name="Your money, your setup" xml:space="preserve">
+    <value>Vos finances, vos réglages</value>
+  </data>
+  <data name="Your own instance." xml:space="preserve">
+    <value>Votre propre instance.</value>
+  </data>
+  <data name="Your sensitive text is encrypted with a personal key, unlocked only by your password or your one-time recovery key. We keep just a one-way hash of the password and never see the recovery key." xml:space="preserve">
+    <value>Les textes sensibles sont chiffrés avec une clé personnelle déverrouillée par votre mot de passe ou votre clé de récupération à usage unique. Nous conservons uniquement un hachage du mot de passe et ne voyons jamais la clé de récupération.</value>
+  </data>
+  <data name="Your server." xml:space="preserve">
+    <value>Votre serveur.</value>
+  </data>
+  <data name="Zoom in" xml:space="preserve">
+    <value>Agrandir</value>
+  </data>
+  <data name="and" xml:space="preserve">
+    <value>et</value>
+  </data>
+  <data name="database encryption" xml:space="preserve">
+    <value>le chiffrement de la base</value>
+  </data>
+  <data name="documentation on GitHub." xml:space="preserve">
+    <value>sur GitHub.</value>
+  </data>
+  <data name="iOS application" xml:space="preserve">
+    <value>Application iOS</value>
+  </data>
+  <data name="of the hosting." xml:space="preserve">
+    <value>de l’hébergement.</value>
+  </data>
+  <data name="page, or read the" xml:space="preserve">
+    <value>ou lisez la documentation sur</value>
+  </data>
+  <data name="that journey a little easier." xml:space="preserve">
+    <value>faciliter ce parcours.</value>
+  </data>
+  <data name="← Previous" xml:space="preserve">
+    <value>← Précédent</value>
+  </data>
+  <data name="PocketLedger is a free, open-source personal finance app for tracking accounts, spending, income and debts. Use the hosted instance or run it on your own server." xml:space="preserve">
+    <value>PocketLedger est une application de finances personnelles gratuite et open source pour suivre comptes, dépenses, revenus et dettes. Utilisez l’instance hébergée ou votre propre serveur.</value>
+  </data>
+  <data name="{0} — PocketLedger application screenshot" xml:space="preserve">
+    <value>{0} — capture de l’application PocketLedger</value>
+  </data>
+  <data name="{0} — view full-size screenshot" xml:space="preserve">
+    <value>{0} — voir la capture en taille réelle</value>
+  </data>
+</root>

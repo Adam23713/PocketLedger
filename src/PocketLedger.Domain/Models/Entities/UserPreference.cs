@@ -3,6 +3,7 @@ namespace PocketLedger.Models.Entities;
 public sealed class UserPreference
 {
     public Guid UserId { get; set; }
+    public string? Language { get; set; }
     public string? DisplayName { get; set; }
     public int AvatarId { get; set; } = 1;
     public string DefaultCurrency { get; set; } = "EUR";

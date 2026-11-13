@@ -46,13 +46,13 @@ public class AccountFormViewModel
 {
     public Guid Id { get; set; }
 
-    [Required, StringLength(100)]
+    [Required(ErrorMessage = "The {0} field is required."), StringLength(100, ErrorMessage = "The field {0} must be a string with a maximum length of {1}.")]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "The {0} field is required.")]
     public AccountType Type { get; set; }
 
-    [Required, RegularExpression("^[A-Za-z]{3}$", ErrorMessage = "Currency must contain exactly three letters.")]
+    [Required(ErrorMessage = "The {0} field is required."), RegularExpression("^[A-Za-z]{3}$", ErrorMessage = "Currency must contain exactly three letters.")]
     public string Currency { get; set; } = "EUR";
 
     [Display(Name = "Initial balance")]
@@ -60,15 +60,15 @@ public class AccountFormViewModel
     public decimal OriginalInitialBalance { get; set; }
     public bool CreateInitialBalanceAdjustment { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "The {0} field is required.")]
     public string Icon { get; set; } = AccountIcons.DefaultFor(AccountType.Cash).Id;
 
     public IReadOnlyList<AccountIconDefinition> AvailableIcons { get; init; } = AccountIcons.All;
 
-    [Required, RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Color must be a valid hexadecimal color.")]
+    [Required(ErrorMessage = "The {0} field is required."), RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Color must be a valid hexadecimal color.")]
     public string Color { get; set; } = "#ffffff";
 
-    [Display(Name = "Display order"), Range(0, int.MaxValue)]
+    [Display(Name = "Display order"), Range(0, int.MaxValue, ErrorMessage = "The field {0} must be between {1} and {2}.")]
     public int DisplayOrder { get; set; }
 
     [Display(Name = "Include in main balance")]

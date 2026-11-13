@@ -1,3 +1,4 @@
+using PocketLedger.Localization;
 using Microsoft.AspNetCore.Mvc;
 using PocketLedger.Models.Entities;
 using PocketLedger.Models;
@@ -29,7 +30,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
         try { SetDefaultLastPaymentDate(model, model.OriginalAmount); var debt = await debtService.CreateAsync(ToEntity(model), ToRecurring(model), cancellationToken); TempData["SuccessMessage"] = "Debt created."; return RedirectToAction(nameof(Details), new { id = debt.Id }); }
-        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+        catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
 
     [HttpGet] public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
@@ -45,7 +46,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
         ModelState.Remove(nameof(model.Currency)); model.Currency = current.Debt.Currency;
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
         try { SetDefaultLastPaymentDate(model, current.RemainingAmount + model.OriginalAmount - current.Debt.OriginalAmount); await debtService.UpdateAsync(ToEntity(model), ToRecurring(model), cancellationToken); TempData["SuccessMessage"] = "Debt updated."; return RedirectToAction(nameof(Details), new { id }); }
-        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
 
     [HttpGet] public async Task<IActionResult> AddOperation(Guid id, CancellationToken cancellationToken)
@@ -57,7 +58,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
         try { if (await PrepareOverpaymentResolutionAsync(model, null, cancellationToken)) { await PopulateAccountsAsync(model, cancellationToken); return View(model); } await debtService.AddOperationAsync(model.DebtId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note, model.OverpaymentResolution), cancellationToken); TempData["SuccessMessage"] = "Debt operation recorded."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
-        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpGet] public async Task<IActionResult> EditOperation(Guid id, CancellationToken cancellationToken)
     {
@@ -68,7 +69,7 @@ public class DebtsController(IDebtService debtService, IAccountService accountSe
     {
         if (!ModelState.IsValid) { await PopulateAccountsAsync(model, cancellationToken); return View(model); }
         try { if (await PrepareOverpaymentResolutionAsync(model, model.TransactionId, cancellationToken)) { await PopulateAccountsAsync(model, cancellationToken); return View(model); } await debtService.UpdateOperationAsync(model.TransactionId, new DebtOperationInput(model.Type, model.Amount, model.AccountId, model.Date, UserLocalTime(await userContext.GetUserAsync(cancellationToken)), model.Note, model.OverpaymentResolution), cancellationToken); TempData["SuccessMessage"] = "Debt operation updated."; return RedirectToAction(nameof(Details), new { id = model.DebtId }); }
-        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, exception.Message); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
+        catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { ModelState.AddModelError(string.Empty, CommonText.Get(exception.Message)); await PopulateAccountsAsync(model, cancellationToken); return View(model); }
     }
     [HttpPost, ValidateAntiForgeryToken] public async Task<IActionResult> DeleteOperation(Guid id, Guid debtId, CancellationToken cancellationToken) { try { await debtService.DeleteOperationAsync(id, cancellationToken); TempData["SuccessMessage"] = "Debt operation deleted."; return RedirectToAction(nameof(Details), new { id = debtId }); } catch (EntityNotFoundException) { return NotFound(); } catch (BusinessRuleException exception) { TempData["ErrorMessage"] = exception.Message; return RedirectToAction(nameof(Details), new { id = debtId }); } }
     [HttpGet] public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)

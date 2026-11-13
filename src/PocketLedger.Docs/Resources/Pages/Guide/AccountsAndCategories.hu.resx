@@ -1,0 +1,125 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Számlák és kategóriák</value>
+  </data>
+  <data name="Accounts and categories" xml:space="preserve">
+    <value>Számlák és kategóriák</value>
+  </data>
+  <data name="CHAPTER 02" xml:space="preserve">
+    <value>02. FEJEZET</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Fejezetnavigáció</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Első lépések</value>
+  </data>
+  <data name="Net worth" xml:space="preserve">
+    <value>Nettó vagyon</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Tranzakciók</value>
+  </data>
+  <data name=", then select" xml:space="preserve">
+    <value>, majd ezt:</value>
+  </data>
+  <data name=". Give it a clear name, choose its type and currency, and enter the opening balance as of the selected date." xml:space="preserve">
+    <value>. Adj meg egy egyértelmű nevet, típust, pénznemet és a kiválasztott dátumhoz tartozó nyitóegyenleget.</value>
+  </data>
+  <data name="A compact tree keeps transaction entry fast while preserving meaningful reporting detail." xml:space="preserve">
+    <value>A rövid kategóriafa gyors rögzítést és kellően részletes kimutatásokat tesz lehetővé.</value>
+  </data>
+  <data name="A short category list is easier to use consistently. Add subcategories only when the distinction will help a decision or report." xml:space="preserve">
+    <value>Egy rövid kategórialista használata következetesebb. Akkor adj hozzá alkategóriát, ha a különbség egy döntéshez vagy kimutatáshoz hasznos.</value>
+  </data>
+  <data name="Account details connect the current balance to the entries that produced it." xml:space="preserve">
+    <value>A számlaadatok összekapcsolják az aktuális egyenleget az azt létrehozó tételekkel.</value>
+  </data>
+  <data name="Accounts" xml:space="preserve">
+    <value>Számlák</value>
+  </data>
+  <data name="Accounts hold balances. Categories explain where money came from or where it went. Set up both before entering day-to-day activity." xml:space="preserve">
+    <value>A számlák az egyenlegeket követik. A kategóriák megmutatják, honnan jött és mire ment el a pénz. Állítsd be mindkettőt a napi tételek rögzítése előtt.</value>
+  </data>
+  <data name="Allows activity on the account to contribute to reports." xml:space="preserve">
+    <value>A számla forgalmát beszámítja a kimutatásokba.</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Kategóriák</value>
+  </data>
+  <data name="Controls where the account appears in lists and on the dashboard." xml:space="preserve">
+    <value>Meghatározza a számla helyét a listákban és az áttekintőn.</value>
+  </data>
+  <data name="Create an account" xml:space="preserve">
+    <value>Számla létrehozása</value>
+  </data>
+  <data name="Display order" xml:space="preserve">
+    <value>Megjelenítési sorrend</value>
+  </data>
+  <data name="Each currency keeps its own balance; PocketLedger does not silently convert amounts between currencies." xml:space="preserve">
+    <value>A PocketLedger minden pénznem egyenlegét külön kezeli. Az összegeket nem váltja át automatikusan.</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Szerkesztés</value>
+  </data>
+  <data name="Includes the account in the dashboard net-worth figure." xml:space="preserve">
+    <value>A számlát beszámítja az áttekintő nettó vagyon értékébe.</value>
+  </data>
+  <data name="Includes the account in the headline balance used across the app." xml:space="preserve">
+    <value>A számlát beszámítja az appban megjelenő fő egyenlegbe.</value>
+  </data>
+  <data name="Main balance" xml:space="preserve">
+    <value>Fő egyenleg</value>
+  </data>
+  <data name="Manage account balances" xml:space="preserve">
+    <value>Számlaegyenlegek kezelése</value>
+  </data>
+  <data name="New account" xml:space="preserve">
+    <value>Új számla</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Nyisd meg ezt:</value>
+  </data>
+  <data name="Open your avatar menu, choose" xml:space="preserve">
+    <value>Nyisd meg a profilmenüt, és válaszd ezt:</value>
+  </data>
+  <data name="Organize with categories" xml:space="preserve">
+    <value>Rendszerezés kategóriákkal</value>
+  </data>
+  <data name="Select an account name to open its balance history, recent transactions and quick actions. Use" xml:space="preserve">
+    <value>Kattints egy számlanévre az egyenlegelőzmények, a legutóbbi tranzakciók és a gyorsműveletek megnyitásához. Válaszd ezt:</value>
+  </data>
+  <data name="Start broad." xml:space="preserve">
+    <value>Kezdj tág kategóriákkal.</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Statisztikák</value>
+  </data>
+  <data name="The reporting switches decide where an account contributes; they do not change its real balance." xml:space="preserve">
+    <value>A kimutatási kapcsolók azt szabályozzák, hol számít bele a számla az összesítésbe. A tényleges egyenleget nem módosítják.</value>
+  </data>
+  <data name="from the avatar menu. Income and expense categories are separate. Add a main category for a broad purpose, then use subcategories when you need more detail." xml:space="preserve">
+    <value>a profilmenüből. A bevételek és a kiadások kategóriái külön vannak. Az átfogó témákhoz hozz létre főkategóriát, a részletekhez alkategóriát.</value>
+  </data>
+  <data name="to change presentation and reporting options. Deletion is available only when related financial data does not make it unsafe." xml:space="preserve">
+    <value>a megjelenítési és kimutatási beállítások módosításához. A törlés csak akkor érhető el, ha a kapcsolódó pénzügyi adatok ezt lehetővé teszik.</value>
+  </data>
+  <data name="Account details with current balance, account properties and recent transactions" xml:space="preserve">
+    <value>Számlaadatok az aktuális egyenleggel, tulajdonságokkal és legutóbbi tranzakciókkal</value>
+  </data>
+  <data name="Accounts list with bank, credit card, savings and cash accounts in multiple currencies" xml:space="preserve">
+    <value>Bankszámlák, hitelkártyák, megtakarítások és készpénzszámlák listája több pénznemben</value>
+  </data>
+  <data name="Income and expense category trees with icons and nested subcategories" xml:space="preserve">
+    <value>Bevételi és kiadási kategóriafák ikonokkal és alkategóriákkal</value>
+  </data>
+  <data name="New account form with name, type, currency, opening balance and account display options" xml:space="preserve">
+    <value>Új számla űrlapja névvel, típussal, pénznemmel, nyitóegyenleggel és megjelenítési lehetőségekkel</value>
+  </data>
+</root>

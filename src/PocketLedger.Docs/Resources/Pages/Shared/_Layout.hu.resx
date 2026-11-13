@@ -1,0 +1,29 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Ugrás a tartalomra</value>
+  </data>
+  <data name="Guide" xml:space="preserve">
+    <value>Útmutató</value>
+  </data>
+  <data name="PocketLedger documentation" xml:space="preserve">
+    <value>PocketLedger dokumentáció</value>
+  </data>
+  <data name="Contact" xml:space="preserve">
+    <value>Kapcsolat</value>
+  </data>
+  <data name="Docs" xml:space="preserve">
+    <value>Dokumentáció</value>
+  </data>
+  <data name="Main navigation" xml:space="preserve">
+    <value>Fő navigáció</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Főoldal</value>
+  </data>
+</root>

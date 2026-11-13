@@ -1,0 +1,44 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 / GUIDE" xml:space="preserve">
+    <value>01 / ÚTMUTATÓ</value>
+  </data>
+  <data name="API reference" xml:space="preserve">
+    <value>API-referencia</value>
+  </data>
+  <data name="Build confidence with PocketLedger." xml:space="preserve">
+    <value>Használd magabiztosan a PocketLedgert.</value>
+  </data>
+  <data name="Concepts, endpoints and copyable curl examples for developers building PocketLedger clients." xml:space="preserve">
+    <value>Fogalmak, végpontok és másolható curl-példák a PocketLedger-kliensek fejlesztőinek.</value>
+  </data>
+  <data name="Documentation" xml:space="preserve">
+    <value>Dokumentáció</value>
+  </data>
+  <data name="Explore the API" xml:space="preserve">
+    <value>API megtekintése</value>
+  </data>
+  <data name="Explore the documentation" xml:space="preserve">
+    <value>Fedezd fel a dokumentációt</value>
+  </data>
+  <data name="Learn how to use PocketLedger or integrate a client with its API. This documentation is being built alongside the project." xml:space="preserve">
+    <value>Ismerd meg a PocketLedger használatát vagy egy kliens API-integrációját. A dokumentáció a projekttel együtt készül.</value>
+  </data>
+  <data name="Open the guide" xml:space="preserve">
+    <value>Útmutató megnyitása</value>
+  </data>
+  <data name="START HERE" xml:space="preserve">
+    <value>ITT KEZDD</value>
+  </data>
+  <data name="Step-by-step help for setting up and using PocketLedger in everyday life." xml:space="preserve">
+    <value>Lépésről lépésre segít a PocketLedger beállításában és mindennapi használatában.</value>
+  </data>
+  <data name="User guide" xml:space="preserve">
+    <value>Felhasználói útmutató</value>
+  </data>
+</root>

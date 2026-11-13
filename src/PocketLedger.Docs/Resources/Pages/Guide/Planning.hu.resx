@@ -1,0 +1,89 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="CHAPTER 04" xml:space="preserve">
+    <value>04. FEJEZET</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Fejezetnavigáció</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Tartozások és célok</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Tervezés és elemzés</value>
+  </data>
+  <data name="Planning and insights" xml:space="preserve">
+    <value>Tervezés és elemzés</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Tranzakciók</value>
+  </data>
+  <data name="A recurring template describes future activity; generated transactions remain visible in the normal history." xml:space="preserve">
+    <value>Az ismétlődő sablon a jövőbeli forgalmat írja le. A létrehozott tranzakciók a szokásos előzményekben maradnak láthatók.</value>
+  </data>
+  <data name="Automate repeating entries" xml:space="preserve">
+    <value>Ismétlődő tételek automatizálása</value>
+  </data>
+  <data name="Calendar is ideal for spotting clusters, timing effects and unusually expensive days." xml:space="preserve">
+    <value>A naptárban látszik, mely tételek esnek egy időszakra, hogyan hat az időzítés és mely napokon volt szokatlanul magas a költés.</value>
+  </data>
+  <data name="Choose a month and currency to see daily income, expenses and running totals. Summary cards at the top highlight the month’s overall movement." xml:space="preserve">
+    <value>Válassz hónapot és pénznemet a napi bevételek, kiadások és a halmozott összegek megtekintéséhez. A felső kártyák összesítik a havi forgalmat.</value>
+  </data>
+  <data name="Create a recurring template for salaries, subscriptions, rent and other predictable items. Choose the account, category, amount, frequency and next date. Active templates generate transactions according to their schedule." xml:space="preserve">
+    <value>Készíts ismétlődő sablont a fizetéshez, előfizetésekhez, lakbérhez és más előre látható tételekhez. Add meg a számlát, a kategóriát, az összeget, a gyakoriságot és a következő dátumot. Az aktív sablonok ütemezés szerint hoznak létre tranzakciókat.</value>
+  </data>
+  <data name="Each currency is calculated separately. Accounts marked Include contribute to the available-to-spend total." xml:space="preserve">
+    <value>A számítás pénznemenként külön történik. A bevont számlák egyenlege beleszámít az elkölthető összegbe.</value>
+  </data>
+  <data name="Main-category charts reveal the broad shape of spending before you drill into subcategories." xml:space="preserve">
+    <value>A főkategóriák diagramjai a kiadások összetételét mutatják, amelyet alkategóriánként részletezhetsz.</value>
+  </data>
+  <data name="Plan a future month" xml:space="preserve">
+    <value>Egy későbbi hónap megtervezése</value>
+  </data>
+  <data name="Plans are estimates, not posted transactions." xml:space="preserve">
+    <value>A tervek becslések, nem könyvelt tranzakciók.</value>
+  </data>
+  <data name="Read the calendar" xml:space="preserve">
+    <value>A naptár áttekintése</value>
+  </data>
+  <data name="Statistics combines monthly totals, category distribution, recurring expenses, account balances and longer-term trends. Select the same month and currency you want to compare elsewhere." xml:space="preserve">
+    <value>A statisztika havi összesítést, kategóriabontást, ismétlődő kiadásokat, számlaegyenlegeket és hosszabb távú trendeket mutat. Az összehasonlításhoz válaszd ugyanazt a hónapot és pénznemet, mint a másik nézetben.</value>
+  </data>
+  <data name="The Monthly planner combines planned income, expenses and transfers with active recurring entries and expected loan payments. Add items for the selected month, pause optional plans, and adjust opening balances when planning from a different starting point." xml:space="preserve">
+    <value>A havi tervező összevonja a tervezett bevételeket, kiadásokat és átvezetéseket az aktív ismétlődő tételekkel és a várható törlesztésekkel. Adj hozzá tételeket a kiválasztott hónaphoz, szüneteltesd az opcionálisakat, és szükség esetén módosítsd a nyitóegyenleget.</value>
+  </data>
+  <data name="The list separates editable templates from loan-related schedules managed by the debt feature." xml:space="preserve">
+    <value>A lista külön mutatja a szerkeszthető sablonokat és a tartozásoknál kezelt hitelütemezéseket.</value>
+  </data>
+  <data name="Turn repeated activity into automation, then use calendar, statistics and the monthly planner to understand what happened and what comes next." xml:space="preserve">
+    <value>Automatizáld az ismétlődő tételeket, majd használd a naptárat, a statisztikákat és a havi tervezőt a múlt és a várható forgalom áttekintéséhez.</value>
+  </data>
+  <data name="Understand the patterns" xml:space="preserve">
+    <value>Mintázatok felismerése</value>
+  </data>
+  <data name="Use the planner to test a future month. Record the real event as a transaction when it actually happens." xml:space="preserve">
+    <value>A tervezőben próbáld ki, hogyan alakulhat egy későbbi hónap. A tényleges műveletet akkor rögzítsd tranzakcióként, amikor megtörténik.</value>
+  </data>
+  <data name="Monthly calendar with daily income, expense and running balance information" xml:space="preserve">
+    <value>Havi naptár napi bevételekkel, kiadásokkal és halmozott egyenleggel</value>
+  </data>
+  <data name="Monthly planner with expected totals, planned items and projected balances for several currencies" xml:space="preserve">
+    <value>Havi tervező várható összegekkel, tervezett tételekkel és több pénznem várható egyenlegével</value>
+  </data>
+  <data name="Recurring transaction form with type, account, amount, category, schedule and note" xml:space="preserve">
+    <value>Ismétlődő tranzakció űrlapja típus, számla, összeg, kategória, ütemezés és megjegyzés mezőkkel</value>
+  </data>
+  <data name="Recurring transaction list showing income, expenses and a loan-related recurring payment" xml:space="preserve">
+    <value>Ismétlődő bevételek, kiadások és egy hiteltörlesztés listája</value>
+  </data>
+  <data name="Statistics dashboard with income, expenses, balance and category distribution charts" xml:space="preserve">
+    <value>Statisztikai áttekintő bevételi, kiadási, egyenleg- és kategóriadiagramokkal</value>
+  </data>
+</root>

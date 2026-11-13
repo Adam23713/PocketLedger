@@ -1,32 +1,33 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Transactions.TransactionDetailsViewModel
 @using PocketLedger.Models.Enums
 @{
-    ViewData["Title"] = "Transaction details";
+    ViewData["Title"] = CommonText.Get("Transaction details");
     var negative = Model.Type == TransactionType.Expense || Model.Type == TransactionType.Adjustment && Model.AdjustmentDirection == AdjustmentDirection.Decrease || Model.DebtOperationType is DebtOperationType.Payment or DebtOperationType.EarlyRepayment or DebtOperationType.ManualCorrectionDecrease or DebtOperationType.ReceivedRepayment;
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Transaction details</h1>
-    <div class="d-flex flex-wrap gap-2"><a class="btn btn-primary" asp-action="Create" asp-route-accountId="@Model.AccountId">@(Model.AccountName is null ? "Add new transaction" : $"Add new transaction to {Model.AccountName}")</a>@if (Model.DebtId is null) { <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a> } else { <a class="btn btn-outline-primary" asp-controller="Debts" asp-action="Details" asp-route-id="@Model.DebtId">View debt</a> }</div>
+    <h1>@CommonText.Get("Transaction details")</h1>
+    <div class="d-flex flex-wrap gap-2"><a class="btn btn-primary" asp-action="Create" asp-route-accountId="@Model.AccountId">@(Model.AccountName is null ? "Add new transaction" : $"Add new transaction to {Model.AccountName}")</a>@if (Model.DebtId is null) { <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">@CommonText.Get("Edit")</a> <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">@CommonText.Get("Delete")</a> } else { <a class="btn btn-outline-primary" asp-controller="Debts" asp-action="Details" asp-route-id="@Model.DebtId">@CommonText.Get("View debt")</a> }</div>
 </div>
 <div class="card mb-3">
     <div class="table-responsive edge-to-edge-table">
         <table class="table align-middle mb-0">
             <tbody>
-                <tr><th class="w-25" scope="row">Type</th><td>@Model.Type @Model.AdjustmentDirection</td></tr>
-                <tr><th scope="row">Account</th><td>@(Model.AccountName ?? "No account movement")</td></tr>
-                @if (Model.DebtId is not null) { <tr><th scope="row">Debt operation</th><td>@if (!string.IsNullOrWhiteSpace(Model.DebtIconPath)) { <img class="category-icon me-2" src="@Model.DebtIconPath" alt="@Model.DebtIconAlt" /> }@Model.DebtOperationType · @Model.DebtName</td></tr> }
+                <tr><th class="w-25" scope="row">@CommonText.Get("Type")</th><td>@CommonText.EnumLabel(Model.Type) @CommonText.EnumLabel(Model.AdjustmentDirection)</td></tr>
+                <tr><th scope="row">@CommonText.Get("Account")</th><td>@(Model.AccountName ?? CommonText.Get("No account movement"))</td></tr>
+                @if (Model.DebtId is not null) { <tr><th scope="row">@CommonText.Get("Debt operation")</th><td>@if (!string.IsNullOrWhiteSpace(Model.DebtIconPath)) { <img class="category-icon me-2" src="@Model.DebtIconPath" alt="@CommonText.IconLabel(Model.DebtIconAlt)" /> }@Model.DebtOperationType · @Model.DebtName</td></tr> }
                 @if (Model.Type == TransactionType.Transfer)
                 {
-                    <tr><th scope="row">Target account</th><td>@Model.TargetAccountName</td></tr>
-                    <tr><th scope="row">Target amount</th><td>@MoneyFormatter.Format(Model.TargetAmount ?? Model.Amount, Model.TargetCurrency)</td></tr>
-                    <tr><th scope="row">Exchange rate</th><td>1 @Model.Currency = @Model.ExchangeRate @Model.TargetCurrency</td></tr>
+                    <tr><th scope="row">@CommonText.Get("Target account")</th><td>@Model.TargetAccountName</td></tr>
+                    <tr><th scope="row">@CommonText.Get("Target amount")</th><td>@MoneyFormatter.Format(Model.TargetAmount ?? Model.Amount, Model.TargetCurrency)</td></tr>
+                    <tr><th scope="row">@CommonText.Get("Exchange rate")</th><td>1 @Model.Currency = @Model.ExchangeRate @Model.TargetCurrency</td></tr>
                 }
-                <tr><th scope="row">Amount</th><td class="fw-semibold @(Model.Type == TransactionType.Transfer ? null : negative ? "text-danger" : "text-success")">@(Model.Type == TransactionType.Transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(Model.Amount, Model.Currency)</td></tr>
-                <tr><th scope="row">Date and time</th><td>@Model.TransactionDate.ToString("yyyy-MM-dd") @Model.TransactionTime.ToString("HH:mm")</td></tr>
-                <tr><th scope="row">Category</th><td>@if (!string.IsNullOrWhiteSpace(Model.CategoryIconPath)) { <img class="category-icon me-2" src="@Model.CategoryIconPath" alt="@Model.CategoryIconAlt" /> }@(Model.CategoryName ?? "—")</td></tr>
-                <tr><th scope="row">Note</th><td class="text-break">@(Model.Note ?? "—")</td></tr>
+                <tr><th scope="row">@CommonText.Get("Amount")</th><td class="fw-semibold @(Model.Type == TransactionType.Transfer ? null : negative ? "text-danger" : "text-success")">@(Model.Type == TransactionType.Transfer ? "" : negative ? "−" : "+")@MoneyFormatter.Format(Model.Amount, Model.Currency)</td></tr>
+                <tr><th scope="row">@CommonText.Get("Date and time")</th><td>@Model.TransactionDate.ToString("yyyy-MM-dd") @Model.TransactionTime.ToString("HH:mm")</td></tr>
+                <tr><th scope="row">@CommonText.Get("Category")</th><td>@if (!string.IsNullOrWhiteSpace(Model.CategoryIconPath)) { <img class="category-icon me-2" src="@Model.CategoryIconPath" alt="@CommonText.IconLabel(Model.CategoryIconAlt)" /> }@(Model.CategoryName ?? "—")</td></tr>
+                <tr><th scope="row">@CommonText.Get("Note")</th><td class="text-break">@(Model.Note ?? "—")</td></tr>
             </tbody>
         </table>
     </div>
 </div>
-<a class="btn btn-sm btn-outline-primary" asp-action="Index">Back to transactions</a>
+<a class="btn btn-sm btn-outline-primary" asp-action="Index">@CommonText.Get("Back to transactions")</a>

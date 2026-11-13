@@ -1,4 +1,5 @@
+@using PocketLedger.Localization
 @model PocketLedger.Models.ViewModels.Debts.DebtFormViewModel
-@{ ViewData["Title"] = "New debt"; }
-<h1>New debt</h1><form method="post">@await Html.PartialAsync("_Form", Model)<button class="btn btn-primary mt-4" type="submit">Create</button> <a class="btn btn-link mt-4" asp-action="Index">Cancel</a></form>
+@{ ViewData["Title"] = CommonText.Get("New debt"); }
+<h1>@CommonText.Get("New debt")</h1><form method="post">@await Html.PartialAsync("_Form", Model)<button class="btn btn-primary mt-4" type="submit">@CommonText.Get("Create")</button> <a class="btn btn-link mt-4" asp-action="Index">@CommonText.Get("Cancel")</a></form>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

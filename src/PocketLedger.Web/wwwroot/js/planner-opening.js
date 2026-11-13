@@ -1,16 +1,17 @@
 (() => {
+    const text = document.getElementById("planner-opening-script").dataset;
     async function update(form, data) {
         const response = await fetch(form.action, { method: "POST", body: data, headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" });
         if (!response.ok) {
             const problem = response.headers.get("content-type")?.includes("application/json") ? await response.json() : null;
-            throw new Error(problem?.message ?? "Could not save the planner changes. Please try again.");
+            throw new Error(problem?.message ?? text.savePlannerError);
         }
         const updated = new DOMParser().parseFromString(await response.text(), "text/html");
         const rowId = form.closest("tr").id;
         const ids = form.classList.contains("planner-pause")
             ? [form.closest("#planner-transfers")?.id ?? form.closest("section").id, "planner-summary", "planner-chart", "planner-accounts", "planner-account-summary"]
             : [rowId, "planner-summary", "planner-chart", "planner-notices", "planner-account-summary"];
-        if (response.redirected || ids.some(id => !updated.getElementById(id))) throw new Error("Could not refresh the plan. Please reload the page to check the saved settings.");
+        if (response.redirected || ids.some(id => !updated.getElementById(id))) throw new Error(text.refreshError);
         ids.forEach(id => document.getElementById(id)?.replaceWith(updated.getElementById(id)));
         document.dispatchEvent(new Event("money:initialize"));
         initialize();
@@ -23,18 +24,18 @@
             form.dataset.initialized = "true";
             const status = form.querySelector('[role="status"]');
             const notes = form.querySelector("textarea");
-            notes.addEventListener("input", () => { status.textContent = "Unsaved changes"; });
+            notes.addEventListener("input", () => { status.textContent = text.unsaved; });
             form.addEventListener("submit", async event => {
                 event.preventDefault();
                 if (button.disabled) return;
                 button.disabled = true;
                 const savedText = notes.value;
-                status.textContent = "Saving…";
+                status.textContent = text.saving;
                 try {
                     const response = await fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" });
                     const result = response.headers.get("content-type")?.includes("application/json") ? await response.json() : null;
-                    if (!response.ok || response.redirected || !result) throw new Error(result?.message ?? "Could not save notes. Please try again.");
-                    status.textContent = notes.value === savedText ? result.message : "Unsaved changes";
+                    if (!response.ok || response.redirected || !result) throw new Error(result?.message ?? text.saveNotesError);
+                    status.textContent = notes.value === savedText ? result.message : text.unsaved;
                 } catch (exception) { status.textContent = exception.message; }
                 finally { button.disabled = false; }
             });

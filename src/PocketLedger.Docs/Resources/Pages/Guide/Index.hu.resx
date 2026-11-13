@@ -1,0 +1,92 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="01 · Set up" xml:space="preserve">
+    <value>01 · Beállítás</value>
+  </data>
+  <data name="02 · Record" xml:space="preserve">
+    <value>02 · Rögzítés</value>
+  </data>
+  <data name="03 · Understand" xml:space="preserve">
+    <value>03 · Elemzés</value>
+  </data>
+  <data name="04 · Protect" xml:space="preserve">
+    <value>04 · Védelem</value>
+  </data>
+  <data name="Accounts &amp; categories" xml:space="preserve">
+    <value>Számlák és kategóriák</value>
+  </data>
+  <data name="Automate entries, review trends and plan the months ahead." xml:space="preserve">
+    <value>Automatizáld a bejegyzéseket, tekintsd át a trendeket és tervezd meg a következő hónapokat.</value>
+  </data>
+  <data name="Build the structure that keeps balances and spending meaningful." xml:space="preserve">
+    <value>Alakítsd ki a számlák és kiadások követéséhez szükséges szerkezetet.</value>
+  </data>
+  <data name="Chapter navigation" xml:space="preserve">
+    <value>Fejezetnavigáció</value>
+  </data>
+  <data name="Choose a chapter" xml:space="preserve">
+    <value>Válassz fejezetet</value>
+  </data>
+  <data name="Data &amp; settings" xml:space="preserve">
+    <value>Adatok és beállítások</value>
+  </data>
+  <data name="Debts &amp; goals" xml:space="preserve">
+    <value>Tartozások és célok</value>
+  </data>
+  <data name="Getting started" xml:space="preserve">
+    <value>Első lépések</value>
+  </data>
+  <data name="Guide" xml:space="preserve">
+    <value>Útmutató</value>
+  </data>
+  <data name="New to PocketLedger?" xml:space="preserve">
+    <value>Most kezded a PocketLedger használatát?</value>
+  </data>
+  <data name="Personalize PocketLedger and keep portable encrypted copies." xml:space="preserve">
+    <value>Szabd személyre a PocketLedgert, és készíts hordozható, titkosított másolatokat.</value>
+  </data>
+  <data name="Planning &amp; insights" xml:space="preserve">
+    <value>Tervezés és elemzés</value>
+  </data>
+  <data name="Recommended learning path" xml:space="preserve">
+    <value>Ajánlott tanulási sorrend</value>
+  </data>
+  <data name="Record income, expenses, transfers and balance corrections." xml:space="preserve">
+    <value>Rögzíts bevételeket, kiadásokat, átvezetéseket és egyenlegkorrekciókat.</value>
+  </data>
+  <data name="Register securely, learn the navigation and read the dashboard." xml:space="preserve">
+    <value>Regisztrálj biztonságosan, és ismerd meg a navigációt és az áttekintőt.</value>
+  </data>
+  <data name="Start the guide" xml:space="preserve">
+    <value>Útmutató indítása</value>
+  </data>
+  <data name="Start with Getting started, then create your accounts before recording transactions. Most reports become useful as soon as a few categorized entries exist." xml:space="preserve">
+    <value>Kezdd az Első lépésekkel, majd hozd létre a számláidat a tranzakciók rögzítése előtt. Néhány kategorizált bejegyzés után a legtöbb kimutatás már használható.</value>
+  </data>
+  <data name="The dashboard brings balances, monthly activity and everyday actions into one place." xml:space="preserve">
+    <value>Az áttekintő egy helyre gyűjti az egyenlegeket, a havi forgalmat és a mindennapi műveleteket.</value>
+  </data>
+  <data name="This guide takes you from your first account to planning, reporting and encrypted backups. Follow it in order for a complete tour, or jump directly to the task you need." xml:space="preserve">
+    <value>Az útmutató az első számlától a tervezésen és a kimutatásokon át a titkosított mentésekig vezet. Haladj sorban, vagy ugorj közvetlenül a keresett feladatra.</value>
+  </data>
+  <data name="Track what is owed and make progress towards savings targets." xml:space="preserve">
+    <value>Kövesd a tartozásokat és a megtakarítási célok alakulását.</value>
+  </data>
+  <data name="Transactions" xml:space="preserve">
+    <value>Tranzakciók</value>
+  </data>
+  <data name="User guide" xml:space="preserve">
+    <value>FELHASZNÁLÓI ÚTMUTATÓ</value>
+  </data>
+  <data name="Your money, clearly organized." xml:space="preserve">
+    <value>Átlátható pénzügyek.</value>
+  </data>
+  <data name="PocketLedger dashboard showing balances in several currencies, account cards and quick transaction actions" xml:space="preserve">
+    <value>PocketLedger-áttekintő különböző pénznemű egyenlegekkel, számlakártyákkal és gyorsműveletekkel</value>
+  </data>
+</root>
